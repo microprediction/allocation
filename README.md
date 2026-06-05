@@ -58,6 +58,14 @@ budget-preserving blend `w_t = α w* + (1−α) w_prev` with `α = 1/(1+λ)`, so
 turnover is scaled exactly by `α`. This explicit damping composes with the implicit
 turnover control (smooth target) and has a streaming twin `StreamingTurnoverPenalty`.
 
+### Linear constraints
+
+`BoxConstrained(estimator, lower=, upper=, groups=, group_caps=)` imposes per-asset
+bounds and (disjoint) group caps on any estimator via a **log-barrier**, not a QP.
+The barrier's domain *is* the constraint set, so the result is strictly feasible for
+any `tau>0` — feasibility never depends on tuning, and the operator stays C¹ (no
+active-set kinks), so turnover stays low. Streaming twin: `StreamingBoxConstrained`.
+
 ## Design
 
 ```
