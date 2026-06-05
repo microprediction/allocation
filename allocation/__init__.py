@@ -12,6 +12,7 @@ Estimators:
 from .base import BaseOnlinePortfolio
 from .keyed import KeyedEwmaCovariance, StreamingThurstone
 from .moments import EwmaCovariance
+from .schur import SchurComplementary
 from .thurstone import ThurstonePortfolio
 
 __version__ = "0.0.1"
@@ -20,6 +21,7 @@ __all__ = [
     # batch / skfolio-style
     "BaseOnlinePortfolio",
     "ThurstonePortfolio",
+    "SchurComplementary",
     "EwmaCovariance",
     # streaming / river-style (changing universe)
     "StreamingThurstone",
