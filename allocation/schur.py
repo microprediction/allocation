@@ -20,7 +20,7 @@ from .base import BaseOnlinePortfolio
 from ._schur.coupling import compute_monotonic_weights, compute_weights
 from ._schur.seriation import seriate
 
-__all__ = ["SchurComplementary"]
+__all__ = ["SchurComplementary", "HierarchicalRiskParity"]
 
 
 class SchurComplementary(BaseOnlinePortfolio):
@@ -99,3 +99,39 @@ class SchurComplementary(BaseOnlinePortfolio):
     @property
     def fiedler_(self) -> np.ndarray:
         return self._fiedler
+
+
+class HierarchicalRiskParity(SchurComplementary):
+    """Dynamic HRP: recursive-bisection risk parity over a *smooth* order.
+
+    Classic HRP (Lopez de Prado, 2016) takes the asset order from agglomerative
+    clustering, whose dendrogram reorders discontinuously as the covariance
+    drifts -- a source of turnover. This estimator is exactly
+    :class:`SchurComplementary` at ``gamma=0`` (no cross-block coupling, so the
+    recursion is the plain inverse-variance recursive bisection of HRP), but with
+    the smooth Fiedler seriation in place of the dendrogram, so ``partial_fit``
+    gives low-turnover updates.
+
+    Provided as a named estimator for recognisability and for benchmark tables;
+    it is the ``gamma=0`` special case of the Schur construction. ``knn`` / a
+    seriation ``prior`` are exposed as on the parent.
+    """
+
+    def __init__(
+        self,
+        *,
+        knn: int | None = None,
+        prior=None,
+        prior_weight: float = 0.0,
+        covariance_estimator=None,
+        halflife: float = 60.0,
+    ):
+        super().__init__(
+            gamma=0.0,
+            keep_monotonic=False,
+            knn=knn,
+            prior=prior,
+            prior_weight=prior_weight,
+            covariance_estimator=covariance_estimator,
+            halflife=halflife,
+        )

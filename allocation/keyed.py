@@ -18,6 +18,13 @@ import zlib
 
 import numpy as np
 
+from .baselines import risk_parity_weights
+from .convex import (
+    max_decorrelation_weights,
+    max_diversification_weights,
+    mean_variance_weights,
+    min_variance_weights,
+)
 from ._schur.coupling import compute_monotonic_weights, compute_weights
 from ._schur.seriation import seriate
 from ._thurstone.ability import base_density
@@ -26,7 +33,19 @@ from ._thurstone.covariance import market_betas, one_factor_corr
 from ._thurstone.diagonal import diagonal_portfolio
 from ._thurstone.transport import blend_correlation, transport_weights
 
-__all__ = ["KeyedEwmaCovariance", "StreamingThurstone", "StreamingSchur"]
+__all__ = [
+    "KeyedEwmaCovariance",
+    "StreamingThurstone",
+    "StreamingSchur",
+    "StreamingHRP",
+    "StreamingEqualWeight",
+    "StreamingInverseVariance",
+    "StreamingRiskParity",
+    "StreamingMinimumVariance",
+    "StreamingMaximumDiversification",
+    "StreamingMaximumDecorrelation",
+    "StreamingMeanVariance",
+]
 
 
 def _halflife_to_alpha(halflife: float) -> float:
@@ -214,6 +233,208 @@ class StreamingSchur:
         else:
             w = compute_weights(order, cov, self.gamma)
         self._weights = dict(zip(ids, w))
+
+    def predict_one(self, x: dict | None = None) -> dict:
+        return dict(self._weights)
+
+    @property
+    def weights(self) -> dict:
+        return dict(self._weights)
+
+
+class StreamingHRP(StreamingSchur):
+    """Streaming dynamic HRP over a changing universe.
+
+    The ``gamma=0`` special case of :class:`StreamingSchur`: recursive-bisection
+    risk parity (HRP) over the smooth Fiedler order, so the dendrogram churn of
+    classic HRP is replaced by low-turnover updates. Named for recognisability.
+    """
+
+    def __init__(self, *, knn: int | None = None, halflife: float = 60.0, min_obs: int = 20):
+        super().__init__(
+            gamma=0.0, keep_monotonic=False, knn=knn, halflife=halflife, min_obs=min_obs
+        )
+
+
+class StreamingEqualWeight:
+    """Streaming equal-weight portfolio over a changing universe.
+
+    Uniform over the names that have warmed up (seen ``>= min_obs`` times), so a
+    freshly-listed name does not jump straight to full weight. Needs no
+    covariance; only per-asset counts.
+    """
+
+    def __init__(self, *, min_obs: int = 20):
+        self.min_obs = min_obs
+        self._count: dict = {}
+        self._weights: dict = {}
+
+    def learn_one(self, x: dict) -> "StreamingEqualWeight":
+        for k in x:
+            self._count[k] = self._count.get(k, 0) + 1
+        warm = [k for k in sorted(x) if self._count.get(k, 0) >= self.min_obs]
+        if warm:
+            w = 1.0 / len(warm)
+            self._weights = {k: w for k in warm}
+        return self
+
+    def predict_one(self, x: dict | None = None) -> dict:
+        return dict(self._weights)
+
+    @property
+    def weights(self) -> dict:
+        return dict(self._weights)
+
+
+class StreamingInverseVariance:
+    """Streaming inverse-variance (naive risk-parity) over a changing universe."""
+
+    def __init__(self, *, halflife: float = 60.0, min_obs: int = 20):
+        self.halflife = halflife
+        self.min_obs = min_obs
+        self._cov = KeyedEwmaCovariance(halflife=halflife)
+        self._weights: dict = {}
+
+    def learn_one(self, x: dict) -> "StreamingInverseVariance":
+        self._cov.learn_one(x)
+        warm = [k for k in sorted(x) if self._cov.count.get(k, 0) >= self.min_obs]
+        if len(warm) >= 1:
+            var = np.array([max(self._cov.cov.get((k, k), 0.0), 1e-12) for k in warm])
+            inv = 1.0 / var
+            w = inv / inv.sum()
+            self._weights = dict(zip(warm, w))
+        return self
+
+    def predict_one(self, x: dict | None = None) -> dict:
+        return dict(self._weights)
+
+    @property
+    def weights(self) -> dict:
+        return dict(self._weights)
+
+
+class StreamingRiskParity:
+    """Streaming equal-risk-contribution (ERC) portfolio over a changing universe.
+
+    The unnormalised ERC iterate is carried per asset id, so continuing names
+    warm-start from their previous coordinate (smooth, low turnover) while a new
+    name starts from an inverse-volatility default. Parameters mirror
+    :class:`allocation.RiskParity`.
+    """
+
+    def __init__(self, *, budgets=None, halflife: float = 60.0, min_obs: int = 20):
+        self.budgets = budgets
+        self.halflife = halflife
+        self.min_obs = min_obs
+        self._cov = KeyedEwmaCovariance(halflife=halflife)
+        self._x: dict = {}  # asset_id -> last unnormalised ERC coordinate (warm start)
+        self._weights: dict = {}
+
+    def learn_one(self, x: dict) -> "StreamingRiskParity":
+        self._cov.learn_one(x)
+        warm = [k for k in sorted(x) if self._cov.count.get(k, 0) >= self.min_obs]
+        if len(warm) >= 2:
+            self._recompute(warm)
+        return self
+
+    def _recompute(self, ids) -> None:
+        cov = self._cov.matrix(ids)
+        x0 = np.array([self._x.get(k, np.nan) for k in ids])  # NaN -> inv-vol default
+        w, xs = risk_parity_weights(cov, budgets=self.budgets, x0=x0)
+        self._x = dict(zip(ids, xs))
+        self._weights = dict(zip(ids, w))
+
+    def predict_one(self, x: dict | None = None) -> dict:
+        return dict(self._weights)
+
+    @property
+    def weights(self) -> dict:
+        return dict(self._weights)
+
+
+class _StreamingClosedForm:
+    """Shared plumbing for streaming closed-form allocators over a changing universe.
+
+    Subclasses implement ``_weights_from_cov(cov)`` returning weights aligned to
+    the warm id order. Weights may be signed (these are unconstrained).
+    """
+
+    def __init__(self, *, shrinkage: float = 0.0, halflife: float = 60.0, min_obs: int = 20):
+        self.shrinkage = shrinkage
+        self.halflife = halflife
+        self.min_obs = min_obs
+        self._cov = KeyedEwmaCovariance(halflife=halflife)
+        self._weights: dict = {}
+
+    def _weights_from_cov(self, cov: np.ndarray) -> np.ndarray:  # pragma: no cover - abstract
+        raise NotImplementedError
+
+    def learn_one(self, x: dict):
+        self._cov.learn_one(x)
+        warm = [k for k in sorted(x) if self._cov.count.get(k, 0) >= self.min_obs]
+        if len(warm) >= 2:
+            w = self._weights_from_cov(self._cov.matrix(warm))
+            self._weights = dict(zip(warm, w))
+        return self
+
+    def predict_one(self, x: dict | None = None) -> dict:
+        return dict(self._weights)
+
+    @property
+    def weights(self) -> dict:
+        return dict(self._weights)
+
+
+class StreamingMinimumVariance(_StreamingClosedForm):
+    """Streaming unconstrained minimum-variance over a changing universe (signed)."""
+
+    def _weights_from_cov(self, cov: np.ndarray) -> np.ndarray:
+        return min_variance_weights(cov, self.shrinkage)
+
+
+class StreamingMaximumDiversification(_StreamingClosedForm):
+    """Streaming unconstrained maximum-diversification over a changing universe (signed)."""
+
+    def _weights_from_cov(self, cov: np.ndarray) -> np.ndarray:
+        return max_diversification_weights(cov, self.shrinkage)
+
+
+class StreamingMaximumDecorrelation(_StreamingClosedForm):
+    """Streaming maximum-decorrelation over a changing universe (signed)."""
+
+    def _weights_from_cov(self, cov: np.ndarray) -> np.ndarray:
+        return max_decorrelation_weights(cov, self.shrinkage)
+
+
+class StreamingMeanVariance:
+    """Streaming tangency / mean-variance portfolio over a changing universe (signed).
+
+    Uses the keyed EWMA mean for ``mu`` unless ``expected_returns`` (a
+    ``{id: mu}`` dict) is given. Mirrors :class:`allocation.MeanVariance`.
+    """
+
+    def __init__(
+        self, *, expected_returns=None, shrinkage: float = 0.0, halflife: float = 60.0, min_obs: int = 20
+    ):
+        self.expected_returns = expected_returns
+        self.shrinkage = shrinkage
+        self.halflife = halflife
+        self.min_obs = min_obs
+        self._cov = KeyedEwmaCovariance(halflife=halflife)
+        self._weights: dict = {}
+
+    def learn_one(self, x: dict) -> "StreamingMeanVariance":
+        self._cov.learn_one(x)
+        warm = [k for k in sorted(x) if self._cov.count.get(k, 0) >= self.min_obs]
+        if len(warm) >= 2:
+            cov = self._cov.matrix(warm)
+            if self.expected_returns is not None:
+                mu = np.array([self.expected_returns.get(k, 0.0) for k in warm])
+            else:
+                mu = np.array([self._cov.mean.get(k, 0.0) for k in warm])
+            w = mean_variance_weights(cov, mu, self.shrinkage)
+            self._weights = dict(zip(warm, w))
+        return self
 
     def predict_one(self, x: dict | None = None) -> dict:
         return dict(self._weights)
