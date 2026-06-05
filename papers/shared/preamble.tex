@@ -1,0 +1,23 @@
+% Shared preamble for Thurstone papers.
+% Imported via \input{../shared/preamble.tex} from each paper.tex.
+% Keep packages and macros common to all papers here.
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+% Bibliography. We use biblatex with the bibtex backend because Tectonic runs
+% bibtex natively (no external biber, which avoids biber/biblatex version
+% mismatches). bibtex runs through Tectonic's own I/O, so the shared
+% bibliography at papers/refs.bib resolves directly via the parent path below.
+\usepackage[backend=bibtex,style=authoryear,sorting=nyt]{biblatex}
+\addbibresource{../refs.bib}
+
+% --- Shared macros ---
+\newcommand{\thurstone}{Thurstone}
