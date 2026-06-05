@@ -47,3 +47,24 @@ def test_streaming_is_smooth_step_to_step():
             max_step = max(max_step, sum(abs(w[k] - prev[k]) for k in w))
         prev = w
     assert max_step < 0.15  # small per-step turnover
+
+
+def test_streaming_schur_changing_universe():
+    from allocation import StreamingSchur
+    rng = np.random.default_rng(2)
+    est = StreamingSchur(gamma=0.5, min_obs=MIN_OBS)
+    for t in range(160):
+        active = ["A", "B", "C", "E"]
+        if t >= 40:
+            active = active + ["D"]
+        if t >= 110:
+            active = [a for a in active if a != "A"]
+        f = rng.standard_normal(2)
+        x = {a: 0.6 * f[i % 2] + 0.5 * rng.standard_normal() for i, a in enumerate(active)}
+        est.learn_one(x)
+        w = est.predict_one()
+        assert set(w).issubset(set(active))
+        if w:
+            assert abs(sum(w.values()) - 1.0) < 1e-6
+            assert all(v >= -1e-9 for v in w.values())
+    assert "D" in est.weights and "A" not in est.weights

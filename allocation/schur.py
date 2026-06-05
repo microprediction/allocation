@@ -17,7 +17,7 @@ from __future__ import annotations
 import numpy as np
 
 from .base import BaseOnlinePortfolio
-from ._schur.coupling import compute_weights
+from ._schur.coupling import compute_monotonic_weights, compute_weights
 from ._schur.seriation import seriate
 
 __all__ = ["SchurComplementary"]
@@ -46,6 +46,7 @@ class SchurComplementary(BaseOnlinePortfolio):
         self,
         *,
         gamma: float = 0.5,
+        keep_monotonic: bool = True,
         knn: int | None = None,
         prior=None,
         prior_weight: float = 0.0,
@@ -54,11 +55,13 @@ class SchurComplementary(BaseOnlinePortfolio):
     ):
         super().__init__(covariance_estimator=covariance_estimator, halflife=halflife)
         self.gamma = gamma
+        self.keep_monotonic = keep_monotonic
         self.knn = knn
         self.prior = prior
         self.prior_weight = prior_weight
         self._fiedler = None
         self._order = None
+        self.effective_gamma_ = None
 
     def _seriate(self, cov: np.ndarray):
         order, v = seriate(
@@ -72,15 +75,22 @@ class SchurComplementary(BaseOnlinePortfolio):
         self._order = order
         return order
 
+    def _allocate(self, order, cov) -> None:
+        if self.keep_monotonic:
+            self._weights, self.effective_gamma_ = compute_monotonic_weights(
+                order, cov, self.gamma
+            )
+        else:
+            self._weights = compute_weights(order, cov, self.gamma)
+            self.effective_gamma_ = self.gamma
+
     def _cold_start(self, cov: np.ndarray) -> None:
         if not 0.0 <= self.gamma <= 1.0:
             raise ValueError("gamma must lie in [0, 1].")
-        order = self._seriate(cov)
-        self._weights = compute_weights(order, cov, self.gamma)
+        self._allocate(self._seriate(cov), cov)
 
     def _online_update(self, cov: np.ndarray) -> None:
-        order = self._seriate(cov)  # warm-started sign keeps the order stable
-        self._weights = compute_weights(order, cov, self.gamma)
+        self._allocate(self._seriate(cov), cov)  # warm-started sign keeps order stable
 
     @property
     def order_(self) -> np.ndarray:

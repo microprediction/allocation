@@ -14,9 +14,11 @@ the covariance, so a smooth order (Fiedler seriation) yields smooth weights.
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 
-__all__ = ["compute_weights", "schur_augmentation"]
+__all__ = ["compute_weights", "compute_monotonic_weights", "schur_augmentation"]
 
 
 def _inverse_multiply(a: np.ndarray, b: np.ndarray) -> np.ndarray:
@@ -117,6 +119,8 @@ def compute_weights(
                         a_aug = _nearest_spd(a_aug)
                     if not _is_spd(d_aug):
                         d_aug = _nearest_spd(d_aug)
+                elif not _is_spd(a_aug) or not _is_spd(d_aug):
+                    return None  # signal infeasible gamma to the monotonic sweep
                 cov[np.ix_(left, left)] = a_aug
                 cov[np.ix_(right, right)] = d_aug
             lv = _naive_portfolio_variance(a_aug)
@@ -127,3 +131,69 @@ def compute_weights(
         items = new_items
     s = weights.sum()
     return weights / s if s > 0 else np.full(n, 1.0 / n)
+
+
+def _binary_search(objective, low_gamma, high_gamma, low_variance, tol=1e-4):
+    """Locate the gamma turning point where portfolio variance stops decreasing."""
+    max_iter = math.ceil(math.log2(max(high_gamma - low_gamma, tol) / tol) * 2 + 1)
+    is_decreasing = False
+    best = None
+    for _ in range(max_iter):
+        mid = 0.5 * (low_gamma + high_gamma)
+        variance, weights = objective(mid)
+        variance_h = objective(mid - tol)[0]
+        if variance <= low_variance and variance <= variance_h:
+            is_decreasing = True
+            low_gamma, low_variance, best = mid, variance, weights
+        else:
+            high_gamma = mid
+        if is_decreasing and best is not None and (high_gamma - low_gamma) <= tol:
+            return best, low_gamma
+    raise RuntimeError("no permissible gamma with monotonically decreasing variance")
+
+
+def compute_monotonic_weights(
+    order: np.ndarray,
+    covariance: np.ndarray,
+    max_gamma: float,
+    step: float = 0.1,
+    tol: float = 1e-4,
+) -> tuple[np.ndarray, float]:
+    """Weights at the largest gamma (<= ``max_gamma``) for which variance still falls.
+
+    Caps gamma at the turning point ``effective_gamma`` so that
+    ``variance(Schur) <= variance(HRP)`` even for ill-conditioned covariances
+    (skfolio's ``keep_monotonic=True`` behaviour). Returns ``(weights, effective_gamma)``.
+    """
+    if max_gamma == 0:
+        return compute_weights(order, covariance, 0.0, force_spd=True), 0.0
+    cov = np.asarray(covariance, dtype=float)
+
+    def objective(x):
+        w = compute_weights(order, cov, x, force_spd=False)
+        risk = np.inf if w is None else float(w @ cov @ w.T)
+        return risk, w
+
+    n = int(np.ceil(max_gamma / step)) + 1
+    gammas = np.linspace(0.0, max_gamma, n)
+    variances = np.full(n, np.nan)
+    variance, weights_0 = objective(gammas[0])
+    variances[0] = variance
+    weights = weights_0
+    for i in range(1, n):
+        variance, weights = objective(gammas[i])
+        variances[i] = variance
+        if variance >= variances[i - 1]:
+            lo = gammas[0] if i == 1 else gammas[i - 2]
+            lo_var = variances[0] if i == 1 else variances[i - 2]
+            try:
+                return _binary_search(objective, lo, gammas[i], lo_var, tol)
+            except RuntimeError:
+                return weights_0, 0.0
+    # monotonically decreasing up to max_gamma
+    if variance <= objective(max_gamma - tol)[0]:
+        return weights, max_gamma
+    try:
+        return _binary_search(objective, gammas[-2], max_gamma, variances[-2], tol)
+    except RuntimeError:
+        return weights, max_gamma

@@ -18,13 +18,15 @@ import zlib
 
 import numpy as np
 
+from ._schur.coupling import compute_monotonic_weights, compute_weights
+from ._schur.seriation import seriate
 from ._thurstone.ability import base_density
 from ._thurstone.calibrate import calibrate_diagonal, calibrate_one_factor
 from ._thurstone.covariance import market_betas, one_factor_corr
 from ._thurstone.diagonal import diagonal_portfolio
 from ._thurstone.transport import blend_correlation, transport_weights
 
-__all__ = ["KeyedEwmaCovariance", "StreamingThurstone"]
+__all__ = ["KeyedEwmaCovariance", "StreamingThurstone", "StreamingSchur"]
 
 
 def _halflife_to_alpha(halflife: float) -> float:
@@ -153,6 +155,67 @@ class StreamingThurstone:
 
     def predict_one(self, x: dict | None = None) -> dict:
         """Current portfolio as ``{asset_id: weight}`` (a copy)."""
+        return dict(self._weights)
+
+    @property
+    def weights(self) -> dict:
+        return dict(self._weights)
+
+
+class StreamingSchur:
+    """Streaming Schur-complementary portfolio over a changing universe.
+
+    River-style ``learn_one({asset: ret})`` / ``predict_one()``. The Fiedler
+    seriation is carried as a per-asset dict so its sign (hence the order) stays
+    stable as the universe changes. Parameters mirror
+    :class:`allocation.SchurComplementary`.
+    """
+
+    def __init__(
+        self,
+        *,
+        gamma: float = 0.5,
+        keep_monotonic: bool = True,
+        knn: int | None = None,
+        halflife: float = 60.0,
+        min_obs: int = 20,
+    ):
+        if not 0.0 <= gamma <= 1.0:
+            raise ValueError("gamma must lie in [0, 1].")
+        self.gamma = gamma
+        self.keep_monotonic = keep_monotonic
+        self.knn = knn
+        self.halflife = halflife
+        self.min_obs = min_obs
+        self._cov = KeyedEwmaCovariance(halflife=halflife)
+        self._fiedler: dict = {}  # asset_id -> Fiedler coordinate (for sign stability)
+        self._weights: dict = {}
+        self._n = 0
+
+    def learn_one(self, x: dict) -> "StreamingSchur":
+        self._cov.learn_one(x)
+        self._n += 1
+        warm = [k for k in sorted(x.keys()) if self._cov.count.get(k, 0) >= self.min_obs]
+        if len(warm) >= 2:
+            self._recompute(warm)
+        return self
+
+    def _recompute(self, ids) -> None:
+        cov = self._cov.matrix(ids)
+        prev = (
+            np.array([self._fiedler.get(k, 0.0) for k in ids])
+            if self._fiedler
+            else None
+        )
+        order, v = seriate(cov, previous=prev, knn=self.knn)
+        self._fiedler = dict(zip(ids, v))
+        if self.keep_monotonic:
+            w, _ = compute_monotonic_weights(order, cov, self.gamma)
+        else:
+            w = compute_weights(order, cov, self.gamma)
+        self._weights = dict(zip(ids, w))
+
+    def predict_one(self, x: dict | None = None) -> dict:
         return dict(self._weights)
 
     @property

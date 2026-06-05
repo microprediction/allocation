@@ -16,8 +16,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+scale = ["scipy>=1.10"]        # sparse/iterative Fiedler solver for large universes
 skfolio = ["skfolio>=0.5"]
-test = ["pytest>=7.0"]
+test = ["pytest>=7.0", "scipy>=1.10"]
 
 [project.urls]
 Homepage = "https://github.com/microprediction/allocation"

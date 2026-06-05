@@ -52,20 +52,56 @@ def affinity(
     return A
 
 
-def fiedler_vector(A: np.ndarray, previous: np.ndarray | None = None) -> np.ndarray:
+def _fiedler_dense(A: np.ndarray) -> np.ndarray:
+    L = np.diag(A.sum(axis=1)) - A
+    _, vecs = np.linalg.eigh(L)
+    return vecs[:, 1]  # 2nd-smallest eigenvalue -> Fiedler vector
+
+
+def _fiedler_sparse(A: np.ndarray, previous: np.ndarray | None) -> np.ndarray:
+    """Fiedler vector via LOBPCG on a sparse Laplacian (only one eigenpair).
+
+    We deflate the constant null vector (`Y = 1`, the eigenvalue-0 eigenvector of a
+    connected Laplacian) and ask for the smallest remaining eigenpair -- the
+    Fiedler vector. Warm-started from ``previous``. This is what scales: an
+    `O(nnz)` matvec on a kNN-sparsified graph rather than a dense `O(n^3)` eigh.
+    """
+    import scipy.sparse as sp
+    import scipy.sparse.linalg as spla
+
+    n = A.shape[0]
+    Asp = sp.csr_matrix(A)
+    deg = np.asarray(Asp.sum(axis=1)).ravel()
+    L = sp.diags(deg) - Asp
+    if previous is not None and len(previous) == n:
+        X = previous.reshape(n, 1).copy()
+    else:
+        rng = np.random.default_rng(0)
+        X = rng.standard_normal((n, 1))
+    Y = np.ones((n, 1))  # deflate the constant (lambda=0) eigenvector
+    _, vecs = spla.lobpcg(L, X, Y=Y, largest=False, maxiter=200, tol=1e-7)
+    return np.asarray(vecs)[:, 0]
+
+
+def fiedler_vector(
+    A: np.ndarray, previous: np.ndarray | None = None, sparse: bool = False
+) -> np.ndarray:
     """Fiedler vector of the graph Laplacian ``L = D - A``.
 
-    Sign is fixed by alignment with ``previous`` (the Fiedler vector is defined up
-    to sign; without this the order would flip arbitrarily between updates). A
-    dense symmetric eigendecomposition is used; only the 2nd-smallest eigenpair
-    matters, so this is the place to swap in an iterative warm-started solver.
+    With ``sparse=True`` an iterative single-eigenpair LOBPCG solve is used
+    (scales to large kNN graphs); otherwise a dense ``eigh``. The sign is fixed by
+    alignment with ``previous`` -- the Fiedler vector is defined up to sign, and
+    without this the order would flip arbitrarily between streaming updates.
     """
-    L = np.diag(A.sum(axis=1)) - A
-    vals, vecs = np.linalg.eigh(L)
-    v = vecs[:, 1]  # second smallest eigenvalue -> Fiedler vector
-    if previous is not None and len(previous) == len(v):
-        if float(v @ previous) < 0.0:
-            v = -v
+    if sparse and A.shape[0] > 3:
+        try:
+            v = _fiedler_sparse(A, previous)
+        except Exception:
+            v = _fiedler_dense(A)
+    else:
+        v = _fiedler_dense(A)
+    if previous is not None and len(previous) == len(v) and float(v @ previous) < 0.0:
+        v = -v
     return v
 
 
@@ -75,13 +111,17 @@ def seriate(
     knn: int | None = None,
     prior: np.ndarray | None = None,
     prior_weight: float = 0.0,
+    sparse: bool | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(order, fiedler)``: the seriation order and its Fiedler vector.
 
     ``previous`` is last period's Fiedler vector, used to keep the sign (and hence
-    the order) stable across streaming updates.
+    the order) stable across streaming updates. ``sparse`` selects the iterative
+    LOBPCG solver; if ``None`` it defaults to sparse whenever ``knn`` is set.
     """
     A = affinity(cov, knn=knn, prior=prior, prior_weight=prior_weight)
-    v = fiedler_vector(A, previous=previous)
+    if sparse is None:
+        sparse = knn is not None
+    v = fiedler_vector(A, previous=previous, sparse=sparse)
     order = np.argsort(v)
     return order, v

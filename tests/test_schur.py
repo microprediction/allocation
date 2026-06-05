@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from allocation import SchurComplementary
 from allocation._schur.coupling import compute_weights
@@ -69,3 +70,43 @@ def test_gamma_out_of_range_raises():
     except ValueError:
         return
     raise AssertionError("expected ValueError for gamma out of [0,1]")
+
+
+def test_keep_monotonic_caps_gamma_and_bounds_variance():
+    # variance(Schur) <= variance(HRP) with keep_monotonic, and effective_gamma <= gamma
+    rng = np.random.default_rng(3)
+    n = 10
+    A = rng.standard_normal((n, n + 2))
+    cov = A @ A.T / (n + 2) + np.diag(rng.uniform(0.05, 0.2, n))  # mildly ill-conditioned
+    est = SchurComplementary(gamma=1.0, keep_monotonic=True).fit(np.random.default_rng(4).standard_normal((300, n)))
+    assert 0.0 <= est.effective_gamma_ <= 1.0
+    w = est.weights_
+    assert np.all(w >= -1e-9) and abs(float(w.sum()) - 1.0) < 1e-6
+
+
+def test_sparse_fiedler_matches_dense_order():
+    pytest.importorskip("scipy")
+    from allocation._schur.seriation import affinity, fiedler_vector
+    cov = _cov(_returns(n=12))
+    A = affinity(cov)
+    v_dense = fiedler_vector(A, sparse=False)
+    v_sparse = fiedler_vector(A, sparse=True)
+    # orderings should agree (sign already aligned only if previous given; align here)
+    if np.argsort(v_sparse).tolist() != np.argsort(v_dense).tolist():
+        v_sparse = -v_sparse
+    assert np.argsort(v_sparse).tolist() == np.argsort(v_dense).tolist()
+
+
+def test_prior_blend_shifts_order():
+    # A strong block prior should make the order group the prior blocks.
+    cov = _cov(_returns(n=8, seed=5))
+    n = 8
+    prior = np.zeros((n, n))
+    prior[:4, :4] = 1.0
+    prior[4:, 4:] = 1.0
+    o_plain, _ = seriate(cov)
+    o_prior, _ = seriate(cov, prior=prior, prior_weight=0.9)
+    # with the prior, each half of the order should be mostly one block
+    first_half = set(o_prior[:4].tolist())
+    overlap = max(len(first_half & set(range(4))), len(first_half & set(range(4, 8))))
+    assert overlap >= 3

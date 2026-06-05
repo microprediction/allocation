@@ -10,7 +10,7 @@ Estimators:
 """
 
 from .base import BaseOnlinePortfolio
-from .keyed import KeyedEwmaCovariance, StreamingThurstone
+from .keyed import KeyedEwmaCovariance, StreamingSchur, StreamingThurstone
 from .moments import EwmaCovariance
 from .schur import SchurComplementary
 from .thurstone import ThurstonePortfolio
@@ -25,5 +25,6 @@ __all__ = [
     "EwmaCovariance",
     # streaming / river-style (changing universe)
     "StreamingThurstone",
+    "StreamingSchur",
     "KeyedEwmaCovariance",
 ]
