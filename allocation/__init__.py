@@ -17,6 +17,7 @@ from .convex import (
     MeanVariance,
     MinimumVariance,
 )
+from .costs import StreamingTurnoverPenalty, TurnoverPenalty
 from .keyed import (
     KeyedEwmaCovariance,
     StreamingEqualWeight,
@@ -49,6 +50,7 @@ __all__ = [
     "MaximumDiversification",
     "MaximumDecorrelation",
     "MeanVariance",
+    "TurnoverPenalty",
     "EwmaCovariance",
     # streaming / river-style (changing universe)
     "StreamingThurstone",
@@ -61,5 +63,6 @@ __all__ = [
     "StreamingMaximumDiversification",
     "StreamingMaximumDecorrelation",
     "StreamingMeanVariance",
+    "StreamingTurnoverPenalty",
     "KeyedEwmaCovariance",
 ]
