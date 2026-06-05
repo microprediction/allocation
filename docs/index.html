@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>allocation — online portfolio construction</title>
+<meta name="description" content="Online (streaming) portfolio estimators: scikit-learn / skfolio-compatible, over a keyed dynamic universe. Thurstone tilt and Schur-complementary allocation.">
+<style>
+  :root{ --bg:#0d1117; --panel:#161b22; --fg:#e6edf3; --muted:#9da7b3; --accent:#58a6ff; --line:#2b3340; }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header{padding:64px 0 28px;border-bottom:1px solid var(--line)}
+  h1{font-size:2.6rem;margin:0 0 6px;letter-spacing:-.5px}
+  .tag{color:var(--muted);font-size:1.15rem;margin:0 0 18px}
+  .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.82rem;color:var(--muted)}
+  h2{font-size:1.5rem;margin:44px 0 10px;letter-spacing:-.3px}
+  h3{font-size:1.1rem;margin:26px 0 6px}
+  p{color:#c9d4df}
+  code{background:#1f2630;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.9em}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow:auto}
+  pre code{background:none;border:none;padding:0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .card h3{margin-top:0}
+  .muted{color:var(--muted)}
+  table{border-collapse:collapse;width:100%;margin-top:12px;font-size:.93rem}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  th{background:var(--panel)}
+  footer{margin:56px 0 40px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>allocation</h1>
+  <p class="tag">Online (streaming) portfolio construction.</p>
+  <p>scikit-learn / <a href="https://skfolio.org">skfolio</a>-compatible estimators
+     (<code>fit</code> / <code>partial_fit</code> / <code>weights_</code> / <code>predict</code>),
+     on top of a keyed dynamic-universe layer — so they survive reconstituting universes,
+     where assets come and go.</p>
+  <div class="pills">
+    <span class="pill">long-only</span>
+    <span class="pill">streaming · partial_fit</span>
+    <span class="pill">changing universe</span>
+    <span class="pill">low turnover</span>
+    <span class="pill">skfolio-compatible</span>
+  </div>
+</header>
+
+<h2>Install</h2>
+<pre><code>pip install allocation
+pip install allocation[scale]    # sparse Fiedler (scipy) for large universes
+pip install allocation[skfolio]  # skfolio Portfolio interop</code></pre>
+
+<h2>Two methods, one engine</h2>
+<div class="grid">
+  <div class="card">
+    <h3>Thurstone portfolio</h3>
+    <p class="muted">Weights are the winning probabilities of a Thurstonian race
+    among assets. Abilities are calibrated so the race reproduces a benchmark at a
+    reference correlation; the tilt re-runs it under the estimate. A smooth
+    common-seed transport gives low-turnover streaming updates.</p>
+  </div>
+  <div class="card">
+    <h3>Schur-complementary</h3>
+    <p class="muted">Peter Cotton's Schur allocation (the <code>gamma</code> coupling
+    interpolating HRP and minimum variance), but with the order from <em>Fiedler
+    seriation</em> instead of agglomerative linkage — so the hierarchy, and the
+    weights, are a smooth function of the covariance.</p>
+  </div>
+</div>
+
+<h2>Batch — scikit-learn / skfolio style</h2>
+<pre><code>import numpy as np
+from allocation import ThurstonePortfolio, SchurComplementary
+
+est = ThurstonePortfolio(calib="market", phi=1.0)
+est.fit(returns)              # returns: (n_observations, n_assets)
+est.weights_                  # long-only weights on the simplex
+est.score(returns)            # Sharpe ratio (skfolio scoring convention)
+
+SchurComplementary(gamma=0.5).fit(returns).weights_</code></pre>
+
+<h2>Streaming — river style, over a changing universe</h2>
+<pre><code>from allocation import StreamingThurstone, StreamingSchur
+
+est = StreamingSchur(gamma=0.5)
+for x in stream:                       # x = {asset_id: return}
+    est.learn_one(x)                   # assets may enter / leave each step
+    weights = est.predict_one()        # {asset_id: weight}</code></pre>
+<p class="muted">A changing universe is just a changing set of dict keys. Per-asset
+state is keyed; the smooth transport / Fiedler order carry across updates so
+turnover tracks genuine change, not churn.</p>
+
+<h2>Estimators</h2>
+<table>
+  <tr><th>Estimator</th><th>Interface</th><th>Notes</th></tr>
+  <tr><td><code>ThurstonePortfolio</code></td><td>batch</td><td>ability tilt; common-seed transport</td></tr>
+  <tr><td><code>SchurComplementary</code></td><td>batch</td><td>Schur coupling; Fiedler seriation; <code>keep_monotonic</code></td></tr>
+  <tr><td><code>StreamingThurstone</code></td><td>streaming</td><td>changing universe, keyed</td></tr>
+  <tr><td><code>StreamingSchur</code></td><td>streaming</td><td>changing universe, keyed</td></tr>
+</table>
+
+<h2>Why a separate package</h2>
+<p>skfolio is the scikit-learn-native portfolio library, but it is <em>batch</em>:
+a changing universe is handled by NaN/incomplete-data mechanics rather than by
+carrying per-asset state across streaming updates. <strong>allocation</strong> is
+the online complement — <code>partial_fit</code>, a keyed dynamic universe (in the
+spirit of <a href="https://github.com/microprediction/precise">precise</a>), and
+turnover control by construction — while staying API-compatible so each estimator
+can also be contributed upstream.</p>
+
+<footer>
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://github.com/microprediction/thurstone">thurstone</a> ·
+  <a href="https://skfolio.org">skfolio</a> ·
+  <a href="https://github.com/microprediction/precise">precise</a><br>
+  MIT © Peter Cotton
+</footer>
+
+</div>
+</body>
+</html>
