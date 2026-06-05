@@ -50,6 +50,3 @@ first run and runs bibtex for the bibliography automatically. (We use biblatex's
 - **Status**: `draft` → `internal-review` → `submitted` → `published`.
 - **Bibliography**: add entries to the shared `refs.bib`; don't keep per-paper
   bib files. Cite with `\textcite{key}` / `\parencite{key}`.
-- Keep exploratory study code and shared figure generation in
-  [`research/`](../research/); copy only the final figures a paper needs into
-  its own `figures/` folder.

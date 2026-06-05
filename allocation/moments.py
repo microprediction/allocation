@@ -60,3 +60,10 @@ class EwmaCovariance:
         if self._cov is None:
             raise ValueError("EwmaCovariance has not seen any data yet.")
         return 0.5 * (self._cov + self._cov.T)
+
+    @property
+    def mean_(self) -> np.ndarray:
+        """EWMA mean of the observed returns (itself a smooth path)."""
+        if self._mean is None:
+            raise ValueError("EwmaCovariance has not seen any data yet.")
+        return self._mean

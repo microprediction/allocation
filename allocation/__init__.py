@@ -10,9 +10,28 @@ Estimators:
 """
 
 from .base import BaseOnlinePortfolio
-from .keyed import KeyedEwmaCovariance, StreamingSchur, StreamingThurstone
+from .baselines import EqualWeight, InverseVariance, RiskParity
+from .convex import (
+    MaximumDecorrelation,
+    MaximumDiversification,
+    MeanVariance,
+    MinimumVariance,
+)
+from .keyed import (
+    KeyedEwmaCovariance,
+    StreamingEqualWeight,
+    StreamingHRP,
+    StreamingInverseVariance,
+    StreamingMaximumDecorrelation,
+    StreamingMaximumDiversification,
+    StreamingMeanVariance,
+    StreamingMinimumVariance,
+    StreamingRiskParity,
+    StreamingSchur,
+    StreamingThurstone,
+)
 from .moments import EwmaCovariance
-from .schur import SchurComplementary
+from .schur import HierarchicalRiskParity, SchurComplementary
 from .thurstone import ThurstonePortfolio
 
 __version__ = "0.0.1"
@@ -22,9 +41,25 @@ __all__ = [
     "BaseOnlinePortfolio",
     "ThurstonePortfolio",
     "SchurComplementary",
+    "HierarchicalRiskParity",
+    "EqualWeight",
+    "InverseVariance",
+    "RiskParity",
+    "MinimumVariance",
+    "MaximumDiversification",
+    "MaximumDecorrelation",
+    "MeanVariance",
     "EwmaCovariance",
     # streaming / river-style (changing universe)
     "StreamingThurstone",
     "StreamingSchur",
+    "StreamingHRP",
+    "StreamingEqualWeight",
+    "StreamingInverseVariance",
+    "StreamingRiskParity",
+    "StreamingMinimumVariance",
+    "StreamingMaximumDiversification",
+    "StreamingMaximumDecorrelation",
+    "StreamingMeanVariance",
     "KeyedEwmaCovariance",
 ]
