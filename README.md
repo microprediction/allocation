@@ -17,6 +17,11 @@ for batch in stream:        # streaming / rebalancing
     w = est.weights_
 ```
 
+`score(X)` returns the portfolio's Sharpe ratio (skfolio's scoring convention),
+and `to_portfolio(X)` wraps the fitted weights as a skfolio `Portfolio`
+(`pip install allocation[skfolio]`) so the output drops into skfolio's metrics,
+`Population`, and cross-validation.
+
 ## Why a separate package
 
 skfolio is the scikit-learn-native portfolio library, but it is *batch*: a

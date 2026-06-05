@@ -103,6 +103,32 @@ class BaseOnlinePortfolio:
         """Portfolio returns of each row of ``X`` under the fitted weights."""
         return self._as_2d(X) @ self.weights_
 
+    def score(self, X, y=None) -> float:
+        """Per-period Sharpe ratio of the portfolio on ``X`` (higher is better).
+
+        Follows skfolio's convention that an optimizer's score is the Sharpe
+        ratio of its predicted portfolio, so the estimator works with
+        scikit-learn / skfolio model-selection out of the box.
+        """
+        r = np.asarray(self.predict(X), dtype=float)
+        sd = float(np.std(r))
+        return float(np.mean(r) / sd) if sd > 0 else 0.0
+
+    def to_portfolio(self, X):
+        """Wrap the fitted weights as a skfolio ``Portfolio`` (optional dependency).
+
+        Lets the estimator's output drop into skfolio's metrics, ``Population``,
+        and plotting, and is the bridge for contributing the estimator upstream
+        (where ``predict`` returns a ``Portfolio`` natively). Requires skfolio.
+        """
+        try:
+            from skfolio import Portfolio
+        except Exception as exc:  # pragma: no cover - optional dependency
+            raise ImportError(
+                "to_portfolio requires skfolio (pip install skfolio)"
+            ) from exc
+        return Portfolio(X=X, weights=self.weights_)
+
     def get_params(self, deep: bool = True) -> dict:
         import inspect
 

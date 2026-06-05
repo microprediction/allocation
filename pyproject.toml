@@ -16,6 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+skfolio = ["skfolio>=0.5"]
 test = ["pytest>=7.0"]
 
 [project.urls]
