@@ -14,6 +14,7 @@ from allocation import (
 )
 from allocation.backtest import (
     compare,
+    compare_random_subsets,
     format_table,
     make_panel,
     portfolio_metrics,
@@ -57,6 +58,26 @@ def test_turnover_penalty_lowers_realized_turnover():
         *walk_forward(lambda: TurnoverPenalty(SchurComplementary(gamma=0.5), cost=4.0), panel, 80)
     )
     assert damped["turnover"] < base["turnover"]
+
+
+def test_compare_random_subsets_aggregates():
+    panel = make_panel(n_obs=600, n=20, seed=5)
+    rows = compare_random_subsets(
+        {"equal": EqualWeight, "invvar": InverseVariance, "schur": lambda: SchurComplementary(gamma=0.5)},
+        panel, k=[8, 12], window=[300, 400], n_trials=6, warmup=60, seed=1,
+    )
+    assert {r["name"] for r in rows} == {"equal", "invvar", "schur"}
+    total_wins = sum(r["win_rate"] for r in rows)
+    assert abs(total_wins - 1.0) < 1e-9  # win rates partition the trials
+    for r in rows:
+        assert r["trials"] == 6 and r["net_sd"] >= 0
+    # reproducible
+    rows2 = compare_random_subsets(
+        {"equal": EqualWeight, "invvar": InverseVariance, "schur": lambda: SchurComplementary(gamma=0.5)},
+        panel, k=[8, 12], window=[300, 400], n_trials=6, warmup=60, seed=1,
+    )
+    assert [r["name"] for r in rows] == [r["name"] for r in rows2]
+    assert rows[0]["net_sharpe"] == rows2[0]["net_sharpe"]
 
 
 def test_box_constraint_caps_concentration_through_backtest():

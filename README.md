@@ -90,6 +90,12 @@ print(format_table(compare({
 No data is shipped (to avoid bloat); `compare()` takes any array, and
 `load_returns_csv(url)` can pull a raw CSV from a data repo at runtime.
 
+For a robust, universe-independent comparison, `compare_random_subsets(...)` runs
+a Monte-Carlo over random name-subsets and windows, reporting each method's mean
+± sd net Sharpe, mean turnover, and **win rate** (fraction of trials it had the
+best net Sharpe) — averaging out the single-backtest dependence on which names
+and period you happened to pick.
+
 ## Design
 
 ```
