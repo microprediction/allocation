@@ -11,12 +11,14 @@ Estimators:
 
 from .base import BaseOnlinePortfolio
 from .baselines import EqualWeight, InverseVariance, RiskParity
+from .constraints import BoxConstrained, StreamingBoxConstrained
 from .convex import (
     MaximumDecorrelation,
     MaximumDiversification,
     MeanVariance,
     MinimumVariance,
 )
+from .costs import StreamingTurnoverPenalty, TurnoverPenalty
 from .keyed import (
     KeyedEwmaCovariance,
     StreamingEqualWeight,
@@ -49,6 +51,8 @@ __all__ = [
     "MaximumDiversification",
     "MaximumDecorrelation",
     "MeanVariance",
+    "TurnoverPenalty",
+    "BoxConstrained",
     "EwmaCovariance",
     # streaming / river-style (changing universe)
     "StreamingThurstone",
@@ -61,5 +65,7 @@ __all__ = [
     "StreamingMaximumDiversification",
     "StreamingMaximumDecorrelation",
     "StreamingMeanVariance",
+    "StreamingTurnoverPenalty",
+    "StreamingBoxConstrained",
     "KeyedEwmaCovariance",
 ]

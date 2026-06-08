@@ -50,6 +50,44 @@ Each has a river-style streaming twin for a *changing* universe — `StreamingTh
 - For the **closed-form linear allocators** (`MinimumVariance`, `MaximumDiversification`, `InverseVariance`) the allocator factor is already a smooth (rational) function of `Σ`, so weight-smoothness *is* covariance-smoothness — pair them with a smooth online covariance (the default EWMA, a shrinkage estimator, or a `precise` skater) and you're done. Caveats: keep `Σ` well-conditioned (use `shrinkage`, since `Σ⁻¹` swings near a vanishing eigenvalue) and avoid hard long-only QPs (they kink at the zero bound — the smooth long-only min-variance is `SchurComplementary` as `gamma→1`).
 - The package's distinctive work is the **other** family, where the allocator factor itself is rough no matter how smooth `Σ` is. Three sources, three primitives: sampling noise → common-seed transport (Thurstone); combinatorial ordering → Fiedler seriation (Schur/HRP); active-set kinks → keep the solution interior (ERC is interior by construction).
 
+### Trading costs
+
+`TurnoverPenalty(estimator, cost=λ)` wraps any estimator with a quadratic trading
+cost (market-impact model). Minimising `‖w − w*‖² + λ‖w − w_prev‖²` gives the smooth,
+budget-preserving blend `w_t = α w* + (1−α) w_prev` with `α = 1/(1+λ)`, so each step's
+turnover is scaled exactly by `α`. This explicit damping composes with the implicit
+turnover control (smooth target) and has a streaming twin `StreamingTurnoverPenalty`.
+
+### Linear constraints
+
+`BoxConstrained(estimator, lower=, upper=, groups=, group_caps=)` imposes per-asset
+bounds and (disjoint) group caps on any estimator via a **log-barrier**, not a QP.
+The barrier's domain *is* the constraint set, so the result is strictly feasible for
+any `tau>0` — feasibility never depends on tuning, and the operator stays C¹ (no
+active-set kinks), so turnover stays low. Streaming twin: `StreamingBoxConstrained`.
+
+## Comparing methods
+
+`allocation.backtest` is a numpy-only walk-forward harness: it trades each
+estimator forward (form weights → earn next period → update) and tabulates
+out-of-sample Sharpe, **turnover**, concentration, and Sharpe net of a
+proportional cost.
+
+```python
+from allocation import SchurComplementary, TurnoverPenalty, MinimumVariance
+from allocation.backtest import compare, format_table, make_panel
+
+panel = make_panel()                       # synthetic; or any (n_obs, n_assets) array
+print(format_table(compare({
+    "schur":   lambda: SchurComplementary(gamma=0.5),
+    "schur+λ": lambda: TurnoverPenalty(SchurComplementary(gamma=0.5), cost=3.0),
+    "minvar":  lambda: MinimumVariance(shrinkage=0.1),
+}, panel)))
+```
+
+No data is shipped (to avoid bloat); `compare()` takes any array, and
+`load_returns_csv(url)` can pull a raw CSV from a data repo at runtime.
+
 ## Design
 
 ```
