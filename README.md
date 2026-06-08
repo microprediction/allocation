@@ -66,6 +66,28 @@ The barrier's domain *is* the constraint set, so the result is strictly feasible
 any `tau>0` — feasibility never depends on tuning, and the operator stays C¹ (no
 active-set kinks), so turnover stays low. Streaming twin: `StreamingBoxConstrained`.
 
+## Comparing methods
+
+`allocation.backtest` is a numpy-only walk-forward harness: it trades each
+estimator forward (form weights → earn next period → update) and tabulates
+out-of-sample Sharpe, **turnover**, concentration, and Sharpe net of a
+proportional cost.
+
+```python
+from allocation import SchurComplementary, TurnoverPenalty, MinimumVariance
+from allocation.backtest import compare, format_table, make_panel
+
+panel = make_panel()                       # synthetic; or any (n_obs, n_assets) array
+print(format_table(compare({
+    "schur":   lambda: SchurComplementary(gamma=0.5),
+    "schur+λ": lambda: TurnoverPenalty(SchurComplementary(gamma=0.5), cost=3.0),
+    "minvar":  lambda: MinimumVariance(shrinkage=0.1),
+}, panel)))
+```
+
+No data is shipped (to avoid bloat); `compare()` takes any array, and
+`load_returns_csv(url)` can pull a raw CSV from a data repo at runtime.
+
 ## Design
 
 ```
