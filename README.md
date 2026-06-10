@@ -62,6 +62,14 @@ HRP/Schur, and the **Thurstone tilt** — benchmark-anchored, no inversion, low 
 an `O(M·n·k)` race instead of the dense `O(M·n²)+O(n³)` one, so it scales to thousands of
 names (≈0.4 s/rebalance at n=3000).
 
+To make *minimum-variance itself* well-posed at scale, `FactorMinimumVariance` /
+`FactorMaximumDiversification` invert a factor covariance `Σ = BBᵀ + diag(ψ)` via the
+**Woodbury identity** (`O(n·k²)`, condition number bounded by an idiosyncratic floor, so the
+inverse always exists). Supply a factor covariance (`loadings_` / `idiosyncratic_`, e.g. an
+adapted `precise.FactorCovariance`) for the `O(n·k)` path, or let it factor a dense covariance.
+And `SchurComplementary(ridge=…)` regularizes the cross-block solve so `gamma>0` stays
+well-posed (and self-tempers toward HRP) when blocks are rank-deficient.
+
 ### Trading costs
 
 `TurnoverPenalty(estimator, cost=λ)` wraps any estimator with a quadratic trading
