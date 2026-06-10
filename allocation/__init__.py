@@ -18,6 +18,7 @@ from .convex import (
     MeanVariance,
     MinimumVariance,
 )
+from .factor import FactorMaximumDiversification, FactorMinimumVariance
 from .costs import StreamingTurnoverPenalty, TurnoverPenalty
 from .keyed import (
     KeyedEwmaCovariance,
@@ -51,6 +52,8 @@ __all__ = [
     "MaximumDiversification",
     "MaximumDecorrelation",
     "MeanVariance",
+    "FactorMinimumVariance",
+    "FactorMaximumDiversification",
     "TurnoverPenalty",
     "BoxConstrained",
     "EwmaCovariance",
