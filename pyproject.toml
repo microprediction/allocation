@@ -21,7 +21,8 @@ skfolio = ["skfolio>=0.5"]
 test = ["pytest>=7.0", "scipy>=1.10"]
 
 [project.urls]
-Homepage = "https://github.com/microprediction/allocation"
+Homepage = "https://allocation.microprediction.org"
+Source = "https://github.com/microprediction/allocation"
 
 [tool.setuptools.packages.find]
 where = ["."]

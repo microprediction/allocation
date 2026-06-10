@@ -5,6 +5,8 @@ scikit-learn / [skfolio](https://skfolio.org)-compatible estimators
 (`fit` / `partial_fit` / `predict` / `weights_`), on top of a keyed
 dynamic-universe layer so they survive reconstituting universes.
 
+📖 **[allocation.microprediction.org](https://allocation.microprediction.org)**
+
 ```python
 from allocation import ThurstonePortfolio
 
