@@ -16,6 +16,7 @@ __all__ = [
     "nearest_correlation",
     "market_betas",
     "one_factor_corr",
+    "factor_decompose",
 ]
 
 
@@ -75,6 +76,36 @@ def market_betas(
     sig_m = np.sqrt(max(var_m, 1e-300))
     b = cov_im / (sig * sig_m)
     return np.clip(b, -b_max, b_max)
+
+
+def factor_decompose(corr: np.ndarray, k: int, oversample: int = 5, seed: int = 0):
+    """Top-``k`` factor approximation ``corr ~= B B^T + diag(d)`` (unit diagonal).
+
+    Returns ``(B, d)`` with ``B`` of shape ``(n, k)`` and ``d`` the idiosyncratic
+    residual variances, so ``B B^T + diag(d)`` has unit diagonal. Uses a
+    randomized range finder (one ``corr @ Omega`` matvec, a thin QR, a tiny
+    eigendecomposition) -- ``O(n^2 k)`` rather than the ``O(n^3)`` of a full eigh,
+    and with a *fixed* ``seed`` the projection is constant so the factors vary
+    smoothly with ``corr``. The result feeds :func:`transport_weights_lowrank`.
+
+    A genuine factor covariance estimator would supply ``(B, d)`` directly in
+    ``O(n k)`` and remove the ``O(n^2)`` floor here; this keeps the tilt usable to
+    a few thousand names without one.
+    """
+    c = np.asarray(corr, dtype=float)
+    n = c.shape[0]
+    k = max(1, min(int(k), n))
+    rng = np.random.default_rng(seed)
+    p = min(n, k + oversample)
+    omega = rng.standard_normal((n, p))
+    q, _ = np.linalg.qr(c @ omega)         # orthonormal basis for the dominant subspace
+    small = q.T @ c @ q                     # (p, p)
+    vals, vecs = np.linalg.eigh(small)
+    order = np.argsort(vals)[::-1][:k]
+    lam = np.clip(vals[order], 0.0, None)
+    B = (q @ vecs[:, order]) * np.sqrt(lam)
+    d = np.clip(1.0 - np.sum(B * B, axis=1), 1e-6, None)
+    return B, d
 
 
 def one_factor_corr(betas: np.ndarray) -> np.ndarray:

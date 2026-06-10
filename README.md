@@ -52,6 +52,16 @@ Each has a river-style streaming twin for a *changing* universe — `StreamingTh
 - For the **closed-form linear allocators** (`MinimumVariance`, `MaximumDiversification`, `InverseVariance`) the allocator factor is already a smooth (rational) function of `Σ`, so weight-smoothness *is* covariance-smoothness — pair them with a smooth online covariance (the default EWMA, a shrinkage estimator, or a `precise` skater) and you're done. Caveats: keep `Σ` well-conditioned (use `shrinkage`, since `Σ⁻¹` swings near a vanishing eigenvalue) and avoid hard long-only QPs (they kink at the zero bound — the smooth long-only min-variance is `SchurComplementary` as `gamma→1`).
 - The package's distinctive work is the **other** family, where the allocator factor itself is rough no matter how smooth `Σ` is. Three sources, three primitives: sampling noise → common-seed transport (Thurstone); combinatorial ordering → Fiedler seriation (Schur/HRP); active-set kinks → keep the solution interior (ERC is interior by construction).
 
+### Very large universes (e.g. Russell 3000)
+
+Where the covariance is rank-deficient, every inversion-based allocator (min-variance,
+max-diversification, …) is *undefined* (`is_singular()` flags it; `strict=True` refuses).
+The robust large-universe methods are the ones that never invert `Σ`: inverse-variance,
+HRP/Schur, and the **Thurstone tilt** — benchmark-anchored, no inversion, low turnover.
+`ThurstonePortfolio(factors=k)` runs the tilt with a `k`-factor (low-rank) correlation and
+an `O(M·n·k)` race instead of the dense `O(M·n²)+O(n³)` one, so it scales to thousands of
+names (≈0.4 s/rebalance at n=3000).
+
 ### Trading costs
 
 `TurnoverPenalty(estimator, cost=λ)` wraps any estimator with a quadratic trading

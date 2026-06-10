@@ -18,9 +18,13 @@ import numpy as np
 from .base import BaseOnlinePortfolio
 from ._thurstone.ability import base_density
 from ._thurstone.calibrate import calibrate_diagonal, calibrate_one_factor
-from ._thurstone.covariance import market_betas, one_factor_corr
+from ._thurstone.covariance import cov_to_corr, factor_decompose, market_betas, one_factor_corr
 from ._thurstone.diagonal import diagonal_portfolio
-from ._thurstone.transport import blend_correlation, transport_weights
+from ._thurstone.transport import (
+    blend_correlation,
+    transport_weights,
+    transport_weights_lowrank,
+)
 
 __all__ = ["ThurstonePortfolio"]
 
@@ -53,6 +57,12 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         Monte-Carlo seed budget (rounded up to a power of two).
     n_quad : int, default 16
         Gauss--Hermite nodes for one-factor calibration.
+    factors : int or None, default None
+        If set, run the tilt with a ``k``-factor (low-rank) correlation and the
+        ``O(M n k)`` transport instead of the dense ``O(M n^2) + O(n^3)`` one --
+        what makes the tilt usable on very large universes (e.g. Russell-3000),
+        where every inversion-based allocator is undefined. ``None`` uses the
+        exact dense transport.
     seed : int, default 42
         Seed for the fixed path ensemble.
     covariance : estimator or None, default None
@@ -70,6 +80,7 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         phi: float = 1.0,
         n_paths: int = 1 << 14,
         n_quad: int = 16,
+        factors: int | None = None,
         seed: int = 42,
         covariance_estimator=None,
         halflife: float = 60.0,
@@ -80,9 +91,12 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         self.phi = phi
         self.n_paths = n_paths
         self.n_quad = n_quad
+        self.factors = factors
         self.seed = seed
         # persistent state set in _cold_start
         self._seeds = None
+        self._seeds_factor = None
+        self._seeds_idio = None
         self._ability = None
         self._C_calib = None
         self._target_w = None
@@ -120,13 +134,28 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         else:
             raise ValueError(f"unknown calib {self.calib!r} (use 'diagonal' or 'market')")
 
+        m = _pow2(self.n_paths)
         rng = np.random.default_rng(self.seed)
-        self._seeds = rng.standard_normal((_pow2(self.n_paths), n))
+        if self.factors:
+            k = min(int(self.factors), n)
+            self._seeds_factor = rng.standard_normal((m, k))
+            self._seeds_idio = rng.standard_normal((m, n))
+        else:
+            self._seeds = rng.standard_normal((m, n))
         self._online_update(cov)
 
     def _online_update(self, cov: np.ndarray) -> None:
-        C_tilt = blend_correlation(self._C_calib, cov, self.phi)
-        self._weights = transport_weights(self._ability, C_tilt, self._seeds)
+        if self.factors:
+            # keep the tilt low-rank end to end: blend correlations (a PSD convex
+            # combination already has unit diagonal), factor it, race in O(M n k).
+            ct = (1.0 - self.phi) * self._C_calib + self.phi * cov_to_corr(cov)
+            B, d = factor_decompose(ct, min(int(self.factors), cov.shape[0]), seed=self.seed)
+            self._weights = transport_weights_lowrank(
+                self._ability, B, d, self._seeds_factor, self._seeds_idio
+            )
+        else:
+            C_tilt = blend_correlation(self._C_calib, cov, self.phi)
+            self._weights = transport_weights(self._ability, C_tilt, self._seeds)
 
     # --------------------------------------------------- fitted attributes
     @property

@@ -13,7 +13,12 @@ import numpy as np
 
 from .covariance import cov_to_corr, nearest_correlation
 
-__all__ = ["symmetric_sqrt", "blend_correlation", "transport_weights"]
+__all__ = [
+    "symmetric_sqrt",
+    "blend_correlation",
+    "transport_weights",
+    "transport_weights_lowrank",
+]
 
 
 def symmetric_sqrt(C: np.ndarray) -> np.ndarray:
@@ -47,6 +52,27 @@ def transport_weights(ability: np.ndarray, C_tilt: np.ndarray, seeds: np.ndarray
     a = np.asarray(ability, dtype=float)
     S = symmetric_sqrt(C_tilt)
     X = a + seeds @ S  # rows ~ N(a, C_tilt)
+    winners = np.argmin(X, axis=1)
+    counts = np.bincount(winners, minlength=len(a)).astype(float)
+    total = counts.sum()
+    return counts / total if total > 0 else np.full(len(a), 1.0 / len(a))
+
+
+def transport_weights_lowrank(ability, loadings, idio, seeds_factor, seeds_idio):
+    """Win frequencies of ``N(ability, diag(idio) + B B^T)`` in ``O(M n k)``.
+
+    For a ``k``-factor tilt correlation ``C = diag(idio) + B B^T`` (``B`` is
+    ``loadings``, shape ``(n, k)``), a draw is ``x = a + B z + sqrt(idio) * eps``
+    with ``z ~ N(0, I_k)``, ``eps ~ N(0, I_n)`` -- no ``n x n`` square root, so the
+    race costs ``O(M n k)`` instead of the dense ``O(M n^2) + O(n^3)``. This is
+    what lets the Thurstone tilt scale to thousands of names (Russell-3000). The
+    *same* fixed ``seeds_factor`` / ``seeds_idio`` across calls keeps weights
+    smooth, exactly as in the dense transport.
+    """
+    a = np.asarray(ability, dtype=float)
+    B = np.asarray(loadings, dtype=float)
+    s = np.sqrt(np.clip(np.asarray(idio, dtype=float), 0.0, None))
+    X = a + seeds_factor @ B.T + seeds_idio * s  # (M, n), rows ~ N(a, diag(idio) + B B^T)
     winners = np.argmin(X, axis=1)
     counts = np.bincount(winners, minlength=len(a)).astype(float)
     total = counts.sum()
