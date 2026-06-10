@@ -50,6 +50,7 @@ class SchurComplementary(BaseOnlinePortfolio):
         knn: int | None = None,
         prior=None,
         prior_weight: float = 0.0,
+        ridge: float = 0.0,
         covariance_estimator=None,
         halflife: float = 60.0,
     ):
@@ -59,6 +60,7 @@ class SchurComplementary(BaseOnlinePortfolio):
         self.knn = knn
         self.prior = prior
         self.prior_weight = prior_weight
+        self.ridge = ridge
         self._fiedler = None
         self._order = None
         self.effective_gamma_ = None
@@ -78,10 +80,10 @@ class SchurComplementary(BaseOnlinePortfolio):
     def _allocate(self, order, cov) -> None:
         if self.keep_monotonic:
             self._weights, self.effective_gamma_ = compute_monotonic_weights(
-                order, cov, self.gamma
+                order, cov, self.gamma, ridge=self.ridge
             )
         else:
-            self._weights = compute_weights(order, cov, self.gamma)
+            self._weights = compute_weights(order, cov, self.gamma, ridge=self.ridge)
             self.effective_gamma_ = self.gamma
 
     def _cold_start(self, cov: np.ndarray) -> None:

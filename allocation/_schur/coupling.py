@@ -26,6 +26,26 @@ def _inverse_multiply(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return np.linalg.solve(a, b)
 
 
+def _ridge_solve(a: np.ndarray, b: np.ndarray, ridge: float) -> np.ndarray:
+    """``(a + ridge * scale * I)^-1 @ b`` -- a robust block solve.
+
+    The Schur coupling inverts the *other* block, which is rank-deficient at the
+    top of the recursion on a large universe. A ridge proportional to the block's
+    own scale (``trace/n``) keeps the solve well-posed for any ``a`` and makes the
+    coupling self-tempering: as a block becomes less estimable the ridge dominates,
+    the cross-block term shrinks, and Schur degrades gracefully toward HRP.
+    ``ridge=0`` is the exact solve (with a least-squares safety net).
+    """
+    if ridge > 0.0:
+        n = a.shape[0]
+        scale = float(np.trace(a)) / n if n else 1.0
+        a = a + ridge * scale * np.eye(n)
+    try:
+        return np.linalg.solve(a, b)
+    except np.linalg.LinAlgError:
+        return np.linalg.lstsq(a, b, rcond=None)[0]
+
+
 def _multiply_by_inverse(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     """a @ b^-1."""
     return np.linalg.solve(b.T, a.T).T
@@ -65,15 +85,22 @@ def _symmetric_step_up_matrix(n1: int, n2: int) -> np.ndarray:
     return m
 
 
-def schur_augmentation(a: np.ndarray, b: np.ndarray, d: np.ndarray, gamma: float) -> np.ndarray:
-    """Augment block ``a`` with the gamma-scaled Schur complement of ``d``."""
+def schur_augmentation(
+    a: np.ndarray, b: np.ndarray, d: np.ndarray, gamma: float, ridge: float = 0.0
+) -> np.ndarray:
+    """Augment block ``a`` with the gamma-scaled Schur complement of ``d``.
+
+    ``ridge > 0`` regularizes the (rank-deficient at scale) inverse of the other
+    block ``d`` -- see :func:`_ridge_solve`.
+    """
     n_a, n_d = a.shape[0], d.shape[0]
     if gamma == 0 or n_a == 1 or n_d == 1:
         return a
-    a_aug = a - gamma * b @ _inverse_multiply(d, b.T)
+    db = _ridge_solve(d, b.T, ridge)  # d^-1 b^T (n_d, n_a); d symmetric so b d^-1 == db^T
+    a_aug = a - gamma * b @ db
     m = _symmetric_step_up_matrix(n1=n_a, n2=n_d)
-    r = np.eye(n_a) - gamma * _multiply_by_inverse(b, d) @ m.T
-    return _symmetrize(_inverse_multiply(r, a_aug))
+    r = np.eye(n_a) - gamma * db.T @ m.T
+    return _symmetrize(_ridge_solve(r, a_aug, ridge))
 
 
 def _bisection(items):
@@ -91,12 +118,14 @@ def _naive_portfolio_variance(cov: np.ndarray) -> float:
 
 
 def compute_weights(
-    order: np.ndarray, covariance: np.ndarray, gamma: float, force_spd: bool = True
+    order: np.ndarray, covariance: np.ndarray, gamma: float, force_spd: bool = True,
+    ridge: float = 0.0,
 ) -> np.ndarray:
     """Schur-complementary weights for a given seriation ``order`` and covariance.
 
     Weights are returned in the original asset order (not the seriation order),
-    are long-only, and sum to one.
+    are long-only, and sum to one. ``ridge > 0`` regularizes the cross-block
+    solves so ``gamma > 0`` stays well-posed when blocks are rank-deficient.
     """
     cov = np.array(covariance, dtype=float, copy=True)
     n = len(cov)
@@ -112,8 +141,8 @@ def compute_weights(
                 a_aug, d_aug = a, d
             else:
                 b = cov[np.ix_(left, right)]
-                a_aug = schur_augmentation(a, b, d, gamma=gamma)
-                d_aug = schur_augmentation(d, b.T, a, gamma=gamma)
+                a_aug = schur_augmentation(a, b, d, gamma=gamma, ridge=ridge)
+                d_aug = schur_augmentation(d, b.T, a, gamma=gamma, ridge=ridge)
                 if force_spd:
                     if not _is_spd(a_aug):
                         a_aug = _nearest_spd(a_aug)
@@ -158,6 +187,7 @@ def compute_monotonic_weights(
     max_gamma: float,
     step: float = 0.1,
     tol: float = 1e-4,
+    ridge: float = 0.0,
 ) -> tuple[np.ndarray, float]:
     """Weights at the largest gamma (<= ``max_gamma``) for which variance still falls.
 
@@ -166,11 +196,11 @@ def compute_monotonic_weights(
     (skfolio's ``keep_monotonic=True`` behaviour). Returns ``(weights, effective_gamma)``.
     """
     if max_gamma == 0:
-        return compute_weights(order, covariance, 0.0, force_spd=True), 0.0
+        return compute_weights(order, covariance, 0.0, force_spd=True, ridge=ridge), 0.0
     cov = np.asarray(covariance, dtype=float)
 
     def objective(x):
-        w = compute_weights(order, cov, x, force_spd=False)
+        w = compute_weights(order, cov, x, force_spd=False, ridge=ridge)
         risk = np.inf if w is None else float(w @ cov @ w.T)
         return risk, w
 

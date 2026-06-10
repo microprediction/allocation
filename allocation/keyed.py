@@ -196,6 +196,7 @@ class StreamingSchur:
         gamma: float = 0.5,
         keep_monotonic: bool = True,
         knn: int | None = None,
+        ridge: float = 0.0,
         halflife: float = 60.0,
         min_obs: int = 20,
     ):
@@ -204,6 +205,7 @@ class StreamingSchur:
         self.gamma = gamma
         self.keep_monotonic = keep_monotonic
         self.knn = knn
+        self.ridge = ridge
         self.halflife = halflife
         self.min_obs = min_obs
         self._cov = KeyedEwmaCovariance(halflife=halflife)
@@ -229,9 +231,9 @@ class StreamingSchur:
         order, v = seriate(cov, previous=prev, knn=self.knn)
         self._fiedler = dict(zip(ids, v))
         if self.keep_monotonic:
-            w, _ = compute_monotonic_weights(order, cov, self.gamma)
+            w, _ = compute_monotonic_weights(order, cov, self.gamma, ridge=self.ridge)
         else:
-            w = compute_weights(order, cov, self.gamma)
+            w = compute_weights(order, cov, self.gamma, ridge=self.ridge)
         self._weights = dict(zip(ids, w))
 
     def predict_one(self, x: dict | None = None) -> dict:

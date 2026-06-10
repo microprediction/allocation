@@ -97,6 +97,39 @@ def test_sparse_fiedler_matches_dense_order():
     assert np.argsort(v_sparse).tolist() == np.argsort(v_dense).tolist()
 
 
+def test_ridge_wellposed_on_rank_deficient_blocks():
+    # 12 obs, 20 names -> rank-deficient covariance; gamma>0 inverts singular blocks
+    rng = np.random.default_rng(0)
+    cov = np.cov(rng.standard_normal((12, 20)), rowvar=False)
+    order, _ = seriate(cov)
+    w = compute_weights(order, cov, gamma=0.5, ridge=0.1)
+    assert w is not None
+    assert np.all(w >= -1e-9) and abs(float(w.sum()) - 1.0) < 1e-9 and np.all(np.isfinite(w))
+
+
+def test_large_ridge_recovers_hrp():
+    # as the ridge dominates, the cross-block coupling vanishes -> Schur -> HRP (gamma 0)
+    cov = _cov(_returns())
+    order, _ = seriate(cov)
+    w_hrp = compute_weights(order, cov, gamma=0.0)
+    w_big = compute_weights(order, cov, gamma=0.9, ridge=1e8)
+    assert np.allclose(w_hrp, w_big, atol=1e-6)
+
+
+def test_ridge_zero_is_unchanged():
+    # ridge=0 must reproduce the original exact coupling on a full-rank covariance
+    cov = _cov(_returns())
+    order, _ = seriate(cov)
+    assert np.allclose(compute_weights(order, cov, 0.5), compute_weights(order, cov, 0.5, ridge=0.0))
+
+
+def test_schur_estimator_ridge_runs_high_dim():
+    rng = np.random.default_rng(1)
+    X = rng.standard_normal((40, 120))  # rank-deficient EWMA covariance
+    w = SchurComplementary(gamma=0.5, ridge=0.1, keep_monotonic=False).fit(X).weights_
+    assert np.all(w >= -1e-9) and abs(float(w.sum()) - 1.0) < 1e-6 and np.all(np.isfinite(w))
+
+
 def test_prior_blend_shifts_order():
     # A strong block prior should make the order group the prior blocks.
     cov = _cov(_returns(n=8, seed=5))
