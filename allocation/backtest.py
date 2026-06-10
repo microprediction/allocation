@@ -15,8 +15,8 @@ from __future__ import annotations
 
 import numpy as np
 
-__all__ = ["walk_forward", "portfolio_metrics", "compare", "format_table",
-           "make_panel", "load_returns_csv"]
+__all__ = ["walk_forward", "portfolio_metrics", "compare", "compare_random_subsets",
+           "format_table", "make_panel", "load_returns_csv"]
 
 
 def load_returns_csv(path_or_url: str, skip_cols: int = 0):
@@ -105,6 +105,64 @@ def compare(factories: dict, returns, *, warmup: int = 60, cost_bps: float = 10.
         rets, path = walk_forward(factory, returns, warmup=warmup)
         m = portfolio_metrics(rets, path, periods_per_year, cost_bps)
         rows.append({"name": name, **m})
+    rows.sort(key=lambda r: r["net_sharpe"], reverse=True)
+    return rows
+
+
+def compare_random_subsets(factories: dict, returns, *, k=50, window=None, n_trials: int = 100,
+                           warmup: int = 60, cost_bps: float = 10.0, periods_per_year: int = 252,
+                           seed: int = 0):
+    """Monte-Carlo comparison over random name-subsets (and optional random windows).
+
+    Each trial draws a random subset of ``k`` columns (``k`` may be a list, sampled
+    per trial) and, if ``window`` is set, a random contiguous block of that many
+    rows; every ``factory`` is walk-forward tested on that slice. Aggregating over
+    trials averages out the universe/period dependence a single backtest suffers,
+    giving each method a mean +/- sd net Sharpe, mean turnover, and **win rate**
+    (fraction of trials it had the best net Sharpe). Returns rows sorted by mean
+    net Sharpe.
+    """
+    returns = np.asarray(returns, dtype=float)
+    T, N = returns.shape
+    rng = np.random.default_rng(seed)
+    ks = list(k) if isinstance(k, (list, tuple)) else [k]
+    windows = list(window) if isinstance(window, (list, tuple)) else ([window] if window else [None])
+    stats = {name: {"net": [], "sharpe": [], "turnover": [], "eff_n": [], "wins": 0} for name in factories}
+    for _ in range(n_trials):
+        kk = min(int(rng.choice(ks)), N)
+        cols = rng.choice(N, size=kk, replace=False)
+        ww = rng.choice([w for w in windows if w]) if any(windows) else None
+        if ww and ww < T:
+            s = int(rng.integers(0, T - int(ww) + 1)); panel = returns[s:s + int(ww)][:, cols]
+        else:
+            panel = returns[:, cols]
+        wu = min(warmup, panel.shape[0] // 4)
+        best, best_net = None, -np.inf
+        for name, fac in factories.items():
+            try:
+                rets, path = walk_forward(fac, panel, warmup=wu)
+                m = portfolio_metrics(rets, path, periods_per_year, cost_bps)
+            except Exception:
+                continue
+            st = stats[name]
+            st["net"].append(m["net_sharpe"]); st["sharpe"].append(m["sharpe"])
+            st["turnover"].append(m["turnover"]); st["eff_n"].append(m["eff_n"])
+            if m["net_sharpe"] > best_net:
+                best_net, best = m["net_sharpe"], name
+        if best is not None:
+            stats[best]["wins"] += 1
+    rows = []
+    for name, st in stats.items():
+        n = len(st["net"])
+        if not n:
+            continue
+        rows.append({"name": name, "trials": n,
+                     "net_sharpe": float(np.mean(st["net"])),
+                     "net_sd": float(np.std(st["net"])),
+                     "sharpe": float(np.mean(st["sharpe"])),
+                     "turnover": float(np.mean(st["turnover"])),
+                     "eff_n": float(np.mean(st["eff_n"])),
+                     "win_rate": st["wins"] / n_trials})
     rows.sort(key=lambda r: r["net_sharpe"], reverse=True)
     return rows
 
