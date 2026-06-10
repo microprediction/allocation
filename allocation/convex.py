@@ -34,6 +34,7 @@ __all__ = [
     "max_diversification_weights",
     "max_decorrelation_weights",
     "mean_variance_weights",
+    "is_singular",
     "MinimumVariance",
     "MaximumDiversification",
     "MaximumDecorrelation",
@@ -57,6 +58,34 @@ def _solve(cov: np.ndarray, rhs: np.ndarray) -> np.ndarray:
         return np.linalg.solve(cov, rhs)
     except np.linalg.LinAlgError:
         return np.linalg.lstsq(cov, rhs, rcond=None)[0]
+
+
+def is_singular(cov: np.ndarray, cond_tol: float = 1e10) -> bool:
+    """Whether ``cov`` is rank-deficient or worse-conditioned than ``cond_tol``.
+
+    The inversion-based allocators here are only well-posed on a full-rank,
+    decently-conditioned covariance; with an EWMA covariance that fails whenever
+    fewer observations than assets have been seen (rank <= #obs). When this is
+    true ``Sigma^{-1}`` does not meaningfully exist and minimum-variance is
+    ill-posed -- shrinkage, or a method that needs no full inverse
+    (InverseVariance / HierarchicalRiskParity / SchurComplementary), is required.
+    """
+    ev = np.linalg.eigvalsh(0.5 * (cov + cov.T))
+    lo, hi = float(ev[0]), float(ev[-1])
+    return lo <= 1e-14 * max(hi, 1e-30) or hi / max(lo, 1e-300) > cond_tol
+
+
+def _guard(name: str, cov: np.ndarray, shrinkage: float, strict: bool) -> bool:
+    """Set/return the singular flag for an inversion estimator; raise if ``strict``."""
+    sing = is_singular(_shrink(np.asarray(cov, dtype=float), shrinkage))
+    if strict and sing:
+        raise np.linalg.LinAlgError(
+            f"{name}: the covariance is rank-deficient / ill-conditioned, so this "
+            "inversion-based allocation is undefined. Add shrinkage, or use a method "
+            "that needs no full inverse (InverseVariance, HierarchicalRiskParity, "
+            "SchurComplementary)."
+        )
+    return sing
 
 
 def _normalize_signed(w: np.ndarray) -> np.ndarray:
@@ -110,18 +139,27 @@ class MinimumVariance(BaseOnlinePortfolio):
     shrinkage : float in [0, 1], default 0.0
         Blend the covariance toward a scaled identity before inverting. Improves
         conditioning (hence smoothness); ``1.0`` recovers equal weight.
+    strict : bool, default False
+        If True, raise when the (shrunk) covariance is rank-deficient /
+        ill-conditioned -- i.e. when minimum-variance is genuinely ill-posed --
+        instead of returning a least-squares pseudo-solution. Either way the
+        ``singular_`` attribute records whether that happened.
     covariance_estimator, halflife : see :class:`BaseOnlinePortfolio`.
     """
 
-    def __init__(self, *, shrinkage: float = 0.0, covariance_estimator=None, halflife: float = 60.0):
+    def __init__(self, *, shrinkage: float = 0.0, strict: bool = False,
+                 covariance_estimator=None, halflife: float = 60.0):
         super().__init__(covariance_estimator=covariance_estimator, halflife=halflife)
         self.shrinkage = shrinkage
+        self.strict = strict
+        self.singular_ = False
 
     def _cold_start(self, cov: np.ndarray) -> None:
+        self.singular_ = _guard(type(self).__name__, cov, self.shrinkage, self.strict)
         self._weights = min_variance_weights(cov, self.shrinkage)
 
     def _online_update(self, cov: np.ndarray) -> None:
-        self._weights = min_variance_weights(cov, self.shrinkage)
+        self._cold_start(cov)
 
 
 class MaximumDiversification(BaseOnlinePortfolio):
@@ -129,36 +167,44 @@ class MaximumDiversification(BaseOnlinePortfolio):
 
     Maximises the diversification ratio ``(w . sigma) / sqrt(w' Sigma w)``; the
     unconstrained optimum is ``w propto Sigma^{-1} sigma``. Parameters as in
-    :class:`MinimumVariance`.
+    :class:`MinimumVariance` (including ``strict`` / ``singular_``).
     """
 
-    def __init__(self, *, shrinkage: float = 0.0, covariance_estimator=None, halflife: float = 60.0):
+    def __init__(self, *, shrinkage: float = 0.0, strict: bool = False,
+                 covariance_estimator=None, halflife: float = 60.0):
         super().__init__(covariance_estimator=covariance_estimator, halflife=halflife)
         self.shrinkage = shrinkage
+        self.strict = strict
+        self.singular_ = False
 
     def _cold_start(self, cov: np.ndarray) -> None:
+        self.singular_ = _guard(type(self).__name__, cov, self.shrinkage, self.strict)
         self._weights = max_diversification_weights(cov, self.shrinkage)
 
     def _online_update(self, cov: np.ndarray) -> None:
-        self._weights = max_diversification_weights(cov, self.shrinkage)
+        self._cold_start(cov)
 
 
 class MaximumDecorrelation(BaseOnlinePortfolio):
     """Maximum-decorrelation portfolio ``C^{-1} 1`` (min-variance on the correlation).
 
     Minimum variance with individual volatilities stripped out. Parameters as in
-    :class:`MinimumVariance`.
+    :class:`MinimumVariance` (including ``strict`` / ``singular_``).
     """
 
-    def __init__(self, *, shrinkage: float = 0.0, covariance_estimator=None, halflife: float = 60.0):
+    def __init__(self, *, shrinkage: float = 0.0, strict: bool = False,
+                 covariance_estimator=None, halflife: float = 60.0):
         super().__init__(covariance_estimator=covariance_estimator, halflife=halflife)
         self.shrinkage = shrinkage
+        self.strict = strict
+        self.singular_ = False
 
     def _cold_start(self, cov: np.ndarray) -> None:
+        self.singular_ = _guard(type(self).__name__, cov, self.shrinkage, self.strict)
         self._weights = max_decorrelation_weights(cov, self.shrinkage)
 
     def _online_update(self, cov: np.ndarray) -> None:
-        self._weights = max_decorrelation_weights(cov, self.shrinkage)
+        self._cold_start(cov)
 
 
 class MeanVariance(BaseOnlinePortfolio):
@@ -173,15 +219,21 @@ class MeanVariance(BaseOnlinePortfolio):
     shrinkage : float in [0, 1], default 0.0
         Conditioning of the covariance before inversion (see
         :class:`MinimumVariance`).
+    strict : bool, default False
+        Raise on a rank-deficient / ill-conditioned covariance instead of
+        pseudo-solving; ``singular_`` records it either way.
     covariance_estimator, halflife : see :class:`BaseOnlinePortfolio`.
     """
 
     def __init__(
-        self, *, expected_returns=None, shrinkage: float = 0.0, covariance_estimator=None, halflife: float = 60.0
+        self, *, expected_returns=None, shrinkage: float = 0.0, strict: bool = False,
+        covariance_estimator=None, halflife: float = 60.0
     ):
         super().__init__(covariance_estimator=covariance_estimator, halflife=halflife)
         self.expected_returns = expected_returns
         self.shrinkage = shrinkage
+        self.strict = strict
+        self.singular_ = False
 
     def _mu(self, n: int) -> np.ndarray:
         if self.expected_returns is not None:
@@ -193,7 +245,8 @@ class MeanVariance(BaseOnlinePortfolio):
         return np.asarray(mu, dtype=float) if mu is not None else np.ones(n)
 
     def _cold_start(self, cov: np.ndarray) -> None:
+        self.singular_ = _guard(type(self).__name__, cov, self.shrinkage, self.strict)
         self._weights = mean_variance_weights(cov, self._mu(cov.shape[0]), self.shrinkage)
 
     def _online_update(self, cov: np.ndarray) -> None:
-        self._weights = mean_variance_weights(cov, self._mu(cov.shape[0]), self.shrinkage)
+        self._cold_start(cov)

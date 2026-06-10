@@ -122,6 +122,34 @@ def test_min_variance_handles_singular_cov():
     assert _sums_to_one(w) and np.all(np.isfinite(w))
 
 
+def test_is_singular_detects_rank_deficiency():
+    from allocation.convex import is_singular
+    rng = np.random.default_rng(0)
+    full = np.cov(_returns(n_obs=600, n=8), rowvar=False)
+    assert not is_singular(full)
+    A = rng.standard_normal((8, 3))  # rank 3 < 8
+    assert is_singular(A @ A.T)
+
+
+def test_singular_flag_and_strict_raise():
+    X = _returns(n_obs=4, n=8, seed=3)  # 4 obs, 8 names -> Sigma rank-deficient
+    # default: pseudo-solves but flags it
+    est = MinimumVariance().fit(X)
+    assert est.singular_ is True
+    assert _sums_to_one(est.weights_)
+    # strict: refuses
+    with pytest.raises(np.linalg.LinAlgError):
+        MinimumVariance(strict=True).fit(X)
+    # shrinkage makes it well-posed again (full rank), so no flag and no raise
+    est2 = MinimumVariance(shrinkage=0.2, strict=True).fit(X)
+    assert est2.singular_ is False and _sums_to_one(est2.weights_)
+
+
+def test_singular_flag_false_when_well_conditioned():
+    est = MinimumVariance().fit(_returns(n_obs=600, n=8))
+    assert est.singular_ is False
+
+
 # ------------------------------------------------------------- streaming
 
 @pytest.mark.parametrize(
