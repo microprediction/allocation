@@ -53,6 +53,11 @@
     table.impl tr:last-child td{border-bottom:none}
     .kind-novel{color:var(--accent);font-weight:600}
     .kind-std{color:var(--faint)}
+    table.rmap td{text-align:center}
+    table.rmap td.lab{text-align:right;font-weight:600;color:var(--muted);white-space:nowrap}
+    .c-mv{background:#f1f1f6}
+    .c-fmv{background:var(--accent-soft);color:var(--accent);font-weight:600}
+    .c-iv{background:#edf4ec}
 
     footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;
       color:var(--muted);border-top:1px solid var(--border)}
@@ -65,6 +70,7 @@
     <a class="brand" href="./">allocation</a>
     <nav>
       <a href="#methods">Methods</a>
+      <a href="#regimes">What works</a>
       <a href="#estimators">Estimators</a>
       <a href="https://skfolio.org">skfolio</a>
       <a href="https://github.com/microprediction/allocation">GitHub</a>
@@ -133,6 +139,45 @@
       </tbody>
     </table>
   </div>
+
+  <h2 id="regimes">What works at scale</h2>
+  <p class="muted">A portfolio rule is a covariance estimate feeding an allocator. Which one wins
+  comes down to two things: how many names you hold, and how much it costs to trade. Over
+  ~2,600 random S&amp;P subsets, the winner by net-of-cost Sharpe:</p>
+  <div class="table-wrap">
+    <table class="impl rmap">
+      <thead><tr><th class="lab">names \ cost</th><th>0&nbsp;bp</th><th>5&nbsp;bp</th><th>10&nbsp;bp</th><th>20&nbsp;bp</th></tr></thead>
+      <tbody>
+        <tr><td class="lab">25</td><td class="c-mv">MinVar</td><td class="c-mv">MinVar</td><td class="c-iv">InvVar</td><td class="c-iv">InvVar</td></tr>
+        <tr><td class="lab">50</td><td class="c-mv">MinVar</td><td class="c-mv">MinVar</td><td class="c-iv">InvVar</td><td class="c-iv">InvVar</td></tr>
+        <tr><td class="lab">100</td><td class="c-fmv">FactorMV</td><td class="c-fmv">FactorMV</td><td class="c-iv">InvVar</td><td class="c-iv">InvVar</td></tr>
+        <tr><td class="lab">200</td><td class="c-fmv">FactorMV</td><td class="c-fmv">FactorMV</td><td class="c-iv">InvVar</td><td class="c-iv">InvVar</td></tr>
+        <tr><td class="lab">350</td><td class="c-fmv">FactorMV</td><td class="c-fmv">FactorMV</td><td class="c-iv">InvVar</td><td class="c-iv">InvVar</td></tr>
+        <tr><td class="lab">500</td><td class="c-fmv">FactorMV</td><td class="c-fmv">FactorMV</td><td class="c-iv">InvVar</td><td class="c-iv">InvVar</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <h3>Few names, cheap trading</h3>
+      <p><strong>Minimum-variance.</strong> The classic answer &mdash; while the covariance is
+      still full-rank.</p>
+    </div>
+    <div class="card">
+      <h3>Many names, cheap trading</h3>
+      <p><strong>Factor minimum-variance.</strong> Dense min-variance is undefined here (more
+      names than data); the factor version (Woodbury inverse) stays well-posed and wins by a
+      margin that grows with size.</p>
+    </div>
+    <div class="card">
+      <h3>Any size, cost above ~10&nbsp;bp</h3>
+      <p><strong>Inverse-variance.</strong> When trading is expensive, the rule that barely
+      trades wins &mdash; turnover, not estimation error, is what hurts.</p>
+    </div>
+  </div>
+  <p class="muted">Two more findings from the same study: at scale <strong>turnover decides</strong>
+  the net winner, not raw skill; and the signed methods' <strong>short positions are not
+  needed</strong> &mdash; dropping them matches or beats keeping them after costs.</p>
 
   <h2>Usage</h2>
   <pre><code>pip install allocation
