@@ -1,0 +1,242 @@
+\documentclass[11pt]{article}
+
+\input{../shared/preamble.tex}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{cleveref}
+
+\title{When Does Portfolio Construction Work?\\
+       A Map across the Number of Assets and the Cost of Trading}
+\author{Peter Cotton}
+\date{\today}
+
+\newcommand{\Sig}{\Sigma}
+\newcommand{\R}{\mathbb{R}}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\tr}{tr}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A portfolio rule is a covariance estimate feeding an allocator. We ask a plain
+question: which rules actually work out of sample---after trading costs, and as
+the number of assets grows? We backtest eleven online constructions over
+thousands of random subsets of U.S.\ stocks and draw a map of the winner against
+two axes, the number of names and the cost of trading. The map has three regions.
+With few names and cheap trading, classic minimum-variance wins. With
+many names and cheap trading, a factor-model minimum-variance wins---and
+by a margin that grows with the number of names---because the ordinary version
+becomes undefined once there are more assets than data. Once trading
+costs rise above about five to ten basis points, simple inverse-variance
+weighting wins everywhere, because turnover, not estimation error, is what hurts.
+We then give the two ingredients that make the many-names corner work: a Woodbury
+inversion of a factor covariance, and a ridge-regularized version of the Schur
+coupling.
+\end{abstract}
+
+\section{The question}
+Most studies compare portfolio methods one against another and crown a winner. A
+practitioner faces a different question: which method should I run, given
+how many names I hold, how noisy my covariance estimate is, and how much it costs
+me to trade? The answer is not a single method; it is a map.
+
+Write a portfolio rule as
+\begin{equation}
+  w \;=\; \mathcal{A}\!\left(\widehat{\Sig}\right):
+\end{equation}
+an allocator $\mathcal{A}$ (minimum-variance, risk parity, a tilt, \dots)
+applied to an estimated covariance $\widehat{\Sig}$. Whether a rule is
+usable as the universe grows comes down to three things:
+\begin{itemize}
+  \item \textbf{Is it defined?} With more assets than data, $\widehat{\Sig}$ is
+    rank-deficient and $\widehat{\Sig}^{-1}$ does not exist. Any rule that needs
+    the full inverse simply has no answer.
+  \item \textbf{Is it fast enough?} An $O(n^3)$ step is unusable at thousands of
+    names.
+  \item \textbf{Does it pay after costs?} In-sample variance is not the point;
+    net-of-cost return is.
+\end{itemize}
+This paper measures all three at once and reports the result as a two-axis map.
+
+\section{The methods, in one breath}
+We use online estimators: a one-time \texttt{fit}, then a cheap
+\texttt{partial\_fit} each period over an exponentially-weighted covariance. They
+split into two families by how they use $\widehat{\Sig}$.
+
+\paragraph{Rules that never invert the covariance (work at any size).}
+Equal weight; inverse-variance ($w_i \propto 1/\widehat\sigma_i^2$,
+using only the diagonal); risk parity (equal risk contributions, an
+interior solution we solve by warm-started iteration)
+\parencite{maillard2010}; hierarchical risk parity (HRP), which allocates
+down a tree \parencite{lopezdeprado2016}; and the Thurstone tilt, which
+nudges a chosen benchmark and never touches $\Sig^{-1}$.
+
+\paragraph{Rules that invert the covariance (need it full-rank).}
+Minimum-variance ($w\propto\Sig^{-1}\mathbf 1$); maximum
+diversification \parencite{choueifaty2008}; maximum decorrelation; and
+mean--variance. Each is a clean function of $\Sig$, but undefined when
+$\Sig$ is singular---which is the normal state of affairs at scale.
+
+\paragraph{The bridge.}
+The Schur construction \parencite{cotton2024schur} has a dial $\gamma$ that slides
+from HRP ($\gamma{=}0$) to minimum-variance ($\gamma{\to}1$).
+
+\paragraph{Why turnover is built in, not bolted on.}
+Because $w=\mathcal{A}(\widehat\Sig)$, weights jolt around whenever either
+factor does. For the inverting rules the allocator is already a smooth function of
+$\Sig$, so smooth weights just need a smooth covariance. The harder cases are HRP
+and the tilt, where the allocator itself is jumpy---a re-sorted tree, a fresh
+random draw---and we smooth those directly (a stable spectral ordering for the
+tree; a fixed random seed reused across updates for the tilt).
+
+\section{How we test}
+We use daily returns for the U.S.\ large-cap cross-section
+\parencite{winningport}; we redistribute no data. One trial works like
+this:
+\begin{enumerate}
+  \item draw a random set of $k$ names and a random time window;
+  \item walk forward---form weights from the past, earn the next day, update;
+  \item record gross Sharpe, turnover, and Sharpe after a $c$-bp trading cost.
+\end{enumerate}
+We run thousands of trials with $k$ and the window drawn at random. Averaging over
+trials removes the luck of which names and period a single backtest
+happened to pick---luck large enough, we found, to flip the ranking. One more
+convenience: net Sharpe is just gross minus a cost-proportional drag, so a single
+run at $10$\,bp recovers the ranking at any cost.
+
+\section{What the map shows}
+
+\subsection{At scale, trading cost decides---not skill}
+On broad subsets (hundreds of names) the gross and net winners are different
+methods. Minimum-variance has the best gross Sharpe, and its raw skill even
+grows with the number of names. But it trades a lot, and after costs it
+falls behind. Inverse-variance and risk parity trade roughly ten times less and
+win net. The crossover is early: about $5$--$10$\,bp.
+
+\subsection{The three regions}
+\Cref{tab:regime} is the headline: the winning method, by mean net Sharpe, over
+$2{,}638$ trials.
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{r llll}
+    \toprule
+    names $k\;\backslash\;$ cost & $0$\,bp & $5$\,bp & $10$\,bp & $20$\,bp \\
+    \midrule
+    $25$  & MinVar $0.59$ & MinVar $0.53$ & InvVar $0.50$ & InvVar $0.49$ \\
+    $50$  & MinVar $0.71$ & MinVar $0.61$ & InvVar $0.56$ & InvVar $0.54$ \\
+    $100$ & \textbf{FactorMV} $0.83$ & \textbf{FactorMV} $0.65$ & InvVar $0.54$ & InvVar $0.52$ \\
+    $200$ & \textbf{FactorMV} $0.89$ & \textbf{FactorMV} $0.66$ & InvVar $0.56$ & InvVar $0.54$ \\
+    $350$ & \textbf{FactorMV} $0.95$ & \textbf{FactorMV} $0.69$ & InvVar $0.56$ & InvVar $0.54$ \\
+    $500$ & \textbf{FactorMV} $0.94$ & \textbf{FactorMV} $0.66$ & InvVar $0.53$ & InvVar $0.51$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{The regime map: winner and its mean out-of-sample net Sharpe, by number
+  of names and trading cost. Dense minimum-variance (MinVar) is undefined
+  past the point where names exceed the data, so it is absent there; the
+  factor-model version (FactorMV) takes that corner and wins by a widening margin
+  (its win rate reaches $79\%$ at $k{=}500$, zero cost).}
+  \label{tab:regime}
+\end{table}
+Read it in three pieces:
+\begin{itemize}
+  \item \textbf{Few names, cheap trading $\Rightarrow$ minimum-variance.} The
+    classic answer, while the covariance is still full-rank.
+  \item \textbf{Many names, cheap trading $\Rightarrow$ factor minimum-variance.}
+    Here ordinary minimum-variance is undefined. The factor version
+    (\cref{sec:wellposed}) not only fills the gap, it wins outright, and
+    its lead grows with the number of names.
+  \item \textbf{Costs above ${\sim}10$\,bp $\Rightarrow$ inverse-variance,}
+    everywhere. When trading is expensive, the rule that barely trades wins.
+\end{itemize}
+The novel coupling and tilt are competitive in the middle but rarely top the
+mean; their value is staying robust and well-defined at scale, not setting the
+net-Sharpe record.
+
+\subsection{How to set the Schur dial $\gamma$}
+Restricting to cases where the construction is well-defined, a middle setting of
+$\gamma$ does beat HRP on raw skill---the best is near $\gamma\approx0.25$
+($0.539$ versus HRP's $0.529$). But the edge is small and turnover climbs quickly
+with $\gamma$, so the moment trading costs anything the best $\gamma$ drops to $0$
+(plain HRP) by about $2$\,bp. The rule of thumb: pick $\gamma$ to maximise
+$\text{skill}(\gamma)-\text{cost}\times\text{turnover}(\gamma)$, which at
+realistic costs means keep it near zero.
+
+\subsection{Do the shorts pay? No.}
+The winning rules in the first two regions (minimum-variance and its factor
+version) allow short positions. Are those shorts earning their place, or are they
+just noise from inverting a noisy covariance? We test it directly: take the
+allocator's own weight path, remove the shorts (clip to zero, renormalise), and
+re-price it on the same returns. The shorts add value only if the signed book
+beats this long-only version out of sample. On every subset we tried, it does not.
+\begin{itemize}
+  \item The short book grows with the number of names---its gross size reaches
+    $180\%$ at $k{=}400$---which is the error-maximization one expects from an
+    ill-conditioned inverse.
+  \item Net of cost, dropping the shorts matches or beats keeping them at every
+    dimension; only a sliver ($+0.03$ to $+0.05$ Sharpe) ever favours the shorts,
+    and at large $k$ they cost $0.2$ or more.
+\end{itemize}
+So on this universe the negative weights are not needed: a long-only version of
+the same idea does as well or better after costs. This is consistent with the
+map, where the long-only inverse-variance rule already wins once trading is not
+free.
+
+\section{Making the many-names corner work}\label{sec:wellposed}
+Two small fixes are what let the high-dimension column exist.
+
+\paragraph{Factor minimum-variance (a stable inverse).}
+Model the covariance as a few factors plus noise, $\Sig = BB^\top + \diag(\psi)$
+with $B\in\R^{n\times k}$. Its inverse is then cheap and stable through the
+Woodbury identity,
+\begin{equation}
+  \Sig^{-1} = D^{-1} - D^{-1}B\,(I_k + B^\top D^{-1}B)^{-1}B^\top D^{-1},
+  \qquad D=\diag(\psi),
+\end{equation}
+costing $O(nk^2)$. Keep the noise term $\psi$ above a small floor and the inverse
+always exists, no matter how many names. That single change turns
+``minimum-variance is undefined'' into the winner of \cref{tab:regime}.
+
+\paragraph{Ridge Schur (a stable coupling).}
+The Schur dial needs to invert one block using another; at scale that other block
+is singular. Add a small ridge to that solve. It restores well-posedness and is
+self-correcting: when a block is poorly estimated the ridge dominates, the
+coupling fades, and Schur slides safely back toward HRP (a large ridge reproduces
+$\gamma{=}0$ exactly).
+
+\paragraph{Scaling the tilt.}
+The tilt's naive cost is $O(Mn^2)+O(n^3)$. Writing its correlation in the same
+factor form makes a sample cost only $O(Mnk)$, so the benchmark-anchored,
+no-inverse tilt runs at about $0.4$\,s per rebalance on $3{,}000$ names.
+
+\section{What it all means}
+One idea ties the map together. In high dimension you can only reliably estimate
+simple structure: a diagonal, a few factors, or a tree. The methods that
+survive are exactly the ones that use only that---inverse-variance (diagonal),
+factor minimum-variance and the factor tilt (factors), HRP (tree). A rule that
+demands the full $n\times n$ inverse is trying to pin down $O(n^2)$ numbers from
+far less data; the only way to rescue it is to shrink it into one of those
+simple forms, at which point it has effectively become one of the survivors.
+
+The second lesson is about cost. Because the cost axis decides the winner over so
+much of the map, an explicit turnover penalty and a constraint mechanism that does
+not jolt the weights are not niceties---they are what let a high-skill allocator
+keep its skill after costs. This sharpens the classic finding that naive
+diversification is hard to beat net of cost \parencite{demiguel2009}: the one
+place it is beaten is the cheap-trading, many-names corner, and the thing
+that beats it is a factor optimizer, not a dense one.
+
+\section{Conclusion}
+``Is this method good?'' is the wrong question; ``when is it good?'' is the
+useful one. Across the number of names and the cost of trading, the answer is a
+map with three regions---dense minimum-variance, factor minimum-variance, and
+inverse-variance---divided by where the covariance runs out of rank and by a
+$5$--$10$\,bp cost line. At the frontier, the methods that work are the ones that
+never need a full inverse, made well-defined by a factor model and a ridge and
+made fast by a low-rank draw.
+
+\printbibliography
+
+\end{document}
