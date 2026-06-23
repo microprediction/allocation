@@ -1,0 +1,97 @@
+\section{Turnover: an empirical illustration}
+\label{sec:experiments}
+
+We make one empirical claim, the one \Cref{thm:smooth} predicts: among the
+allocators that avoid optimization and inversion, the common-seed transport gives
+the Thurstone tilt the lowest turnover. We trade each estimator forward over the
+$28$ Dow constituents with full 2010--2024 daily history (Yahoo Finance) from a
+$252$-day warm-up, updating online each day; turnover is the mean one-way fraction
+of the book traded per day, and the net Sharpe charges $10$ basis points on it.
+
+\begin{table}[h]
+  \centering
+  \caption{Walk-forward over $28$ Dow constituents, 2010--2024. The Thurstone tilt
+  turns over far less than the inversion-free clustering allocators (HRP, Schur)
+  and than minimum variance, at comparable gross Sharpe; the low turnover is not
+  bought by standing still, and it carries through to net Sharpe.}
+  \label{tab:dow}
+  \begin{tabular}{lccc}
+    \toprule
+    Method & Turnover & Sharpe & Net Sharpe \\
+    \midrule
+    Equal weight              & $0.000$ & $0.74$ & $0.74$ \\
+    Inverse variance          & $0.005$ & $0.78$ & $0.76$ \\
+    Risk parity               & $0.004$ & $0.78$ & $0.76$ \\
+    Minimum variance          & $0.045$ & $0.77$ & $0.60$ \\
+    Hierarchical risk parity  & $0.034$ & $0.79$ & $0.67$ \\
+    Schur ($\gamma=0.5$)      & $0.071$ & $0.78$ & $0.53$ \\
+    Thurstone tilt            & $0.008$ & $0.71$ & $0.69$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The tilt turns over four to nine times less than the seriation-smoothed Schur and
+HRP, in line with \Cref{thm:smooth}: its weights move with the correlation, not
+with the re-clustering or re-seriation those methods incur each step. Gross Sharpe
+is comparable across all methods, so the difference is not an artefact of trading
+little; net of cost it is the systematic one. We claim nothing here about
+risk-adjusted return.
+
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Choice and ranking.}
+The Thurstonian (probit) model \parencite{thurstone1927} and the Luce
+\parencite{luce1959} / Bradley--Terry \parencite{bradleyterry1952} /
+Plackett--Luce \parencite{plackett1975} family are the two classical accounts of
+probabilistic choice, differing precisely on independence of irrelevant
+alternatives; our allocator is the Thurstonian side of that dichotomy applied to
+portfolio weights (\Cref{sec:choice,sec:fat}).
+
+\paragraph{The racing inverse.}
+Assigning winning probabilities to multi-entrant contests and inverting them to
+relative abilities is treated by \textcite{harville1973} and, in the lattice form
+we use, by \textcite{cotton2021}; the latter supplies the linear-time
+forward/inverse maps and tie handling that drive calibration.
+
+\paragraph{Capitalization weighting and robust portfolios.}
+The CAPM \parencite{sharpe1964}, Roll's critique \parencite{roll1977} and its
+correlation-aware refinements \parencite{prono2009}, fundamental indexing
+\parencite{hsu2006}, covariance shrinkage \parencite{ledoitwolf2004},
+tracking-error analysis \parencite{roll1992}, and the Markowitz optimization
+baseline \parencite{markowitz1952} are taken up where they bear on the argument
+(\Cref{sec:capm,sec:robust}).
+
+\paragraph{Perturbed optimizers.}
+The identity ``weights equal the gradient of an expected maximum'' is the
+random-utility social-surplus construction \parencite{mcfadden1981, williams1977}
+and, in machine learning, the perturbed-optimizer / differentiable-argmax
+framework \parencite{berthet2020}. Gumbel perturbations give the
+entropy-regularized softmax; our Gaussian, correlation-bearing perturbation gives
+the correlation-aware regularizer of \Cref{thm:objective}.
+
+\section{Discussion}
+\label{sec:discussion}
+
+The ability tilt is a mechanically simple idea with useful properties: long-only and feasible
+without optimization, never inverting a covariance, reproducing a chosen benchmark
+by construction and tilting only in response to correlation, and solving an
+interpretable correlation-aware regularized program (\Cref{thm:objective}) whose
+weights vary smoothly enough (\Cref{thm:smooth}) to bound turnover and license
+cheap online updates and gradient-based tuning.
+
+Open questions include the choice of reference correlation $C_{\mathrm{calib}}$
+(diagonal versus market) and of $\phi$; the treatment of estimation error in the
+abilities, a Thurstonian analogue of covariance shrinkage; and richer
+perturbations, such as a temperature controlling concentration or using
+$C_{\mathrm{tilt}}$ to express an explicit correlation view rather than the sample
+estimate.
+
+The tail-consistency result (\Cref{prop:tail}, \Cref{rem:anysim}) turns the
+fat-tailed-performances direction into a concrete programme: drive the race with an
+online \emph{downside} covariance (lower-partial-moment) estimator, which
+\Cref{fig:tail} shows recovers almost all of the effect, and reserve the full
+tail-dependent simulation for the residual. Estimating that downside covariance
+robustly and online, and measuring whether the tail-aware tilt pays out of sample
+on drawdown and expected shortfall rather than Sharpe, is the natural next study.
+
