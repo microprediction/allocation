@@ -2,35 +2,62 @@
 \label{sec:intro}
 
 We develop \emph{Thurstone portfolios}, a long-only allocation scheme whose
-weights are the winning probabilities of a race among assets. The race has a
-second reading as a Thurstone Class~V model of choice, which we juxtapose against
-the passive investment industry's capitalization weighting and its implicit
-appeal to Luce's choice axiom. That ubiquitous Lucian habit is only superficially
-supported by the Capital Asset Pricing Model (CAPM): what the CAPM endorses is the
-efficiency of the whole-universe market portfolio, a non-Lucian object no investor
-on a restricted universe actually holds (\Cref{sec:capm}).
+weights are the winning probabilities of a race among assets: each asset draws a
+noisy performance, and its weight is the probability that it comes out best. The
+race has a second reading as a Thurstonian model of choice, which we set against
+the passive industry's capitalization weighting and its implicit appeal to Luce's
+choice axiom. That Lucian habit is only superficially supported by the Capital
+Asset Pricing Model (CAPM): what the CAPM endorses is the efficiency of the
+whole-universe market portfolio, a non-Lucian object no investor on a restricted
+universe actually holds (\Cref{sec:capm}).
 
-We read allocation as that choice and take the winning probabilities as weights.
-Being non-Lucian, the construction is free of the duplication paradox that
-afflicts capitalization weighting (\Cref{prop:redundancy}). Its sharper advantages,
-though, are over the \emph{other} allocators that avoid both optimization and
-matrix inversion---risk parity and the Schur-complementary construction, of which
-hierarchical risk parity is a special case---on three counts.
+The reason to read allocation as a Thurstonian rather than a Lucian choice is a
+single property: \emph{redundancy consistency}. Add a second asset that behaves
+almost exactly like one already held, and a sensible rule should \emph{split} the
+position across the two near-duplicates and leave the rest of the book untouched;
+it must not let the duplicated exposure count twice. This is the portfolio form of
+the red-bus/blue-bus problem that unseated the logit model in discrete choice
+\parencite{mcfadden1974}. A Lucian rule---capitalization weighting included---fixes
+the ratio of any two weights independently of the rest of the field, so inserting a
+near-duplicate inflates the duplicated exposure and drains weight from everything
+else (\Cref{prop:restriction,prop:redundancy}). A Thurstonian race does not: two
+assets that move together compete with \emph{each other}, and in the limit a
+co-moving pair collapses to a single horse that holds their combined weight.
 
-It is robust in the same way they are: it samples from a correlation rather than
-inverting one, so it stays well posed when $\Sigma$ is singular or rank-deficient
-(\Cref{sec:robust}).
+Covariance-based allocators are not blind to this; they reach the same
+de-duplication, but lurchily. Mean--variance settles the split between near-
+duplicates by inverting $\Sigma$, and the direction in which two assets become
+identical is exactly the direction in which $\Sigma$ loses rank; so the population
+answer is right while its sample estimate, dividing through a vanishing eigenvalue,
+swings between the twins and flips sign with the data \parencite{markowitz1952}.
+The inversion-free clustering allocators (hierarchical risk parity, the
+Schur-complementary family) de-duplicate by grouping instead, but discretely: the
+split jumps as cluster membership flips. The race de-duplicates \emph{smoothly},
+with a closed characterization (\Cref{prop:redundancy}) and without ever forming
+$\Sigma^{-1}$.
 
-It turns over less than they do. Its weights are locally Lipschitz in the
-correlation, and a common-seed transport moves them only as the correlation moves,
-where Schur and HRP re-seriate or re-cluster each period; on Dow constituents its
-turnover runs several times lower at comparable risk-adjusted return
-(\Cref{thm:smooth}, \Cref{sec:experiments}).
+That is the organizing idea of the paper. Redundancy is near-singularity, so three
+properties usually treated apart turn out to be one. The race is robust to
+ill-conditioning because it samples from a correlation rather than inverting one
+(\Cref{sec:robust}); it turns over little because its weights are locally Lipschitz
+in the correlation and move only as far as the correlation moves, where the
+clustering methods re-seriate each period (\Cref{thm:smooth}, \Cref{sec:experiments});
+and it splits redundant exposure gracefully. The three are one behaviour---moving
+smoothly along the direction in which assets become collinear and a covariance
+inverse would explode.
 
-And, unlike any covariance functional, it admits \emph{tail dependence}: a race
-driven by a tail-dependent simulation responds to lower-tail dependence the
-covariance cannot encode, so a cluster that crashes together de-duplicates to a
-single position (\Cref{prop:tail}).
+One property genuinely stands apart, because it is not about conditioning at all.
+Unlike any covariance functional, the race admits \emph{tail dependence}: driven by
+a tail-dependent simulation it responds to lower-tail co-movement that no second
+moment can encode, so a cluster that crashes together---but only in the
+crash---de-duplicates in the tail (\Cref{prop:tail}). The winner of a race is an
+order statistic of the joint draw, and an order statistic reads the tail copula
+where a covariance cannot.
+
+Read the other way, a winning probability is a credit as much as a weight: a
+redundancy-aware attribution of credit among correlated contributors. The same
+machinery combines forecasts, where stable combinations are known to beat the
+least-squares-optimal one, and we report a first study (\Cref{sec:combination}).
 
 These rest on properties established below: feasibility on the simplex with
 neither optimization nor inversion, exact reproduction of the benchmark when the
@@ -102,14 +129,23 @@ sub-universe $S \subsetneq U$ the capitalization-weighted portfolio is generical
 inefficient, and the discrepancy is governed by the heterogeneity of the assets'
 covariances with the excluded set $U \setminus S$.
 \end{proposition}
-\begin{proof}[Proof sketch]
-The cap-weight ratio $\mathrm{cap}_i/\mathrm{cap}_j$ is constant in $S$, while the
-efficient ratio $[\Sigma_S^{-1}(\mu_S - r\mathbf{1})]_i / [\,\cdot\,]_j$ varies
-with $S$ through $\Sigma_S^{-1}$; a constant and a (generically) non-constant
-function of $S$ agree on at most one $S$. CAPM equilibrium fixes equality at $U$.
-The wedge on $S$ is the part of each $\mathrm{cap}_i$ reflecting asset $i$'s
-covariance with the excluded set $U \setminus S$, its beta to those assets, which
-is irrelevant to the $S$-frontier yet baked into its full-market weight.
+\begin{proof}
+Partition the market $U = S \cup X$ into the retained assets $S$ and the excluded
+$X = U\setminus S$, with market weights $m = (m_S, m_X)$. CAPM equilibrium reads
+$\mu - r\mathbf 1 = \gamma\,\Sigma_U\, m$ for some $\gamma > 0$; its $S$-block is
+$\mu_S - r\mathbf 1 = \gamma(\Sigma_{SS} m_S + \Sigma_{SX} m_X)$, so the
+restricted-universe tangency weights are
+\begin{equation*}
+  q_S \;\propto\; \Sigma_{SS}^{-1}(\mu_S - r\mathbf 1)
+  \;=\; \gamma\big(m_S + \Sigma_{SS}^{-1}\Sigma_{SX}\, m_X\big),
+\end{equation*}
+while restricted capitalization weighting uses $m_S$. The two coincide iff
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X \propto m_S$, which holds generically only at the
+full universe ($X = \varnothing$), fixing the single coincidence point. The wedge
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$---the regression of the retained assets on the
+excluded ones---is precisely the part of each cap weight that reflects covariance
+with $U\setminus S$, irrelevant to the $S$-frontier yet baked into the full-market
+weight.
 \end{proof}
 
 The CAPM's support for the Lucian habit is therefore the single-point coincidence

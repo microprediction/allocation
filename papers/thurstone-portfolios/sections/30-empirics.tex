@@ -40,17 +40,21 @@ little. We make no risk-adjusted-return claim.
 
 \paragraph{Scale.}
 The second practical property is feasibility. Beyond a few hundred names ($n > T$)
-the sample covariance is rank-deficient, so dense minimum-variance and
-maximum-diversification are \emph{undefined}; only the inversion-free methods
-remain. The factor-form race never inverts and costs $O(Mnk)$, staying well-posed
+the sample covariance is rank-deficient, so the dense \emph{inverse-covariance
+formulas} for minimum-variance and maximum-diversification ($\Sigma^{-1}\mathbf 1$,
+$\Sigma^{-1}\sigma$) are undefined; the long-only quadratic program
+$\min_{p\in\Delta} p^\top\Sigma p$ still has a solution, but a non-unique and
+unstable one. Only the inversion-free methods stay well-behaved. The factor-form
+race never inverts and costs $O(Mnk)$, staying well-posed
 and fitting in a few seconds to $n = 3000$ (the Woodbury factor optimizers of
 \Cref{sec:computation} scale likewise, and faster).
 
 \begin{table}[h]
   \centering
-  \caption{Fit time (s) on $5$-factor data with a $T=250$ window. Dense
-  minimum-variance is undefined once $n \ge T$; the factor-form race and the
-  Woodbury factor optimizer remain well-posed and scale.}
+  \caption{Fit time (s) on $5$-factor data with a $T=250$ window. The dense
+  inverse-covariance formula ($\Sigma^{-1}\mathbf 1$) is undefined once $n \ge T$;
+  the factor-form race and the Woodbury factor optimizer remain well-posed and
+  scale.}
   \label{tab:scale}
   \begin{tabular}{lcccc}
     \toprule
@@ -72,8 +76,11 @@ for smoothness in a regime where dense inversion is not an option at all.
 
 Because the tilt returns simplex weights from a dependence-adjusted regularizer
 without inverting anything (\Cref{thm:objective}), it is naturally a
-\emph{forecast combiner}: feed the $K$ base models' error series to the race as
-the competitors' performances and read off the combination weights. Forecast
+\emph{forecast combiner}: feed the $K$ base models' per-period \emph{losses}
+$L_{k,t}$ (absolute or squared error, or an sMAPE contribution) to the race as the
+competitors' performances---losses, not signed errors, so that the lowest-loss
+forecaster wins rather than the most negatively biased one---and read off the
+combination weights. Forecast
 combination is also where the central tension of this paper has a long
 empirical history---the ``forecast combination puzzle'' that the simple average
 is hard to beat with an estimated-optimal combination
