@@ -18,6 +18,7 @@ from .convex import (
     MeanVariance,
     MinimumVariance,
 )
+from .diagnostics import negative_weight_diagnostic
 from .factor import FactorMaximumDiversification, FactorMinimumVariance
 from .costs import StreamingTurnoverPenalty, TurnoverPenalty
 from .keyed import (
@@ -54,6 +55,7 @@ __all__ = [
     "MeanVariance",
     "FactorMinimumVariance",
     "FactorMaximumDiversification",
+    "negative_weight_diagnostic",
     "TurnoverPenalty",
     "BoxConstrained",
     "EwmaCovariance",
