@@ -186,7 +186,36 @@ path, as under full symmetry.
 
 The winning probability is therefore a \emph{cousin} of the Shapley value: an exact
 Aumann--Shapley value of the ability game, sharing efficiency and symmetry, but not
-the membership-game Shapley value itself.
+the membership-game Shapley value itself. Exactly which Shapley axioms it keeps is
+worth stating, since it pins down what is traded for the gradient form.
+
+\begin{proposition}[Which Shapley axioms hold]
+\label{prop:axioms}
+On the expected-maximum game \eqref{eq:game}, the winning-probability credit
+$w = \nabla G_S(\theta)$ satisfies \emph{efficiency} ($\sum_i w_i = 1$),
+\emph{symmetry} (interchangeable contributors receive equal credit), and the
+\emph{null-player} property (a contributor almost surely never the maximizer
+receives $w_i = 0$, and its presence leaves the others' credit unchanged). It does
+\emph{not} satisfy \emph{additivity}.
+\end{proposition}
+\begin{proof}
+Efficiency and $w_i\ge 0$ are immediate from $w$ being a probability vector.
+Symmetry holds because exchanging two contributors with the same marginal and the
+same dependence on the rest leaves $G_S$, hence $\nabla G_S$, invariant. For the
+null player, if $X_i \le \max_{j\neq i} X_j$ almost surely then $i$ is never the
+argmax, so $w_i = 0$; the field maximum equals the maximum without $i$, so every
+other winning probability is unchanged. Finally, the Shapley value is the
+\emph{unique} value satisfying efficiency, symmetry, null-player, and additivity
+\parencite{shapley1953}; $w$ satisfies the first three yet differs from it
+(\Cref{prop:bridge}), so it cannot satisfy additivity. Directly, $w = \nabla G_S$
+is the gradient of a strictly convex potential, a nonlinear function of the
+abilities, hence not a linear functional of the game.
+\end{proof}
+
+So the trade is precise: the winning probability keeps efficiency, symmetry, and the
+null-player property---the content that makes it a sensible credit rule---and gives
+up only \emph{additivity}, the linearity axiom, which is what lets it be a cheap,
+differentiable gradient rather than a sum over $2^n$ coalitions.
 
 \section{Computational complexity}
 \label{sec:complexity}
@@ -254,6 +283,17 @@ coalition-based method. Unlike SHAP it returns a share of wins rather than an
 additive decomposition of a single prediction---a global importance, not a local
 explanation.
 
+\paragraph{Variable selection.}
+Thresholded, the same importance is a selection rule, and the natural competitor for
+\emph{stable} selection under collinearity is stability selection
+\parencite{meinshausen2010}, which ranks features by lasso selection frequency over
+subsamples. On collinear designs the calibrated race is the more stable of the two:
+across data resamples its per-duplicate credit varies several-fold less than both a
+single lasso (which picks one copy and flips) and stability selection, while
+splitting redundant features evenly---and it does so in one pass rather than a bag of
+lasso fits. The costs are a softer signal/noise contrast, since some credit leaks to
+weak features, and a higher per-call price than a single fit.
+
 \section{Discussion}
 \label{sec:discussion}
 
@@ -262,13 +302,15 @@ rule---a cousin of the Shapley value with an exact Aumann--Shapley reading on th
 ability game, and a large computational advantage where redundancy-aware credit is
 what is wanted. Its redundancy guarantee is exact for the calibrated equal-ability
 race, which is the construction to use; raw scores give only a winner-take-all
-screen. Open questions: which further Shapley axioms (null player, additivity) the
-rule satisfies; whether it is a useful variable-selection or preconditioning
-primitive (its Jacobian $\nabla_\theta w$ is a correlation-aware metric on the
-simplex); and how to control the redistribution of de-duplicated credit to weak
-contributors. The construction and its calibration inverse are implemented in the
+screen. Its axiomatic standing is settled by \Cref{prop:axioms}: it keeps
+efficiency, symmetry, and the null-player property, trading away only additivity.
+As a variable-selection rule it is the stable, redundancy-aware option of
+\Cref{sec:apps}. Open questions: whether its choice-sensitivity Jacobian
+$\nabla_\theta w$---a correlation-aware metric on the simplex---is a useful
+preconditioner; and how to control the redistribution of de-duplicated credit to
+weak contributors, the one cost that recurs across the attribution and selection
+experiments. The construction and its calibration inverse are implemented in the
 open-source \texttt{allocation} package, built on \texttt{thurstone}.
-% TODO: axiom audit; variable-selection experiment vs stability selection.
 
 \printbibliography
 
