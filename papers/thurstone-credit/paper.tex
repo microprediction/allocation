@@ -139,45 +139,56 @@ normalization) and both satisfy two Shapley axioms: \emph{efficiency} (the share
 sum to the total) and \emph{symmetry} (interchangeable contributors receive equal
 credit). They differ on the third.
 
-\begin{proposition}[Gradient versus coalitional value]
+\begin{proposition}[Gradient value versus coalitional value]
 \label{prop:bridge}
-Let $G_S$ be differentiable. Then $w = \nabla G_S(\theta)$ is the marginal of the
-grand coalition, while the Shapley value of \eqref{eq:game} is the average marginal
-over all sub-coalitions; equivalently (Owen's multilinear extension
-\parencite{owen1972}) it is the diagonal integral $\phi_i = \int_0^1 \partial_i
-F(t\mathbf 1)\,dt$ of the extension $F$. Consequently the winning probability is the
-diagonal-path \emph{integrand}, and its own diagonal integral
-$\mathrm{AS}_i = \theta_i\!\int_0^1 W_S(t\theta)_i\,dt$ is the Aumann--Shapley value
-\parencite{aumannshapley1974} of the ability-scaling game $f(t) = G_S(t\!\cdot\!
-\theta)$, which is efficient and symmetric.
+Let $S$ have a density, so $G_S$ is differentiable, and define the ability-scaling
+game $f(x) = G_S(x\odot\theta) - G_S(0)$ for $x\in[0,1]^n$, where $x\odot\theta$
+scales ability $i$ by $x_i$.
+\begin{enumerate}
+\item[\textup{(i)}] \emph{Gradient.} $w = \nabla G_S(\theta)$ is the
+  winning-probability vector \eqref{eq:winprob}: the marginal of the grand
+  coalition's value in the abilities.
+\item[\textup{(ii)}] \emph{Aumann--Shapley.} The diagonal Aumann--Shapley value of
+  $f$ \parencite{aumannshapley1974},
+  $\mathrm{AS}_i = \int_0^1 \partial_{x_i} f(t\mathbf 1)\,dt
+   = \theta_i \int_0^1 W_S(t\theta)_i\,dt$,
+  is efficient, $\sum_i \mathrm{AS}_i = G_S(\theta) - G_S(0)$, and symmetric:
+  exchangeable contributors receive equal credit.
+\item[\textup{(iii)}] \emph{Distinct from the membership Shapley value.} The Shapley
+  value of \eqref{eq:game} is, by Owen's multilinear extension \parencite{owen1972},
+  the diagonal integral of the \emph{coalition-averaged} marginal
+  $\E[(X_i - \max_{j\in T}X_j)^+]$ over a random coalition $T$, whereas
+  $w_i = \Prob(X_i = \max_N)$ is the marginal at the grand coalition alone. The two
+  agree in the fully symmetric case and differ in general.
+\end{enumerate}
 \end{proposition}
+\begin{proof}
+(i) is the Williams--Daly--Zachary / perturbed-maximum identity
+\parencite{williams1977, berthet2020}. For (ii), the chain rule and (i) give
+$\partial_{x_i} f(x) = \theta_i\,\partial_{\theta_i} G_S(x\odot\theta) =
+\theta_i\, W_S(x\odot\theta)_i$, which on the diagonal is the stated integrand.
+Efficiency is the fundamental theorem of calculus along the diagonal,
+\[
+  \sum_i \mathrm{AS}_i
+  = \int_0^1 \nabla G_S(t\theta)\cdot\theta \,dt
+  = \int_0^1 \tfrac{d}{dt} G_S(t\theta)\,dt
+  = G_S(\theta) - G_S(0);
+\]
+symmetry holds because exchanging two equal-ability contributors leaves $G_S$, and
+hence each $W_S(t\theta)_i$, invariant. For (iii), the membership marginal is
+$v(T\cup\{i\}) - v(T) = \E[\max(\max_{j\in T} X_j,\, X_i)] - \E[\max_{j\in T} X_j]
+= \E[(X_i - \max_{j\in T} X_j)^+]$, and Owen's identity \parencite{owen1972}
+writes the Shapley value as its diagonal integral over $T$; this coalition-averaged
+exceedance is a different functional from the grand-coalition win probability
+$\Prob(X_i = \max_N)$, coinciding only when the marginal does not vary along the
+path, as under full symmetry.
+\end{proof}
 
-Numerically (\Cref{tab:shapley}): on a small game the identity $w = \nabla G_S$
-holds to Monte-Carlo error; the diagonal integral is efficient and symmetric to the
-same; and the winning probability differs from the membership-game Shapley value,
-in a direction that depends on the field. So the winning probability is a
-\emph{cousin} of the Shapley value---an exact Aumann--Shapley value of the ability
-game, sharing efficiency and symmetry---but not a drop-in for the membership-game
-value. % TODO: state the AS identity as a proper theorem with proof.
-
-\begin{table}[h]
-  \centering
-  \caption{Five-contributor game (contributors $3,4$ an exchangeable near-duplicate
-  pair). The gradient identity holds; the diagonal integral is an efficient,
-  symmetric Aumann--Shapley value; the winning probability is not the
-  membership-game Shapley value. From \texttt{experiments/shapley\_bridge.py}.}
-  \label{tab:shapley}
-  \begin{tabular}{lc}
-    \toprule
-    Check & Result \\
-    \midrule
-    $\max_i |w_i - \partial_i G_S|$ (gradient identity)      & $7\times10^{-5}$ \\
-    $|\sum_i \mathrm{AS}_i - (G_S(\theta)-G_S(0))|$ (efficiency) & $2\times10^{-6}$ \\
-    $|\mathrm{AS}_3 - \mathrm{AS}_4|$ (symmetry)             & $3\times10^{-4}$ \\
-    $\max_i |\,\text{Shapley}_i - w_i|$ (cousin, not equal)  & $1.5\times10^{-2}$ \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+The winning probability is therefore a \emph{cousin} of the Shapley value: an exact
+Aumann--Shapley value of the ability game, sharing efficiency and symmetry, but not
+the membership-game Shapley value itself. A numerical confirmation, and a
+measurement of the divergence on a worked five-contributor example, are in
+\texttt{experiments/shapley\_bridge.py}.
 
 \section{Computational complexity}
 \label{sec:complexity}
