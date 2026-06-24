@@ -186,9 +186,7 @@ path, as under full symmetry.
 
 The winning probability is therefore a \emph{cousin} of the Shapley value: an exact
 Aumann--Shapley value of the ability game, sharing efficiency and symmetry, but not
-the membership-game Shapley value itself. A numerical confirmation, and a
-measurement of the divergence on a worked five-contributor example, are in
-\texttt{experiments/shapley\_bridge.py}.
+the membership-game Shapley value itself.
 
 \section{Computational complexity}
 \label{sec:complexity}
@@ -204,24 +202,15 @@ schemes target a redundancy-aware split over $n$ contributors of the game
         $n$ shares at once and exact in $M$.
 \end{itemize}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.66\textwidth]{figures/shapley_complexity.png}
-  \caption{Wall time for redundancy-aware credit on $n$ contributors. Exact Shapley
-  doubles per contributor (red); the race is flat in $n$ at the same resolution
-  (green) and returns all shares in one pass. From
-  \texttt{experiments/shapley\_complexity.py}.}
-  \label{fig:complexity}
-\end{figure}
-
-At $n=12$ exact Shapley takes $4.8$\,s, sampled Shapley ($R{=}200$) $100$\,ms at
-$\pm0.03$ accuracy, and the race $0.2$\,ms---four to five orders of magnitude
-(\Cref{fig:complexity}). Exact Shapley doubles per added contributor ($67$\,s at
-$n=18$; extrapolating, $\sim\!9$ years at $n=40$); the race is flat at $\sim0.2$\,ms
-and handles $n=5000$ in $57$\,ms, where $2^{5000}$ coalitions is not a number one
-writes down. The race is the gradient of the same potential delivered in a single
-linear pass, and it is differentiable and online; none of these hold for the
-combinatorial value.
+The separation is exponential, and provable by counting. Exact Shapley enumerates
+$2^n$ coalitions, infeasible beyond a few dozen contributors whatever the constants;
+sampled Shapley trades that for $O(RMn)$ work at $O(1/\sqrt R)$ error; the race
+returns all $n$ shares in one $O(Mn)$ pass and is exact in $M$. The gap is not
+asymptotic hairsplitting: a race over thousands of contributors is the routine cost
+of a single $\argmaxop$ sweep, while the corresponding $2^{n}$ is not a number one
+writes down. The race is moreover the gradient of the same potential, so it is
+differentiable in the abilities and admits a smooth online update; neither holds for
+the combinatorial value.
 
 \section{Redundancy, and the calibration condition}
 \label{sec:redundancy}
@@ -242,29 +231,8 @@ slightly unequal scores, the largest wins almost every draw and the split is
 winner-take-all. The fix is calibration \eqref{eq:calib}: set the benchmark $w^0$ to
 the contributors' \emph{marginal} credit---equal across genuine duplicates---then
 tilt under their empirical dependence, so the pair is de-duplicated and split
-evenly. \Cref{tab:redundancy} shows both regimes on a feature-attribution task: a
-signal direction present as six near-duplicate columns plus twenty noise features.
-Raw $\argmaxop$ is winner-take-all (copy spread $26\times$); the calibrated race
-splits the copies evenly (spread $1.1$), at a cost that is still far below
-model-agnostic SHAP.
-
-\begin{table}[h]
-  \centering
-  \caption{Feature attribution: one signal direction as six near-duplicate columns
-  $+$ twenty noise features. ``Copy spread'' is the max/min credit across the six
-  copies ($1$ is an even split). From \texttt{experiments/feature\_attribution.py}.}
-  \label{tab:redundancy}
-  \begin{tabular}{lcccc}
-    \toprule
-    Method & Signal cluster & Noise total & Copy spread & Time \\
-    \midrule
-    permutation importance       & $0.998$ & $0.002$ & $2.3$  & $41$\,ms \\
-    mean $|\text{SHAP}|$          & $0.937$ & $0.063$ & $1.5$  & $0.3$\,ms \\
-    race (raw $\argmaxop$)        & $0.998$ & $0.002$ & $26.5$ & $0.1$\,ms \\
-    race (calibrated)             & $0.909$ & $0.091$ & $1.1$  & $0.3$\,s \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+evenly. The price is that the de-duplicated weight redistributes in part to weak
+contributors; spreading credit and concentrating it cannot both be exact.
 
 \section{Applications}
 \label{sec:apps}
@@ -278,12 +246,13 @@ that study. The performance variable must be a loss, not a signed error, or the
 ``winner'' is merely the most negatively biased forecaster.
 
 \paragraph{Feature attribution.}
-\Cref{tab:redundancy} is the attribution use-case: a fast, redundancy-aware
-importance. Raw scores give a quick screen but are winner-take-all among
-correlates; the calibrated race delivers the even split that correlated-feature
-attribution wants, at a fraction of SHAP's cost. The honest caveats are that
-de-duplicated weight partly redistributes to weak contributors, and that the credit
-is a share of wins, not an additive decomposition of a single prediction.
+For model interpretability the contributors are features and the credit is a
+redundancy-aware importance. Raw contribution scores give a quick screen but are
+winner-take-all among correlated features; the calibrated race delivers the even
+split that correlated-feature attribution wants, far more cheaply than a
+coalition-based method. Unlike SHAP it returns a share of wins rather than an
+additive decomposition of a single prediction---a global importance, not a local
+explanation.
 
 \section{Discussion}
 \label{sec:discussion}
@@ -297,7 +266,9 @@ screen. Open questions: which further Shapley axioms (null player, additivity) t
 rule satisfies; whether it is a useful variable-selection or preconditioning
 primitive (its Jacobian $\nabla_\theta w$ is a correlation-aware metric on the
 simplex); and how to control the redistribution of de-duplicated credit to weak
-contributors. % TODO: axiom audit; variable-selection experiment vs stability selection.
+contributors. The construction and its calibration inverse are implemented in the
+open-source \texttt{allocation} package, built on \texttt{thurstone}.
+% TODO: axiom audit; variable-selection experiment vs stability selection.
 
 \printbibliography
 
