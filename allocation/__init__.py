@@ -33,7 +33,7 @@ from .keyed import (
     StreamingSchur,
     StreamingThurstone,
 )
-from .moments import EwmaCovariance
+from .moments import DownsideSemicovariance, EwmaCovariance
 from .schur import HierarchicalRiskParity, SchurComplementary
 from .thurstone import ThurstonePortfolio
 
@@ -57,6 +57,7 @@ __all__ = [
     "TurnoverPenalty",
     "BoxConstrained",
     "EwmaCovariance",
+    "DownsideSemicovariance",
     # streaming / river-style (changing universe)
     "StreamingThurstone",
     "StreamingSchur",
