@@ -133,7 +133,11 @@ independent chances to win; at $\rho = 1$ it collapses to one
 
 \noindent This is the diversification content of the tilt: correlated clusters
 are progressively de-weighted as their internal correlation rises, with no
-explicit risk term.
+explicit risk term. The claim is exactly the one the structure affords---an
+equal-ability subgroup, independent of the complement, with a single equicorrelation
+parameter raised. We do not assert monotonicity for arbitrary clusters, correlation
+changes that also touch the group's dependence with the complement, or non-Gaussian
+laws; the Slepian argument is what buys the stated case.
 
 \subsection{Tail consistency}
 \label{sec:tail}
@@ -282,6 +286,18 @@ $\Omega_S = G_S^{*}$ convex on the simplex. The weights always solve a
 mean--(convex regularizer) program; the simulation enters only through the penalty
 $\Omega_S$, which carries its full dependence, tails included.
 
+The regularity of the gradient identity depends on the law, and three regimes are
+worth separating. (i) A full-rank \emph{continuous} $S$ makes $G_S$ differentiable
+with an almost-surely unique maximizer, so $w = \nabla G_S(\theta)$ and the program
+has a unique solution. (ii) A \emph{singular or tie-prone} $S$ (atoms, deterministic
+ties, duplicated coordinates) leaves $G_S$ convex but possibly non-differentiable;
+the tie-split weights are then a selected subgradient $w\in\partial G_S(\theta)$, and
+uniqueness or smoothness may fail---this is the regime of the exact duplicate in
+\Cref{prop:redundancy}. (iii) A \emph{finite Monte-Carlo} $S$ gives a
+piecewise-linear empirical $G_{S,M}$ whose weights are step functions of the
+parameters. The redundancy and tail results hold throughout, being statements about
+$\partial G_S$; differentiability and the unique optimizer belong to regime~(i).
+
 This is the sense in which the portfolio is optimal for an arbitrary simulation.
 It does not claim $\Omega_S$ is a \emph{named} risk measure: only the Gumbel
 (Shannon entropy, softmax) and Gaussian (correlation-aware $\Omega_C$) cases are
@@ -387,15 +403,19 @@ eigenmodes. Singular dependence merely means some assets are effective duplicate
 in the race, not that the optimizer takes explosive offsetting positions.
 
 \paragraph{A selection identity.}
-For the Gaussian workhorse one identity sits behind this local geometry. With
-$X = \theta + \eta$, $\eta\sim\mathcal N(0,C)$, and $I = \argmaxop_k X_k$, the
-weight is $w_i(\theta) = \Prob_\theta(I=i)$ and a selection form of Tweedie's
-formula holds,
-\[
+For the Gaussian workhorse one identity sits behind this local geometry.
+\begin{lemma}[Selection identity]
+\label{lem:tweedie}
+With $X = \theta + \eta$, $\eta\sim\mathcal N(0,C)$ for $C\succ0$, and
+$I = \argmaxop_k X_k$, the winning probability $w_i(\theta) = \Prob_\theta(I=i)$
+satisfies the selection form of Tweedie's formula
+\begin{equation*}
   \E[X \mid I=i] = \theta + C\,\nabla_\theta\log w_i(\theta), \qquad
   \frac{\partial w_i}{\partial\theta_j}
   = w_i(\theta)\,\big[C^{-1}(\E[X\mid I=i] - \theta)\big]_j.
-\]
+\end{equation*}
+(For singular $C$, read $C^{-1}$ as a pseudoinverse and the identity in the limit.)
+\end{lemma}
 The score of the winning probability is the conditional displacement of the latent
 performance given that $i$ won; the Jacobian $\nabla_\theta w(\theta)$, whose
 inverse is the local penalty curvature, is a matrix of selection sensitivities.
@@ -407,7 +427,11 @@ None of this makes the tilt a return-forecasting method. The linear term $\theta
 benchmark-implied ability, not expected return; against a true $\mu$ the change in
 expected return, $(w^T - w^0)^\top\mu$, need not be positive. The claim is
 geometric: the tilt holds a benchmark anchor, infers the scores that rationalise it
-under a reference race, and perturbs under a dependence-aware race. Its potential
+under a reference race, and perturbs under a dependence-aware race. The geometry is
+a \emph{diversification} geometry induced by the perturbation law $S$, not a
+\emph{risk} geometry in return space; unless $S$ is tied to an investor loss
+functional, $\Omega_S$ rationalises the choice rule rather than supplying a welfare
+theorem. Its potential
 benefit is a better diversification geometry---fewer duplicated bets, less tail
 co-crash concentration, smoother turnover---while staying close to a return-bearing
 benchmark. The relation to capitalization weighting is then that of \Cref{sec:capm}:
@@ -448,7 +472,7 @@ On the open cone of positive-definite correlation matrices, $w_i(C)$ is
 $C^\infty$ in $C$ (and in $a$). Moreover, on any compact subset whose smallest
 eigenvalue is bounded below by $\lambda > 0$, the map is Lipschitz:
 \begin{equation}
-  \|w(C_1) - w(C_0)\|_1 \;\le\; L_\lambda \,\|C_1 - C_0\|,
+  \|w(C_1) - w(C_0)\|_1 \;\le\; L_\lambda \,\|C_1 - C_0\|_F,
   \qquad L_\lambda = O(1/\lambda).
   \label{eq:lip}
 \end{equation}
@@ -474,6 +498,20 @@ The Lipschitz constant degrades as $C$ approaches singularity
 ($\lambda \to 0$)---the expected caveat that near-degenerate correlation makes
 ties, and hence weights, sensitive. This motivates keeping $C$ well-conditioned
 and regenerating the path ensemble when its effective sample size collapses.
+
+\paragraph{Finite paths.}
+\Cref{thm:smooth} is a statement about the population map $w(C)$. The realized
+common-seed estimator $\widehat w_M(C)$ is piecewise constant in $C$---it jumps when
+a simulated path crosses a tie boundary---so it is not literally Lipschitz. Under
+fixed seeds and a bounded tie-boundary density it is low-turnover only in
+expectation,
+\begin{equation*}
+  \E\,\|\widehat w_M(C+\Delta C) - \widehat w_M(C)\|_1
+  \;=\; O(\|\Delta C\|_F) \,+\, O(1/\sqrt M),
+\end{equation*}
+the first term the population motion of \eqref{eq:lip} and the second a Monte-Carlo
+floor from paths near a boundary. The finite-$M$ map inherits \emph{low turnover in
+expectation}, not smoothness---the honest content behind the common-seed transport.
 
 \paragraph{Rank deficiency and conditioning.}
 The square root is not the inversion it replaces, and the difference is what keeps

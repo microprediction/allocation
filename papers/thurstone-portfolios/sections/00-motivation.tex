@@ -129,14 +129,23 @@ sub-universe $S \subsetneq U$ the capitalization-weighted portfolio is generical
 inefficient, and the discrepancy is governed by the heterogeneity of the assets'
 covariances with the excluded set $U \setminus S$.
 \end{proposition}
-\begin{proof}[Proof sketch]
-The cap-weight ratio $\mathrm{cap}_i/\mathrm{cap}_j$ is constant in $S$, while the
-efficient ratio $[\Sigma_S^{-1}(\mu_S - r\mathbf{1})]_i / [\,\cdot\,]_j$ varies
-with $S$ through $\Sigma_S^{-1}$; a constant and a (generically) non-constant
-function of $S$ agree on at most one $S$. CAPM equilibrium fixes equality at $U$.
-The wedge on $S$ is the part of each $\mathrm{cap}_i$ reflecting asset $i$'s
-covariance with the excluded set $U \setminus S$, its beta to those assets, which
-is irrelevant to the $S$-frontier yet baked into its full-market weight.
+\begin{proof}
+Partition the market $U = S \cup X$ into the retained assets $S$ and the excluded
+$X = U\setminus S$, with market weights $m = (m_S, m_X)$. CAPM equilibrium reads
+$\mu - r\mathbf 1 = \gamma\,\Sigma_U\, m$ for some $\gamma > 0$; its $S$-block is
+$\mu_S - r\mathbf 1 = \gamma(\Sigma_{SS} m_S + \Sigma_{SX} m_X)$, so the
+restricted-universe tangency weights are
+\begin{equation*}
+  q_S \;\propto\; \Sigma_{SS}^{-1}(\mu_S - r\mathbf 1)
+  \;=\; \gamma\big(m_S + \Sigma_{SS}^{-1}\Sigma_{SX}\, m_X\big),
+\end{equation*}
+while restricted capitalization weighting uses $m_S$. The two coincide iff
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X \propto m_S$, which holds generically only at the
+full universe ($X = \varnothing$), fixing the single coincidence point. The wedge
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$---the regression of the retained assets on the
+excluded ones---is precisely the part of each cap weight that reflects covariance
+with $U\setminus S$, irrelevant to the $S$-frontier yet baked into the full-market
+weight.
 \end{proof}
 
 The CAPM's support for the Lucian habit is therefore the single-point coincidence

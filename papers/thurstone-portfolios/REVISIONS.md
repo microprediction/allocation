@@ -78,25 +78,33 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
   space / Moore–Penrose modulo the constant direction" (in full R^n the Jacobian is singular). *The
   §6.3 fix already added this qualifier; sweep the rest (Markowitz §, Tweedie §).*
 
-- [ ] **[S] 7. Separate the three regularity regimes for "any simulation."** Convexity of `G_S` holds
+- [x] **[S] 7. Separate the three regularity regimes — DONE** (§anysim: (i) full-rank continuous →
+  `w=∇G_S` unique; (ii) singular/tie-prone → `w∈∂G_S`, redundancy holds, smoothness may fail; (iii)
+  finite-MC → piecewise-linear). Convexity of `G_S` holds
   for any centered S, but `w=∇G_S` and uniqueness need regularity. State three regimes:
   (i) full-rank continuous law → `G_S` smooth, `w=∇G_S` unique; (ii) singular/tie-prone law → `G_S`
   convex but possibly nonsmooth, tie-splitting selects a subgradient `w∈∂G_S(θ)`, redundancy holds but
   uniqueness/smoothness may fail; (iii) finite-MC → empirical `G_{S,M}` piecewise-linear, weights are
   step functions of parameters. *Agree — reconciles the smooth-Gaussian and singular-duplicate claims.*
 
-- [ ] **[S] 8. Soften "minimum variance is undefined" at rank deficiency.** The unconstrained inverse
+- [x] **[S] 8. Soften "minimum variance is undefined" — DONE** (§scale + `tab:scale` caption now say
+  the dense inverse-covariance formula `Σ^{-1}1` is undefined; the long-only QP noted well-posed but
+  non-unique/unstable). The unconstrained inverse
   formula is undefined when Σ singular, but the long-only QP `min_{p∈Δ} p^T Σ p` is well-defined for
   PSD Σ (possibly non-unique/unstable, not undefined). Table 5 / §scale should say "dense **inverse
   formula** undefined" or "unregularized inverse implementation undefined," not "minimum variance
   undefined." *Agree — easy target for critics; fix wording in 30-empirics Table `tab:scale` + §robust.*
 
-- [ ] **[S] 9. Sharpen the CAPM restriction proposition with the block-matrix wedge.** Replace the
+- [x] **[S] 9. Sharpen the CAPM restriction proposition — DONE** (`prop:restriction` proof replaced
+  with the block-matrix wedge `q_S ∝ γ(m_S + Σ_SS^{-1}Σ_SX m_X)`, coincide iff `Σ_SS^{-1}Σ_SX m_X ∝
+  m_S`). Replace the
   proof sketch with: from `μ−r1=γΣ_U m`, restricted tangency `q_S ∝ Σ_SS^{-1}(μ_S−r1) =
   γ(m_S + Σ_SS^{-1}Σ_SX m_X)`; cap weighting uses `m_S`; they coincide iff `Σ_SS^{-1}Σ_SX m_X ∝ m_S`.
   That is the precise "excluded-covariance" wedge. *Agree — makes Prop 1 hard to object to.*
 
-- [ ] **[S] 12. Define the performance/loss variable in the forecast-combination section.** Running the
+- [x] **[S] 12. Define the performance/loss variable — DONE** (§combination now feeds per-period
+  losses `L_{k,t}` — absolute/squared error or sMAPE contribution — not signed errors, so the
+  lowest-loss forecaster wins). Running the
   race on signed errors makes the "winner" the most negatively-biased forecaster. Competitors'
   performances should be **losses** (`|e_{k,t}|`, `e²_{k,t}`, sMAPE contribution), centered/scaled,
   so lower performance = better forecast. State this explicitly in §combination. *Agree — and check
@@ -105,30 +113,40 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
 
 ## Tier 3 — strengthen / elevate
 
-- [ ] **[S] 4. Advertise Prop 5 (diversification monotonicity) narrowly.** Correct under its stated
+- [x] **[S] 4. Advertise Prop 5 narrowly — DONE** (scope sentence after `prop:monotone`: equal-ability
+  subgroup, independent of complement, single equicorrelation raised; no claim for arbitrary clusters,
+  group–complement changes, or non-Gaussian laws). Correct under its stated
   structure (equal-ability Gaussian subgroup, independent of complement, equicorrelation ρ inside;
   Slepian). Do **not** imply general monotonicity for arbitrary clusters, correlation changes,
   non-Gaussian laws, or changes touching the group–complement dependence. State exactly: `ρ↑ ⇒
   min_{i∈T}X_i` stochastically larger ⇒ `P(T wins)↓`.
 
-- [ ] **[N] 7-bis. Cleaner smoothness proof (Theorem 2).** Optionally replace Price's-theorem/boundary
+- [~] **[N] 7-bis. Matrix norm defined; TV reproof optional (PARTIAL).** `eq:lip` now uses the
+  Frobenius norm `‖C_1−C_0‖_F`. The optional TV/Pinsker reproof is left as a possible simplification.
+  Optionally replace Price's-theorem/boundary
   integrals with total variation: `‖w(C_1)−w(C_0)‖_1 ≤ 2 TV(N(0,C_1),N(0,C_0))`, then KL/Pinsker on
   `λ_min(C)≥λ` gives `‖Δw‖_1 ≤ K(n,λ)‖C_1−C_0‖_F`, `K∼dim·(1/λ)`. **Define the matrix norm in eq. (9)**
   (the table uses an ℓ1-style norm; the theorem just writes `‖C_1−C_0‖`). *Cleaner and avoids
   distributional derivatives of cone indicators.*
 
-- [ ] **[B-ish] 7-ter. Finite-MC turnover is probabilistic, not Lipschitz.** Don't say the finite-M
+- [x] **[B-ish] 7-ter. Finite-MC turnover is probabilistic, not Lipschitz — DONE** ("Finite paths"
+  remark after `thm:smooth`: `E‖Δŵ_M‖_1 = O(‖ΔC‖_F) + O(1/√M)`; "low turnover in expectation, not
+  smoothness"). Don't say the finite-M
   map "inherits" smoothness. It's piecewise-constant and jumps at boundary crossings. Correct claim
   (fixed seeds, boundary-density condition): `E‖ŵ(C+ΔC)−ŵ(C)‖_1 = O(‖ΔC‖)+O(‖ΔC‖/√M)`. It inherits
   **low turnover in expectation/high probability**, not literal smoothness. *We already corrected Thm 2
   toward the O(1/√M) term in the empirics; make sure the Theorem 2 statement itself carries this.*
 
-- [ ] **[S] 10. Markowitz analogy — one warning sentence.** Make explicit: the Thurstone geometry is a
+- [x] **[S] 10. Markowitz analogy — warning sentence DONE** ("Not a return forecast" para now states
+  the geometry is a diversification geometry induced by `S`, not a risk geometry in return space;
+  unless `S` is tied to a loss functional `Ω_S` rationalises the choice rule, not a welfare theorem).
+  Make explicit: the Thurstone geometry is a
   **diversification** geometry induced by the perturbation law, not automatically a **risk** geometry
   in return space. Unless S is tied to an investor loss functional, the objective rationalizes the
   choice rule; it is not a welfare theorem.
 
-- [ ] **[S] 11. Elevate the selection/Tweedie identity to a lemma.** `E[X|I=i]=θ+C∇_θ log w_i(θ)`, hence
+- [x] **[S] 11. Elevate the selection/Tweedie identity to a lemma — DONE** (`lem:tweedie` in §markowitz,
+  with the `C≻0` caveat and a pseudoinverse note for the singular case). `E[X|I=i]=θ+C∇_θ log w_i(θ)`, hence
   `∇_θ w_i = w_i C^{-1}(E[X|I=i]−θ)`. Gives a concrete object behind `[∇_θ w]^{-1}` (selection
   sensitivities). Label as Lemma/Proposition; caveat `C≻0` (limits/pseudoinverse in singular duplicate
   cases). *Agree — supports the choice-space-inverse story; also corroborated by the gradient identity.*

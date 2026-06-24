@@ -241,23 +241,30 @@ with the excluded set <span class="math inline">\(U \setminus
 S\)</span>.</em></p>
 </div>
 <div class="proof">
-<p><em>Proof sketch.</em> The cap-weight ratio <span
-class="math inline">\(\mathrm{cap}_i/\mathrm{cap}_j\)</span> is constant
-in <span class="math inline">\(S\)</span>, while the efficient ratio
-<span class="math inline">\([\Sigma_S^{-1}(\mu_S - r\mathbf{1})]_i /
-[\,\cdot\,]_j\)</span> varies with <span
-class="math inline">\(S\)</span> through <span
-class="math inline">\(\Sigma_S^{-1}\)</span>; a constant and a
-(generically) non-constant function of <span
-class="math inline">\(S\)</span> agree on at most one <span
-class="math inline">\(S\)</span>. CAPM equilibrium fixes equality at
-<span class="math inline">\(U\)</span>. The wedge on <span
-class="math inline">\(S\)</span> is the part of each <span
-class="math inline">\(\mathrm{cap}_i\)</span> reflecting asset <span
-class="math inline">\(i\)</span>’s covariance with the excluded set
-<span class="math inline">\(U \setminus S\)</span>, its beta to those
-assets, which is irrelevant to the <span
-class="math inline">\(S\)</span>-frontier yet baked into its full-market
+<p><em>Proof.</em> Partition the market <span class="math inline">\(U =
+S \cup X\)</span> into the retained assets <span
+class="math inline">\(S\)</span> and the excluded <span
+class="math inline">\(X = U\setminus S\)</span>, with market weights
+<span class="math inline">\(m = (m_S, m_X)\)</span>. CAPM equilibrium
+reads <span class="math inline">\(\mu - r\mathbf 1 = \gamma\,\Sigma_U\,
+m\)</span> for some <span class="math inline">\(\gamma &gt; 0\)</span>;
+its <span class="math inline">\(S\)</span>-block is <span
+class="math inline">\(\mu_S - r\mathbf 1 = \gamma(\Sigma_{SS} m_S +
+\Sigma_{SX} m_X)\)</span>, so the restricted-universe tangency weights
+are <span class="math display">\[\begin{equation*}
+  q_S \;\propto\; \Sigma_{SS}^{-1}(\mu_S - r\mathbf 1)
+  \;=\; \gamma\big(m_S + \Sigma_{SS}^{-1}\Sigma_{SX}\, m_X\big),
+\end{equation*}\]</span> while restricted capitalization weighting uses
+<span class="math inline">\(m_S\)</span>. The two coincide iff <span
+class="math inline">\(\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X \propto
+m_S\)</span>, which holds generically only at the full universe (<span
+class="math inline">\(X = \varnothing\)</span>), fixing the single
+coincidence point. The wedge <span
+class="math inline">\(\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X\)</span>—the
+regression of the retained assets on the excluded ones—is precisely the
+part of each cap weight that reflects covariance with <span
+class="math inline">\(U\setminus S\)</span>, irrelevant to the <span
+class="math inline">\(S\)</span>-frontier yet baked into the full-market
 weight. ◻</p>
 </div>
 <p>The CAPM’s support for the Lucian habit is therefore the single-point
@@ -973,7 +980,12 @@ class="math inline">\(\rho = 1\)</span>). ◻</p>
 </div>
 <p>This is the diversification content of the tilt: correlated clusters
 are progressively de-weighted as their internal correlation rises, with
-no explicit risk term.</p>
+no explicit risk term. The claim is exactly the one the structure
+affords—an equal-ability subgroup, independent of the complement, with a
+single equicorrelation parameter raised. We do not assert monotonicity
+for arbitrary clusters, correlation changes that also touch the group’s
+dependence with the complement, or non-Gaussian laws; the Slepian
+argument is what buys the stated case.</p>
 <h2 data-number="6.1" id="sec:tail"><span
 class="header-section-number">6.1</span> Tail consistency</h2>
 <p><a href="#prop:monotone" data-reference-type="ref+Label"
@@ -1181,6 +1193,27 @@ G_S^{*}\)</span> convex on the simplex. The weights always solve a
 mean–(convex regularizer) program; the simulation enters only through
 the penalty <span class="math inline">\(\Omega_S\)</span>, which carries
 its full dependence, tails included.</p>
+<p>The regularity of the gradient identity depends on the law, and three
+regimes are worth separating. (i) A full-rank <em>continuous</em> <span
+class="math inline">\(S\)</span> makes <span
+class="math inline">\(G_S\)</span> differentiable with an almost-surely
+unique maximizer, so <span class="math inline">\(w = \nabla
+G_S(\theta)\)</span> and the program has a unique solution. (ii) A
+<em>singular or tie-prone</em> <span class="math inline">\(S\)</span>
+(atoms, deterministic ties, duplicated coordinates) leaves <span
+class="math inline">\(G_S\)</span> convex but possibly
+non-differentiable; the tie-split weights are then a selected
+subgradient <span class="math inline">\(w\in\partial
+G_S(\theta)\)</span>, and uniqueness or smoothness may fail—this is the
+regime of the exact duplicate in <a href="#prop:redundancy"
+data-reference-type="ref+Label" data-reference="prop:redundancy">5</a>.
+(iii) A <em>finite Monte-Carlo</em> <span
+class="math inline">\(S\)</span> gives a piecewise-linear empirical
+<span class="math inline">\(G_{S,M}\)</span> whose weights are step
+functions of the parameters. The redundancy and tail results hold
+throughout, being statements about <span class="math inline">\(\partial
+G_S\)</span>; differentiability and the unique optimizer belong to
+regime (i).</p>
 <p>This is the sense in which the portfolio is optimal for an arbitrary
 simulation. It does not claim <span
 class="math inline">\(\Omega_S\)</span> is a <em>named</em> risk
@@ -1326,17 +1359,27 @@ optimizer takes explosive offsetting positions.</p>
 <h4 data-number="6.4.0.5" id="a-selection-identity."><span
 class="header-section-number">6.4.0.5</span> A selection identity.</h4>
 <p>For the Gaussian workhorse one identity sits behind this local
-geometry. With <span class="math inline">\(X = \theta + \eta\)</span>,
-<span class="math inline">\(\eta\sim\mathcal N(0,C)\)</span>, and <span
+geometry.</p>
+<div id="lem:tweedie" class="lemma">
+<p><strong>Lemma 1</strong> (Selection identity). <em>With <span
+class="math inline">\(X = \theta + \eta\)</span>, <span
+class="math inline">\(\eta\sim\mathcal N(0,C)\)</span> for <span
+class="math inline">\(C\succ0\)</span>, and <span
 class="math inline">\(I = \mathop{\mathrm{arg\,max}}_k X_k\)</span>, the
-weight is <span class="math inline">\(w_i(\theta) =
-\mathbb{P}_\theta(I=i)\)</span> and a selection form of Tweedie’s
-formula holds, <span class="math display">\[\mathbb{E}[X \mid I=i] =
-\theta + C\,\nabla_\theta\log w_i(\theta), \qquad
+winning probability <span class="math inline">\(w_i(\theta) =
+\mathbb{P}_\theta(I=i)\)</span> satisfies the selection form of
+Tweedie’s formula <span class="math display">\[\begin{equation*}
+  \mathbb{E}[X \mid I=i] = \theta + C\,\nabla_\theta\log w_i(\theta),
+\qquad
   \frac{\partial w_i}{\partial\theta_j}
-  = w_i(\theta)\,\big[C^{-1}(\mathbb{E}[X\mid I=i] -
-\theta)\big]_j.\]</span> The score of the winning probability is the
-conditional displacement of the latent performance given that <span
+  = w_i(\theta)\,\big[C^{-1}(\mathbb{E}[X\mid I=i] - \theta)\big]_j.
+\end{equation*}\]</span> (For singular <span
+class="math inline">\(C\)</span>, read <span
+class="math inline">\(C^{-1}\)</span> as a pseudoinverse and the
+identity in the limit.)</em></p>
+</div>
+<p>The score of the winning probability is the conditional displacement
+of the latent performance given that <span
 class="math inline">\(i\)</span> won; the Jacobian <span
 class="math inline">\(\nabla_\theta w(\theta)\)</span>, whose inverse is
 the local penalty curvature, is a matrix of selection sensitivities.
@@ -1352,21 +1395,27 @@ class="math inline">\(\mu\)</span> the change in expected return, <span
 class="math inline">\((w^T - w^0)^\top\mu\)</span>, need not be
 positive. The claim is geometric: the tilt holds a benchmark anchor,
 infers the scores that rationalise it under a reference race, and
-perturbs under a dependence-aware race. Its potential benefit is a
-better diversification geometry—fewer duplicated bets, less tail
-co-crash concentration, smoother turnover—while staying close to a
-return-bearing benchmark. The relation to capitalization weighting is
-then that of <a href="#sec:capm" data-reference-type="ref+Label"
-data-reference="sec:capm">2.1</a>: efficiency on a restricted universe
-depends on the whole <span class="math inline">\(\Sigma_U^{-1}\)</span>,
-which renormalised cap weights ignore, and the tilt recovers part of
-that field-dependence without inversion, since assets redundant in the
-dependence law compete in the race and their combined weight falls with
-their effective distinctness. In one line: Markowitz is expected return
-minus a quadratic covariance penalty; reverse Markowitz reads the
-benchmark as an implied return perturbed by a covariance change; the
-tilt is benchmark-implied ability minus a race-induced convex penalty;
-and locally that penalty is Markowitz’s, with <span
+perturbs under a dependence-aware race. The geometry is a
+<em>diversification</em> geometry induced by the perturbation law <span
+class="math inline">\(S\)</span>, not a <em>risk</em> geometry in return
+space; unless <span class="math inline">\(S\)</span> is tied to an
+investor loss functional, <span class="math inline">\(\Omega_S\)</span>
+rationalises the choice rule rather than supplying a welfare theorem.
+Its potential benefit is a better diversification geometry—fewer
+duplicated bets, less tail co-crash concentration, smoother
+turnover—while staying close to a return-bearing benchmark. The relation
+to capitalization weighting is then that of <a href="#sec:capm"
+data-reference-type="ref+Label" data-reference="sec:capm">2.1</a>:
+efficiency on a restricted universe depends on the whole <span
+class="math inline">\(\Sigma_U^{-1}\)</span>, which renormalised cap
+weights ignore, and the tilt recovers part of that field-dependence
+without inversion, since assets redundant in the dependence law compete
+in the race and their combined weight falls with their effective
+distinctness. In one line: Markowitz is expected return minus a
+quadratic covariance penalty; reverse Markowitz reads the benchmark as
+an implied return perturbed by a covariance change; the tilt is
+benchmark-implied ability minus a race-induced convex penalty; and
+locally that penalty is Markowitz’s, with <span
 class="math inline">\([\nabla_\theta w(\theta)]^{-1}\)</span> replacing
 <span class="math inline">\(\Sigma\)</span>.</p>
 <h1 data-number="7" id="sec:smoothness"><span
@@ -1401,7 +1450,7 @@ class="math inline">\(a\)</span>). Moreover, on any compact subset whose
 smallest eigenvalue is bounded below by <span
 class="math inline">\(\lambda &gt; 0\)</span>, the map is Lipschitz:
 <span class="math display">\[\begin{equation}
-  \|w(C_1) - w(C_0)\|_1 \;\le\; L_\lambda \,\|C_1 - C_0\|,
+  \|w(C_1) - w(C_0)\|_1 \;\le\; L_\lambda \,\|C_1 - C_0\|_F,
   \qquad L_\lambda = O(1/\lambda).
   \label{eq:lip}
 \end{equation}\]</span></em></p>
@@ -1444,8 +1493,28 @@ near-degenerate correlation makes ties, and hence weights, sensitive.
 This motivates keeping <span class="math inline">\(C\)</span>
 well-conditioned and regenerating the path ensemble when its effective
 sample size collapses.</p>
-<h4 data-number="7.0.0.1" id="rank-deficiency-and-conditioning."><span
-class="header-section-number">7.0.0.1</span> Rank deficiency and
+<h4 data-number="7.0.0.1" id="finite-paths."><span
+class="header-section-number">7.0.0.1</span> Finite paths.</h4>
+<p><a href="#thm:smooth" data-reference-type="ref+Label"
+data-reference="thm:smooth">2</a> is a statement about the population
+map <span class="math inline">\(w(C)\)</span>. The realized common-seed
+estimator <span class="math inline">\(\widehat w_M(C)\)</span> is
+piecewise constant in <span class="math inline">\(C\)</span>—it jumps
+when a simulated path crosses a tie boundary—so it is not literally
+Lipschitz. Under fixed seeds and a bounded tie-boundary density it is
+low-turnover only in expectation, <span
+class="math display">\[\begin{equation*}
+  \mathbb{E}\,\|\widehat w_M(C+\Delta C) - \widehat w_M(C)\|_1
+  \;=\; O(\|\Delta C\|_F) \,+\, O(1/\sqrt M),
+\end{equation*}\]</span> the first term the population motion of <a
+href="#eq:lip" data-reference-type="eqref"
+data-reference="eq:lip">[eq:lip]</a> and the second a Monte-Carlo floor
+from paths near a boundary. The finite-<span
+class="math inline">\(M\)</span> map inherits <em>low turnover in
+expectation</em>, not smoothness—the honest content behind the
+common-seed transport.</p>
+<h4 data-number="7.0.0.2" id="rank-deficiency-and-conditioning."><span
+class="header-section-number">7.0.0.2</span> Rank deficiency and
 conditioning.</h4>
 <p>The square root is not the inversion it replaces, and the difference
 is what keeps the method well posed where minimum variance is not.
@@ -1479,8 +1548,8 @@ regularizing both the root and the Lipschitz constant while never
 forming a dense <span class="math inline">\(C^{1/2}\)</span>.<a
 href="#fn3" class="footnote-ref" id="fnref3"
 role="doc-noteref"><sup>3</sup></a></p>
-<h4 data-number="7.0.0.2" id="common-seed-transport."><span
-class="header-section-number">7.0.0.2</span> Common-seed transport.</h4>
+<h4 data-number="7.0.0.3" id="common-seed-transport."><span
+class="header-section-number">7.0.0.3</span> Common-seed transport.</h4>
 <p>We realise <span class="math inline">\(w(C)\)</span> by Monte Carlo
 with a <em>fixed</em> set of standard-normal seeds <span
 class="math inline">\(Z_1, \dots, Z_M\)</span> and the symmetric square
@@ -1684,21 +1753,27 @@ claim.</p>
 class="header-section-number">8.0.0.1</span> Scale.</h4>
 <p>The second practical property is feasibility. Beyond a few hundred
 names (<span class="math inline">\(n &gt; T\)</span>) the sample
-covariance is rank-deficient, so dense minimum-variance and
-maximum-diversification are <em>undefined</em>; only the inversion-free
-methods remain. The factor-form race never inverts and costs <span
-class="math inline">\(O(Mnk)\)</span>, staying well-posed and fitting in
-a few seconds to <span class="math inline">\(n = 3000\)</span> (the
-Woodbury factor optimizers of <a href="#sec:computation"
-data-reference-type="ref+Label" data-reference="sec:computation">5</a>
-scale likewise, and faster).</p>
+covariance is rank-deficient, so the dense <em>inverse-covariance
+formulas</em> for minimum-variance and maximum-diversification (<span
+class="math inline">\(\Sigma^{-1}\mathbf 1\)</span>, <span
+class="math inline">\(\Sigma^{-1}\sigma\)</span>) are undefined; the
+long-only quadratic program <span
+class="math inline">\(\min_{p\in\Delta} p^\top\Sigma p\)</span> still
+has a solution, but a non-unique and unstable one. Only the
+inversion-free methods stay well-behaved. The factor-form race never
+inverts and costs <span class="math inline">\(O(Mnk)\)</span>, staying
+well-posed and fitting in a few seconds to <span class="math inline">\(n
+= 3000\)</span> (the Woodbury factor optimizers of <a
+href="#sec:computation" data-reference-type="ref+Label"
+data-reference="sec:computation">5</a> scale likewise, and faster).</p>
 <div id="tab:scale">
 <table>
 <caption>Fit time (s) on <span class="math inline">\(5\)</span>-factor
-data with a <span class="math inline">\(T=250\)</span> window. Dense
-minimum-variance is undefined once <span class="math inline">\(n \ge
-T\)</span>; the factor-form race and the Woodbury factor optimizer
-remain well-posed and scale.</caption>
+data with a <span class="math inline">\(T=250\)</span> window. The dense
+inverse-covariance formula (<span
+class="math inline">\(\Sigma^{-1}\mathbf 1\)</span>) is undefined once
+<span class="math inline">\(n \ge T\)</span>; the factor-form race and
+the Woodbury factor optimizer remain well-posed and scale.</caption>
 <thead>
 <tr>
 <th style="text-align: left;"><span
@@ -1760,14 +1835,18 @@ but inconclusive study</h1>
 regularizer without inverting anything (<a href="#thm:objective"
 data-reference-type="ref+Label" data-reference="thm:objective">1</a>),
 it is naturally a <em>forecast combiner</em>: feed the <span
-class="math inline">\(K\)</span> base models’ error series to the race
-as the competitors’ performances and read off the combination weights.
-Forecast combination is also where the central tension of this paper has
-a long empirical history—the “forecast combination puzzle” that the
-simple average is hard to beat with an estimated-optimal combination
-<span class="citation" data-cites="bates1969 timmermann2006">(Bates and
-Granger 1969; Timmermann 2006)</span>, precisely because the optimal
-weights overfit a noisily estimated error covariance.</p>
+class="math inline">\(K\)</span> base models’ per-period <em>losses</em>
+<span class="math inline">\(L_{k,t}\)</span> (absolute or squared error,
+or an sMAPE contribution) to the race as the competitors’
+performances—losses, not signed errors, so that the lowest-loss
+forecaster wins rather than the most negatively biased one—and read off
+the combination weights. Forecast combination is also where the central
+tension of this paper has a long empirical history—the “forecast
+combination puzzle” that the simple average is hard to beat with an
+estimated-optimal combination <span class="citation"
+data-cites="bates1969 timmermann2006">(Bates and Granger 1969;
+Timmermann 2006)</span>, precisely because the optimal weights overfit a
+noisily estimated error covariance.</p>
 <p>We ran a first study on the M4 competition data <span
 class="citation" data-cites="makridakis2020">(Makridakis et al.
 2020)</span>, fitting the standard statistical base-forecaster pool to
