@@ -469,13 +469,19 @@ $C^\infty$ on the positive-definite cone): the paths are
 $\widehat{Y}_m(C) = S(C)\,Z_m$ and
 $\widehat{w}_i(C) = M^{-1}\sum_m \mathbf{1}[\widehat{Y}_m(C) \in A_i]$. Each
 indicator is piecewise constant in $C$, flipping only when a path crosses a face
-of $A_i$, so a step $\Delta C$ flips $O(M\,\|\Delta C\|)$ paths and
-$\|\Delta\widehat{w}\|_1 = O(\|\Delta C\|)$. Crucially, when $\Delta C = 0$ the
-same seeds give the same winners and $\Delta\widehat{w} = 0$ \emph{exactly},
-whereas redrawing fresh samples each period incurs an irreducible
-$O(1/\sqrt{M})$ turnover whether or not $C$ changed. The common seeds make the
-sampling error a fixed offset that cancels in differences; this is the mechanism
-behind the incremental (online) rebalancing update.
+of $A_i$. A step $\Delta C$ thus moves the realized weights by two contributions:
+the systematic response $O(\|\Delta C\|)$ inherited from \Cref{thm:smooth}, and a
+sampling term from the $O(M\,\|\Delta C\|)$ boundary crossings, which net out
+stochastically to $O(\sqrt{\|\Delta C\|/M})$. Common seeds are what keep the second
+small: when $\Delta C = 0$ the same seeds give the same winners and
+$\Delta\widehat{w} = 0$ \emph{exactly}, whereas fresh resampling carries an
+$O(1/\sqrt{M})$ floor whether or not $C$ moved. The sampling offset cancels in
+differences, leaving only the (smaller) crossing term, which shrinks with the path
+budget $M$; this is the mechanism behind the incremental (online) update. The
+realized turnover is therefore not zero at finite $M$ but is far below fresh
+resampling and vanishes with the path budget. (Quasi-Monte-Carlo sharpens the
+\emph{level} of each $\widehat{w}(C)$, but not this difference, whose noise is set
+by the moved decision boundary rather than by integration error.)
 
 \Cref{tab:turnover} confirms both statements numerically along a $60$-step
 convex path between two random correlation matrices.

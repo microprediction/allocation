@@ -111,10 +111,11 @@ The race under a general target law has no tractable analytic form, so it is
 evaluated by sampling. The \texttt{allocation} package factors the race into a
 \emph{draw}---the sampler---and a \emph{scoring} step, the argmin win-frequency
 core, so the sampler is a plug-in: the Gaussian default recolours a fixed
-standard-normal ensemble by $C_{\mathrm{tilt}}^{1/2}$ (a randomized Sobol'
-quasi-Monte-Carlo sequence when available); a Student-$t$ and a low-rank factor
-race (for scale) ship alongside; and any user callable obeying the fixed-seed
-contract supplies an arbitrary law. Tail consistency (\Cref{prop:tail}) follows by
+standard-normal ensemble by $C_{\mathrm{tilt}}^{1/2}$ (a quasi-Monte-Carlo
+ensemble may be substituted to sharpen the win-frequency \emph{level}, though not
+the step-to-step turnover of \Cref{sec:smoothness}); a Student-$t$ and a low-rank
+factor race (for scale) ship alongside; and any user callable obeying the
+fixed-seed contract supplies an arbitrary law. Tail consistency (\Cref{prop:tail}) follows by
 driving the race with a downside-dependent sampler---or, within the Gaussian
 workhorse, a downside (lower-partial-moment) covariance. This supersedes the
 earlier \texttt{winningport} implementation of the tilt.

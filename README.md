@@ -63,7 +63,8 @@ The robust large-universe methods are the ones that never invert `Σ`: inverse-v
 HRP/Schur, and the **Thurstone tilt** — benchmark-anchored, no inversion, low turnover.
 `ThurstonePortfolio(factors=k)` runs the tilt with a `k`-factor (low-rank) correlation and
 an `O(M·n·k)` race instead of the dense `O(M·n²)+O(n³)` one, so it scales to thousands of
-names (≈0.4 s/rebalance at n=3000).
+names (a few seconds per rebalance at n=3000 with the default path budget; fewer paths
+trade accuracy for speed).
 
 To make *minimum-variance itself* well-posed at scale, `FactorMinimumVariance` /
 `FactorMaximumDiversification` invert a factor covariance `Σ = BBᵀ + diag(ψ)` via the
