@@ -78,41 +78,76 @@ method in the <code>allocation</code> package, built on
 class="header-section-number">1</span> Introduction</h1>
 <p>We develop <em>Thurstone portfolios</em>, a long-only allocation
 scheme whose weights are the winning probabilities of a race among
-assets. The race has a second reading as a Thurstone Class V model of
-choice, which we juxtapose against the passive investment industry’s
+assets: each asset draws a noisy performance, and its weight is the
+probability that it comes out best. The race has a second reading as a
+Thurstonian model of choice, which we set against the passive industry’s
 capitalization weighting and its implicit appeal to Luce’s choice axiom.
-That ubiquitous Lucian habit is only superficially supported by the
-Capital Asset Pricing Model (CAPM): what the CAPM endorses is the
-efficiency of the whole-universe market portfolio, a non-Lucian object
-no investor on a restricted universe actually holds (<a href="#sec:capm"
+That Lucian habit is only superficially supported by the Capital Asset
+Pricing Model (CAPM): what the CAPM endorses is the efficiency of the
+whole-universe market portfolio, a non-Lucian object no investor on a
+restricted universe actually holds (<a href="#sec:capm"
 data-reference-type="ref+Label" data-reference="sec:capm">2.1</a>).</p>
-<p>We read allocation as that choice and take the winning probabilities
-as weights. Being non-Lucian, the construction is free of the
-duplication paradox that afflicts capitalization weighting (<a
+<p>The reason to read allocation as a Thurstonian rather than a Lucian
+choice is a single property: <em>redundancy consistency</em>. Add a
+second asset that behaves almost exactly like one already held, and a
+sensible rule should <em>split</em> the position across the two
+near-duplicates and leave the rest of the book untouched; it must not
+let the duplicated exposure count twice. This is the portfolio form of
+the red-bus/blue-bus problem that unseated the logit model in discrete
+choice <span class="citation" data-cites="mcfadden1974">(McFadden
+1974)</span>. A Lucian rule—capitalization weighting included—fixes the
+ratio of any two weights independently of the rest of the field, so
+inserting a near-duplicate inflates the duplicated exposure and drains
+weight from everything else (Propositions&nbsp;<a href="#prop:restriction">1</a> and <a href="#prop:redundancy">4</a>).
+A Thurstonian race does not: two assets that move together compete with
+<em>each other</em>, and in the limit a co-moving pair collapses to a
+single horse that holds their combined weight.</p>
+<p>Covariance-based allocators are not blind to this; they reach the
+same de-duplication, but lurchily. Mean–variance settles the split
+between near- duplicates by inverting <span
+class="math inline">\(\Sigma\)</span>, and the direction in which two
+assets become identical is exactly the direction in which <span
+class="math inline">\(\Sigma\)</span> loses rank; so the population
+answer is right while its sample estimate, dividing through a vanishing
+eigenvalue, swings between the twins and flips sign with the data <span
+class="citation" data-cites="markowitz1952">(Markowitz 1952)</span>. The
+inversion-free clustering allocators (hierarchical risk parity, the
+Schur-complementary family) de-duplicate by grouping instead, but
+discretely: the split jumps as cluster membership flips. The race
+de-duplicates <em>smoothly</em>, with a closed characterization (<a
 href="#prop:redundancy" data-reference-type="ref+Label"
-data-reference="prop:redundancy">4</a>). Its sharper advantages, though,
-are over the <em>other</em> allocators that avoid both optimization and
-matrix inversion—risk parity and the Schur-complementary construction,
-of which hierarchical risk parity is a special case—on three counts.</p>
-<p>It is robust in the same way they are: it samples from a correlation
-rather than inverting one, so it stays well posed when <span
-class="math inline">\(\Sigma\)</span> is singular or rank-deficient (<a
-href="#sec:robust" data-reference-type="ref+Label"
-data-reference="sec:robust">2.4</a>).</p>
-<p>It turns over less than they do. Its weights are locally Lipschitz in
-the correlation, and a common-seed transport moves them only as the
-correlation moves, where Schur and HRP re-seriate or re-cluster each
-period; on Dow constituents its turnover runs several times lower at
-comparable risk-adjusted return (<a href="#thm:smooth"
+data-reference="prop:redundancy">4</a>) and without ever forming <span
+class="math inline">\(\Sigma^{-1}\)</span>.</p>
+<p>That is the organizing idea of the paper. Redundancy is
+near-singularity, so three properties usually treated apart turn out to
+be one. The race is robust to ill-conditioning because it samples from a
+correlation rather than inverting one (<a href="#sec:robust"
+data-reference-type="ref+Label" data-reference="sec:robust">2.4</a>); it
+turns over little because its weights are locally Lipschitz in the
+correlation and move only as far as the correlation moves, where the
+clustering methods re-seriate each period (<a href="#thm:smooth"
 data-reference-type="ref+Label" data-reference="thm:smooth">2</a>, <a
 href="#sec:experiments" data-reference-type="ref+Label"
-data-reference="sec:experiments">8</a>).</p>
-<p>And, unlike any covariance functional, it admits <em>tail
-dependence</em>: a race driven by a tail-dependent simulation responds
-to lower-tail dependence the covariance cannot encode, so a cluster that
-crashes together de-duplicates to a single position (<a
-href="#prop:tail" data-reference-type="ref+Label"
-data-reference="prop:tail">6</a>).</p>
+data-reference="sec:experiments">8</a>); and it splits redundant
+exposure gracefully. The three are one behaviour—moving smoothly along
+the direction in which assets become collinear and a covariance inverse
+would explode.</p>
+<p>One property genuinely stands apart, because it is not about
+conditioning at all. Unlike any covariance functional, the race admits
+<em>tail dependence</em>: driven by a tail-dependent simulation it
+responds to lower-tail co-movement that no second moment can encode, so
+a cluster that crashes together—but only in the crash—de-duplicates in
+the tail (<a href="#prop:tail" data-reference-type="ref+Label"
+data-reference="prop:tail">6</a>). The winner of a race is an order
+statistic of the joint draw, and an order statistic reads the tail
+copula where a covariance cannot.</p>
+<p>Read the other way, a winning probability is a credit as much as a
+weight: a redundancy-aware attribution of credit among correlated
+contributors. The same machinery combines forecasts, where stable
+combinations are known to beat the least-squares-optimal one, and we
+report a first study (<a href="#sec:combination"
+data-reference-type="ref+Label"
+data-reference="sec:combination">9</a>).</p>
 <p>These rest on properties established below: feasibility on the
 simplex with neither optimization nor inversion, exact reproduction of
 the benchmark when the reference and target laws agree, redundancy
@@ -1824,6 +1859,11 @@ Forecasting</em> 36 (1): 54–74.
 <div id="ref-markowitz1952" class="csl-entry" role="listitem">
 Markowitz, Harry. 1952. <span>“Portfolio Selection.”</span> <em>The
 Journal of Finance</em> 7 (1): 77–91.
+</div>
+<div id="ref-mcfadden1974" class="csl-entry" role="listitem">
+McFadden, Daniel. 1974. <span>“Conditional Logit Analysis of Qualitative
+Choice Behavior.”</span> In <em>Frontiers in Econometrics</em>, edited
+by Paul Zarembka. Academic Press.
 </div>
 <div id="ref-mcfadden1981" class="csl-entry" role="listitem">
 McFadden, Daniel. 1981. <span>“Econometric Models of Probabilistic
