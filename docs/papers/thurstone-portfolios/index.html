@@ -30,6 +30,11 @@ Probability — allocation</title>
   thead th{border-bottom:2px solid var(--border)}
   figure{margin:20px 0;text-align:center} figure img{max-width:100%;height:auto}
   figcaption{color:var(--muted);font-size:.9rem;margin-top:6px}
+  .algorithm{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 16px 14px;margin:18px 0}
+  .algo-title{margin:0 0 6px;font-size:.98rem}
+  ol.algo{margin:0;padding-left:1.5em} ol.algo li{margin:.3em 0}
+  .algo .kw{font-variant:small-caps;font-weight:600}
+  .algo .cmt{color:var(--faint);font-size:.9em;margin-left:.3em}
   .references{font-size:.92rem} .references div{margin:.4em 0}
   footer{max-width:760px;margin:24px auto 40px;padding:18px 24px 0;border-top:1px solid var(--border);
     color:var(--faint);font-size:.85rem} footer a{color:var(--muted)}
@@ -69,7 +74,8 @@ penalty the simulation fixes. We prove the supporting properties
 implied objective, and a Lipschitz turnover bound) and implement the
 method in the <code>allocation</code> package, built on
 <code>thurstone</code>.</p></div>
-<h1 id="sec:intro">Introduction</h1>
+<h1 data-number="1" id="sec:intro"><span
+class="header-section-number">1</span> Introduction</h1>
 <p>We develop <em>Thurstone portfolios</em>, a long-only allocation
 scheme whose weights are the winning probabilities of a race among
 assets. The race has a second reading as a Thurstone Class V model of
@@ -114,18 +120,20 @@ consistency and diversification monotonicity, tail consistency, an
 implied mean–(convex-regularizer) objective <span
 class="math inline">\(w = \nabla G_S(\theta)\)</span> for any
 performance law <span class="math inline">\(S\)</span>, and a Lipschitz
-bound on turnover (<a href="#sec:properties,sec:smoothness"
-data-reference-type="ref+Label"
-data-reference="sec:properties,sec:smoothness">[sec:properties,sec:smoothness]</a>).</p>
-<h1 id="sec:background">Background</h1>
-<h2 id="sec:capm">Why the CAPM does not rescue naive indexing</h2>
+bound on turnover (Sections&nbsp;<a href="#sec:properties">6</a> and <a href="#sec:smoothness">7</a>).</p>
+<h1 data-number="2" id="sec:background"><span
+class="header-section-number">2</span> Background</h1>
+<h2 data-number="2.1" id="sec:capm"><span
+class="header-section-number">2.1</span> Why the CAPM does not rescue
+naive indexing</h2>
 <p>The passive industry defends capitalization weighting by appeal to
 the CAPM. We grant the CAPM in full; the point is that its support for
 the practice is superficial. What the model endorses is the efficiency
 of the whole-universe market portfolio, a non-Lucian object the indexer
 never holds, and that endorsement does not transfer to the restricted
 universes where weighting decisions are made.</p>
-<h4 id="what-the-capm-says.">What the CAPM says.</h4>
+<h4 data-number="2.1.0.1" id="what-the-capm-says."><span
+class="header-section-number">2.1.0.1</span> What the CAPM says.</h4>
 <p>Under the CAPM every investor is a mean–variance optimizer who agrees
 on the expected returns <span class="math inline">\(\mu\)</span> and on
 the <em>same</em> covariance <span
@@ -143,7 +151,8 @@ one portfolio on which all investors, reasoning from a single <span
 class="math inline">\(\Sigma\)</span> over all assets, agree.<a
 href="#fn1" class="footnote-ref" id="fnref1"
 role="doc-noteref"><sup>1</sup></a></p>
-<h4 id="choice-and-efficiency.">Choice and efficiency.</h4>
+<h4 data-number="2.1.0.2" id="choice-and-efficiency."><span
+class="header-section-number">2.1.0.2</span> Choice and efficiency.</h4>
 <p>Given these imperfections it is natural to ask whether allocation
 admits other, less normative models. The choice literature offers a rich
 menu, and in particular two accounts long viewed as rivals in the heyday
@@ -229,7 +238,9 @@ data-cites="ledoitwolf2004">(Ledoit and Wolf 2004)</span> and
 tracking-error analysis <span class="citation"
 data-cites="roll1992">(Roll 1992)</span> document the fragility of the
 inputs.</p>
-<h2 id="sec:choice">Asset allocation as a choice</h2>
+<h2 data-number="2.2" id="sec:choice"><span
+class="header-section-number">2.2</span> Asset allocation as a
+choice</h2>
 <p>If capitalization weighting is a Lucian <em>habit</em> rather than a
 principle, what is an <em>informationally modest</em> alternative to
 naive indexing? We read allocation as a <em>choice</em>. The market, in
@@ -259,8 +270,9 @@ from the prevailing allocation only as far as the correlation warrants.
 Treating the market as at least weakly efficient is the prudent default;
 discarding that anchor to bet against the index on thin evidence is the
 error that undid many entrants in the M6 forecasting competition.</p>
-<h2 id="sec:fat">Thurstone’s eclipse, and the Fast Ability
-Transform</h2>
+<h2 data-number="2.3" id="sec:fat"><span
+class="header-section-number">2.3</span> Thurstone’s eclipse, and the
+Fast Ability Transform</h2>
 <p>The Thurstonian (probit) choice model is older and strictly more
 general than the Lucian (logit) one, and it does not assume independence
 of irrelevant alternatives. It lost the applied field on a single axis,
@@ -293,7 +305,8 @@ different reference correlations, and target simulations carrying
 whatever dependence one wishes to match, but each routes through this
 one calibration map. None is practical without a fast, exact inverse
 from weights to abilities; with it, the rest is sampling.</p>
-<h2 id="sec:robust">Avoiding matrix inversion</h2>
+<h2 data-number="2.4" id="sec:robust"><span
+class="header-section-number">2.4</span> Avoiding matrix inversion</h2>
 <p>The operational fragility of mean–variance optimization is the
 inversion of an estimated covariance <span class="citation"
 data-cites="markowitz1952">(Markowitz 1952)</span>: as <span
@@ -318,7 +331,9 @@ and risk-parity weights, can carry entirely different probabilities of a
 simultaneous crash. The quantity that separates them, tail dependence,
 is not a moment, and no re-estimation or shrinkage of <span
 class="math inline">\(\Sigma\)</span> recovers it.</p>
-<h2 id="sec:tailmotiv">The tail a covariance cannot see</h2>
+<h2 data-number="2.5" id="sec:tailmotiv"><span
+class="header-section-number">2.5</span> The tail a covariance cannot
+see</h2>
 <p>Concretely: how often do the Dow’s constituents fall
 <em>together</em>, and by how much? A multivariate Gaussian fit to their
 daily returns, pinning the means and the full covariance, reproduces a
@@ -449,7 +464,9 @@ shares collapse to one, which no covariance-based allocator can arrange
 (<a href="#prop:tail" data-reference-type="ref+Label"
 data-reference="prop:tail">6</a>). With this in view we make the
 construction precise.</p>
-<h1 id="sec:model">The Thurstonian Model of a Field</h1>
+<h1 data-number="3" id="sec:model"><span
+class="header-section-number">3</span> The Thurstonian Model of a
+Field</h1>
 <p>Consider a universe of <span class="math inline">\(n\)</span> assets.
 Each asset has a latent ability <span
 class="math inline">\(a_i\in\mathbb{R}\)</span> and a noisy
@@ -468,9 +485,7 @@ results below are closed-form; but the construction—and the
 implementation—treat <span class="math inline">\(S\)</span> as a
 black-box sampler, so a copula with genuine tail dependence, a
 fat-tailed or skewed law, or a structured generator are equally
-admissible (<a href="#prop:tail,rem:anysim"
-data-reference-type="ref+Label"
-data-reference="prop:tail,rem:anysim">[prop:tail,rem:anysim]</a>). The
+admissible (Proposition&nbsp;<a href="#prop:tail">6</a> and Section&nbsp;<a href="#rem:anysim">6.3</a>). The
 <em>state price</em> (winning probability) of asset <span
 class="math inline">\(i\)</span> is <span
 class="math display">\[\begin{equation}
@@ -492,7 +507,9 @@ data-reference="eq:inverse">[eq:inverse]</a>—the <em>Fast Ability
 Transform</em>—recovers abilities (up to an additive constant) from a
 target set of winning probabilities, and is the engine of the
 construction below.</p>
-<h1 id="sec:method">Thurstone Portfolios via the Ability Tilt</h1>
+<h1 data-number="4" id="sec:method"><span
+class="header-section-number">4</span> Thurstone Portfolios via the
+Ability Tilt</h1>
 <p>We treat portfolio <em>weights</em> as winning probabilities and
 <em>assets</em> as competitors. The construction uses two simulations—a
 <em>reference</em> law and a <em>target</em> law. We first
@@ -512,21 +529,14 @@ but any pair of centered samplers may be used, with the target law in
 particular carrying dependence (tail dependence included) that the
 reference does not.</p>
 <div class="algorithm">
-<div class="algorithmic">
-<p>target weights <span
-class="math inline">\(w^{\mathrm{target}}\in\Delta\)</span>; reference
-sampler <span class="math inline">\(S_{\mathrm{calib}}\)</span>; target
-sampler <span class="math inline">\(S_{\mathrm{tilt}}\)</span> (Gaussian
-<span class="math inline">\(\mathcal{N}(\,\cdot\,,
-C_{\mathrm{tilt}})\)</span> by default). <span class="math inline">\(a
-\gets \textsc{Calibrate}(w^{\mathrm{target}},
-S_{\mathrm{calib}})\)</span> Draw <span
-class="math inline">\(X^{(1)},\dots,X^{(M)} \sim
-S_{\mathrm{tilt}}(a)\)</span> from <em>fixed</em> seeds <span
-class="math inline">\(w_i \gets \dfrac{1}{M}\sum_{m=1}^{M}
-       \mathbf{1}\!\left[\, i = \mathop{\mathrm{arg\,min}}_k X^{(m)}_k
-\,\right]\)</span> <span class="math inline">\(w\)</span></p>
-</div>
+<p class="algo-title"><strong>Algorithm 1.</strong> Ability tilt (Thurstone portfolio)</p>
+<ol class="algo">
+<li><span class="kw">require</span> target weights \(w^{\mathrm{target}}\in\Delta\); reference sampler \(S_{\mathrm{calib}}\); target sampler \(S_{\mathrm{tilt}}\) (Gaussian \(\mathcal{N}(\cdot,\,C_{\mathrm{tilt}})\) by default).</li>
+<li>\(a \gets \operatorname{Calibrate}(w^{\mathrm{target}}, S_{\mathrm{calib}})\) <span class="cmt">&#9655; abilities s.t.\ the race under \(S_{\mathrm{calib}}\) yields \(w^{\mathrm{target}}\)</span></li>
+<li>draw \(X^{(1)},\dots,X^{(M)} \sim S_{\mathrm{tilt}}(a)\) from <em>fixed</em> seeds <span class="cmt">&#9655; Gaussian: \(X^{(m)} = a + C_{\mathrm{tilt}}^{1/2} Z^{(m)}\)</span></li>
+<li>\(w_i \gets \tfrac{1}{M}\sum_{m=1}^{M} \mathbf{1}\!\left[\, i = \arg\min_k X^{(m)}_k \,\right]\) <span class="cmt">&#9655; win frequency</span></li>
+<li><span class="kw">return</span> \(w\)</li>
+</ol>
 </div>
 <p>Two choices of the reference correlation give the practical
 flavours:</p>
@@ -562,8 +572,11 @@ estimates. Its feasibility, fixed-point, redundancy, monotonicity, and
 objective properties are established in <a href="#sec:properties"
 data-reference-type="ref+Label"
 data-reference="sec:properties">6</a>.</p>
-<h1 id="sec:computation">Computation</h1>
-<h4 id="calibration-deterministic.">Calibration (deterministic).</h4>
+<h1 data-number="5" id="sec:computation"><span
+class="header-section-number">5</span> Computation</h1>
+<h4 data-number="5.0.0.1" id="calibration-deterministic."><span
+class="header-section-number">5.0.0.1</span> Calibration
+(deterministic).</h4>
 <p>The calibration step—the inverse map from target weights to
 abilities—is computed deterministically with the lattice machinery of
 the <code>thurstone</code> package, which builds the distribution of the
@@ -579,7 +592,8 @@ market factor, so the same lattice race is evaluated at a few
 Gauss–Hermite nodes and integrated over the factor; the inverse is then
 a damped fixed-point on this forward map. This is the only place
 quadrature enters.</p>
-<h4 id="tilt-monte-carlo.">Tilt (Monte-Carlo).</h4>
+<h4 data-number="5.0.0.2" id="tilt-monte-carlo."><span
+class="header-section-number">5.0.0.2</span> Tilt (Monte-Carlo).</h4>
 <p>The race under a general target law has no tractable analytic form,
 so it is evaluated by sampling. The <code>allocation</code> package
 factors the race into a <em>draw</em>—the sampler—and a <em>scoring</em>
@@ -595,7 +609,9 @@ follows by driving the race with a downside-dependent sampler—or, within
 the Gaussian workhorse, a downside (lower-partial-moment) covariance.
 This supersedes the earlier <code>winningport</code> implementation of
 the tilt.</p>
-<h4 id="online-updates-and-scale.">Online updates and scale.</h4>
+<h4 data-number="5.0.0.3" id="online-updates-and-scale."><span
+class="header-section-number">5.0.0.3</span> Online updates and
+scale.</h4>
 <p>At rebalancing the correlation estimate moves slowly, and <a
 href="#sec:smoothness" data-reference-type="ref+Label"
 data-reference="sec:smoothness">7</a> shows the weights move smoothly
@@ -610,7 +626,8 @@ class="math inline">\(n\)</span>, scaling to thousands of assets. The
 covariance estimate itself is supplied by any external online estimator,
 so the method interoperates with standard covariance-forecasting
 tooling.</p>
-<h1 id="sec:properties">Theoretical Properties</h1>
+<h1 data-number="6" id="sec:properties"><span
+class="header-section-number">6</span> Theoretical Properties</h1>
 <p>We collect the properties that make the ability tilt a principled
 allocator rather than a heuristic. Throughout, the abilities <span
 class="math inline">\(a\)</span> are fixed and we view the weights as
@@ -806,7 +823,8 @@ class="math inline">\(\rho = 1\)</span>). ◻</p>
 <p>This is the diversification content of the tilt: correlated clusters
 are progressively de-weighted as their internal correlation rises, with
 no explicit risk term.</p>
-<h2 id="sec:tail">Tail consistency</h2>
+<h2 data-number="6.1" id="sec:tail"><span
+class="header-section-number">6.1</span> Tail consistency</h2>
 <p><a href="#prop:monotone" data-reference-type="ref+Label"
 data-reference="prop:monotone">5</a> de-weights a cluster by its
 <em>full</em> correlation. Yet two clusters with an identical covariance
@@ -893,7 +911,8 @@ statistic tracks the lowest-drift asset and swamps the tail-dependence
 signal; in the tilt the abilities carry the location and the race acts
 on the centred residual.</em></p>
 </div>
-<h2 id="sec:objective">The implied objective</h2>
+<h2 data-number="6.2" id="sec:objective"><span
+class="header-section-number">6.2</span> The implied objective</h2>
 <p>The tilt is defined procedurally, by winning probabilities. It is
 natural to ask what objective, if any, it optimizes. It optimizes a
 recognizable one.</p>
@@ -966,7 +985,9 @@ class="math inline">\(C\)</span> the regularizer <span
 class="math inline">\(\Omega_C\)</span> has no closed form, unlike the
 entropy/softmax special case, but it provably exists and is convex,
 which is all we use.)</p>
-<h2 id="rem:anysim">Any simulation, and the implied penalty</h2>
+<h2 data-number="6.3" id="rem:anysim"><span
+class="header-section-number">6.3</span> Any simulation, and the implied
+penalty</h2>
 <p>Nothing in <a href="#thm:objective" data-reference-type="ref+Label"
 data-reference="thm:objective">1</a> uses Gaussianity. For any centred
 performance law <span class="math inline">\(S\)</span> set <span
@@ -995,24 +1016,24 @@ when <span class="math inline">\(S\)</span> carries it.</p>
 class="math inline">\(\Omega_S\)</span> is a <em>generalized
 entropy</em>: it rewards spreading across <em>independent</em> options
 but counts only the dependence-effective number of bets, so it will not
-reward spreading across comonotone names (<a
-href="#prop:redundancy,prop:tail" data-reference-type="ref+Label"
-data-reference="prop:redundancy,prop:tail">[prop:redundancy,prop:tail]</a>).
+reward spreading across comonotone names (Propositions&nbsp;<a href="#prop:redundancy">4</a> and <a href="#prop:tail">6</a>).
 Locally it is quadratic, its Hessian the Jacobian of the winning
 probabilities, hence a Mahalanobis penalty in the choice geometry. It is
 not a coherent risk measure (neither variance nor CVaR), but the
 canonical Fenchel–Young regularizer of the perturbed argmax <span
 class="citation" data-cites="berthet2020">(Berthet et al.
 2020)</span>.</p>
-<h2 id="sec:markowitz">Markowitz, reverse optimization, and the
-Thurstone inverse</h2>
+<h2 data-number="6.4" id="sec:markowitz"><span
+class="header-section-number">6.4</span> Markowitz, reverse
+optimization, and the Thurstone inverse</h2>
 <p>The implied objective of <a href="#thm:objective"
 data-reference-type="ref+Label" data-reference="thm:objective">1</a> is
 best read as a reverse-optimization analogue of Markowitz. The
 comparison separates three roles that are easily conflated: the
 benchmark, the return or ability vector that rationalises it, and the
 risk or diversification geometry used to perturb it.</p>
-<h4 id="the-markowitz-inverse.">The Markowitz inverse.</h4>
+<h4 data-number="6.4.0.1" id="the-markowitz-inverse."><span
+class="header-section-number">6.4.0.1</span> The Markowitz inverse.</h4>
 <p>The long-only mean–variance problem <span class="math inline">\(w^M =
 \mathop{\mathrm{arg\,max}}_{p\in\Delta}\{\mu^\top p -
 \tfrac{\gamma}{2}p^\top\Sigma p\}\)</span> has first-order condition
@@ -1026,7 +1047,8 @@ class="math inline">\(\Sigma\)</span> becomes a large eigenvalue of
 <span class="math inline">\(\Sigma^{-1}\)</span>, so a small return
 component in a near-null direction can produce a large, unstable
 position.</p>
-<h4 id="reverse-optimization.">Reverse optimization.</h4>
+<h4 data-number="6.4.0.2" id="reverse-optimization."><span
+class="header-section-number">6.4.0.2</span> Reverse optimization.</h4>
 <p>Reverse (Black–Litterman / Grinold) optimization turns this around.
 If a benchmark <span class="math inline">\(w^0\)</span> is optimal under
 a reference covariance <span class="math inline">\(\Sigma_0\)</span>, it
@@ -1047,7 +1069,9 @@ At <span class="math inline">\(\phi=0\)</span> the solution is <span
 class="math inline">\(w^0\)</span>, and for small <span
 class="math inline">\(\phi\)</span> it departs only as the added penalty
 forces.</p>
-<h4 id="the-thurstone-analogue.">The Thurstone analogue.</h4>
+<h4 data-number="6.4.0.3" id="the-thurstone-analogue."><span
+class="header-section-number">6.4.0.3</span> The Thurstone
+analogue.</h4>
 <p>The tilt has the same structure, with the quadratic Markowitz
 geometry replaced by the Fenchel geometry of the race. Calibration finds
 <span class="math inline">\(\theta\)</span> with <span
@@ -1085,7 +1109,8 @@ class="math inline">\(\tfrac{\gamma}{2}p^\top\Delta\Sigma\,p
 displacement from the benchmark by a quadratic form in <span
 class="math inline">\(\Sigma_0\)</span>; the tilt measures it by the
 Bregman divergence of the reference race.</p>
-<h4 id="the-displaced-inverse.">The displaced inverse.</h4>
+<h4 data-number="6.4.0.4" id="the-displaced-inverse."><span
+class="header-section-number">6.4.0.4</span> The displaced inverse.</h4>
 <p>Locally the two are closer still. For <span class="math inline">\(p =
 w^0 + \delta\)</span>, <span
 class="math inline">\(D_{\Omega_{S_0}}(w^0+\delta, w^0) =
@@ -1111,7 +1136,8 @@ leaves an inverse, now a bounded, simplex-supported curvature rather
 than a lever on small covariance eigenmodes. Singular dependence merely
 means some assets are effective duplicates in the race, not that the
 optimizer takes explosive offsetting positions.</p>
-<h4 id="a-selection-identity.">A selection identity.</h4>
+<h4 data-number="6.4.0.5" id="a-selection-identity."><span
+class="header-section-number">6.4.0.5</span> A selection identity.</h4>
 <p>For the Gaussian workhorse one identity sits behind this local
 geometry. With <span class="math inline">\(X = \theta + \eta\)</span>,
 <span class="math inline">\(\eta\sim\mathcal N(0,C)\)</span>, and <span
@@ -1130,7 +1156,8 @@ the local penalty curvature, is a matrix of selection sensitivities.
 Tweedie’s identity, the Markowitz analogy, and the Fenchel dual all
 point to the same object: the local geometry of the winning-probability
 map.</p>
-<h4 id="not-a-return-forecast.">Not a return forecast.</h4>
+<h4 data-number="6.4.0.6" id="not-a-return-forecast."><span
+class="header-section-number">6.4.0.6</span> Not a return forecast.</h4>
 <p>None of this makes the tilt a return-forecasting method. The linear
 term <span class="math inline">\(\theta\)</span> is benchmark-implied
 ability, not expected return; against a true <span
@@ -1155,7 +1182,8 @@ tilt is benchmark-implied ability minus a race-induced convex penalty;
 and locally that penalty is Markowitz’s, with <span
 class="math inline">\([\nabla_\theta w(\theta)]^{-1}\)</span> replacing
 <span class="math inline">\(\Sigma\)</span>.</p>
-<h1 id="sec:smoothness">Smoothness and Turnover</h1>
+<h1 data-number="7" id="sec:smoothness"><span
+class="header-section-number">7</span> Smoothness and Turnover</h1>
 <p>In the online (rebalancing) setting the correlation estimate moves
 slowly from one period to the next, and we want the portfolio to move
 slowly with it: turnover should track <em>genuine</em> change in the
@@ -1229,7 +1257,8 @@ near-degenerate correlation makes ties, and hence weights, sensitive.
 This motivates keeping <span class="math inline">\(C\)</span>
 well-conditioned and regenerating the path ensemble when its effective
 sample size collapses.</p>
-<h4 id="rank-deficiency-and-conditioning.">Rank deficiency and
+<h4 data-number="7.0.0.1" id="rank-deficiency-and-conditioning."><span
+class="header-section-number">7.0.0.1</span> Rank deficiency and
 conditioning.</h4>
 <p>The square root is not the inversion it replaces, and the difference
 is what keeps the method well posed where minimum variance is not.
@@ -1263,7 +1292,8 @@ regularizing both the root and the Lipschitz constant while never
 forming a dense <span class="math inline">\(C^{1/2}\)</span>.<a
 href="#fn3" class="footnote-ref" id="fnref3"
 role="doc-noteref"><sup>3</sup></a></p>
-<h4 id="common-seed-transport.">Common-seed transport.</h4>
+<h4 data-number="7.0.0.2" id="common-seed-transport."><span
+class="header-section-number">7.0.0.2</span> Common-seed transport.</h4>
 <p>We realise <span class="math inline">\(w(C)\)</span> by Monte Carlo
 with a <em>fixed</em> set of standard-normal seeds <span
 class="math inline">\(Z_1, \dots, Z_M\)</span> and the symmetric square
@@ -1345,7 +1375,9 @@ class="math inline">\(0.0157\)</span></td>
 </tbody>
 </table>
 </div>
-<h1 id="sec:experiments">Turnover: an empirical illustration</h1>
+<h1 data-number="8" id="sec:experiments"><span
+class="header-section-number">8</span> Turnover: an empirical
+illustration</h1>
 <p>We make one empirical claim, the one <a href="#thm:smooth"
 data-reference-type="ref+Label" data-reference="thm:smooth">2</a>
 predicts: among the allocators that avoid optimization and inversion,
@@ -1448,8 +1480,10 @@ re-seriation those methods incur each step. Gross Sharpe is comparable
 across all methods, so the difference is not an artefact of trading
 little; net of cost it is the systematic one. We claim nothing here
 about risk-adjusted return.</p>
-<h1 id="sec:related">Related Work</h1>
-<h4 id="choice-and-ranking.">Choice and ranking.</h4>
+<h1 data-number="9" id="sec:related"><span
+class="header-section-number">9</span> Related Work</h1>
+<h4 data-number="9.0.0.1" id="choice-and-ranking."><span
+class="header-section-number">9.0.0.1</span> Choice and ranking.</h4>
 <p>The Thurstonian (probit) model <span class="citation"
 data-cites="thurstone1927">(Thurstone 1927)</span> and the Luce <span
 class="citation" data-cites="luce1959">(Luce 1959)</span> /
@@ -1459,10 +1493,9 @@ Plackett–Luce <span class="citation" data-cites="plackett1975">(Plackett
 1975)</span> family are the two classical accounts of probabilistic
 choice, differing precisely on independence of irrelevant alternatives;
 our allocator is the Thurstonian side of that dichotomy applied to
-portfolio weights (<a href="#sec:choice,sec:fat"
-data-reference-type="ref+Label"
-data-reference="sec:choice,sec:fat">[sec:choice,sec:fat]</a>).</p>
-<h4 id="the-racing-inverse.">The racing inverse.</h4>
+portfolio weights (Sections&nbsp;<a href="#sec:choice">2.2</a> and <a href="#sec:fat">2.3</a>).</p>
+<h4 data-number="9.0.0.2" id="the-racing-inverse."><span
+class="header-section-number">9.0.0.2</span> The racing inverse.</h4>
 <p>Assigning winning probabilities to multi-entrant contests and
 inverting them to relative abilities is treated by <span
 class="citation" data-cites="harville1973">Harville (1973)</span> and,
@@ -1470,8 +1503,10 @@ in the lattice form we use, by <span class="citation"
 data-cites="cotton2021">Cotton (2021)</span>; the latter supplies the
 linear-time forward/inverse maps and tie handling that drive
 calibration.</p>
-<h4 id="capitalization-weighting-and-robust-portfolios.">Capitalization
-weighting and robust portfolios.</h4>
+<h4 data-number="9.0.0.3"
+id="capitalization-weighting-and-robust-portfolios."><span
+class="header-section-number">9.0.0.3</span> Capitalization weighting
+and robust portfolios.</h4>
 <p>The CAPM <span class="citation" data-cites="sharpe1964">(Sharpe
 1964)</span>, Roll’s critique <span class="citation"
 data-cites="roll1977">(Roll 1977)</span> and its correlation-aware
@@ -1482,10 +1517,9 @@ class="citation" data-cites="ledoitwolf2004">(Ledoit and Wolf
 2004)</span>, tracking-error analysis <span class="citation"
 data-cites="roll1992">(Roll 1992)</span>, and the Markowitz optimization
 baseline <span class="citation" data-cites="markowitz1952">(Markowitz
-1952)</span> are taken up where they bear on the argument (<a
-href="#sec:capm,sec:robust" data-reference-type="ref+Label"
-data-reference="sec:capm,sec:robust">[sec:capm,sec:robust]</a>).</p>
-<h4 id="perturbed-optimizers.">Perturbed optimizers.</h4>
+1952)</span> are taken up where they bear on the argument (Sections&nbsp;<a href="#sec:capm">2.1</a> and <a href="#sec:robust">2.4</a>).</p>
+<h4 data-number="9.0.0.4" id="perturbed-optimizers."><span
+class="header-section-number">9.0.0.4</span> Perturbed optimizers.</h4>
 <p>The identity “weights equal the gradient of an expected maximum” is
 the random-utility social-surplus construction <span class="citation"
 data-cites="mcfadden1981 williams1977">(McFadden 1981; Williams
@@ -1496,7 +1530,8 @@ perturbations give the entropy-regularized softmax; our Gaussian,
 correlation-bearing perturbation gives the correlation-aware regularizer
 of <a href="#thm:objective" data-reference-type="ref+Label"
 data-reference="thm:objective">1</a>.</p>
-<h1 id="sec:discussion">Discussion</h1>
+<h1 data-number="10" id="sec:discussion"><span
+class="header-section-number">10</span> Discussion</h1>
 <p>The ability tilt is a mechanically simple idea with useful
 properties: long-only and feasible without optimization, never inverting
 a covariance, reproducing a chosen benchmark by construction and tilting
