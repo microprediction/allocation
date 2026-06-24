@@ -149,25 +149,39 @@ correlation. We call this \emph{tail consistency}.
 
 \begin{proposition}[Tail consistency]
 \label{prop:tail}
-Let $G$ be a subgroup of equal-ability assets whose performances are comonotone
-in the relevant (winning) tail---in the limit, $X_i = Z_G$ for all $i\in G$. Then
-the subgroup's combined weight equals the winning probability of a single
-competitor with performance $Z_G$, independent of the cardinality $|G|$, and each
-member receives $|G|^{-1}$ of it.
+Let $G$ be a subgroup of equal-ability assets, write
+$M_G = \min_{i\in G} X_i$ and $Y = \min_{j\notin G} X_j$ with $Y$ independent of
+$G$, so the subgroup's combined weight is $w_G = \Prob(M_G < Y)$. Then:
+\begin{enumerate}
+\item[\textup{(i)}] If a change in the subgroup's joint law raises $M_G$ in
+  first-order stochastic order while fixing $Y$, then $w_G$ does not increase.
+\item[\textup{(ii)}] In the comonotone limit $X_i = Z_G$ for all $i\in G$,
+  $M_G = Z_G$, so $w_G$ equals the winning probability of a single competitor with
+  performance $Z_G$, independent of $|G|$, and exchangeability splits it equally,
+  each member receiving $|G|^{-1}$.
+\end{enumerate}
 \end{proposition}
 \begin{proof}
-Comonotonicity gives $\min_{i\in G} X_i = Z_G$, so
-$\{\text{winner}\in G\} = \{Z_G = \min_k X_k\}$, the winning event of a single
-competitor with performance $Z_G$; this probability does not depend on $|G|$.
-Exchangeability within $G$ splits it equally.
+For (i), $w_G = \Prob(M_G < Y) = \E[\overline F_Y(M_G)]$ with $\overline F_Y$ the
+survival function of $Y$, which is non-increasing; a first-order stochastic
+increase in $M_G$ therefore cannot increase $\E[\overline F_Y(M_G)]$. For (ii),
+comonotonicity gives $M_G = Z_G$, so $\{\text{winner}\in G\} = \{Z_G = \min_k X_k\}$,
+the winning event of a single competitor; this does not depend on $|G|$, and
+exchangeability within $G$ splits it equally.
 \end{proof}
 
-\Cref{prop:tail} is the tail analogue of \Cref{prop:monotone}: as the cluster's
-\emph{lower-tail} dependence rises while the marginals---and even the full
-correlation---are held fixed, its combined weight falls from the head-count value
-toward the single-competitor value, so its \emph{tail-effective} cardinality runs
-from $|G|$ to $1$. For one independent asset racing a symmetric cluster that
-limit is $\tfrac12$ regardless of $|G|$.
+\Cref{prop:tail} is the tail analogue of \Cref{prop:monotone}, and it makes precise
+what the race responds to: not the pairwise tail-dependence coefficient $\lambda_L$,
+which does not order copulas, but the whole \emph{distribution of the group minimum}
+$M_G$, whose lower tail is fixed by the joint lower-tail copula. As that lower-tail
+co-movement deepens---$M_G$ rising stochastically while the marginals, and even the
+full correlation, are held fixed---the subgroup's combined weight falls from the
+head-count value toward the single-competitor value, so its \emph{tail-effective}
+cardinality runs from $|G|$ to $1$. For one independent asset racing a symmetric
+cluster that limit is $\tfrac12$ regardless of $|G|$. Whether a given parametric
+family (Clayton, say, at fixed margins) deepens $M_G$ monotonically is a
+family-specific question; \Cref{fig:tail} shows that it does for the family used
+there.
 
 \begin{figure}[h]
   \centering
@@ -211,13 +225,14 @@ centred residual.
 The tilt is defined procedurally, by winning probabilities. It is natural to ask
 what objective, if any, it optimizes. It optimizes a recognizable one.
 
-Write $\theta = -a$ (so larger $\theta$ denotes a stronger competitor, since the
-minimum wins) and define the \emph{expected-best} potential
+Specializing the population map \eqref{eq:popmap} to the Gaussian race, the
+\emph{expected-best} potential is
 \begin{equation}
   G_C(\theta) = \E\Big[\max_i\,(\theta_i + \eta_i)\Big], \qquad
-  \eta \sim \mathcal{N}(0, C).
+  \eta \sim \mathcal{N}(0, C),
   \label{eq:surplus}
 \end{equation}
+with $\theta = -a$ (so a larger $\theta$ denotes a stronger competitor).
 
 \begin{theorem}[Implied objective]
 \label{thm:objective}
@@ -354,7 +369,10 @@ Locally the two are closer still. For $p = w^0 + \delta$,
 $D_{\Omega_{S_0}}(w^0+\delta, w^0) = \tfrac12\delta^\top H_0\delta + O(\|\delta\|^3)$
 with $H_0 = \nabla^2\Omega_{S_0}(w^0)$. Convex duality gives
 $H_0 = [\nabla^2 G_{S_0}(\theta)]^{-1} = [\nabla_\theta w(\theta)]^{-1}$, the inverse
-of the winning-probability Jacobian, so the local penalty is
+of the winning-probability Jacobian---here and below taken on the simplex tangent
+space $\{v:\mathbf 1^\top v=0\}$, where it is positive definite, the constant
+direction $\mathbf 1$ being its kernel (a Moore--Penrose inverse modulo
+$\mathbf 1$). The local penalty is
 $\tfrac12\delta^\top[\nabla_\theta w(\theta)]^{-1}\delta$: a Markowitz-like
 quadratic with the \emph{inverse choice-sensitivity} in place of $\Sigma$. The
 Markowitz inverse is not replicated but \emph{displaced}, from return space to

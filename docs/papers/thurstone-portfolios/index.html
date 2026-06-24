@@ -103,7 +103,7 @@ choice <span class="citation" data-cites="mcfadden1974">(McFadden
 1974)</span>. A Lucian rule—capitalization weighting included—fixes the
 ratio of any two weights independently of the rest of the field, so
 inserting a near-duplicate inflates the duplicated exposure and drains
-weight from everything else (Propositions&nbsp;<a href="#prop:restriction">1</a> and <a href="#prop:redundancy">4</a>).
+weight from everything else (Propositions&nbsp;<a href="#prop:restriction">1</a> and <a href="#prop:redundancy">5</a>).
 A Thurstonian race does not: two assets that move together compete with
 <em>each other</em>, and in the limit a co-moving pair collapses to a
 single horse that holds their combined weight.</p>
@@ -121,7 +121,7 @@ Schur-complementary family) de-duplicate by grouping instead, but
 discretely: the split jumps as cluster membership flips. The race
 de-duplicates <em>smoothly</em>, with a closed characterization (<a
 href="#prop:redundancy" data-reference-type="ref+Label"
-data-reference="prop:redundancy">4</a>) and without ever forming <span
+data-reference="prop:redundancy">5</a>) and without ever forming <span
 class="math inline">\(\Sigma^{-1}\)</span>.</p>
 <p>That is the organizing idea of the paper. Redundancy is
 near-singularity, so three properties usually treated apart turn out to
@@ -143,7 +143,7 @@ conditioning at all. Unlike any covariance functional, the race admits
 responds to lower-tail co-movement that no second moment can encode, so
 a cluster that crashes together—but only in the crash—de-duplicates in
 the tail (<a href="#prop:tail" data-reference-type="ref+Label"
-data-reference="prop:tail">6</a>). The winner of a race is an order
+data-reference="prop:tail">7</a>). The winner of a race is an order
 statistic of the joint draw, and an order statistic reads the tail
 copula where a covariance cannot.</p>
 <p>Read the other way, a winning probability is a credit as much as a
@@ -502,7 +502,7 @@ class="math inline">\(\lambda_L\)</span>: assets that crash together are
 recognised as the near-duplicates they become in the tail, and their
 shares collapse to one, which no covariance-based allocator can arrange
 (<a href="#prop:tail" data-reference-type="ref+Label"
-data-reference="prop:tail">6</a>). With this in view we make the
+data-reference="prop:tail">7</a>). With this in view we make the
 construction precise.</p>
 <h1 data-number="3" id="sec:model"><span
 class="header-section-number">3</span> The Thurstonian Model of a
@@ -525,7 +525,7 @@ results below are closed-form; but the construction—and the
 implementation—treat <span class="math inline">\(S\)</span> as a
 black-box sampler, so a copula with genuine tail dependence, a
 fat-tailed or skewed law, or a structured generator are equally
-admissible (Proposition&nbsp;<a href="#prop:tail">6</a> and Section&nbsp;<a href="#rem:anysim">6.3</a>). The
+admissible (Proposition&nbsp;<a href="#prop:tail">7</a> and Section&nbsp;<a href="#rem:anysim">6.3</a>). The
 <em>state price</em> (winning probability) of asset <span
 class="math inline">\(i\)</span> is <span
 class="math display">\[\begin{equation}
@@ -564,10 +564,94 @@ estimated return correlation <span
 class="math inline">\(C_{\mathrm{tilt}}\)</span>—and the tilt is the
 portfolio’s response to <span class="math inline">\(C_{\mathrm{tilt}} -
 C_{\mathrm{calib}}\)</span> (<a href="#prop:fixedpoint"
-data-reference-type="ref+Label" data-reference="prop:fixedpoint">3</a>);
+data-reference-type="ref+Label" data-reference="prop:fixedpoint">4</a>);
 but any pair of centered samplers may be used, with the target law in
 particular carrying dependence (tail dependence included) that the
 reference does not.</p>
+<h4 data-number="4.0.0.1" id="the-population-map."><span
+class="header-section-number">4.0.0.1</span> The population map.</h4>
+<p>One display organizes the whole construction. Write <span
+class="math inline">\(\theta = -a\)</span>, so a larger <span
+class="math inline">\(\theta_i\)</span> denotes a stronger competitor,
+and let <span class="math display">\[\begin{equation}
+  G_S(\theta) = \mathbb{E}_{\eta\sim S}\Big[\max_i(\theta_i +
+\eta_i)\Big], \qquad
+  W_S(\theta) = \nabla G_S(\theta) \in \Delta,
+  \label{eq:popmap}
+\end{equation}\]</span> so <span
+class="math inline">\(W_S(\theta)\)</span> is the vector of winning
+probabilities <a href="#eq:stateprice" data-reference-type="eqref"
+data-reference="eq:stateprice">[eq:stateprice]</a> (the gradient
+identity is <a href="#thm:objective" data-reference-type="ref+Label"
+data-reference="thm:objective">1</a>). Calibration to a benchmark <span
+class="math inline">\(w^{\mathrm{target}}\in\operatorname{int}\Delta\)</span>
+under a reference law <span class="math inline">\(S_0\)</span> inverts
+this map, <span class="math inline">\(\theta^0 =
+W_{S_0}^{-1}(w^{\mathrm{target}})\)</span> up to an additive constant
+(<a href="#prop:calib" data-reference-type="ref+Label"
+data-reference="prop:calib">2</a>), and the ability tilt is the
+composition <span class="math display">\[\begin{equation}
+  T_{S_0\to S_1}(w^{\mathrm{target}}) \;=\;
+W_{S_1}\!\big(W_{S_0}^{-1}(w^{\mathrm{target}})\big).
+  \label{eq:tiltmap}
+\end{equation}\]</span> Almost everything below is a property of <a
+href="#eq:tiltmap" data-reference-type="eqref"
+data-reference="eq:tiltmap">[eq:tiltmap]</a>: index reproduction is
+<span class="math inline">\(T_{S_0\to S_0} = \mathrm{id}\)</span> (<a
+href="#prop:fixedpoint" data-reference-type="ref+Label"
+data-reference="prop:fixedpoint">4</a>); the implied objective is the
+Fenchel dual of <span class="math inline">\(G_{S_1}\)</span> (<a
+href="#thm:objective" data-reference-type="ref+Label"
+data-reference="thm:objective">1</a>); redundancy and tail consistency
+are properties of <span class="math inline">\(W_{S_1}\)</span> at the
+fixed <span class="math inline">\(\theta^0\)</span> (Propositions&nbsp;<a href="#prop:redundancy">5</a> and <a href="#prop:tail">7</a>);
+and the tilt’s smoothness is that of <span
+class="math inline">\(W_{S_1}\)</span> (<a href="#thm:smooth"
+data-reference-type="ref+Label" data-reference="thm:smooth">2</a>). The
+Gaussian instance, in which <span class="math inline">\(S_0,
+S_1\)</span> are two correlation matrices, is <a href="#alg:tilt"
+data-reference-type="ref+Label" data-reference="alg:tilt">[alg:tilt]</a>
+below.</p>
+<div id="prop:calib" class="proposition">
+<p><strong>Proposition 2</strong> (Calibration). <em>For a Gaussian
+reference <span class="math inline">\(S_0 = \mathcal N(0, C_0)\)</span>
+with <span class="math inline">\(C_0 \succ 0\)</span>, the map <span
+class="math inline">\(W_{C_0} :
+\mathbb{R}^n/\!\operatorname{span}\{\mathbf 1\} \to
+\operatorname{int}\Delta\)</span> is a smooth bijection with smooth
+inverse; equivalently, every strictly positive benchmark <span
+class="math inline">\(w^{\mathrm{target}}\in\operatorname{int}\Delta\)</span>
+has a unique ability vector <span
+class="math inline">\(\theta^0\)</span>, modulo an additive constant,
+with <span class="math inline">\(W_{C_0}(\theta^0) =
+w^{\mathrm{target}}\)</span>.</em></p>
+</div>
+<div class="proof">
+<p><em>Proof.</em> <span class="math inline">\(G_{C_0}\)</span> is
+convex (<a href="#thm:objective" data-reference-type="ref+Label"
+data-reference="thm:objective">1</a>) and, for <span
+class="math inline">\(C_0\succ0\)</span>, <span
+class="math inline">\(C^\infty\)</span> with Hessian <span
+class="math inline">\(\nabla^2 G_{C_0} = \nabla_\theta W_{C_0}\)</span>,
+the winning-probability Jacobian, which is positive definite on the
+tangent space <span class="math inline">\(\{v:\mathbf 1^\top v =
+0\}\)</span> and annihilates <span class="math inline">\(\mathbf
+1\)</span> (since <span class="math inline">\(G_{C_0}(\theta + c\mathbf
+1) = G_{C_0}(\theta) + c\)</span>). Hence <span
+class="math inline">\(G_{C_0}\)</span> is strictly convex on the
+quotient <span
+class="math inline">\(\mathbb{R}^n/\!\operatorname{span}\{\mathbf
+1\}\)</span>, so its gradient <span
+class="math inline">\(W_{C_0}\)</span> is a diffeomorphism onto the
+relative interior of its range, which is <span
+class="math inline">\(\operatorname{int}\Delta\)</span> as any
+coordinate can be driven to <span class="math inline">\(0\)</span> or
+<span class="math inline">\(1\)</span> by sending abilities to <span
+class="math inline">\(\mp\infty\)</span>. ◻</p>
+</div>
+<p>The benchmark must lie in the open simplex: a zero target weight
+sends its ability to <span class="math inline">\(-\infty\)</span>, so
+zero-weight assets are dropped or floored before calibration.</p>
 <div class="algorithm">
 <p class="algo-title"><strong>Algorithm 1.</strong> Ability tilt (Thurstone portfolio)</p>
 <ol class="algo">
@@ -603,7 +687,7 @@ class="math inline">\(C_{\mathrm{tilt}}\)</span>.</p></li>
 estimated correlation <span class="math inline">\(\widehat{C}\)</span>
 in continuously: <span class="math inline">\(\phi = 0\)</span>
 reproduces the benchmark (<a href="#prop:fixedpoint"
-data-reference-type="ref+Label" data-reference="prop:fixedpoint">3</a>)
+data-reference-type="ref+Label" data-reference="prop:fixedpoint">4</a>)
 and <span class="math inline">\(\phi = 1\)</span> uses the full
 estimate. The construction never inverts a covariance—it needs only a
 valid correlation for sampling, repaired if necessary to the nearest
@@ -647,7 +731,7 @@ data-reference="sec:smoothness">7</a>); a Student-<span
 class="math inline">\(t\)</span> and a low-rank factor race (for scale)
 ship alongside; and any user callable obeying the fixed-seed contract
 supplies an arbitrary law. Tail consistency (<a href="#prop:tail"
-data-reference-type="ref+Label" data-reference="prop:tail">6</a>)
+data-reference-type="ref+Label" data-reference="prop:tail">7</a>)
 follows by driving the race with a downside-dependent sampler—or, within
 the Gaussian workhorse, a downside (lower-partial-moment) covariance.
 This supersedes the earlier <code>winningport</code> implementation of
@@ -677,7 +761,7 @@ class="math inline">\(a\)</span> are fixed and we view the weights as
 the winning-probability map <span
 class="math inline">\(w(C)\)</span>.</p>
 <div id="prop:feasible" class="proposition">
-<p><strong>Proposition 2</strong> (Feasibility). <em>For every
+<p><strong>Proposition 3</strong> (Feasibility). <em>For every
 positive-definite <span class="math inline">\(C\)</span> and every <span
 class="math inline">\(a\)</span>, the weights lie in the probability
 simplex: <span class="math inline">\(w_i \ge 0\)</span> and <span
@@ -694,7 +778,7 @@ estimator low-variance.) ◻</p>
 <p>Long-only and fully-invested portfolios thus come for free—no
 constraints, penalties, or projection onto the simplex.</p>
 <div id="prop:fixedpoint" class="proposition">
-<p><strong>Proposition 3</strong> (Index reproduction). <em>If the tilt
+<p><strong>Proposition 4</strong> (Index reproduction). <em>If the tilt
 correlation equals the calibration correlation, <span
 class="math inline">\(C_{\mathrm{tilt}} = C_{\mathrm{calib}}\)</span>,
 then <span class="math inline">\(w =
@@ -712,7 +796,7 @@ class="math inline">\(C_{\mathrm{tilt}} - C_{\mathrm{calib}}\)</span>
 and bounded by the Lipschitz estimate of <a href="#thm:smooth"
 data-reference-type="ref+Label" data-reference="thm:smooth">2</a>.</p>
 <div id="prop:redundancy" class="proposition">
-<p><strong>Proposition 4</strong> (Redundancy consistency). <em>Replace
+<p><strong>Proposition 5</strong> (Redundancy consistency). <em>Replace
 asset <span class="math inline">\(k\)</span> by two perfect duplicates
 <span class="math inline">\(k&#39;, k&#39;&#39;\)</span> (equal ability,
 unit variance, mutual correlation <span
@@ -738,7 +822,7 @@ would have won. The even split halves that shared probability. ◻</p>
 <div id="rem:fixedability" class="remark">
 <p><strong>Remark 1</strong> (Fixed abilities versus recalibration).
 <em><a href="#prop:redundancy" data-reference-type="ref+Label"
-data-reference="prop:redundancy">4</a> is a statement about the race at
+data-reference="prop:redundancy">5</a> is a statement about the race at
 <em>fixed</em> abilities: the duplicate inherits asset <span
 class="math inline">\(k\)</span>’s ability. The full benchmark-anchored
 tilt inherits exact redundancy consistency only when calibration itself
@@ -852,7 +936,7 @@ class="math inline">\(0.500\)</span></td>
 data-reference-type="ref+Label" data-reference="tab:redundancy">2</a> is
 not an accident; it holds in general.</p>
 <div id="prop:monotone" class="proposition">
-<p><strong>Proposition 5</strong> (Diversification monotonicity).
+<p><strong>Proposition 6</strong> (Diversification monotonicity).
 <em>Let <span class="math inline">\(T\)</span> be a subgroup of
 equal-ability assets, independent of the rest of the field, with common
 pairwise correlation <span class="math inline">\(\rho\)</span> within
@@ -883,7 +967,7 @@ class="math inline">\(\rho\)</span>. At <span class="math inline">\(\rho
 = 0\)</span> the group has <span class="math inline">\(|T|\)</span>
 independent chances to win; at <span class="math inline">\(\rho =
 1\)</span> it collapses to one (<a href="#prop:redundancy"
-data-reference-type="ref+Label" data-reference="prop:redundancy">4</a>
+data-reference-type="ref+Label" data-reference="prop:redundancy">5</a>
 is the case <span class="math inline">\(|T| = 2\)</span>, <span
 class="math inline">\(\rho = 1\)</span>). ◻</p>
 </div>
@@ -893,7 +977,7 @@ no explicit risk term.</p>
 <h2 data-number="6.1" id="sec:tail"><span
 class="header-section-number">6.1</span> Tail consistency</h2>
 <p><a href="#prop:monotone" data-reference-type="ref+Label"
-data-reference="prop:monotone">5</a> de-weights a cluster by its
+data-reference="prop:monotone">6</a> de-weights a cluster by its
 <em>full</em> correlation. Yet two clusters with an identical covariance
 can behave oppositely in the tail: one may crash together while the
 other merely co-moves on average. A symmetric second moment cannot tell
@@ -901,43 +985,71 @@ them apart. If instead the race is driven by the assets’
 <em>downside</em> dependence—their co-lower-partial-moments, or,
 exactly, a tail-dependent joint law for the performances—the
 de-weighting of <a href="#prop:monotone" data-reference-type="ref+Label"
-data-reference="prop:monotone">5</a> keys to genuine tail co-movement
+data-reference="prop:monotone">6</a> keys to genuine tail co-movement
 rather than to average correlation. We call this <em>tail
 consistency</em>.</p>
 <div id="prop:tail" class="proposition">
-<p><strong>Proposition 6</strong> (Tail consistency). <em>Let <span
-class="math inline">\(G\)</span> be a subgroup of equal-ability assets
-whose performances are comonotone in the relevant (winning) tail—in the
-limit, <span class="math inline">\(X_i = Z_G\)</span> for all <span
-class="math inline">\(i\in G\)</span>. Then the subgroup’s combined
-weight equals the winning probability of a single competitor with
-performance <span class="math inline">\(Z_G\)</span>, independent of the
-cardinality <span class="math inline">\(|G|\)</span>, and each member
-receives <span class="math inline">\(|G|^{-1}\)</span> of it.</em></p>
+<p><strong>Proposition 7</strong> (Tail consistency). <em>Let <span
+class="math inline">\(G\)</span> be a subgroup of equal-ability assets,
+write <span class="math inline">\(M_G = \min_{i\in G} X_i\)</span> and
+<span class="math inline">\(Y = \min_{j\notin G} X_j\)</span> with <span
+class="math inline">\(Y\)</span> independent of <span
+class="math inline">\(G\)</span>, so the subgroup’s combined weight is
+<span class="math inline">\(w_G = \mathbb{P}(M_G &lt; Y)\)</span>.
+Then:</em></p>
+<ol>
+<li><p><em>If a change in the subgroup’s joint law raises <span
+class="math inline">\(M_G\)</span> in first-order stochastic order while
+fixing <span class="math inline">\(Y\)</span>, then <span
+class="math inline">\(w_G\)</span> does not increase.</em></p></li>
+<li><p><em>In the comonotone limit <span class="math inline">\(X_i =
+Z_G\)</span> for all <span class="math inline">\(i\in G\)</span>, <span
+class="math inline">\(M_G = Z_G\)</span>, so <span
+class="math inline">\(w_G\)</span> equals the winning probability of a
+single competitor with performance <span
+class="math inline">\(Z_G\)</span>, independent of <span
+class="math inline">\(|G|\)</span>, and exchangeability splits it
+equally, each member receiving <span
+class="math inline">\(|G|^{-1}\)</span>.</em></p></li>
+</ol>
 </div>
 <div class="proof">
-<p><em>Proof.</em> Comonotonicity gives <span
-class="math inline">\(\min_{i\in G} X_i = Z_G\)</span>, so <span
-class="math inline">\(\{\text{winner}\in G\} = \{Z_G = \min_k
-X_k\}\)</span>, the winning event of a single competitor with
-performance <span class="math inline">\(Z_G\)</span>; this probability
-does not depend on <span class="math inline">\(|G|\)</span>.
-Exchangeability within <span class="math inline">\(G\)</span> splits it
-equally. ◻</p>
+<p><em>Proof.</em> For (i), <span class="math inline">\(w_G =
+\mathbb{P}(M_G &lt; Y) = \mathbb{E}[\overline F_Y(M_G)]\)</span> with
+<span class="math inline">\(\overline F_Y\)</span> the survival function
+of <span class="math inline">\(Y\)</span>, which is non-increasing; a
+first-order stochastic increase in <span
+class="math inline">\(M_G\)</span> therefore cannot increase <span
+class="math inline">\(\mathbb{E}[\overline F_Y(M_G)]\)</span>. For (ii),
+comonotonicity gives <span class="math inline">\(M_G = Z_G\)</span>, so
+<span class="math inline">\(\{\text{winner}\in G\} = \{Z_G = \min_k
+X_k\}\)</span>, the winning event of a single competitor; this does not
+depend on <span class="math inline">\(|G|\)</span>, and exchangeability
+within <span class="math inline">\(G\)</span> splits it equally. ◻</p>
 </div>
 <p><a href="#prop:tail" data-reference-type="ref+Label"
-data-reference="prop:tail">6</a> is the tail analogue of <a
+data-reference="prop:tail">7</a> is the tail analogue of <a
 href="#prop:monotone" data-reference-type="ref+Label"
-data-reference="prop:monotone">5</a>: as the cluster’s
-<em>lower-tail</em> dependence rises while the marginals—and even the
-full correlation—are held fixed, its combined weight falls from the
-head-count value toward the single-competitor value, so its
-<em>tail-effective</em> cardinality runs from <span
-class="math inline">\(|G|\)</span> to <span
+data-reference="prop:monotone">6</a>, and it makes precise what the race
+responds to: not the pairwise tail-dependence coefficient <span
+class="math inline">\(\lambda_L\)</span>, which does not order copulas,
+but the whole <em>distribution of the group minimum</em> <span
+class="math inline">\(M_G\)</span>, whose lower tail is fixed by the
+joint lower-tail copula. As that lower-tail co-movement deepens—<span
+class="math inline">\(M_G\)</span> rising stochastically while the
+marginals, and even the full correlation, are held fixed—the subgroup’s
+combined weight falls from the head-count value toward the
+single-competitor value, so its <em>tail-effective</em> cardinality runs
+from <span class="math inline">\(|G|\)</span> to <span
 class="math inline">\(1\)</span>. For one independent asset racing a
 symmetric cluster that limit is <span
 class="math inline">\(\tfrac12\)</span> regardless of <span
-class="math inline">\(|G|\)</span>.</p>
+class="math inline">\(|G|\)</span>. Whether a given parametric family
+(Clayton, say, at fixed margins) deepens <span
+class="math inline">\(M_G\)</span> monotonically is a family-specific
+question; <a href="#fig:tail" data-reference-type="ref+Label"
+data-reference="fig:tail">1</a> shows that it does for the family used
+there.</p>
 <figure id="fig:tail" data-latex-placement="h">
 <img src="figures/tail_consistency.png" style="width:80.0%" />
 <figcaption>Tail consistency. One independent asset versus a <span
@@ -949,7 +1061,7 @@ centred performances). As <span
 class="math inline">\(\lambda_L\to1\)</span> the cluster’s combined
 weight falls toward the two-body limit <span
 class="math inline">\(\tfrac12\)</span> (<a href="#prop:tail"
-data-reference-type="ref+Label" data-reference="prop:tail">6</a>)—the
+data-reference-type="ref+Label" data-reference="prop:tail">7</a>)—the
 <span class="math inline">\(99\)</span> names de-duplicate to a single
 horse. Driving the race by the downside semicovariance (lower partial
 co-moments) recovers almost all of the effect; the full covariance is
@@ -983,15 +1095,16 @@ class="header-section-number">6.2</span> The implied objective</h2>
 <p>The tilt is defined procedurally, by winning probabilities. It is
 natural to ask what objective, if any, it optimizes. It optimizes a
 recognizable one.</p>
-<p>Write <span class="math inline">\(\theta = -a\)</span> (so larger
-<span class="math inline">\(\theta\)</span> denotes a stronger
-competitor, since the minimum wins) and define the
-<em>expected-best</em> potential <span
+<p>Specializing the population map <a href="#eq:popmap"
+data-reference-type="eqref" data-reference="eq:popmap">[eq:popmap]</a>
+to the Gaussian race, the <em>expected-best</em> potential is <span
 class="math display">\[\begin{equation}
   G_C(\theta) = \mathbb{E}\Big[\max_i\,(\theta_i + \eta_i)\Big], \qquad
-  \eta \sim \mathcal{N}(0, C).
+  \eta \sim \mathcal{N}(0, C),
   \label{eq:surplus}
-\end{equation}\]</span></p>
+\end{equation}\]</span> with <span class="math inline">\(\theta =
+-a\)</span> (so a larger <span class="math inline">\(\theta\)</span>
+denotes a stronger competitor).</p>
 <div id="thm:objective" class="theorem">
 <p><strong>Theorem 1</strong> (Implied objective). <em><span
 class="math inline">\(G_C\)</span> is convex and <span
@@ -1043,7 +1156,7 @@ with covariance <span class="math inline">\(C\)</span> makes <span
 class="math inline">\(\Omega_C\)</span> <em>correlation-aware</em>,
 which is precisely what produces the redundancy consistency of <a
 href="#prop:redundancy" data-reference-type="ref+Label"
-data-reference="prop:redundancy">4</a>. Finally, since <span
+data-reference="prop:redundancy">5</a>. Finally, since <span
 class="math inline">\(w = \nabla G_C(\theta)\)</span> is the gradient of
 a convex potential, it is automatically smooth—consistent with <a
 href="#thm:smooth" data-reference-type="ref+Label"
@@ -1076,14 +1189,14 @@ measure: only the Gumbel (Shannon entropy, softmax) and Gaussian
 are closed-form, and in general <span
 class="math inline">\(\Omega_S\)</span> is implicit. Tail consistency
 (<a href="#prop:tail" data-reference-type="ref+Label"
-data-reference="prop:tail">6</a>) is precisely the statement that <span
+data-reference="prop:tail">7</a>) is precisely the statement that <span
 class="math inline">\(\Omega_S\)</span> charges for tail co-movement
 when <span class="math inline">\(S\)</span> carries it.</p>
 <p>As the social-surplus conjugate, <span
 class="math inline">\(\Omega_S\)</span> is a <em>generalized
 entropy</em>: it rewards spreading across <em>independent</em> options
 but counts only the dependence-effective number of bets, so it will not
-reward spreading across comonotone names (Propositions&nbsp;<a href="#prop:redundancy">4</a> and <a href="#prop:tail">6</a>).
+reward spreading across comonotone names (Propositions&nbsp;<a href="#prop:redundancy">5</a> and <a href="#prop:tail">7</a>).
 Locally it is quadratic, its Hessian the <em>inverse</em> of the
 winning-probability Jacobian on the simplex tangent space (<a
 href="#sec:markowitz" data-reference-type="ref+Label"
@@ -1187,8 +1300,13 @@ class="math inline">\(D_{\Omega_{S_0}}(w^0+\delta, w^0) =
 class="math inline">\(H_0 = \nabla^2\Omega_{S_0}(w^0)\)</span>. Convex
 duality gives <span class="math inline">\(H_0 = [\nabla^2
 G_{S_0}(\theta)]^{-1} = [\nabla_\theta w(\theta)]^{-1}\)</span>, the
-inverse of the winning-probability Jacobian, so the local penalty is
-<span class="math inline">\(\tfrac12\delta^\top[\nabla_\theta
+inverse of the winning-probability Jacobian—here and below taken on the
+simplex tangent space <span class="math inline">\(\{v:\mathbf 1^\top
+v=0\}\)</span>, where it is positive definite, the constant direction
+<span class="math inline">\(\mathbf 1\)</span> being its kernel (a
+Moore–Penrose inverse modulo <span class="math inline">\(\mathbf
+1\)</span>). The local penalty is <span
+class="math inline">\(\tfrac12\delta^\top[\nabla_\theta
 w(\theta)]^{-1}\delta\)</span>: a Markowitz-like quadratic with the
 <em>inverse choice-sensitivity</em> in place of <span
 class="math inline">\(\Sigma\)</span>. The Markowitz inverse is not
@@ -1670,7 +1788,7 @@ quality and the fitting data is scarce (M4 Yearly at five to ten series,
 Quarterly at five). Where one method dominates the pool, concentration
 wins and stacking takes over—exactly what the redundancy property (<a
 href="#prop:redundancy" data-reference-type="ref+Label"
-data-reference="prop:redundancy">4</a>) would predict. We report this as
+data-reference="prop:redundancy">5</a>) would predict. We report this as
 suggestive rather than settled: the tilt is the stable, small-sample
 member of the combination family, not a uniformly better combiner, and
 the case for it as a general non-negative regression and stacking tool
@@ -1752,7 +1870,7 @@ class="math inline">\(\ell_2\)</span> penalty, and obtains them without
 solving the constrained least-squares program. The same machinery is a
 general tool for stable non-negative (simplex) regression—it shares
 weight among collinear regressors (<a href="#prop:redundancy"
-data-reference-type="ref+Label" data-reference="prop:redundancy">4</a>),
+data-reference-type="ref+Label" data-reference="prop:redundancy">5</a>),
 stays smooth under streaming updates (<a href="#thm:smooth"
 data-reference-type="ref+Label" data-reference="thm:smooth">2</a>), and
 is well-posed when regressors outnumber observations. Forecast
@@ -1796,7 +1914,7 @@ controlling concentration or using <span
 class="math inline">\(C_{\mathrm{tilt}}\)</span> to express an explicit
 correlation view rather than the sample estimate.</p>
 <p>The tail-consistency result (<a href="#prop:tail"
-data-reference-type="ref+Label" data-reference="prop:tail">6</a>, <a
+data-reference-type="ref+Label" data-reference="prop:tail">7</a>, <a
 href="#rem:anysim" data-reference-type="ref+Label"
 data-reference="rem:anysim">6.3</a>) turns the fat-tailed-performances
 direction into a concrete programme: drive the race with an online

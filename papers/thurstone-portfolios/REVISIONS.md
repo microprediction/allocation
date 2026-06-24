@@ -15,14 +15,16 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
 
 ## Tier 1 — do before circulating
 
-- [ ] **[B] 1. State the population map up front.** Before the algorithm, give the clean object:
+- [x] **[B] 1. State the population map up front — DONE** (`eq:popmap`, `eq:tiltmap` at the head of
+  §method; `thm:objective` now specializes it). Before the algorithm, give the clean object:
   `G_S(θ)=E_{η∼S}[max_i(θ_i+η_i)]`, `W_S(θ)=∇G_S(θ)∈Δ`; calibration `θ_0=W_{S_0}^{-1}(w_0)` (mod
   constant); tilt `T_{S_0→S_1}(w_0)=W_{S_1}(θ_0)`. Then index reproduction is `T_{S_0→S_0}=id`,
   the implied objective is Fenchel duality, Markowitz is a change of regularizer, smoothness is
   smoothness of `W_S`, redundancy is a property of `W_S(θ)` at fixed θ. *Agree — one display
   organizes the whole paper. Pure exposition, high payoff.*
 
-- [ ] **[B] 2. Add an existence/uniqueness (calibration) theorem.** For Gaussian `S=N(0,C)`, `C≻0`:
+- [x] **[B] 2. Add an existence/uniqueness (calibration) theorem — DONE** (`prop:calib` in §method:
+  `W_{C_0}` a smooth bijection on the tangent space; int-Δ caveat stated). For Gaussian `S=N(0,C)`, `C≻0`:
   `W_C : R^n/span{1} → int Δ` is a smooth bijection with smooth inverse; equivalently every strictly
   positive benchmark has a unique ability vector (mod constants). Separate this existence result from
   the *numerical* inverse (the Fast Ability Transform handles the diagonal case; one-factor/general
@@ -52,7 +54,10 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
   than being recalibrated). *This is the single most important clarification — verify our Prop 4
   wording and surrounding rhetoric; add the caveat and likely the counterexample.*
 
-- [ ] **[B] 5. Reformulate tail consistency via the group minimum, not λ_L.** Prop 6 proves only the
+- [x] **[B] 5. Reformulate tail consistency via the group minimum, not λ_L — DONE.** `prop:tail` now
+  has part (i) the FOSD-monotonicity of `w_G=E[F̄_Y(M_G)]` and (ii) the comonotone endpoint; prose
+  states it reads the law of `M_G` (lower tail = lower-tail copula), λ_L doesn't order copulas, and
+  the Clayton sweep is framed as family-specific. Prop 6 proves only the
   comonotone limit, not monotonicity in λ_L. The object controlling combined weight is
   `M_G=min_{i∈G}X_i` vs `Y=min_{j∉G}X_j`, `w_G=P(M_G<Y)` — the race responds to the *whole
   distribution of M_G*, not the pairwise asymptotic λ_L (which is not a total order on copulas; equal
@@ -65,7 +70,10 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
 
 ## Tier 2 — should fix
 
-- [ ] **[S] 6. Tangent-space care throughout.** Since `G_C(θ+c1)=G_C(θ)+c`, all gradients/Hessians/
+- [x] **[S] 6. Tangent-space care throughout — DONE.** §6.3 fixed earlier; the displaced-inverse
+  paragraph now states `[∇_θ w]^{-1}` is taken on the tangent space (PD there, kernel `1`,
+  Moore–Penrose modulo `1`) "here and below"; `prop:calib` and the Markowitz lead also carry it.
+  Since `G_C(θ+c1)=G_C(θ)+c`, all gradients/Hessians/
   inverses live on `TΔ={v:1^T v=0}`; every `[∇_θ w]^{-1}` should read "inverse on the simplex tangent
   space / Moore–Penrose modulo the constant direction" (in full R^n the Jacobian is singular). *The
   §6.3 fix already added this qualifier; sweep the rest (Markowitz §, Tweedie §).*

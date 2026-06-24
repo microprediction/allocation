@@ -49,6 +49,55 @@ the tilt is the portfolio's response to $C_{\mathrm{tilt}} - C_{\mathrm{calib}}$
 target law in particular carrying dependence (tail dependence included) that the
 reference does not.
 
+\paragraph{The population map.}
+One display organizes the whole construction. Write $\theta = -a$, so a larger
+$\theta_i$ denotes a stronger competitor, and let
+\begin{equation}
+  G_S(\theta) = \E_{\eta\sim S}\Big[\max_i(\theta_i + \eta_i)\Big], \qquad
+  W_S(\theta) = \nabla G_S(\theta) \in \Delta,
+  \label{eq:popmap}
+\end{equation}
+so $W_S(\theta)$ is the vector of winning probabilities \eqref{eq:stateprice} (the
+gradient identity is \Cref{thm:objective}). Calibration to a benchmark
+$w^{\mathrm{target}}\in\operatorname{int}\Delta$ under a reference law $S_0$ inverts
+this map, $\theta^0 = W_{S_0}^{-1}(w^{\mathrm{target}})$ up to an additive constant
+(\Cref{prop:calib}), and the ability tilt is the composition
+\begin{equation}
+  T_{S_0\to S_1}(w^{\mathrm{target}}) \;=\; W_{S_1}\!\big(W_{S_0}^{-1}(w^{\mathrm{target}})\big).
+  \label{eq:tiltmap}
+\end{equation}
+Almost everything below is a property of \eqref{eq:tiltmap}: index reproduction is
+$T_{S_0\to S_0} = \mathrm{id}$ (\Cref{prop:fixedpoint}); the implied objective is
+the Fenchel dual of $G_{S_1}$ (\Cref{thm:objective}); redundancy and tail
+consistency are properties of $W_{S_1}$ at the fixed $\theta^0$
+(\Cref{prop:redundancy,prop:tail}); and the tilt's smoothness is that of $W_{S_1}$
+(\Cref{thm:smooth}). The Gaussian instance, in which $S_0, S_1$ are two correlation
+matrices, is \Cref{alg:tilt} below.
+
+\begin{proposition}[Calibration]
+\label{prop:calib}
+For a Gaussian reference $S_0 = \mathcal N(0, C_0)$ with $C_0 \succ 0$, the map
+$W_{C_0} : \R^n/\!\operatorname{span}\{\mathbf 1\} \to \operatorname{int}\Delta$ is a
+smooth bijection with smooth inverse; equivalently, every strictly positive
+benchmark $w^{\mathrm{target}}\in\operatorname{int}\Delta$ has a unique ability
+vector $\theta^0$, modulo an additive constant, with
+$W_{C_0}(\theta^0) = w^{\mathrm{target}}$.
+\end{proposition}
+\begin{proof}
+$G_{C_0}$ is convex (\Cref{thm:objective}) and, for $C_0\succ0$, $C^\infty$ with
+Hessian $\nabla^2 G_{C_0} = \nabla_\theta W_{C_0}$, the winning-probability
+Jacobian, which is positive definite on the tangent space
+$\{v:\mathbf 1^\top v = 0\}$ and annihilates $\mathbf 1$ (since
+$G_{C_0}(\theta + c\mathbf 1) = G_{C_0}(\theta) + c$). Hence $G_{C_0}$ is strictly
+convex on the quotient $\R^n/\!\operatorname{span}\{\mathbf 1\}$, so its gradient
+$W_{C_0}$ is a diffeomorphism onto the relative interior of its range, which is
+$\operatorname{int}\Delta$ as any coordinate can be driven to $0$ or $1$ by sending
+abilities to $\mp\infty$.
+\end{proof}
+\noindent The benchmark must lie in the open simplex: a zero target weight sends its
+ability to $-\infty$, so zero-weight assets are dropped or floored before
+calibration.
+
 \begin{algorithm}[h]
 \caption{Ability tilt (Thurstone portfolio)}
 \label{alg:tilt}
