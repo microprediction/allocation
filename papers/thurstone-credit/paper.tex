@@ -309,9 +309,13 @@ As a variable-selection rule it is the stable, redundancy-aware option of
 well-conditioned even when the covariance is not: numerically its condition number
 stays near $1$ while the covariance's grows into the hundreds, so the
 ill-conditioning that defeats $\Sigma^{-1}$ never enters the choice-space inverse and
-calibration needs no preconditioning. The cost that does remain is how to control the
-redistribution of de-duplicated credit to weak contributors---the one weakness that
-recurs across the attribution and selection experiments. The construction and its calibration inverse are implemented in the
+calibration needs no preconditioning. The cost that does remain---the de-duplicated
+credit that leaks to weak contributors, the one weakness recurring across the
+attribution and selection experiments---is controlled by a concentration
+(inverse-temperature) parameter $\beta$: scaling the calibrated strengths by $\beta$
+drives a sub-maximal contributor's credit to zero as $\beta\to\infty$ while leaving
+the even split among genuine duplicates intact, trading the leak against the
+smoothness of the map (developed in the companion paper). The construction and its calibration inverse are implemented in the
 open-source \texttt{allocation} package, built on \texttt{thurstone}.
 
 \printbibliography

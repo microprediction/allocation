@@ -184,10 +184,11 @@ cheap online updates and gradient-based tuning.
 
 Open questions include the choice of reference correlation $C_{\mathrm{calib}}$
 (diagonal versus market) and of $\phi$; the treatment of estimation error in the
-abilities, a Thurstonian analogue of covariance shrinkage; and richer
-perturbations, such as a temperature controlling concentration or using
+abilities, a Thurstonian analogue of covariance shrinkage; and using
 $C_{\mathrm{tilt}}$ to express an explicit correlation view rather than the sample
-estimate.
+estimate. The concentration of the allocation is governed by the temperature of
+\Cref{prop:temperature}, which trades the weight that leaks to weak names against
+the turnover bound of \Cref{thm:smooth}.
 
 The tail-consistency result (\Cref{prop:tail}, \Cref{rem:anysim}) turns the
 fat-tailed-performances direction into a concrete programme: drive the race with an

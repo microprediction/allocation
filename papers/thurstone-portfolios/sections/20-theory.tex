@@ -275,6 +275,54 @@ automatically smooth---consistent with \Cref{thm:smooth}. (For general $C$ the
 regularizer $\Omega_C$ has no closed form, unlike the entropy/softmax special
 case, but it provably exists and is convex, which is all we use.)
 
+\subsection{Temperature and concentration}
+\label{sec:temperature}
+
+The program \eqref{eq:regularized} carries a free concentration parameter. Scaling
+the strengths by an inverse temperature $\beta > 0$,
+\begin{equation}
+  w^{\beta} = \nabla G_C(\beta\theta)
+  = \argmaxop_{p\in\Delta}\Big\{\langle\theta, p\rangle - \tfrac{1}{\beta}\,\Omega_C(p)\Big\},
+  \label{eq:temperature}
+\end{equation}
+reweights the diversification penalty: $\beta = 1$ is the calibrated tilt, larger
+$\beta$ down-weights $\Omega_C$ and concentrates, smaller $\beta$ enforces it and
+diversifies.
+
+\begin{proposition}[Concentration with redundancy preserved]
+\label{prop:temperature}
+For every $\beta > 0$ the map $w^{\beta} = \nabla G_C(\beta\theta)$ is a simplex
+allocation, and
+\begin{enumerate}
+\item[\textup{(i)}] it preserves redundancy and tail consistency: equal-strength
+  comonotone duplicates split evenly at every $\beta$
+  (\Cref{prop:redundancy,prop:tail});
+\item[\textup{(ii)}] a strictly sub-maximal competitor ($\theta_i < \max_j\theta_j$)
+  has $w^{\beta}_i \to 0$ as $\beta\to\infty$, the race tending to a hard
+  $\argmaxop$ on strength;
+\item[\textup{(iii)}] as $\beta\to 0$, $w^{\beta}\to\nabla G_C(0)$, the winning
+  probabilities of the dependence law alone, the strengths washed out.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+Scaling all strengths by $\beta$ leaves equal strengths equal and comonotone
+performances comonotone, so the tie arguments of
+\Cref{prop:redundancy,prop:tail} are untouched, giving~(i). For~(ii), with
+$j^\star = \argmaxop_j \theta_j$, $w^{\beta}_i \le
+\Prob\big(\eta_i - \eta_{j^\star} > \beta(\theta_{j^\star} - \theta_i)\big) \to 0$
+since $\theta_{j^\star} - \theta_i > 0$. For~(iii), $G_C$ is $C^1$, so
+$\nabla G_C(\beta\theta) \to \nabla G_C(0)$ as $\beta\to 0$.
+\end{proof}
+
+Temperature is the knob for the construction's one residual cost. When a cluster
+de-duplicates, the freed weight is shared with the rest of the field, including weak
+competitors; by \Cref{prop:temperature}(ii) that leak to sub-maximal names falls to
+zero as $\beta$ grows, while the even split among the duplicates is left intact
+by~(i). The price is smoothness: as $\beta\to\infty$ the map approaches a hard
+$\argmaxop$ and the Lipschitz bound of \Cref{thm:smooth} degrades, so $\beta$ trades
+concentration against turnover. The calibrated $\beta = 1$ sits at the smooth,
+benchmark-reproducing end.
+
 \subsection{Any simulation, and the implied penalty}
 \label{rem:anysim}
 

@@ -532,7 +532,7 @@ results below are closed-form; but the construction—and the
 implementation—treat <span class="math inline">\(S\)</span> as a
 black-box sampler, so a copula with genuine tail dependence, a
 fat-tailed or skewed law, or a structured generator are equally
-admissible (Proposition&nbsp;<a href="#prop:tail">7</a> and Section&nbsp;<a href="#rem:anysim">6.3</a>). The
+admissible (Proposition&nbsp;<a href="#prop:tail">7</a> and Section&nbsp;<a href="#rem:anysim">6.4</a>). The
 <em>state price</em> (winning probability) of asset <span
 class="math inline">\(i\)</span> is <span
 class="math display">\[\begin{equation}
@@ -1177,8 +1177,76 @@ class="math inline">\(C\)</span> the regularizer <span
 class="math inline">\(\Omega_C\)</span> has no closed form, unlike the
 entropy/softmax special case, but it provably exists and is convex,
 which is all we use.)</p>
-<h2 data-number="6.3" id="rem:anysim"><span
-class="header-section-number">6.3</span> Any simulation, and the implied
+<h2 data-number="6.3" id="sec:temperature"><span
+class="header-section-number">6.3</span> Temperature and
+concentration</h2>
+<p>The program <a href="#eq:regularized" data-reference-type="eqref"
+data-reference="eq:regularized">[eq:regularized]</a> carries a free
+concentration parameter. Scaling the strengths by an inverse temperature
+<span class="math inline">\(\beta &gt; 0\)</span>, <span
+class="math display">\[\begin{equation}
+  w^{\beta} = \nabla G_C(\beta\theta)
+  = \mathop{\mathrm{arg\,max}}_{p\in\Delta}\Big\{\langle\theta, p\rangle
+- \tfrac{1}{\beta}\,\Omega_C(p)\Big\},
+  \label{eq:temperature}
+\end{equation}\]</span> reweights the diversification penalty: <span
+class="math inline">\(\beta = 1\)</span> is the calibrated tilt, larger
+<span class="math inline">\(\beta\)</span> down-weights <span
+class="math inline">\(\Omega_C\)</span> and concentrates, smaller <span
+class="math inline">\(\beta\)</span> enforces it and diversifies.</p>
+<div id="prop:temperature" class="proposition">
+<p><strong>Proposition 8</strong> (Concentration with redundancy
+preserved). <em>For every <span class="math inline">\(\beta &gt;
+0\)</span> the map <span class="math inline">\(w^{\beta} = \nabla
+G_C(\beta\theta)\)</span> is a simplex allocation, and</em></p>
+<ol>
+<li><p><em>it preserves redundancy and tail consistency: equal-strength
+comonotone duplicates split evenly at every <span
+class="math inline">\(\beta\)</span> (Propositions&nbsp;<a href="#prop:redundancy">5</a> and <a href="#prop:tail">7</a>);</em></p></li>
+<li><p><em>a strictly sub-maximal competitor (<span
+class="math inline">\(\theta_i &lt; \max_j\theta_j\)</span>) has <span
+class="math inline">\(w^{\beta}_i \to 0\)</span> as <span
+class="math inline">\(\beta\to\infty\)</span>, the race tending to a
+hard <span class="math inline">\(\mathop{\mathrm{arg\,max}}\)</span> on
+strength;</em></p></li>
+<li><p><em>as <span class="math inline">\(\beta\to 0\)</span>, <span
+class="math inline">\(w^{\beta}\to\nabla G_C(0)\)</span>, the winning
+probabilities of the dependence law alone, the strengths washed
+out.</em></p></li>
+</ol>
+</div>
+<div class="proof">
+<p><em>Proof.</em> Scaling all strengths by <span
+class="math inline">\(\beta\)</span> leaves equal strengths equal and
+comonotone performances comonotone, so the tie arguments of Propositions&nbsp;<a href="#prop:redundancy">5</a> and <a href="#prop:tail">7</a>
+are untouched, giving (i). For (ii), with <span
+class="math inline">\(j^\star = \mathop{\mathrm{arg\,max}}_j
+\theta_j\)</span>, <span class="math inline">\(w^{\beta}_i \le
+\mathbb{P}\big(\eta_i - \eta_{j^\star} &gt; \beta(\theta_{j^\star} -
+\theta_i)\big) \to 0\)</span> since <span
+class="math inline">\(\theta_{j^\star} - \theta_i &gt; 0\)</span>.
+For (iii), <span class="math inline">\(G_C\)</span> is <span
+class="math inline">\(C^1\)</span>, so <span
+class="math inline">\(\nabla G_C(\beta\theta) \to \nabla G_C(0)\)</span>
+as <span class="math inline">\(\beta\to 0\)</span>. ◻</p>
+</div>
+<p>Temperature is the knob for the construction’s one residual cost.
+When a cluster de-duplicates, the freed weight is shared with the rest
+of the field, including weak competitors; by <a href="#prop:temperature"
+data-reference-type="ref+Label"
+data-reference="prop:temperature">8</a>(ii) that leak to sub-maximal
+names falls to zero as <span class="math inline">\(\beta\)</span> grows,
+while the even split among the duplicates is left intact by (i). The
+price is smoothness: as <span
+class="math inline">\(\beta\to\infty\)</span> the map approaches a hard
+<span class="math inline">\(\mathop{\mathrm{arg\,max}}\)</span> and the
+Lipschitz bound of <a href="#thm:smooth" data-reference-type="ref+Label"
+data-reference="thm:smooth">2</a> degrades, so <span
+class="math inline">\(\beta\)</span> trades concentration against
+turnover. The calibrated <span class="math inline">\(\beta = 1\)</span>
+sits at the smooth, benchmark-reproducing end.</p>
+<h2 data-number="6.4" id="rem:anysim"><span
+class="header-section-number">6.4</span> Any simulation, and the implied
 penalty</h2>
 <p>Nothing in <a href="#thm:objective" data-reference-type="ref+Label"
 data-reference="thm:objective">1</a> uses Gaussianity. For any centred
@@ -1233,13 +1301,13 @@ reward spreading across comonotone names (Propositions&nbsp;<a href="#prop:redun
 Locally it is quadratic, its Hessian the <em>inverse</em> of the
 winning-probability Jacobian on the simplex tangent space (<a
 href="#sec:markowitz" data-reference-type="ref+Label"
-data-reference="sec:markowitz">6.4</a>), hence a Mahalanobis penalty in
+data-reference="sec:markowitz">6.5</a>), hence a Mahalanobis penalty in
 the choice geometry. It is not a coherent risk measure (neither variance
 nor CVaR), but the canonical Fenchel–Young regularizer of the perturbed
 argmax <span class="citation" data-cites="berthet2020">(Berthet et al.
 2020)</span>.</p>
-<h2 data-number="6.4" id="sec:markowitz"><span
-class="header-section-number">6.4</span> Markowitz, reverse
+<h2 data-number="6.5" id="sec:markowitz"><span
+class="header-section-number">6.5</span> Markowitz, reverse
 optimization, and the Thurstone inverse</h2>
 <p>The implied objective of <a href="#thm:objective"
 data-reference-type="ref+Label" data-reference="thm:objective">1</a> is
@@ -1247,8 +1315,8 @@ best read as a reverse-optimization analogue of Markowitz. The
 comparison separates three roles that are easily conflated: the
 benchmark, the return or ability vector that rationalises it, and the
 risk or diversification geometry used to perturb it.</p>
-<h4 data-number="6.4.0.1" id="the-markowitz-inverse."><span
-class="header-section-number">6.4.0.1</span> The Markowitz inverse.</h4>
+<h4 data-number="6.5.0.1" id="the-markowitz-inverse."><span
+class="header-section-number">6.5.0.1</span> The Markowitz inverse.</h4>
 <p>The long-only mean–variance problem <span class="math inline">\(w^M =
 \mathop{\mathrm{arg\,max}}_{p\in\Delta}\{\mu^\top p -
 \tfrac{\gamma}{2}p^\top\Sigma p\}\)</span> has first-order condition
@@ -1262,8 +1330,8 @@ class="math inline">\(\Sigma\)</span> becomes a large eigenvalue of
 <span class="math inline">\(\Sigma^{-1}\)</span>, so a small return
 component in a near-null direction can produce a large, unstable
 position.</p>
-<h4 data-number="6.4.0.2" id="reverse-optimization."><span
-class="header-section-number">6.4.0.2</span> Reverse optimization.</h4>
+<h4 data-number="6.5.0.2" id="reverse-optimization."><span
+class="header-section-number">6.5.0.2</span> Reverse optimization.</h4>
 <p>Reverse (Black–Litterman / Grinold) optimization turns this around.
 If a benchmark <span class="math inline">\(w^0\)</span> is optimal under
 a reference covariance <span class="math inline">\(\Sigma_0\)</span>, it
@@ -1284,8 +1352,8 @@ At <span class="math inline">\(\phi=0\)</span> the solution is <span
 class="math inline">\(w^0\)</span>, and for small <span
 class="math inline">\(\phi\)</span> it departs only as the added penalty
 forces.</p>
-<h4 data-number="6.4.0.3" id="the-thurstone-analogue."><span
-class="header-section-number">6.4.0.3</span> The Thurstone
+<h4 data-number="6.5.0.3" id="the-thurstone-analogue."><span
+class="header-section-number">6.5.0.3</span> The Thurstone
 analogue.</h4>
 <p>The tilt has the same structure, with the quadratic Markowitz
 geometry replaced by the Fenchel geometry of the race. Calibration finds
@@ -1324,8 +1392,8 @@ class="math inline">\(\tfrac{\gamma}{2}p^\top\Delta\Sigma\,p
 displacement from the benchmark by a quadratic form in <span
 class="math inline">\(\Sigma_0\)</span>; the tilt measures it by the
 Bregman divergence of the reference race.</p>
-<h4 data-number="6.4.0.4" id="the-displaced-inverse."><span
-class="header-section-number">6.4.0.4</span> The displaced inverse.</h4>
+<h4 data-number="6.5.0.4" id="the-displaced-inverse."><span
+class="header-section-number">6.5.0.4</span> The displaced inverse.</h4>
 <p>Locally the two are closer still. For <span class="math inline">\(p =
 w^0 + \delta\)</span>, <span
 class="math inline">\(D_{\Omega_{S_0}}(w^0+\delta, w^0) =
@@ -1363,8 +1431,8 @@ scaled, its own condition number remaining near one, so the displaced
 inverse never inherits the ill-conditioning that defeats <span
 class="math inline">\(\Sigma^{-1}\)</span>, and a Newton calibration
 step preconditioned by it converges in a handful of iterations.</p>
-<h4 data-number="6.4.0.5" id="a-selection-identity."><span
-class="header-section-number">6.4.0.5</span> A selection identity.</h4>
+<h4 data-number="6.5.0.5" id="a-selection-identity."><span
+class="header-section-number">6.5.0.5</span> A selection identity.</h4>
 <p>For the Gaussian workhorse one identity sits behind this local
 geometry.</p>
 <div id="lem:tweedie" class="lemma">
@@ -1393,8 +1461,8 @@ the local penalty curvature, is a matrix of selection sensitivities.
 Tweedie’s identity, the Markowitz analogy, and the Fenchel dual all
 point to the same object: the local geometry of the winning-probability
 map.</p>
-<h4 data-number="6.4.0.6" id="not-a-return-forecast."><span
-class="header-section-number">6.4.0.6</span> Not a return forecast.</h4>
+<h4 data-number="6.5.0.6" id="not-a-return-forecast."><span
+class="header-section-number">6.5.0.6</span> Not a return forecast.</h4>
 <p>None of this makes the tilt a return-forecasting method. The linear
 term <span class="math inline">\(\theta\)</span> is benchmark-implied
 ability, not expected return; against a true <span
@@ -1995,14 +2063,18 @@ tuning.</p>
 class="math inline">\(C_{\mathrm{calib}}\)</span> (diagonal versus
 market) and of <span class="math inline">\(\phi\)</span>; the treatment
 of estimation error in the abilities, a Thurstonian analogue of
-covariance shrinkage; and richer perturbations, such as a temperature
-controlling concentration or using <span
+covariance shrinkage; and using <span
 class="math inline">\(C_{\mathrm{tilt}}\)</span> to express an explicit
-correlation view rather than the sample estimate.</p>
+correlation view rather than the sample estimate. The concentration of
+the allocation is governed by the temperature of <a
+href="#prop:temperature" data-reference-type="ref+Label"
+data-reference="prop:temperature">8</a>, which trades the weight that
+leaks to weak names against the turnover bound of <a href="#thm:smooth"
+data-reference-type="ref+Label" data-reference="thm:smooth">2</a>.</p>
 <p>The tail-consistency result (<a href="#prop:tail"
 data-reference-type="ref+Label" data-reference="prop:tail">7</a>, <a
 href="#rem:anysim" data-reference-type="ref+Label"
-data-reference="rem:anysim">6.3</a>) turns the fat-tailed-performances
+data-reference="rem:anysim">6.4</a>) turns the fat-tailed-performances
 direction into a concrete programme: drive the race with an online
 <em>downside</em> covariance (lower-partial-moment) estimator, which <a
 href="#fig:tail" data-reference-type="ref+Label"
