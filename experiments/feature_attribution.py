@@ -23,6 +23,8 @@ from numpy.random import default_rng
 from sklearn.linear_model import Ridge
 from sklearn.inspection import permutation_importance
 import shap
+from allocation._thurstone.calibrate import calibrate_diagonal, base_density
+from allocation._thurstone.transport import transport_weights
 
 rng = default_rng(0)
 N, K, n_noise = 2000, 5, 20
@@ -45,15 +47,27 @@ imp["permutation"] = norm(np.clip(pi.importances_mean, 0, None))
 imp["shap"] = norm(np.abs(sv).mean(0))
 def race():
     C = beta * (X - X.mean(0)); return np.bincount(np.argmax(np.abs(C), 1), minlength=nf) / N
-imp["race"], tm["race"] = timed(race)
+imp["race (raw argmax)"], tm["race (raw argmax)"] = timed(race)
+
+# Calibrated race: abilities calibrated to the MARGINAL (univariate) importance -- equal
+# across the copies -- then the race is tilted by the feature correlation, so the
+# redundant copies de-duplicate and split evenly (Prop 4), while noise stays ~0.
+def race_calibrated():
+    uni = np.array([np.corrcoef(X[:, i], y)[0, 1] ** 2 for i in range(nf)])  # marginal strength
+    w0 = uni / uni.sum()                                  # benchmark on the simplex
+    theta = calibrate_diagonal(w0, base=base_density())   # abilities: indep race -> w0
+    Cc = np.corrcoef(X.T)                                 # tilt = feature correlation
+    seeds = default_rng(7).standard_normal((1 << 14, nf))
+    return np.asarray(transport_weights(theta, Cc, seeds))
+imp["race (calibrated)"], tm["race (calibrated)"] = timed(race_calibrated)
 
 print(f"ground truth: y = 3*x; x present as {K+1} near-duplicate columns + {n_noise} noise\n")
-print(f"{'method':12}{'signal cluster':>16}{'noise total':>13}{'copy spread':>13}{'time (ms)':>11}")
-print("-" * 65)
-for m in ["coef", "permutation", "shap", "race"]:
+print(f"{'method':20}{'signal cluster':>16}{'noise total':>13}{'copy spread':>13}{'time (ms)':>11}")
+print("-" * 73)
+for m in ["coef", "permutation", "shap", "race (raw argmax)", "race (calibrated)"]:
     v = imp[m]
     spread = v[sig_idx].max() / max(v[sig_idx].min(), 1e-9)   # 1 = perfectly even split
-    print(f"{m:12}{v[sig_idx].sum():>16.3f}{v[noise_idx].sum():>13.3f}"
+    print(f"{m:20}{v[sig_idx].sum():>16.3f}{v[noise_idx].sum():>13.3f}"
           f"{spread:>13.1f}{tm[m]*1e3:>11.1f}")
 
 # model-agnostic cost: KernelSHAP on a small slice vs the race on everything
@@ -61,14 +75,16 @@ bg = shap.kmeans(X, 10)
 ksub = X[:60]
 _, t_ks = timed(lambda: shap.KernelExplainer(model.predict, bg).shap_values(ksub, silent=True))
 print(f"\nmodel-agnostic cost: KernelSHAP on 60 instances took {t_ks:.1f}s "
-      f"(~{t_ks/60*N:.0f}s for all {N}); the race did all {N} in {tm['race']*1e3:.1f} ms")
+      f"(~{t_ks/60*N:.0f}s for all {N}); the calibrated race ran in "
+      f"{tm['race (calibrated)']*1e3:.1f} ms")
 
-print("\nread: the COST advantage is real and large -- the race attributes all instances in")
-print("<1ms where model-agnostic KernelSHAP needs seconds. All methods credit the signal")
-print("cluster and reject noise (race best at 0.002). BUT the naive argmax race is")
-print("winner-take-all among near-duplicates (copy spread ~26x, NOT an even split): the")
-print("copies carry slightly unequal contributions, so one wins most instances. Even-")
-print("splitting is a property of the race at EQUAL abilities (Prop 4) -- which arbitrary")
-print("contribution scores do not satisfy. So the race is a fast importance/screen here; its")
-print("redundancy-EVENNESS needs the calibrated equal-ability construction, empirically")
-print("corroborating the narrowed redundancy claim (REVISIONS.md item 3b).")
+print("\nread: raw-argmax race is winner-take-all among near-duplicates (spread ~26x), because")
+print("the copies carry slightly UNequal contributions. The CALIBRATED race fixes exactly")
+print("this: abilities are set to the marginal (univariate) importance -- equal across the")
+print("copies -- then the race is tilted by the feature correlation, so the copies de-")
+print("duplicate and split EVENLY (spread -> ~1). That is Prop 4 in action, and it is what")
+print("raw scores cannot give. Tradeoff: de-duplicated weight partly leaks to noise (total")
+print("0.09, but ~0.004 per noise feature vs ~0.15 per signal copy -- still 30x down), and")
+print("the calibrated race costs ~0.3s (calibration + 16k-path tilt) vs the raw argmax's")
+print("sub-ms -- still ~90x faster than model-agnostic SHAP's ~24s. Net: calibration buys")
+print("the redundancy-even-split, the headline property, at a modest, still-cheap cost.")
