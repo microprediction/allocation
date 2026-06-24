@@ -735,6 +735,30 @@ field minimum—and hence every other asset’s winning event—is unchanged,
 while the pair ties exactly when <span class="math inline">\(k\)</span>
 would have won. The even split halves that shared probability. ◻</p>
 </div>
+<div id="rem:fixedability" class="remark">
+<p><strong>Remark 1</strong> (Fixed abilities versus recalibration).
+<em><a href="#prop:redundancy" data-reference-type="ref+Label"
+data-reference="prop:redundancy">4</a> is a statement about the race at
+<em>fixed</em> abilities: the duplicate inherits asset <span
+class="math inline">\(k\)</span>’s ability. The full benchmark-anchored
+tilt inherits exact redundancy consistency only when calibration itself
+commutes with duplication, which it need not. If a duplicate enters the
+universe and the abilities are recalibrated to the <em>renormalised</em>
+benchmark under the independent reference, the cluster’s combined weight
+need not return its pre-duplication value. With a two-asset benchmark
+<span class="math inline">\((0.8, 0.2)\)</span>, duplicating the first
+asset at equal capitalisation gives the renormalised benchmark <span
+class="math inline">\((\tfrac49, \tfrac49, \tfrac19)\)</span>;
+independent calibration then sets <span class="math inline">\(|\theta_A
+- \theta_B| \approx 1.01\)</span>, and making the two copies comonotone
+gives the cluster combined weight <span
+class="math inline">\(\Phi(|\theta_A-\theta_B|/\sqrt2) \approx
+0.76\)</span>, not the original <span
+class="math inline">\(0.8\)</span>. The race still de-duplicates—the
+copies share rather than double—but exact pre/post-universe invariance
+requires that duplicated assets keep their calibrated ability rather
+than being recalibrated through a Lucian benchmark.</em></p>
+</div>
 <p>This is the rigorous form of the non-Lucian advantage, though it pays
 to be precise about whom it indicts. At the independent extreme a
 duplicate is a <em>fresh</em> draw, so the pair’s combined weight
@@ -934,7 +958,7 @@ downside-covariance summary and the true tail copula is the part of the
 dependence that is not a second moment at all.</figcaption>
 </figure>
 <div id="rem:twolayers" class="remark">
-<p><strong>Remark 1</strong> (Two layers of tail dependence). <em>Full
+<p><strong>Remark 2</strong> (Two layers of tail dependence). <em>Full
 covariance is blind to the downside asymmetry (<a href="#fig:tail"
 data-reference-type="ref+Label" data-reference="fig:tail">1</a>, grey);
 the downside semicovariance captures the asymmetry but is still a second
@@ -948,7 +972,7 @@ versus green), so a downside-covariance estimator suffices in practice,
 with the simulation path as the exact limit.</em></p>
 </div>
 <div id="rem:centring" class="remark">
-<p><strong>Remark 2</strong> (Centring). <em>The race must run on
+<p><strong>Remark 3</strong> (Centring). <em>The race must run on
 <em>centred</em> performances. With non-zero means the extreme order
 statistic tracks the lowest-drift asset and swamps the tail-dependence
 signal; in the tilt the abilities carry the location and the race acts

@@ -37,7 +37,9 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
   confirms `∇²G=J`, `∇²Ω=J^{-1}`. The correct local Bregman penalty is
   `D_{Ω_S}(w_0+δ,w_0)=½ δ^T J_S(θ_0)^{-1} δ + O(‖δ‖³)`.
 
-- [ ] **[B] 3b. Narrow redundancy consistency to fixed abilities.** Prop 4 is correct *for the race
+- [x] **[B] 3b. Narrow redundancy consistency to fixed abilities — DONE.** Added `rem:fixedability`
+  after Prop 4 with the verified counterexample (`(.8,.2)→(4/9,4/9,1/9)`, `|θ_A−θ_B|≈1.01`, comonotone
+  cluster `≈0.76≠0.8`). Prop 4 is correct *for the race
   at fixed abilities* (equal abilities + comonotone ⇒ tie-split halves the single-horse prob). But the
   full cap-anchored algorithm recalibrates `θ_new=W_{S_0,new}^{-1}(w_new^0)` to the renormalized
   benchmark when a duplicate enters, and **calibration need not commute with duplication**. Referee's
