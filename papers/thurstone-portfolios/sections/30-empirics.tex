@@ -1,0 +1,192 @@
+\section{Turnover: an empirical illustration}
+\label{sec:experiments}
+
+We claim no out-of-sample outperformance; the contribution is the construction and
+its properties. Two of those are visible in a plain walk-forward and matter in
+practice: low turnover (\Cref{thm:smooth}) and well-posedness when names outnumber
+observations. For turnover we trade each estimator forward over the $28$ Dow
+constituents with full 2010--2024 daily history (Yahoo Finance) from a $252$-day
+warm-up, updating online each day; turnover is the mean one-way fraction of the
+book traded per day, the net Sharpe charging $10$ basis points on it.
+
+\begin{table}[h]
+  \centering
+  \caption{Walk-forward over $28$ Dow constituents, 2010--2024. The Thurstone tilt
+  turns over far less than the inversion-free clustering allocators (HRP, Schur)
+  and than minimum variance, at comparable gross Sharpe; the low turnover is not
+  bought by standing still, and it carries through to net Sharpe.}
+  \label{tab:dow}
+  \begin{tabular}{lccc}
+    \toprule
+    Method & Turnover & Sharpe & Net Sharpe \\
+    \midrule
+    Equal weight              & $0.000$ & $0.74$ & $0.74$ \\
+    Inverse variance          & $0.005$ & $0.78$ & $0.76$ \\
+    Risk parity               & $0.004$ & $0.78$ & $0.76$ \\
+    Minimum variance          & $0.045$ & $0.77$ & $0.60$ \\
+    Hierarchical risk parity  & $0.034$ & $0.79$ & $0.67$ \\
+    Schur ($\gamma=0.5$)      & $0.071$ & $0.78$ & $0.53$ \\
+    Thurstone tilt            & $0.008$ & $0.71$ & $0.69$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The tilt turns over four to nine times less than the seriation-smoothed Schur and
+HRP and than minimum variance, in line with \Cref{thm:smooth}: its weights move
+with the correlation, not with the re-clustering or re-seriation those methods
+incur each step, and it sits at the low-turnover end alongside inverse variance.
+Gross Sharpe is comparable across methods, so the gap is not an artefact of trading
+little. We make no risk-adjusted-return claim.
+
+\paragraph{Scale.}
+The second practical property is feasibility. Beyond a few hundred names ($n > T$)
+the sample covariance is rank-deficient, so dense minimum-variance and
+maximum-diversification are \emph{undefined}; only the inversion-free methods
+remain. The factor-form race never inverts and costs $O(Mnk)$, staying well-posed
+and fitting in a few seconds to $n = 3000$ (the Woodbury factor optimizers of
+\Cref{sec:computation} scale likewise, and faster).
+
+\begin{table}[h]
+  \centering
+  \caption{Fit time (s) on $5$-factor data with a $T=250$ window. Dense
+  minimum-variance is undefined once $n \ge T$; the factor-form race and the
+  Woodbury factor optimizer remain well-posed and scale.}
+  \label{tab:scale}
+  \begin{tabular}{lcccc}
+    \toprule
+    $n$  & dense MinVar & Thurstone ($k{=}5$) & FactorMinVar & HRP \\
+    \midrule
+    $250$  & undefined & $0.38$ & $0.01$ & $0.02$ \\
+    $1000$ & undefined & $0.90$ & $0.20$ & $0.33$ \\
+    $3000$ & undefined & $3.0$  & $1.4$  & $3.2$  \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The cost is that the realized turnover of \Cref{thm:smooth} grows with the path
+budget needed for stable win frequencies at large $n$, so the race trades compute
+for smoothness in a regime where dense inversion is not an option at all.
+
+\section{Forecast combination: a promising but inconclusive study}
+\label{sec:combination}
+
+Because the tilt returns simplex weights from a dependence-adjusted regularizer
+without inverting anything (\Cref{thm:objective}), it is naturally a
+\emph{forecast combiner}: feed the $K$ base models' error series to the race as
+the competitors' performances and read off the combination weights. Forecast
+combination is also where the central tension of this paper has a long
+empirical history---the ``forecast combination puzzle'' that the simple average
+is hard to beat with an estimated-optimal combination
+\parencite{bates1969,timmermann2006}, precisely because the optimal weights
+overfit a noisily estimated error covariance.
+
+We ran a first study on the M4 competition data \parencite{makridakis2020},
+fitting the standard statistical base-forecaster pool to the Yearly, Quarterly
+and Monthly series, estimating combination weights on a small set of series, and
+evaluating held-out sMAPE while sweeping the number of fitting series---the
+small-sample lever the puzzle turns on (\Cref{fig:combine}). The result is the
+expected bias--variance crossover. The variance-optimal Bates--Granger
+combination ($w \propto \Sigma_e^{-1}\mathbf 1$) is wild when series are few and
+settles only once the error covariance is well estimated; the equal-weight
+average is dominated; non-negative least-squares stacking \parencite{breiman1996}
+is a strong, stable baseline. The ability tilt is the \emph{lowest-variance}
+combiner at every sample size, and the best when forecasters are of comparable
+quality and the fitting data is scarce (M4 Yearly at five to ten series,
+Quarterly at five). Where one method dominates the pool, concentration wins and
+stacking takes over---exactly what the redundancy property
+(\Cref{prop:redundancy}) would predict. We report this as suggestive rather than
+settled: the tilt is the stable, small-sample member of the combination family,
+not a uniformly better combiner, and the case for it as a general non-negative
+regression and stacking tool is a direction we mean to pursue, not a result we
+claim here.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{figures/m4_combination.png}
+  \caption{Forecast combination on M4. Held-out sMAPE against the number of series
+  used to estimate the combination weights, over a comparable-quality base pool;
+  mean $\pm$ one standard deviation across random fitting draws. The ability tilt
+  (Thurstone, green) has the tightest variance throughout and is best in the
+  small-sample corner; non-negative least-squares stacking (blue) is the strong
+  general baseline; the variance-optimal Bates--Granger combination (red) overfits
+  badly when series are few; the equal-weight average (grey) is dominated.}
+  \label{fig:combine}
+\end{figure}
+
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Choice and ranking.}
+The Thurstonian (probit) model \parencite{thurstone1927} and the Luce
+\parencite{luce1959} / Bradley--Terry \parencite{bradleyterry1952} /
+Plackett--Luce \parencite{plackett1975} family are the two classical accounts of
+probabilistic choice, differing precisely on independence of irrelevant
+alternatives; our allocator is the Thurstonian side of that dichotomy applied to
+portfolio weights (\Cref{sec:choice,sec:fat}).
+
+\paragraph{The racing inverse.}
+Assigning winning probabilities to multi-entrant contests and inverting them to
+relative abilities is treated by \textcite{harville1973} and, in the lattice form
+we use, by \textcite{cotton2021}; the latter supplies the linear-time
+forward/inverse maps and tie handling that drive calibration.
+
+\paragraph{Capitalization weighting and robust portfolios.}
+The CAPM \parencite{sharpe1964}, Roll's critique \parencite{roll1977} and its
+correlation-aware refinements \parencite{prono2009}, fundamental indexing
+\parencite{hsu2006}, covariance shrinkage \parencite{ledoitwolf2004},
+tracking-error analysis \parencite{roll1992}, and the Markowitz optimization
+baseline \parencite{markowitz1952} are taken up where they bear on the argument
+(\Cref{sec:capm,sec:robust}).
+
+\paragraph{Long-only allocation as regularized regression.}
+Long-only mean--variance is a non-negative regression: the tangency weights are the
+coefficients of regressing a constant on excess returns \parencite{brittenjones1999},
+and the no-short constraint itself acts like covariance shrinkage
+\parencite{jagannathanma2003}. The stable, scalable members of this family penalise
+that regression---$\ell_1$ for sparse, stable portfolios \parencite{brodie2009},
+portfolio-norm constraints \parencite{demiguel2009norms}, and gross-exposure
+($\ell_1$) constraints for vast universes \parencite{fan2012}. The ability tilt is
+the \emph{entropic} member: it returns simplex weights under a dependence-adjusted
+entropy regularizer (\Cref{thm:objective}) rather than an $\ell_1$/$\ell_2$ penalty,
+and obtains them without solving the constrained least-squares program. The same
+machinery is a general tool for stable non-negative (simplex) regression---it shares
+weight among collinear regressors (\Cref{prop:redundancy}), stays smooth under
+streaming updates (\Cref{thm:smooth}), and is well-posed when regressors outnumber
+observations. Forecast combination and model stacking \parencite{breiman1996,
+timmermann2006}, where stable combinations are known to beat the
+least-squares-optimal one, are the natural application; \Cref{sec:combination}
+reports a first, promising-but-inconclusive study on M4.
+
+\paragraph{Perturbed optimizers.}
+The identity ``weights equal the gradient of an expected maximum'' is the
+random-utility social-surplus construction \parencite{mcfadden1981, williams1977}
+and, in machine learning, the perturbed-optimizer / differentiable-argmax
+framework \parencite{berthet2020}. Gumbel perturbations give the
+entropy-regularized softmax; our Gaussian, correlation-bearing perturbation gives
+the correlation-aware regularizer of \Cref{thm:objective}.
+
+\section{Discussion}
+\label{sec:discussion}
+
+The ability tilt is a mechanically simple idea with useful properties: long-only and feasible
+without optimization, never inverting a covariance, reproducing a chosen benchmark
+by construction and tilting only in response to correlation, and solving an
+interpretable correlation-aware regularized program (\Cref{thm:objective}) whose
+weights vary smoothly enough (\Cref{thm:smooth}) to bound turnover and license
+cheap online updates and gradient-based tuning.
+
+Open questions include the choice of reference correlation $C_{\mathrm{calib}}$
+(diagonal versus market) and of $\phi$; the treatment of estimation error in the
+abilities, a Thurstonian analogue of covariance shrinkage; and richer
+perturbations, such as a temperature controlling concentration or using
+$C_{\mathrm{tilt}}$ to express an explicit correlation view rather than the sample
+estimate.
+
+The tail-consistency result (\Cref{prop:tail}, \Cref{rem:anysim}) turns the
+fat-tailed-performances direction into a concrete programme: drive the race with an
+online \emph{downside} covariance (lower-partial-moment) estimator, which
+\Cref{fig:tail} shows recovers almost all of the effect, and reserve the full
+tail-dependent simulation for the residual. Estimating that downside covariance
+robustly and online, and measuring whether the tail-aware tilt pays out of sample
+on drawdown and expected shortfall rather than Sharpe, is the natural next study.
+

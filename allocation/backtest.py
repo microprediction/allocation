@@ -76,8 +76,43 @@ def walk_forward(factory, returns, warmup: int = 60):
     return np.array(rets), np.array(path)
 
 
+def _expected_shortfall(rets, alpha: float) -> float:
+    """Expected shortfall (CVaR) at level ``alpha``: the mean *loss* in the worst
+    ``1-alpha`` tail of the return series (e.g. ``alpha=0.95`` -> mean of the worst
+    5% of days, reported as a positive loss). This is the headline tail metric --
+    the thing a tail-aware allocator should minimise and a variance-only one
+    ignores.
+    """
+    rets = np.asarray(rets, dtype=float)
+    if rets.size == 0:
+        return 0.0
+    q = float(np.quantile(rets, 1.0 - alpha))  # left-tail return cutoff (VaR, signed)
+    tail = rets[rets <= q]
+    return float(-tail.mean()) if tail.size else float(-q)
+
+
+def _max_drawdown(rets) -> float:
+    """Max peak-to-trough drawdown of the compounded equity curve (a positive
+    fraction). The worst-case path metric -- a tail of the *ordering*, not just
+    the marginal, so it sees clustered losses that ES on i.i.d. days can miss.
+    """
+    rets = np.asarray(rets, dtype=float)
+    if rets.size == 0:
+        return 0.0
+    equity = np.cumprod(1.0 + rets)
+    peak = np.maximum.accumulate(equity)
+    return float(np.max(1.0 - equity / peak))
+
+
 def portfolio_metrics(rets, weight_path, periods_per_year: int = 252, cost_bps: float = 10.0):
-    """Summary metrics for a realised return series and its weight path."""
+    """Summary metrics for a realised return series and its weight path.
+
+    Alongside the smoothness/return headline (turnover, Sharpe), reports the
+    **tail** block -- expected shortfall at 95/99%, max drawdown, and the Sortino
+    ratio (downside-only Sharpe) -- so a tail-aware method (e.g. the Student-t
+    Thurstone race) can be scored on the axis it is meant to win, not just on
+    variance-flavoured Sharpe.
+    """
     rets = np.asarray(rets, dtype=float)
     W = np.asarray(weight_path, dtype=float)
     dW = np.abs(np.diff(W, axis=0)).sum(axis=1) if len(W) > 1 else np.array([0.0])
@@ -86,6 +121,7 @@ def portfolio_metrics(rets, weight_path, periods_per_year: int = 252, cost_bps: 
     net = rets - cost
     sd = float(np.std(rets))
     sd_net = float(np.std(net))
+    downside = float(np.sqrt(np.mean(np.minimum(rets, 0.0) ** 2)))
     ann = np.sqrt(periods_per_year)
     return {
         "sharpe": float(np.mean(rets) / sd * ann) if sd > 0 else 0.0,
@@ -94,6 +130,11 @@ def portfolio_metrics(rets, weight_path, periods_per_year: int = 252, cost_bps: 
         "net_sharpe": float(np.mean(net) / sd_net * ann) if sd_net > 0 else 0.0,
         "max_w": float(np.mean(np.max(W, axis=1))),
         "eff_n": float(np.mean(1.0 / np.sum(W**2, axis=1))),
+        # tail block
+        "cvar_95": _expected_shortfall(rets, 0.95),
+        "cvar_99": _expected_shortfall(rets, 0.99),
+        "max_dd": _max_drawdown(rets),
+        "sortino": float(np.mean(rets) / downside * ann) if downside > 0 else 0.0,
     }
 
 

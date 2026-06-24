@@ -156,6 +156,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+# descriptively-named local dev envs (convention: allocation-py<ver>)
+allocation-py*/
 
 # Spyder project settings
 .spyderproject
@@ -223,3 +225,8 @@ research/output/
 *.png
 *.pdf
 !docs/**/*.png
+# keep figures used by the papers (override the blanket *.png ignore)
+!papers/**/figures/*.png
+
+# macOS
+.DS_Store

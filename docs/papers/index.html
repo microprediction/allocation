@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>allocation — papers</title>
+  <meta name="description" content="Working papers from the allocation project: Thurstone portfolios and Schur-complementary allocation.">
+  <style>
+    :root{
+      --bg:#fafafa; --text:#1a1a1a; --muted:#5a5a5a; --faint:#9a9a9a;
+      --accent:#4a3aff; --border:#e6e6e6;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.65;font-size:17px}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    code{background:#f1f1f4;padding:1px 5px;border-radius:3px;font-size:.92em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+
+    .crumb{max-width:720px;margin:0 auto;padding:20px 24px 0;display:flex;
+      justify-content:space-between;align-items:center;font-size:.95rem}
+    .crumb a{color:var(--muted)}
+    .crumb a:hover{color:var(--accent)}
+
+    main{max-width:720px;margin:18px auto 0;padding:0 24px 40px}
+    h1{font-size:2rem;margin:.2em 0 .1em;line-height:1.2}
+    .intro{color:var(--muted);font-size:1.08rem;margin:0 0 8px}
+
+    .entry{padding:26px 0;border-top:1px solid var(--border)}
+    .entry h2{font-size:1.2rem;margin:0 0 .15em;line-height:1.3}
+    .entry .by{color:var(--faint);font-weight:400;font-size:.95rem}
+    .entry .tag{font-style:italic;color:var(--muted);margin:.2em 0 .6em}
+    .entry p{margin:.5em 0}
+    .entry .go{margin-top:.7em;font-size:.95rem}
+
+    footer{max-width:720px;margin:24px auto 40px;padding:18px 24px 0;border-top:1px solid var(--border);
+      color:var(--faint);font-size:.85rem}
+    footer a{color:var(--muted)}
+  </style>
+</head>
+<body>
+
+<div class="crumb">
+  <a href="../">&larr; allocation</a>
+  <a href="https://github.com/microprediction/allocation">GitHub</a>
+</div>
+
+<main>
+  <h1>Papers</h1>
+  <p class="intro">Working papers from the <code>allocation</code> project &mdash; the
+  theory behind the two novel methods. Drafts, revised as the work matures.</p>
+
+  <div class="entry">
+    <h2><a href="thurstone-portfolios/">Thurstone Portfolios: Allocation as Winning Probability</a>
+      <span class="by">&middot; Peter Cotton</span></h2>
+    <p class="tag">Long-only allocation as the winning probabilities of a correlated race.</p>
+    <p>Abilities calibrate the race to a benchmark; the tilt re-runs it under the
+    estimated dependence, so the portfolio is a controlled perturbation of the
+    benchmark. It is free of the duplication paradox, tail-consistent when the race
+    is driven by a downside-dependent simulation, and solves an implied
+    convex-regularizer objective with a smoothness (low-turnover) bound. Built on the
+    <a href="https://github.com/microprediction/thurstone">thurstone</a> package.</p>
+    <p class="go"><a href="thurstone-portfolios/">Read online &rarr;</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://github.com/microprediction/allocation/tree/main/papers/thurstone-portfolios">Source</a></p>
+  </div>
+
+  <div class="entry">
+    <h2>Schur-complementary allocation</h2>
+    <p class="tag">Robust, inversion-light allocation along a smooth Fiedler seriation.</p>
+    <p>A one-parameter (<code>gamma</code>) bridge between hierarchical risk parity and
+    minimum variance, ordered by Fiedler seriation rather than a dendrogram, so the
+    hierarchy and the weights are a smooth function of the covariance. Background,
+    bibliography, and a literature map at
+    <a href="https://schur.microprediction.org">schur.microprediction.org</a>.</p>
+    <p class="go"><a href="https://schur.microprediction.org">Explore &rarr;</a></p>
+  </div>
+</main>
+
+<footer>
+  More methods are in development; drafts are revised as the work matures and are
+  meant to be upstreamable. &nbsp;allocation &middot; MIT licensed &middot;
+  <a href="https://github.com/microprediction/allocation">microprediction/allocation</a>
+</footer>
+
+</body>
+</html>

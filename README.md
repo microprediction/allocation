@@ -6,6 +6,7 @@ scikit-learn / [skfolio](https://skfolio.org)-compatible estimators
 dynamic-universe layer so they survive reconstituting universes.
 
 📖 **[allocation.microprediction.org](https://allocation.microprediction.org)**
+&nbsp;·&nbsp; 🤖 **[SKILL.md](SKILL.md)** — when to reach for `allocation` (for LLMs / code review)
 
 ```python
 from allocation import ThurstonePortfolio
@@ -32,7 +33,9 @@ per-asset state across streaming updates. `allocation` is the **online**
 complement — estimators with `partial_fit`, a keyed dynamic universe (in the
 spirit of [`precise`](https://github.com/microprediction/precise)), and turnover
 control by construction — while staying API-compatible so each estimator can also
-be contributed upstream to skfolio.
+be contributed upstream to skfolio. It is all MIT-licensed and meant to be
+upstreamed: Max (river) and Hugo (skfolio) are welcome to take anything here and
+improve on it.
 
 ## Methods
 
@@ -60,7 +63,8 @@ The robust large-universe methods are the ones that never invert `Σ`: inverse-v
 HRP/Schur, and the **Thurstone tilt** — benchmark-anchored, no inversion, low turnover.
 `ThurstonePortfolio(factors=k)` runs the tilt with a `k`-factor (low-rank) correlation and
 an `O(M·n·k)` race instead of the dense `O(M·n²)+O(n³)` one, so it scales to thousands of
-names (≈0.4 s/rebalance at n=3000).
+names (a few seconds per rebalance at n=3000 with the default path budget; fewer paths
+trade accuracy for speed).
 
 To make *minimum-variance itself* well-posed at scale, `FactorMinimumVariance` /
 `FactorMaximumDiversification` invert a factor covariance `Σ = BBᵀ + diag(ψ)` via the
@@ -133,6 +137,21 @@ allocation/
 Covariance is pluggable: the default is a light EWMA, but any online estimator
 exposing `partial_fit` and `covariance_` (e.g. a `precise` skater) can be passed
 via `covariance=`.
+
+## Papers
+
+The two novel methods are written up as working papers.
+
+- **Thurstone Portfolios: Allocation as Winning Probability** — long-only
+  allocation as the winning probabilities of a correlated race: free of the
+  duplication paradox, tail-consistent when the race is driven by a
+  downside-dependent simulation, with an implied regularized objective and a
+  smoothness/turnover bound. Draft in
+  [`papers/thurstone-portfolios/`](papers/thurstone-portfolios), built on
+  [`thurstone`](https://github.com/microprediction/thurstone).
+- **Schur-complementary allocation** — robust, inversion-light allocation along a
+  smooth Fiedler seriation; background and bibliography at
+  [schur.microprediction.org](https://schur.microprediction.org).
 
 ## Status
 

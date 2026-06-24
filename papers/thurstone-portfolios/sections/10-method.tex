@@ -1,0 +1,134 @@
+\section{The Thurstonian Model of a Field}
+\label{sec:model}
+
+Consider a universe of $n$ assets. Each asset has a latent ability $a_i\in\R$ and
+a noisy \emph{performance}
+\begin{equation}
+  X_i = a_i + \varepsilon_i, \qquad \varepsilon = (\varepsilon_1,\dots,\varepsilon_n)
+  \sim S,
+  \label{eq:performance}
+\end{equation}
+where $S$ is any centered joint law---the \emph{simulation} that drives the
+race---and we adopt the convention that the \emph{minimum} performance wins, so
+that a smaller ability denotes a stronger competitor. The Gaussian
+$S = \mathcal{N}(0, \Sigma_\varepsilon)$ is the workhorse, and the only case in
+which the calibration and smoothness results below are closed-form; but the
+construction---and the implementation---treat $S$ as a black-box sampler, so a
+copula with genuine tail dependence, a fat-tailed or skewed law, or a structured
+generator are equally admissible (\Cref{prop:tail,rem:anysim}). The \emph{state price} (winning
+probability) of asset $i$ is
+\begin{equation}
+  p_i \;=\; \Prob\!\left( X_i = \min_{k} X_k \right).
+  \label{eq:stateprice}
+\end{equation}
+When the performances are independent ($\Sigma_\varepsilon$ diagonal) the
+$p_i$ are determined by the abilities alone through the distribution of the first
+order statistic, and $p$ is a smooth, monotone function of $a$
+\parencite{cotton2021}. Two maps are then of interest:
+\begin{align}
+  \text{forward:}\quad & a \;\longmapsto\; p, \label{eq:forward}\\
+  \text{inverse:}\quad & p \;\longmapsto\; a. \label{eq:inverse}
+\end{align}
+The inverse \eqref{eq:inverse}---the \emph{Fast Ability Transform}---recovers
+abilities (up to an additive constant) from a target set of winning
+probabilities, and is the engine of the construction below.
+
+\section{Thurstone Portfolios via the Ability Tilt}
+\label{sec:method}
+
+We treat portfolio \emph{weights} as winning probabilities and \emph{assets} as
+competitors. The construction uses two simulations---a \emph{reference} law and a
+\emph{target} law. We first \emph{calibrate} latent abilities so that the race
+under the reference law reproduces a target allocation $w^{\mathrm{target}}$ (a
+benchmark such as capitalization weights); we then re-run the race under the
+target law and read off the winning probabilities as the tilted weights. In the
+Gaussian workhorse the two laws are two correlation matrices---a reference
+$C_{\mathrm{calib}}$ and the estimated return correlation $C_{\mathrm{tilt}}$---and
+the tilt is the portfolio's response to $C_{\mathrm{tilt}} - C_{\mathrm{calib}}$
+(\Cref{prop:fixedpoint}); but any pair of centered samplers may be used, with the
+target law in particular carrying dependence (tail dependence included) that the
+reference does not.
+
+\begin{algorithm}[h]
+\caption{Ability tilt (Thurstone portfolio)}
+\label{alg:tilt}
+\begin{algorithmic}[1]
+\Require target weights $w^{\mathrm{target}}\in\Delta$; reference sampler
+         $S_{\mathrm{calib}}$; target sampler $S_{\mathrm{tilt}}$ (Gaussian
+         $\mathcal{N}(\,\cdot\,, C_{\mathrm{tilt}})$ by default).
+\State $a \gets \textsc{Calibrate}(w^{\mathrm{target}}, S_{\mathrm{calib}})$
+       \Comment{abilities s.t.\ the race under $S_{\mathrm{calib}}$ yields $w^{\mathrm{target}}$}
+\State Draw $X^{(1)},\dots,X^{(M)} \sim S_{\mathrm{tilt}}(a)$ from \emph{fixed} seeds
+       \Comment{Gaussian: $X^{(m)} = a + C_{\mathrm{tilt}}^{1/2} Z^{(m)}$}
+\State $w_i \gets \dfrac{1}{M}\sum_{m=1}^{M}
+       \mathbf{1}\!\left[\, i = \argminop_k X^{(m)}_k \,\right]$
+       \Comment{win frequency}
+\State \Return $w$
+\end{algorithmic}
+\end{algorithm}
+
+Two choices of the reference correlation give the practical flavours:
+\begin{itemize}
+  \item \textbf{Diagonal} ($C_{\mathrm{calib}} = I$). Calibration is the exact
+        order-statistic inverse of \Cref{sec:model} (the Fast Ability
+        Transform), and the tilt then injects the estimated correlation. The
+        target may be any benchmark---the variance-only diagonal portfolio,
+        capitalization weights, or equal weight.
+  \item \textbf{One-factor market}
+        ($C_{\mathrm{calib}} = \beta\beta^\top + \mathrm{diag}(1-\beta^2)$). The
+        reference is a single market factor with loadings $\beta$; calibration
+        reproduces the benchmark \emph{given} that market correlation, so the
+        tilt's deviation is driven by the residual (non-market) correlation in
+        $C_{\mathrm{tilt}}$.
+\end{itemize}
+
+\noindent In the Gaussian workhorse a scalar $\phi \in [0,1]$ sets
+$C_{\mathrm{tilt}} = (1-\phi)\,C_{\mathrm{calib}} + \phi\,\widehat{C}$, dialling
+the estimated correlation $\widehat{C}$ in continuously: $\phi = 0$ reproduces the
+benchmark (\Cref{prop:fixedpoint}) and $\phi = 1$ uses the full estimate. The
+construction never inverts a covariance---it needs only a valid correlation for
+sampling, repaired if necessary to the nearest correlation matrix, so it tolerates
+ill-conditioned or singular estimates. Its feasibility, fixed-point, redundancy,
+monotonicity, and objective properties are established in \Cref{sec:properties}.
+
+\section{Computation}
+\label{sec:computation}
+
+\paragraph{Calibration (deterministic).}
+The calibration step---the inverse map from target weights to abilities---is
+computed deterministically with the lattice machinery of the \texttt{thurstone}
+package, which builds the distribution of the first order statistic by convolving
+competitor densities and tracking conditional multiplicity for ties
+\parencite{cotton2021}. For a diagonal reference this is the exact
+order-statistic inverse \eqref{eq:inverse}, with no Monte-Carlo error and cost
+linear in $n$. For the one-factor reference the assets are conditionally
+independent given the market factor, so the same lattice race is evaluated at a
+few Gauss--Hermite nodes and integrated over the factor; the inverse is then a
+damped fixed-point on this forward map. This is the only place quadrature enters.
+
+\paragraph{Tilt (Monte-Carlo).}
+The race under a general target law has no tractable analytic form, so it is
+evaluated by sampling. The \texttt{allocation} package factors the race into a
+\emph{draw}---the sampler---and a \emph{scoring} step, the argmin win-frequency
+core, so the sampler is a plug-in: the Gaussian default recolours a fixed
+standard-normal ensemble by $C_{\mathrm{tilt}}^{1/2}$ (a quasi-Monte-Carlo
+ensemble may be substituted to sharpen the win-frequency \emph{level}, though not
+the step-to-step turnover of \Cref{sec:smoothness}); a Student-$t$ and a low-rank
+factor race (for scale) ship alongside; and any user callable obeying the
+fixed-seed contract supplies an arbitrary law. Tail consistency (\Cref{prop:tail}) follows by
+driving the race with a downside-dependent sampler---or, within the Gaussian
+workhorse, a downside (lower-partial-moment) covariance. This supersedes the
+earlier \texttt{winningport} implementation of the tilt.
+
+\paragraph{Online updates and scale.}
+At rebalancing the correlation estimate moves slowly, and \Cref{sec:smoothness}
+shows the weights move smoothly with it. We exploit this by holding the
+standard-normal seeds fixed and \emph{transporting} the path ensemble to the new
+correlation (recolouring by the updated square root), so turnover tracks genuine
+correlation change rather than sampling noise. For large universes the dense
+correlation is never formed: a low-rank factor model $C = BB^\top + D$ keeps both
+the transport and the argmin streaming and linear in $n$, scaling to thousands of
+assets. The covariance estimate itself is supplied by any external online
+estimator, so the method interoperates with standard covariance-forecasting
+tooling.
+

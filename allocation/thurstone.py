@@ -22,8 +22,11 @@ from ._thurstone.covariance import cov_to_corr, factor_decompose, market_betas, 
 from ._thurstone.diagonal import diagonal_portfolio
 from ._thurstone.transport import (
     blend_correlation,
+    race_weights,
     transport_weights,
     transport_weights_lowrank,
+    transport_weights_lowrank_t,
+    transport_weights_t,
 )
 
 __all__ = ["ThurstonePortfolio"]
@@ -53,6 +56,23 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
     phi : float in [0, 1], default 1.0
         Correlation scale for the tilt: 0 reproduces the benchmark, 1 uses the
         full estimated correlation.
+    sampler : {"gaussian", "student_t"} or callable, default "gaussian"
+        Distribution of the latent race. ``"gaussian"`` is the classic Thurstone
+        normal race. ``"student_t"`` runs a multivariate-t race (``nu`` degrees of
+        freedom): fat marginal tails *and* tail dependence, so the winning
+        probabilities become a genuine tail statistic rather than a function of
+        the correlation alone -- the same common-seed transport keeps it smooth.
+        A **callable** ``(ability, corr, seeds) -> X`` drives the race with *any*
+        centered performance law (a copula with real tail dependence, a skew-t, a
+        structured generator) -- the "any simulation" path; it must be a
+        deterministic function of the fixed ``seeds`` (the common-seed contract;
+        see :func:`allocation._thurstone.transport.gaussian_sampler` for the
+        reference and the contract). Custom samplers run in dense mode only
+        (``factors=None``).
+    nu : float, default 7.0
+        Degrees of freedom for ``sampler="student_t"`` (must be > 0; smaller is
+        heavier-tailed, ``nu -> inf`` recovers the Gaussian race). Ignored for the
+        Gaussian sampler.
     n_paths : int, default 16384
         Monte-Carlo seed budget (rounded up to a power of two).
     n_quad : int, default 16
@@ -78,6 +98,8 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         target="diagonal",
         calib: str = "diagonal",
         phi: float = 1.0,
+        sampler: str = "gaussian",
+        nu: float = 7.0,
         n_paths: int = 1 << 14,
         n_quad: int = 16,
         factors: int | None = None,
@@ -89,6 +111,8 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         self.target = target
         self.calib = calib
         self.phi = phi
+        self.sampler = sampler
+        self.nu = nu
         self.n_paths = n_paths
         self.n_quad = n_quad
         self.factors = factors
@@ -97,6 +121,8 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         self._seeds = None
         self._seeds_factor = None
         self._seeds_idio = None
+        self._seeds_chi2 = None
+        self._custom_sampler = False
         self._ability = None
         self._C_calib = None
         self._target_w = None
@@ -117,6 +143,18 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
     def _cold_start(self, cov: np.ndarray) -> None:
         if not 0.0 <= self.phi <= 1.0:
             raise ValueError("phi must lie in [0, 1].")
+        self._custom_sampler = callable(self.sampler)
+        if self._custom_sampler:
+            if self.factors:
+                raise ValueError(
+                    "a callable sampler is supported only in dense mode (set factors=None)"
+                )
+        elif self.sampler not in ("gaussian", "student_t"):
+            raise ValueError(
+                f"unknown sampler {self.sampler!r} (use 'gaussian', 'student_t', or a callable)"
+            )
+        if self.sampler == "student_t" and not self.nu > 0:
+            raise ValueError("nu must be > 0 for the student_t sampler.")
         n = cov.shape[0]
         base = base_density()
         tgt = self._resolve_target(cov)
@@ -142,20 +180,42 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
             self._seeds_idio = rng.standard_normal((m, n))
         else:
             self._seeds = rng.standard_normal((m, n))
+        # fixed per-path t-mixing scalar -- drawn once, like every other seed, so
+        # the t-race stays smooth in the correlation (turnover tracks structure).
+        if self.sampler == "student_t":
+            self._seeds_chi2 = rng.chisquare(self.nu, m)
         self._online_update(cov)
 
     def _online_update(self, cov: np.ndarray) -> None:
+        if self._custom_sampler:
+            # the "any simulation" path: drive the race with a caller-supplied
+            # centered law, scored by the universal argmin core.
+            C_tilt = blend_correlation(self._C_calib, cov, self.phi)
+            X = self.sampler(self._ability, C_tilt, self._seeds)
+            self._weights = race_weights(X)
+            return
         if self.factors:
             # keep the tilt low-rank end to end: blend correlations (a PSD convex
             # combination already has unit diagonal), factor it, race in O(M n k).
             ct = (1.0 - self.phi) * self._C_calib + self.phi * cov_to_corr(cov)
             B, d = factor_decompose(ct, min(int(self.factors), cov.shape[0]), seed=self.seed)
-            self._weights = transport_weights_lowrank(
-                self._ability, B, d, self._seeds_factor, self._seeds_idio
-            )
+            if self.sampler == "student_t":
+                self._weights = transport_weights_lowrank_t(
+                    self._ability, B, d, self._seeds_factor, self._seeds_idio,
+                    self._seeds_chi2, self.nu,
+                )
+            else:
+                self._weights = transport_weights_lowrank(
+                    self._ability, B, d, self._seeds_factor, self._seeds_idio
+                )
         else:
             C_tilt = blend_correlation(self._C_calib, cov, self.phi)
-            self._weights = transport_weights(self._ability, C_tilt, self._seeds)
+            if self.sampler == "student_t":
+                self._weights = transport_weights_t(
+                    self._ability, C_tilt, self._seeds, self._seeds_chi2, self.nu
+                )
+            else:
+                self._weights = transport_weights(self._ability, C_tilt, self._seeds)
 
     # --------------------------------------------------- fitted attributes
     @property
