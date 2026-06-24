@@ -401,6 +401,12 @@ and never forms $\Sigma^{-1}$---yet convex duality still leaves an inverse, now 
 bounded, simplex-supported curvature rather than a lever on small covariance
 eigenmodes. Singular dependence merely means some assets are effective duplicates
 in the race, not that the optimizer takes explosive offsetting positions.
+Numerically the contrast is stark: as the reference correlation is driven toward
+singularity---condition number into the hundreds---the choice-sensitivity
+$\nabla_\theta w$ stays uniformly scaled, its own condition number remaining near
+one, so the displaced inverse never inherits the ill-conditioning that defeats
+$\Sigma^{-1}$, and a Newton calibration step preconditioned by it converges in a
+handful of iterations.
 
 \paragraph{A selection identity.}
 For the Gaussian workhorse one identity sits behind this local geometry.

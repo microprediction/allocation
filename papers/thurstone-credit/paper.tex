@@ -305,11 +305,13 @@ race, which is the construction to use; raw scores give only a winner-take-all
 screen. Its axiomatic standing is settled by \Cref{prop:axioms}: it keeps
 efficiency, symmetry, and the null-player property, trading away only additivity.
 As a variable-selection rule it is the stable, redundancy-aware option of
-\Cref{sec:apps}. Open questions: whether its choice-sensitivity Jacobian
-$\nabla_\theta w$---a correlation-aware metric on the simplex---is a useful
-preconditioner; and how to control the redistribution of de-duplicated credit to
-weak contributors, the one cost that recurs across the attribution and selection
-experiments. The construction and its calibration inverse are implemented in the
+\Cref{sec:apps}. Its choice-sensitivity Jacobian $\nabla_\theta w$ turns out to be
+well-conditioned even when the covariance is not: numerically its condition number
+stays near $1$ while the covariance's grows into the hundreds, so the
+ill-conditioning that defeats $\Sigma^{-1}$ never enters the choice-space inverse and
+calibration needs no preconditioning. The cost that does remain is how to control the
+redistribution of de-duplicated credit to weak contributors---the one weakness that
+recurs across the attribution and selection experiments. The construction and its calibration inverse are implemented in the
 open-source \texttt{allocation} package, built on \texttt{thurstone}.
 
 \printbibliography
