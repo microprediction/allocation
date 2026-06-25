@@ -10,8 +10,8 @@
 
 \newtheorem{remark}{Remark}
 
-\title{Thurstone Portfolios:\\
-       Allocation as Winning Probability}
+\title{Thurstone Portfolio Polishing:\\
+       Tail-Sensitive Black--Litterman and Beyond}
 \author{Peter Cotton}
 \date{\today}
 
@@ -29,33 +29,32 @@
 \maketitle
 
 \begin{abstract}
-We develop \emph{Thurstone portfolios}, a long-only allocation scheme whose weights
-are the winning probabilities of a race among assets, read as a Thurstonian model of
-choice and set against the passive industry's capitalization weighting and its
-silent appeal to Luce's choice axiom. The organizing property is \emph{redundancy
-consistency}: adding a near-duplicate asset splits its position between the
-duplicates rather than doubling the exposure---the portfolio cure for the
-red-bus/blue-bus failure of any Luce-type rule, and a behaviour mean--variance
-attains only by inverting a covariance that is singular exactly where the redundancy
-lives. Because redundancy is near-singularity, three properties usually treated
-apart are one: the race is robust to ill-conditioning (it samples from a correlation
-rather than inverting one), it turns over little (its weights are locally Lipschitz in the
-correlation), and it de-duplicates correlated holdings smoothly. One property stands
-apart, being no matter of conditioning: driven by a tail-dependent simulation the
-race responds to lower-tail co-movement no covariance can encode, so assets that
-crash together share a single position. The construction is feasible on the simplex
-without optimization, reproduces a chosen benchmark by construction, admits an
-arbitrary performance simulation so dependence beyond second moments can be matched,
-and solves an implied mean--(convex-regularizer) program whose penalty the
-simulation fixes; capitalization weighting appears as its degenerate,
-correlation-blind member. Read as reverse optimization it is a \emph{tail-sensitive
-analogue of Black--Litterman}: latent abilities are backed out of a benchmark and
-re-weighted under a view on \emph{dependence}---correlation or tail co-movement---in
-place of a view on returns, with a fast exact ability inverse standing in for the
-linear one Black--Litterman never needs. We prove the supporting properties
-(feasibility, index reproduction, redundancy and tail consistency, the implied
-objective, and a Lipschitz turnover bound) and implement the method in the
-\texttt{allocation} package, built on \texttt{thurstone}.
+We develop \emph{Thurstone portfolio polishing}: a way to take an existing allocation
+on the simplex---a capitalization index, an equal-weight book, any benchmark---and
+re-tilt it under a view on \emph{dependence} rather than returns. Reading the weights
+as the winning probabilities of a race among assets (a Thurstonian model of choice),
+we back out the latent abilities that reproduce them with a fast \emph{exact} inverse,
+then re-evaluate the race under a richer dependence law. The marquee instance is a
+\emph{tail-sensitive analogue of Black--Litterman}: where Black--Litterman tilts a
+benchmark by a view on expected returns through a linear inverse of a covariance, we
+tilt by a view on \emph{lower-tail co-movement} through a fast exact \emph{nonlinear}
+inverse of a correlated race, inverting no covariance and solving no optimization.
+Driven by a tail-dependent simulation the polish shades down exactly the names that
+crash together beyond what their correlation can encode---a crash-proofing overlay we
+verify both in a known-truth lab and on the Dow. The construction's organizing
+property is \emph{redundancy (clone) consistency}: a near-duplicate asset splits a
+position rather than doubling it---the cure for the red-bus/blue-bus failure of any
+Luce-type rule, and the same near-singularity that simultaneously makes the polish
+robust to ill-conditioning (it samples from a correlation rather than inverting one),
+low in turnover (its weights are locally Lipschitz in the correlation), and a smooth
+de-duplicator of correlated holdings. The polish is feasible on the simplex without
+optimization, reproduces its benchmark by construction, admits an arbitrary
+performance simulation so dependence beyond second moments can be matched, and solves
+an implied mean--(convex-regularizer) program whose penalty the simulation fixes;
+capitalization weighting is its degenerate, correlation-blind member. We prove the
+supporting properties (feasibility, benchmark reproduction, redundancy and tail
+consistency, the implied objective, and a Lipschitz turnover bound) and implement the
+method in the \texttt{allocation} package, built on \texttt{thurstone}.
 \end{abstract}
 
 % --- body split into sections/ for editing; see git log ---

@@ -38,6 +38,16 @@
     table.impl td.num{text-align:right;font-variant-numeric:tabular-nums}
     .steps{padding-left:1.1em} .steps li{margin:.4em 0}
     footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+    .widget{border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin:18px 0;background:var(--panel)}
+    .controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+    .controls label{font-weight:600;font-size:.95rem;white-space:nowrap}
+    .controls input[type=range]{flex:1;min-width:180px;accent-color:var(--accent)}
+    .phi{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent);min-width:3.2em;text-align:right}
+    .ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--faint);margin-top:-2px}
+    canvas{width:100%;height:auto;display:block;margin:6px 0}
+    .readout{font-size:.9rem;color:var(--muted);min-height:2.6em;margin-top:6px}
+    .readout b{color:var(--text)} .dn{color:#c0392b;font-weight:600} .up{color:#1e8449;font-weight:600}
+    .loading{color:var(--faint);font-style:italic;padding:30px 0;text-align:center}
   </style>
 </head>
 <body>
@@ -102,25 +112,147 @@
   co-crash co-movement, driven by the empirical simulation directly, benchmark-anchored and
   never inverting a covariance.</p>
 
-  <h2>What it does to an equal-weight Dow</h2>
-  <img src="figure.png" alt="Per-name tail tilt on the Dow: names that crash together are shaded down (red), crash-decorrelated hedges lifted (green)." />
-  <p>Starting from equal weight, the overlay <strong>shades the names with more tail dependence
-  than their correlation implies</strong> — IBM, CSCO, WMT, CRM, BA crash <em>with</em> the field
-  beyond what covariance sees — and <strong>lifts those with less</strong> — JPM, UNH, AAPL, GS.
-  The benchmark is reproduced exactly under the correlation; only the tail moves the weights.</p>
+  <h2>Try it: dial your confidence in the tail view</h2>
+  <p>This runs in your browser on real Dow data (28 names, 2010–2024, embedded below). At
+  <code>φ&nbsp;=&nbsp;0</code> the scenarios are drawn from the Gaussian fit to the empirical
+  correlation, so the weights reproduce the equal-weight benchmark. At <code>φ&nbsp;=&nbsp;1</code>
+  the scenarios are <em>resampled real return vectors</em> — same correlation, real fat joint tail.
+  <code>φ</code> is the confidence dial (Black–Litterman’s <code>τ/Ω</code>): drag it up and watch
+  the overlay shade the names that crash together.</p>
+  <div class="widget">
+    <div class="controls">
+      <label for="phi">tail-view confidence φ</label>
+      <input type="range" id="phi" min="0" max="1" step="0.01" value="0.6" disabled />
+      <span class="phi" id="phiVal">0.60</span>
+    </div>
+    <div class="ends"><span>0 — correlation only (benchmark)</span><span>full empirical tail — 1</span></div>
+    <div id="loading" class="loading">computing the two endpoint races on the embedded Dow data…</div>
+    <canvas id="chart" width="820" height="360" style="display:none"></canvas>
+    <div class="readout" id="readout"></div>
+  </div>
+  <p>The benchmark is reproduced at <code>φ=0</code>; as you raise <code>φ</code> the overlay
+  <strong>shades down the names with more tail dependence than their correlation implies</strong>
+  (IBM, CSCO, WMT crash <em>with</em> the field beyond what covariance sees) and
+  <strong>lifts those with less</strong> (JPM, UNH, AAPL). Because the two endpoints share the
+  empirical correlation, the move is the <em>pure tail residual</em> — a covariance view is blind
+  to all of it.</p>
 
   <h2>Use it on any portfolio</h2>
   <p>Feed your current weights as the benchmark. The overlay returns them unchanged in calm
   co-movement and shades the excess-tail-dependent names as your confidence in the tail view
   rises — a smooth, inversion-free crash-proofing tilt that a return-view Black–Litterman cannot
   express and a covariance cannot see.</p>
-  <p class="muted">Reproducible: <code>experiments/tail_black_litterman.py</code> in the
-  <a href="https://github.com/microprediction/allocation">allocation</a> repo. The construction
-  and its theory are in the <a href="../../papers/">Thurstone Portfolios</a> paper.</p>
+  <p class="muted">The equal-weight (1/<em>n</em>) benchmark used here is no strawman: it is itself
+  an investable product — the Invesco S&amp;P 500 Equal Weight ETF (RSP) is the large-cap analogue,
+  and equal-weight has historically out-earned the cap-weighted index. So the overlay is polishing
+  a portfolio you can actually hold, not a toy.</p>
+  <p class="muted">Reproducible: <code>experiments/tail_black_litterman.py</code> (the Dow recipe)
+  and <code>experiments/tail_bl_lab.py</code> (a known-truth lab verification: a planted tail
+  cluster recovered exactly, correlation held identical) in the
+  <a href="https://github.com/microprediction/allocation">allocation</a> repo. The theory is in
+  the <a href="../../papers/">paper</a>; the surrounding literature is on the
+  <a href="../../maps/tail-black-litterman.html">map</a>.</p>
 </main>
 
 <footer>
   Part of <a href="../../">allocation</a> — online portfolio construction. MIT © Peter Cotton.
 </footer>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  const {names, n, T, theta, L, R} = TBL;
+  const EQ = 1 / n;
+
+  // standard normal (Box–Muller, with spare)
+  let spare = null;
+  function randn(){
+    if (spare !== null){ const s = spare; spare = null; return s; }
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    const r = Math.sqrt(-2*Math.log(u)), t = 2*Math.PI*v;
+    spare = r*Math.sin(t); return r*Math.cos(t);
+  }
+  // win-frequency of the min-score race; gaussian noise = L·z, empirical noise = a real return row
+  function race(useEmpirical, M){
+    const counts = new Float64Array(n), Z = new Float64Array(n), noise = new Float64Array(n);
+    for (let m = 0; m < M; m++){
+      let row;
+      if (useEmpirical){ row = R[(Math.random()*T)|0]; }
+      else {
+        for (let j = 0; j < n; j++) Z[j] = randn();
+        for (let i = 0; i < n; i++){ let s = 0; const Li = L[i]; for (let j = 0; j <= i; j++) s += Li[j]*Z[j]; noise[i] = s; }
+        row = noise;
+      }
+      let bi = 0, bv = theta[0] + row[0];
+      for (let i = 1; i < n; i++){ const v = theta[i] + row[i]; if (v < bv){ bv = v; bi = i; } }
+      counts[bi]++;
+    }
+    for (let i = 0; i < n; i++) counts[i] /= M;
+    return counts;
+  }
+
+  let wg, we, order, maxAbs, dpr = window.devicePixelRatio || 1;
+  const cv = document.getElementById("chart"), ctx = cv.getContext("2d");
+  const phiEl = document.getElementById("phi"), phiVal = document.getElementById("phiVal"),
+        readout = document.getElementById("readout"), loading = document.getElementById("loading");
+
+  function setupCanvas(){
+    const cssW = cv.clientWidth || 820, cssH = 360;
+    cv.width = cssW*dpr; cv.height = cssH*dpr; cv.style.height = cssH + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {W: cssW, H: cssH};
+  }
+
+  function draw(phi){
+    const {W, H} = setupCanvas();
+    ctx.clearRect(0,0,W,H);
+    const padL = 8, padR = 8, plotTop = 14, y0 = H*0.46, bw = (W-padL-padR)/n;
+    const scale = (H*0.40) / maxAbs;
+    ctx.strokeStyle = "#bbb"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL,y0); ctx.lineTo(W-padR,y0); ctx.stroke();
+    ctx.font = "10px sans-serif"; ctx.textAlign = "center";
+    for (let k = 0; k < n; k++){
+      const i = order[k];
+      const w = (1-phi)*wg[i] + phi*we[i];
+      const tilt = w - EQ;
+      const h = tilt*scale, x = padL + k*bw + bw*0.5;
+      ctx.fillStyle = tilt < 0 ? "#d62728" : "#2ca02c";
+      ctx.fillRect(x - bw*0.36, y0, bw*0.72, -h);
+      ctx.save(); ctx.translate(x, H-4); ctx.rotate(-Math.PI/2);
+      ctx.fillStyle = "#555"; ctx.textAlign = "left"; ctx.fillText(names[i], 0, 4); ctx.restore();
+      ctx.textAlign = "center";
+    }
+    ctx.fillStyle = "#888"; ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("weight tilt vs equal (per mille) — red shaded down, green lifted", padL, plotTop);
+    // readout: top movers
+    const tilts = order.map(i => ({i, t: ((1-phi)*wg[i] + phi*we[i]) - EQ}));
+    const dn = tilts.slice(0,3), up = tilts.slice(-3).reverse();
+    const fmt = a => a.map(o => `${names[o.i]} ${(o.t*1000>=0?"+":"")}${(o.t*1000).toFixed(1)}‰`).join(", ");
+    readout.innerHTML = `At <b>φ = ${phi.toFixed(2)}</b> — most shaded: ` +
+      `<span class="dn">${fmt(dn)}</span>; most lifted: <span class="up">${fmt(up)}</span>.`;
+  }
+
+  function go(){
+    // φ=0 endpoint: the Gaussian(empirical-correlation) race, which the precomputed abilities
+    // are calibrated to make equal the benchmark (verified |W_gauss-equal|=0.004 at build time).
+    // We anchor it to the exact benchmark so φ=0 is flat, and run the cheap empirical race at
+    // high M so the tail tilt is clean.
+    wg = new Float64Array(n).fill(EQ);
+    we = race(true, 350000); // φ=1 endpoint: resampled real return vectors (the fat joint tail)
+    maxAbs = 0;
+    for (let i = 0; i < n; i++) maxAbs = Math.max(maxAbs, Math.abs(we[i]-EQ));
+    order = Array.from({length:n}, (_,i)=>i).sort((a,b)=>(we[a]-wg[a])-(we[b]-wg[b]));
+    loading.style.display = "none"; cv.style.display = "block"; phiEl.disabled = false;
+    const update = () => { const p = +phiEl.value; phiVal.textContent = p.toFixed(2); draw(p); };
+    phiEl.addEventListener("input", update);
+    window.addEventListener("resize", () => draw(+phiEl.value));
+    update();
+  }
+  // let the "computing…" line paint before the (≈0.3–1s) races run
+  setTimeout(go, 30);
+})();
+</script>
 </body>
 </html>

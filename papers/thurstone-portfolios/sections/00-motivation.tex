@@ -1,10 +1,14 @@
 \section{Introduction}
 \label{sec:intro}
 
-We develop \emph{Thurstone portfolios}, a long-only allocation scheme whose
-weights are the winning probabilities of a race among assets: each asset draws a
-noisy performance, and its weight is the probability that it comes out best. The
-race has a second reading as a Thurstonian model of choice, which we set against
+We develop \emph{Thurstone portfolio polishing}: a way to take an existing
+allocation on the simplex---a capitalization index, an equal-weight book, any
+benchmark---and re-tilt it under a view on \emph{dependence} rather than returns.
+The vehicle is a race among assets: each asset draws a noisy performance, and a
+weight is the probability that it comes out best. The abilities driving the race
+are backed out of the benchmark by a fast \emph{exact} inverse, and the polish is
+what happens when those same abilities are re-raced under a richer dependence law.
+The race has a second reading as a Thurstonian model of choice, which we set against
 the passive industry's capitalization weighting and its implicit appeal to Luce's
 choice axiom. That Lucian habit is only superficially supported by the Capital
 Asset Pricing Model (CAPM): what the CAPM endorses is the efficiency of the
