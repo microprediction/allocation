@@ -48,10 +48,14 @@ without optimization, reproduces a chosen benchmark by construction, admits an
 arbitrary performance simulation so dependence beyond second moments can be matched,
 and solves an implied mean--(convex-regularizer) program whose penalty the
 simulation fixes; capitalization weighting appears as its degenerate,
-correlation-blind member. We prove the supporting properties (feasibility, index
-reproduction, redundancy and tail consistency, the implied objective, and a
-Lipschitz turnover bound) and implement the method in the \texttt{allocation}
-package, built on \texttt{thurstone}.
+correlation-blind member. Read as reverse optimization it is a \emph{tail-sensitive
+analogue of Black--Litterman}: latent abilities are backed out of a benchmark and
+re-weighted under a view on \emph{dependence}---correlation or tail co-movement---in
+place of a view on returns, with a fast exact ability inverse standing in for the
+linear one Black--Litterman never needs. We prove the supporting properties
+(feasibility, index reproduction, redundancy and tail consistency, the implied
+objective, and a Lipschitz turnover bound) and implement the method in the
+\texttt{allocation} package, built on \texttt{thurstone}.
 \end{abstract}
 
 % --- body split into sections/ for editing; see git log ---

@@ -74,11 +74,16 @@ without optimization, reproduces a chosen benchmark by construction,
 admits an arbitrary performance simulation so dependence beyond second
 moments can be matched, and solves an implied mean–(convex-regularizer)
 program whose penalty the simulation fixes; capitalization weighting
-appears as its degenerate, correlation-blind member. We prove the
-supporting properties (feasibility, index reproduction, redundancy and
-tail consistency, the implied objective, and a Lipschitz turnover bound)
-and implement the method in the <code>allocation</code> package, built
-on <code>thurstone</code>.</p></div>
+appears as its degenerate, correlation-blind member. Read as reverse
+optimization it is a <em>tail-sensitive analogue of
+Black–Litterman</em>: latent abilities are backed out of a benchmark and
+re-weighted under a view on <em>dependence</em>—correlation or tail
+co-movement—in place of a view on returns, with a fast exact ability
+inverse standing in for the linear one Black–Litterman never needs. We
+prove the supporting properties (feasibility, index reproduction,
+redundancy and tail consistency, the implied objective, and a Lipschitz
+turnover bound) and implement the method in the <code>allocation</code>
+package, built on <code>thurstone</code>.</p></div>
 <h1 data-number="1" id="sec:intro"><span
 class="header-section-number">1</span> Introduction</h1>
 <p>We develop <em>Thurstone portfolios</em>, a long-only allocation
@@ -1444,8 +1449,42 @@ class="math inline">\(\tfrac{\gamma}{2}p^\top\Delta\Sigma\,p
 displacement from the benchmark by a quadratic form in <span
 class="math inline">\(\Sigma_0\)</span>; the tilt measures it by the
 Bregman divergence of the reference race.</p>
-<h4 data-number="6.5.0.4" id="the-displaced-inverse."><span
-class="header-section-number">6.5.0.4</span> The displaced inverse.</h4>
+<h4 data-number="6.5.0.4" id="tail-sensitive-blacklitterman."><span
+class="header-section-number">6.5.0.4</span> Tail-sensitive
+Black–Litterman.</h4>
+<p>Read this way the tilt is reverse optimization with the view placed
+on <em>dependence</em> rather than on returns. Calibration backs the
+abilities out of a benchmark—the choice analogue of Black–Litterman’s
+equilibrium-implied returns <span class="citation"
+data-cites="black1992">(Black and Litterman 1992)</span>—and the tilt
+then expresses a view on how the alternatives <em>co-move</em>, with
+<span class="math inline">\(\phi\)</span> its confidence (<span
+class="math inline">\(\phi = 0\)</span> reproduces the benchmark, <span
+class="math inline">\(\phi = 1\)</span> is full conviction): exactly the
+role of Black–Litterman’s <span
+class="math inline">\(\tau,\Omega\)</span>, but over a correlation or
+<em>tail</em> view in place of a return view. That is a view
+Black–Litterman cannot state—“these names crash together more than the
+benchmark assumes” is a tail-co-movement view, not an expected-return
+one—and the abilities are never touched, so skill (from the benchmark)
+and co-movement (the view) enter as orthogonal inputs. The reverse step
+is genuinely nonlinear here: Black–Litterman’s implied returns are a
+linear first-order condition (<span class="math inline">\(\mu =
+\gamma\Sigma_0 w^0\)</span>, no inverse), whereas the choice geometry
+requires the gradient inverse <span class="math inline">\((\nabla
+G_{S_0})^{-1}\)</span>—which the Fast Ability Transform <span
+class="citation" data-cites="cotton2021">(Cotton 2021)</span> supplies
+exactly and in linear time. Only the simple <em>reference</em> law is
+inverted; the rich correlation- or tail-dependent target enters by
+forward sampling, so the prohibitive inverse of the dependent race is
+never formed. The closest existing device is Meucci’s entropy pooling
+<span class="citation" data-cites="meucci2008">(Meucci 2008)</span>,
+which tilts a scenario <em>distribution</em> to satisfy flexible views
+(tails included) and then re-optimizes; the difference is
+operational—the race tilts the weight vector <em>directly</em> on the
+simplex, smoothly and without a second optimization.</p>
+<h4 data-number="6.5.0.5" id="the-displaced-inverse."><span
+class="header-section-number">6.5.0.5</span> The displaced inverse.</h4>
 <p>Locally the two are closer still. For <span class="math inline">\(p =
 w^0 + \delta\)</span>, <span
 class="math inline">\(D_{\Omega_{S_0}}(w^0+\delta, w^0) =
@@ -1487,8 +1526,8 @@ w\)</span> degenerates as a weight <span class="math inline">\(w_i \to
 0\)</span>, so benchmarks with very small (or floored) weights can
 degrade the local inverse geometry near the simplex boundary even when
 the dependence is well conditioned.</p>
-<h4 data-number="6.5.0.5" id="a-selection-identity."><span
-class="header-section-number">6.5.0.5</span> A selection identity.</h4>
+<h4 data-number="6.5.0.6" id="a-selection-identity."><span
+class="header-section-number">6.5.0.6</span> A selection identity.</h4>
 <p>For the Gaussian workhorse one identity sits behind this local
 geometry.</p>
 <div id="lem:tweedie" class="lemma">
@@ -1517,8 +1556,8 @@ the local penalty curvature, is a matrix of selection sensitivities.
 Tweedie’s identity, the Markowitz analogy, and the Fenchel dual all
 point to the same object: the local geometry of the winning-probability
 map.</p>
-<h4 data-number="6.5.0.6" id="not-a-return-forecast."><span
-class="header-section-number">6.5.0.6</span> Not a return forecast.</h4>
+<h4 data-number="6.5.0.7" id="not-a-return-forecast."><span
+class="header-section-number">6.5.0.7</span> Not a return forecast.</h4>
 <p>None of this makes the tilt a return-forecasting method. The linear
 term <span class="math inline">\(\theta\)</span> is benchmark-implied
 ability, not expected return; against a true <span
@@ -2167,6 +2206,10 @@ Jean-Philippe Vert, and Francis Bach. 2020. <span>“Learning with
 Differentiable Perturbed Optimizers.”</span> <em>Advances in Neural
 Information Processing Systems (NeurIPS)</em>.
 </div>
+<div id="ref-black1992" class="csl-entry" role="listitem">
+Black, Fischer, and Robert Litterman. 1992. <span>“Global Portfolio
+Optimization.”</span> <em>Financial Analysts Journal</em> 48 (5): 28–43.
+</div>
 <div id="ref-bradleyterry1952" class="csl-entry" role="listitem">
 Bradley, Ralph Allan, and Milton E. Terry. 1952. <span>“Rank Analysis of
 Incomplete Block Designs: I. The Method of Paired Comparisons.”</span>
@@ -2248,6 +2291,10 @@ McFadden, Daniel. 1981. <span>“Econometric Models of Probabilistic
 Choice.”</span> In <em>Structural Analysis of Discrete Data with
 Econometric Applications</em>, edited by Charles F. Manski and Daniel
 McFadden. MIT Press.
+</div>
+<div id="ref-meucci2008" class="csl-entry" role="listitem">
+Meucci, Attilio. 2008. <span>“Fully Flexible Views: Theory and
+Practice.”</span> <em>Risk</em> 21 (10): 97–102.
 </div>
 <div id="ref-plackett1975" class="csl-entry" role="listitem">
 Plackett, R. L. 1975. <span>“The Analysis of Permutations.”</span>

@@ -448,6 +448,29 @@ and $\tfrac{\gamma}{2}p^\top\Delta\Sigma\,p \leftrightarrow \dot\Omega_{\Delta S
 Markowitz measures displacement from the benchmark by a quadratic form in
 $\Sigma_0$; the tilt measures it by the Bregman divergence of the reference race.
 
+\paragraph{Tail-sensitive Black--Litterman.}
+Read this way the tilt is reverse optimization with the view placed on
+\emph{dependence} rather than on returns. Calibration backs the abilities out of a
+benchmark---the choice analogue of Black--Litterman's equilibrium-implied returns
+\parencite{black1992}---and the tilt then expresses a view on how the alternatives
+\emph{co-move}, with $\phi$ its confidence ($\phi = 0$ reproduces the benchmark,
+$\phi = 1$ is full conviction): exactly the role of Black--Litterman's $\tau,\Omega$,
+but over a correlation or \emph{tail} view in place of a return view. That is a view
+Black--Litterman cannot state---``these names crash together more than the benchmark
+assumes'' is a tail-co-movement view, not an expected-return one---and the abilities
+are never touched, so skill (from the benchmark) and co-movement (the view) enter as
+orthogonal inputs. The reverse step is genuinely nonlinear here: Black--Litterman's
+implied returns are a linear first-order condition ($\mu = \gamma\Sigma_0 w^0$, no
+inverse), whereas the choice geometry requires the gradient inverse
+$(\nabla G_{S_0})^{-1}$---which the Fast Ability Transform \parencite{cotton2021}
+supplies exactly and in linear time. Only the simple \emph{reference} law is
+inverted; the rich correlation- or tail-dependent target enters by forward sampling,
+so the prohibitive inverse of the dependent race is never formed. The closest
+existing device is Meucci's entropy pooling \parencite{meucci2008}, which tilts a
+scenario \emph{distribution} to satisfy flexible views (tails included) and then
+re-optimizes; the difference is operational---the race tilts the weight vector
+\emph{directly} on the simplex, smoothly and without a second optimization.
+
 \paragraph{The displaced inverse.}
 Locally the two are closer still. For $p = w^0 + \delta$,
 $D_{\Omega_{S_0}}(w^0+\delta, w^0) = \tfrac12\delta^\top H_0\delta + O(\|\delta\|^3)$
