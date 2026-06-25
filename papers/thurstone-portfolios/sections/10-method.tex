@@ -136,8 +136,13 @@ $C_{\mathrm{tilt}} = (1-\phi)\,C_{\mathrm{calib}} + \phi\,\widehat{C}$, dialling
 the estimated correlation $\widehat{C}$ in continuously: $\phi = 0$ reproduces the
 benchmark (\Cref{prop:fixedpoint}) and $\phi = 1$ uses the full estimate. The
 construction never inverts a covariance---it needs only a valid correlation for
-sampling, repaired if necessary to the nearest correlation matrix, so it tolerates
-ill-conditioned or singular estimates. Its feasibility, fixed-point, redundancy,
+sampling, repaired if necessary to the nearest correlation matrix, so the
+\emph{target} race tolerates ill-conditioned or singular estimates (a singular
+$C_{\mathrm{tilt}}$ merely makes some assets effective duplicates, with tie
+splitting). The \emph{reference} law is different: the calibration bijection
+(\Cref{prop:calib}) and the smooth sensitivity theory (\Cref{thm:smooth}) require a
+positive-definite $C_{\mathrm{calib}}$; under a singular reference one works with
+limits or selected subgradients. Its feasibility, fixed-point, redundancy,
 monotonicity, and objective properties are established in \Cref{sec:properties}.
 
 \section{Computation}

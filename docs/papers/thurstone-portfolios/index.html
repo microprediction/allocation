@@ -270,12 +270,13 @@ weight. ◻</p>
 <p>The CAPM’s support for the Lucian habit is therefore the single-point
 coincidence of <a href="#prop:restriction"
 data-reference-type="ref+Label" data-reference="prop:restriction">1</a>:
-it endorses cap weighting on the one universe nobody trades, and is
-silent, indeed contrary, everywhere else. This is the choice-theoretic
-form of Roll’s critique <span class="citation"
-data-cites="roll1977">(Roll 1977)</span>: the only testable content of
-the CAPM is the efficiency of the <em>true</em> market portfolio, and no
-proxy on a restricted universe inherits it <span class="citation"
+it endorses cap weighting on the whole-market universe alone, and is
+silent, indeed contrary, on the restricted universes where weighting
+decisions are actually made. This is the choice-theoretic form of Roll’s
+critique <span class="citation" data-cites="roll1977">(Roll
+1977)</span>: the only testable content of the CAPM is the efficiency of
+the <em>true</em> market portfolio, and no proxy on a restricted
+universe inherits it <span class="citation"
 data-cites="prono2009">(Prono 2009)</span>. We do not contradict the
 CAPM, only decline to extend it past its premises. Fundamental indexing
 reaches cap weighting’s sub-optimality by a different route, price
@@ -698,9 +699,19 @@ data-reference-type="ref+Label" data-reference="prop:fixedpoint">4</a>)
 and <span class="math inline">\(\phi = 1\)</span> uses the full
 estimate. The construction never inverts a covariance—it needs only a
 valid correlation for sampling, repaired if necessary to the nearest
-correlation matrix, so it tolerates ill-conditioned or singular
-estimates. Its feasibility, fixed-point, redundancy, monotonicity, and
-objective properties are established in <a href="#sec:properties"
+correlation matrix, so the <em>target</em> race tolerates
+ill-conditioned or singular estimates (a singular <span
+class="math inline">\(C_{\mathrm{tilt}}\)</span> merely makes some
+assets effective duplicates, with tie splitting). The <em>reference</em>
+law is different: the calibration bijection (<a href="#prop:calib"
+data-reference-type="ref+Label" data-reference="prop:calib">2</a>) and
+the smooth sensitivity theory (<a href="#thm:smooth"
+data-reference-type="ref+Label" data-reference="thm:smooth">2</a>)
+require a positive-definite <span
+class="math inline">\(C_{\mathrm{calib}}\)</span>; under a singular
+reference one works with limits or selected subgradients. Its
+feasibility, fixed-point, redundancy, monotonicity, and objective
+properties are established in <a href="#sec:properties"
 data-reference-type="ref+Label"
 data-reference="sec:properties">6</a>.</p>
 <h1 data-number="5" id="sec:computation"><span
@@ -824,7 +835,12 @@ equal mean are almost surely equal, <span
 class="math inline">\(X_{k&#39;} = X_{k&#39;&#39;}\)</span> a.s., so the
 field minimum—and hence every other asset’s winning event—is unchanged,
 while the pair ties exactly when <span class="math inline">\(k\)</span>
-would have won. The even split halves that shared probability. ◻</p>
+would have won. The even split halves that shared probability. This is a
+boundary case: mutual correlation <span class="math inline">\(1\)</span>
+makes the correlation matrix singular, so the statement is read in the
+positive-semidefinite limit (equivalently, by continuity as the mutual
+correlation <span class="math inline">\(\uparrow 1\)</span>, with exact
+tie-splitting at the limit). ◻</p>
 </div>
 <div id="rem:fixedability" class="remark">
 <p><strong>Remark 1</strong> (Fixed abilities versus recalibration).
@@ -988,14 +1004,23 @@ dependence with the complement, or non-Gaussian laws; the Slepian
 argument is what buys the stated case.</p>
 <h2 data-number="6.1" id="sec:tail"><span
 class="header-section-number">6.1</span> Tail consistency</h2>
+<p>We fix the sign convention for this section, since the race uses
+<em>minimum-performance-wins</em>: take <span
+class="math inline">\(X_i\)</span> to be a centred <em>loss-side</em>
+performance, so a larger <span class="math inline">\(X_i\)</span> is
+worse and the winner is <span class="math inline">\(\min_i X_i\)</span>.
+Lower-tail dependence in returns (assets crashing together) is then
+upper-tail dependence in these losses, and “a cluster that crashes
+together” is one whose loss-side performances are large together.</p>
 <p><a href="#prop:monotone" data-reference-type="ref+Label"
 data-reference="prop:monotone">6</a> de-weights a cluster by its
 <em>full</em> correlation. Yet two clusters with an identical covariance
 can behave oppositely in the tail: one may crash together while the
 other merely co-moves on average. A symmetric second moment cannot tell
 them apart. If instead the race is driven by the assets’
-<em>downside</em> dependence—their co-lower-partial-moments, or,
-exactly, a tail-dependent joint law for the performances—the
+<em>downside</em> dependence—approximately their
+co-lower-partial-moments (still a second moment, so an approximation),
+or, exactly, a tail-dependent joint law for the performances—the
 de-weighting of <a href="#prop:monotone" data-reference-type="ref+Label"
 data-reference="prop:monotone">6</a> keys to genuine tail co-movement
 rather than to average correlation. We call this <em>tail
@@ -1253,14 +1278,19 @@ data-reference="thm:objective">1</a> uses Gaussianity. For any centred
 performance law <span class="math inline">\(S\)</span> set <span
 class="math inline">\(G_S(\theta) = \mathbb{E}_{\eta\sim
 S}[\max_i(\theta_i + \eta_i)]\)</span>. This is convex in <span
-class="math inline">\(\theta\)</span>, so <span class="math inline">\(w
-= \nabla G_S(\theta) =
-\mathop{\mathrm{arg\,max}}_{p\in\Delta}\{\langle\theta, p\rangle -
+class="math inline">\(\theta\)</span> for any <span
+class="math inline">\(S\)</span>, so the tie-split winning vector is a
+selected subgradient, <span class="math inline">\(w \in \partial
+G_S(\theta) = \mathop{\mathrm{arg\,max}}_{p\in\Delta}\{\langle\theta,
+p\rangle -
 \Omega_S(p)\}\)</span> with <span class="math inline">\(\Omega_S =
-G_S^{*}\)</span> convex on the simplex. The weights always solve a
-mean–(convex regularizer) program; the simulation enters only through
-the penalty <span class="math inline">\(\Omega_S\)</span>, which carries
-its full dependence, tails included.</p>
+G_S^{*}\)</span> convex on the simplex; when <span
+class="math inline">\(S\)</span> is full-rank continuous this
+subgradient is the unique gradient <span class="math inline">\(w =
+\nabla G_S(\theta)\)</span>. The weights always solve a mean–(convex
+regularizer) program; the simulation enters only through the penalty
+<span class="math inline">\(\Omega_S\)</span>, which carries its full
+dependence, tails included.</p>
 <p>The regularity of the gradient identity depends on the law, and three
 regimes are worth separating. (i) A full-rank <em>continuous</em> <span
 class="math inline">\(S\)</span> makes <span
@@ -1424,13 +1454,17 @@ leaves an inverse, now a bounded, simplex-supported curvature rather
 than a lever on small covariance eigenmodes. Singular dependence merely
 means some assets are effective duplicates in the race, not that the
 optimizer takes explosive offsetting positions. Numerically the contrast
-is stark: as the reference correlation is driven toward
-singularity—condition number into the hundreds—the choice-sensitivity
-<span class="math inline">\(\nabla_\theta w\)</span> stays uniformly
-scaled, its own condition number remaining near one, so the displaced
-inverse never inherits the ill-conditioning that defeats <span
-class="math inline">\(\Sigma^{-1}\)</span>, and a Newton calibration
-step preconditioned by it converges in a handful of iterations.</p>
+is suggestive: in a sweep driving the reference correlation toward
+singularity (condition number into the hundreds) the choice-sensitivity
+<span class="math inline">\(\nabla_\theta w\)</span> stayed uniformly
+scaled, its own condition number near one, and a Newton calibration step
+preconditioned by it converged in a handful of iterations. This is an
+empirical observation, not a theorem, and it has a known caveat: like
+the softmax Jacobian, <span class="math inline">\(\nabla_\theta
+w\)</span> degenerates as a weight <span class="math inline">\(w_i \to
+0\)</span>, so benchmarks with very small (or floored) weights can
+degrade the local inverse geometry near the simplex boundary even when
+the dependence is well conditioned.</p>
 <h4 data-number="6.5.0.5" id="a-selection-identity."><span
 class="header-section-number">6.5.0.5</span> A selection identity.</h4>
 <p>For the Gaussian workhorse one identity sits behind this local
@@ -1576,18 +1610,24 @@ map <span class="math inline">\(w(C)\)</span>. The realized common-seed
 estimator <span class="math inline">\(\widehat w_M(C)\)</span> is
 piecewise constant in <span class="math inline">\(C\)</span>—it jumps
 when a simulated path crosses a tie boundary—so it is not literally
-Lipschitz. Under fixed seeds and a bounded tie-boundary density it is
-low-turnover only in expectation, <span
-class="math display">\[\begin{equation*}
-  \mathbb{E}\,\|\widehat w_M(C+\Delta C) - \widehat w_M(C)\|_1
-  \;=\; O(\|\Delta C\|_F) \,+\, O(1/\sqrt M),
-\end{equation*}\]</span> the first term the population motion of <a
-href="#eq:lip" data-reference-type="eqref"
-data-reference="eq:lip">[eq:lip]</a> and the second a Monte-Carlo floor
-from paths near a boundary. The finite-<span
-class="math inline">\(M\)</span> map inherits <em>low turnover in
-expectation</em>, not smoothness—the honest content behind the
-common-seed transport.</p>
+Lipschitz. With common random numbers, <span
+class="math inline">\(\widehat w_M(C+\Delta C) - \widehat
+w_M(C)\)</span> estimates the population difference <span
+class="math inline">\(w(C+\Delta C) - w(C)\)</span> with no
+independent-resampling floor: its bias is zero given the shared
+transport, and its variability comes from paths crossing decision
+boundaries. Under a bounded tie-boundary density the expected number of
+crossing paths is <span class="math inline">\(O(M\|\Delta
+C\|_F)\)</span> and each moves the weight by <span
+class="math inline">\(O(1/M)\)</span>, so the expected realized turnover
+is <span class="math inline">\(\mathbb{E}\,\|\widehat w_M(C+\Delta C) -
+\widehat w_M(C)\|_1 = O(\|\Delta C\|_F)\)</span>—the population motion
+of <a href="#eq:lip" data-reference-type="eqref"
+data-reference="eq:lip">[eq:lip]</a>—with stochastic fluctuation of
+order <span class="math inline">\(O(\sqrt{\|\Delta C\|_F/M})\)</span>
+around it. Common seeds therefore reduce the difference noise; they do
+not make the finite-<span class="math inline">\(M\)</span> map
+Lipschitz.</p>
 <h4 data-number="7.0.0.2" id="rank-deficiency-and-conditioning."><span
 class="header-section-number">7.0.0.2</span> Rank deficiency and
 conditioning.</h4>
@@ -1834,13 +1874,14 @@ class="math inline">\(\Sigma^{-1}\mathbf 1\)</span>, <span
 class="math inline">\(\Sigma^{-1}\sigma\)</span>) are undefined; the
 long-only quadratic program <span
 class="math inline">\(\min_{p\in\Delta} p^\top\Sigma p\)</span> still
-has a solution, but a non-unique and unstable one. Only the
-inversion-free methods stay well-behaved. The factor-form race never
-inverts and costs <span class="math inline">\(O(Mnk)\)</span>, staying
-well-posed and fitting in a few seconds to <span class="math inline">\(n
-= 3000\)</span> (the Woodbury factor optimizers of <a
-href="#sec:computation" data-reference-type="ref+Label"
-data-reference="sec:computation">5</a> scale likewise, and faster).</p>
+has a solution—the simplex constraints can remove null directions—though
+it can be non-unique or unstable. Only the inversion-free methods stay
+well-behaved. The factor-form race never inverts and costs <span
+class="math inline">\(O(Mnk)\)</span>, staying well-posed and fitting in
+a few seconds to <span class="math inline">\(n = 3000\)</span> (the
+Woodbury factor optimizers of <a href="#sec:computation"
+data-reference-type="ref+Label" data-reference="sec:computation">5</a>
+scale likewise, and faster).</p>
 <div id="tab:scale">
 <table>
 <caption>Fit time (s) on <span class="math inline">\(5\)</span>-factor

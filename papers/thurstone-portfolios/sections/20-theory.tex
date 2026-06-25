@@ -50,7 +50,10 @@ single asset $k$.
 Perfectly correlated unit-variance Gaussians with equal mean are almost surely
 equal, $X_{k'} = X_{k''}$ a.s., so the field minimum---and hence every other
 asset's winning event---is unchanged, while the pair ties exactly when $k$ would
-have won. The even split halves that shared probability.
+have won. The even split halves that shared probability. This is a boundary case:
+mutual correlation $1$ makes the correlation matrix singular, so the statement is
+read in the positive-semidefinite limit (equivalently, by continuity as the
+mutual correlation $\uparrow 1$, with exact tie-splitting at the limit).
 \end{proof}
 
 \begin{remark}[Fixed abilities versus recalibration]
@@ -142,14 +145,21 @@ laws; the Slepian argument is what buys the stated case.
 \subsection{Tail consistency}
 \label{sec:tail}
 
+We fix the sign convention for this section, since the race uses
+\emph{minimum-performance-wins}: take $X_i$ to be a centred \emph{loss-side}
+performance, so a larger $X_i$ is worse and the winner is $\min_i X_i$. Lower-tail
+dependence in returns (assets crashing together) is then upper-tail dependence in
+these losses, and ``a cluster that crashes together'' is one whose loss-side
+performances are large together.
+
 \Cref{prop:monotone} de-weights a cluster by its \emph{full} correlation. Yet two
 clusters with an identical covariance can behave oppositely in the tail: one may
 crash together while the other merely co-moves on average. A symmetric second
 moment cannot tell them apart. If instead the race is driven by the assets'
-\emph{downside} dependence---their co-lower-partial-moments, or, exactly, a
-tail-dependent joint law for the performances---the de-weighting of
-\Cref{prop:monotone} keys to genuine tail co-movement rather than to average
-correlation. We call this \emph{tail consistency}.
+\emph{downside} dependence---approximately their co-lower-partial-moments (still a
+second moment, so an approximation), or, exactly, a tail-dependent joint law for the
+performances---the de-weighting of \Cref{prop:monotone} keys to genuine tail
+co-movement rather than to average correlation. We call this \emph{tail consistency}.
 
 \begin{proposition}[Tail consistency]
 \label{prop:tail}
@@ -328,9 +338,11 @@ benchmark-reproducing end.
 
 Nothing in \Cref{thm:objective} uses Gaussianity. For any centred performance law
 $S$ set $G_S(\theta) = \E_{\eta\sim S}[\max_i(\theta_i + \eta_i)]$. This is convex
-in $\theta$, so $w = \nabla G_S(\theta) =
-\argmaxop_{p\in\Delta}\{\langle\theta, p\rangle - \Omega_S(p)\}$ with
-$\Omega_S = G_S^{*}$ convex on the simplex. The weights always solve a
+in $\theta$ for any $S$, so the tie-split winning vector is a selected subgradient,
+$w \in \partial G_S(\theta) = \argmaxop_{p\in\Delta}\{\langle\theta, p\rangle -
+\Omega_S(p)\}$ with $\Omega_S = G_S^{*}$ convex on the simplex; when $S$ is full-rank
+continuous this subgradient is the unique gradient $w = \nabla G_S(\theta)$. The
+weights always solve a
 mean--(convex regularizer) program; the simulation enters only through the penalty
 $\Omega_S$, which carries its full dependence, tails included.
 
@@ -449,12 +461,14 @@ and never forms $\Sigma^{-1}$---yet convex duality still leaves an inverse, now 
 bounded, simplex-supported curvature rather than a lever on small covariance
 eigenmodes. Singular dependence merely means some assets are effective duplicates
 in the race, not that the optimizer takes explosive offsetting positions.
-Numerically the contrast is stark: as the reference correlation is driven toward
-singularity---condition number into the hundreds---the choice-sensitivity
-$\nabla_\theta w$ stays uniformly scaled, its own condition number remaining near
-one, so the displaced inverse never inherits the ill-conditioning that defeats
-$\Sigma^{-1}$, and a Newton calibration step preconditioned by it converges in a
-handful of iterations.
+Numerically the contrast is suggestive: in a sweep driving the reference correlation
+toward singularity (condition number into the hundreds) the choice-sensitivity
+$\nabla_\theta w$ stayed uniformly scaled, its own condition number near one, and a
+Newton calibration step preconditioned by it converged in a handful of iterations.
+This is an empirical observation, not a theorem, and it has a known caveat: like the
+softmax Jacobian, $\nabla_\theta w$ degenerates as a weight $w_i \to 0$, so
+benchmarks with very small (or floored) weights can degrade the local inverse
+geometry near the simplex boundary even when the dependence is well conditioned.
 
 \paragraph{A selection identity.}
 For the Gaussian workhorse one identity sits behind this local geometry.
@@ -556,16 +570,17 @@ and regenerating the path ensemble when its effective sample size collapses.
 \paragraph{Finite paths.}
 \Cref{thm:smooth} is a statement about the population map $w(C)$. The realized
 common-seed estimator $\widehat w_M(C)$ is piecewise constant in $C$---it jumps when
-a simulated path crosses a tie boundary---so it is not literally Lipschitz. Under
-fixed seeds and a bounded tie-boundary density it is low-turnover only in
-expectation,
-\begin{equation*}
-  \E\,\|\widehat w_M(C+\Delta C) - \widehat w_M(C)\|_1
-  \;=\; O(\|\Delta C\|_F) \,+\, O(1/\sqrt M),
-\end{equation*}
-the first term the population motion of \eqref{eq:lip} and the second a Monte-Carlo
-floor from paths near a boundary. The finite-$M$ map inherits \emph{low turnover in
-expectation}, not smoothness---the honest content behind the common-seed transport.
+a simulated path crosses a tie boundary---so it is not literally Lipschitz. With
+common random numbers, $\widehat w_M(C+\Delta C) - \widehat w_M(C)$ estimates the
+population difference $w(C+\Delta C) - w(C)$ with no independent-resampling floor:
+its bias is zero given the shared transport, and its variability comes from paths
+crossing decision boundaries. Under a bounded tie-boundary density the expected
+number of crossing paths is $O(M\|\Delta C\|_F)$ and each moves the weight by
+$O(1/M)$, so the expected realized turnover is
+$\E\,\|\widehat w_M(C+\Delta C) - \widehat w_M(C)\|_1 = O(\|\Delta C\|_F)$---the
+population motion of \eqref{eq:lip}---with stochastic fluctuation of order
+$O(\sqrt{\|\Delta C\|_F/M})$ around it. Common seeds therefore reduce the difference
+noise; they do not make the finite-$M$ map Lipschitz.
 
 \paragraph{Rank deficiency and conditioning.}
 The square root is not the inversion it replaces, and the difference is what keeps
