@@ -115,32 +115,36 @@
 <script>
 // ---- company universe: each sector is a tidy ring of names, well separated ----
 const SECTORS = [   // deliberately uneven sizes: bigger sectors default in bigger herds
-  {name:"Tech",     color:"#7c6cff", cx:360, cy:215, names:["AAPL","MSFT","NVDA","GOOGL","META","AMD","CRM"]},
-  {name:"Banks",    color:"#33d17a", cx:505, cy:190, names:["JPM","GS","BAC","MS","C"]},
-  {name:"Energy",   color:"#f0a830", cx:615, cy:255, names:["XOM","CVX","SLB"]},
-  {name:"Health",   color:"#ff7a7a", cx:390, cy:335, names:["UNH","JNJ"]},
-  {name:"Consumer", color:"#24c2ad", cx:520, cy:335, names:["WMT","KO","PG","MCD","NKE","HD"]},
+  {name:"Tech",     color:"#7c6cff", names:["AAPL","MSFT","NVDA","GOOGL","META","AMD","CRM"]},
+  {name:"Banks",    color:"#33d17a", names:["JPM","GS","BAC","MS","C"]},
+  {name:"Energy",   color:"#f0a830", names:["XOM","CVX","SLB"]},
+  {name:"Health",   color:"#ff7a7a", names:["UNH","JNJ"]},
+  {name:"Consumer", color:"#24c2ad", names:["WMT","KO","PG","MCD","NKE","HD"]},
 ];
-const W=820, H=500, BR=16, PR=9, RING=34, BARRIER=26;   // big intra-cluster, packed sectors => a chord spans several
+const W=820, H=500, CX=W/2, CY=H/2, RBIG=210, SR=112, RING=32, BR=16, PR=9, BARRIER=26;
 const MB=11, MP=1, EBP=0.4, EPP=0.5, PF=0.965, BF=0.99;
 let rng = mulberry32(42);
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
 
+// sectors sit on an inner ring; each is a small ring of its names; everything inside RBIG
 const NAMES=[], SEC=[], X0=[], Y0=[], LX=[], LY=[];
-for(const s of SECTORS){ const m=s.names.length;
-  s.names.forEach((nm,j)=>{ const a=-Math.PI/2 + 2*Math.PI*j/m;
-    NAMES.push(nm); SEC.push(s); X0.push(s.cx+RING*Math.cos(a)); Y0.push(s.cy+RING*Math.sin(a));
-    LX.push(Math.cos(a)); LY.push(Math.sin(a)); });
-}
+SECTORS.forEach((s,si)=>{ const ca=-Math.PI/2 + 2*Math.PI*si/SECTORS.length;
+  const ccx=CX+SR*Math.cos(ca), ccy=CY+SR*Math.sin(ca), m=s.names.length;
+  s.names.forEach((nm,j)=>{ const a=2*Math.PI*j/m + si*1.1;
+    const px=ccx+RING*Math.cos(a), py=ccy+RING*Math.sin(a);
+    NAMES.push(nm); SEC.push(s); X0.push(px); Y0.push(py);
+    const ox=px-CX, oy=py-CY, on=Math.hypot(ox,oy)||1; LX.push(ox/on); LY.push(oy/on); });
+});
 const n = NAMES.length;
 let X=X0.slice(), Y=Y0.slice(), defaulted=new Array(n).fill(false);
 let Rad=new Array(n).fill(PR), tiltArr=new Float64Array(n), statsView=false;
 const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
 const heat=document.getElementById("heat"), hx=heat.getContext("2d");
 
-function randomChord(r){ // uniform chord: two random boundary points => uniform sweep
-  const cx=W/2, cy=H/2, R=Math.hypot(W,H)/2, a1=2*Math.PI*r(), a2=2*Math.PI*r();
-  const bx=cx+R*Math.cos(a1), by=cy+R*Math.sin(a1), ex=cx+R*Math.cos(a2), ey=cy+R*Math.sin(a2);
+function randomChord(r){ // a TRUE random chord of the circle: two random points on the rim
+  let a1=2*Math.PI*r(), a2=2*Math.PI*r();
+  while(Math.abs(((a2-a1)%(2*Math.PI)))<0.5) a2=2*Math.PI*r();   // avoid degenerate near-tangent chords
+  const bx=CX+RBIG*Math.cos(a1), by=CY+RBIG*Math.sin(a1), ex=CX+RBIG*Math.cos(a2), ey=CY+RBIG*Math.sin(a2);
   const d=Math.hypot(ex-bx,ey-by)||1, sp=10+2*r();
   return {bx,by,bvx:sp*(ex-bx)/d,bvy:sp*(ey-by)/d,bsp:0}; }
 
@@ -151,7 +155,7 @@ function simulate(entry, record){
     let mv=false; for(let i=0;i<n;i++){ if(vx[i]*vx[i]+vy[i]*vy[i]>0.05){mv=true;break;} }
     if(bvx*bvx+bvy*bvy<0.05 && !mv) break;
     bx+=bvx; by+=bvy; bvx+=bsp*0.010; bsp*=0.985; bvx*=BF; bvy*=BF;
-    if((bx<10||bx>W-10||by<10||by>H-10) && !mv && f>4) break;
+    if((bx-CX)*(bx-CX)+(by-CY)*(by-CY) > (RBIG+30)*(RBIG+30) && !mv && f>4) break;  // left the circle
     for(let i=0;i<n;i++){ if(vx[i]||vy[i]){ x[i]+=vx[i]; y[i]+=vy[i]; vx[i]*=PF; vy[i]*=PF; } }
     for(let i=0;i<n;i++){ const dx=x[i]-bx, dy=y[i]-by, d2=dx*dx+dy*dy, md=BR+PR;
       if(d2>=md*md||d2<1e-6) continue;
@@ -240,6 +244,7 @@ function refreshStats(){
 // ---- drawing the alley ----
 function drawState(bx,by){
   ctx.clearRect(0,0,W,H);
+  ctx.beginPath(); ctx.arc(CX,CY,RBIG,0,7); ctx.strokeStyle="#2c2940"; ctx.lineWidth=1.5; ctx.stroke();
   for(let i=0;i<n;i++){ const dn=defaulted[i], rad=statsView?Rad[i]:PR;
     ctx.beginPath(); ctx.arc(X[i],Y[i],rad,0,7); ctx.fillStyle=dn?"#2c2940":SEC[i].color; ctx.fill();
     if(statsView && !dn){ const tl=tiltArr[i]; ctx.lineWidth=2.4;
