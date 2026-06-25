@@ -79,6 +79,31 @@ Most direct = soft simplex, native choice/win-probability semantics, no cardinal
 Boundary / partial fits (cardinality or coalition — the race is a prior, not the solution):
 **MoE top-k routing**, **recommender top-k slates**, **sparse feature selection**.
 
+## Reality check (adversarial evidence pass)
+
+Before building, we fact-checked the most-hyped instance and found it **largely a straw man**:
+- **LLM-leaderboard "softmax-of-ratings → P(best)/share double-counts siblings"**: Chatbot Arena /
+  LMSYS report Bradley-Terry ratings, set-valued ranks, and bootstrap CIs — they do **not** take the
+  softmax-to-share step, so the IIA attack hits something they don't do. The documented sibling
+  advantage there ("The Leaderboard Illusion", arXiv:2504.20879) is **best-of-N selective disclosure**,
+  a different bug. Verdict: straw man for leaderboards.
+- Where the mechanism **is** real (conjoint / market-share simulation) it is **already solved
+  commercially** — Sawtooth's *Randomized First Choice* is a correlated-noise race built to cure the
+  red-bus/blue-bus IIA flaw (their 50/50 → ~67% example) — and **BLP / mixed logit** relaxed IIA in
+  demand modeling via random coefficients. So the fix is real, validated, and not novel there.
+- The rating application is **already built and working** in the `thurstone` package: the static
+  `AbilityCalibrator` (Fast Ability Transform) and the multi-dimensional `MultiRayGlobalCalibrator`
+  (item vector `Z`, condition direction `V`, ability `Z·V`) are the working pieces. (A
+  `KalmanAbilityTracker` for dynamic online rating also exists but is **not reliable** per the
+  author, so don't lean on it.) Crucially the multi-dimensional calibrator is the **Thurstone
+  analogue of random-coefficients / mixed-logit** — it already relaxes IIA via heterogeneity, the
+  BLP route.
+
+**Net:** a "clone-aware rating" is redundant (straw-man framing + already-solved-in-conjoint +
+already-built-in-`thurstone`). The non-redundant content is the two papers as they stand, plus
+**tail-awareness** — the one thing beyond both covariance *and* heterogeneity (random coefficients
+cannot see tail co-crash), though it is a structural point, not a demonstrated out-of-sample win.
+
 ## Strategic implication
 The breadth (ML, marketing, epidemiology, politics, IR/sports — not just finance) supports the
 conceptual reviewer's two calls: (i) reposition around the unifying object — a *dependence-aware
