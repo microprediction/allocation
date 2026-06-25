@@ -37,7 +37,6 @@
     <a class="brand" href="../index.html">allocation</a>
     <nav>
       <a href="../index.html#methods">Methods</a>
-      <a href="../index.html#regimes">What works</a>
       <a href="../index.html#estimators">Estimators</a>
       <a href="../papers/index.html">Papers</a>
       <a href="../demos/tail-black-litterman/index.html">Demo</a>
@@ -81,7 +80,7 @@ const CLUSTERS = {
   reverseopt: {label:"Reverse / inverse optimization", color:"#2980b9"},
   choice:     {label:"Discrete-choice inversion",      color:"#8e44ad"},
   meucci:     {label:"Entropy / copula pooling",       color:"#16a085"},
-  blnn:       {label:"BL non-normal / higher-moment",  color:"#d68910"},
+  blnn:       {label:"Higher-moment / skew",          color:"#d68910"},
   taildep:    {label:"Tail-dependence allocation",     color:"#c0392b"},
   thurstone:  {label:"Thurstonian race",               color:"#27ae60"},
   empirical:  {label:"Empirical premise",              color:"#5d6d7e"},
@@ -114,9 +113,16 @@ const NODES = [
  // BL non-normal / higher-moment / copula-BL
  {id:"giacometti2007", label:"Giacometti et al 2007", year:2007, c:"blnn", url:"https://scholar.google.com/scholar?q=Giacometti+Bertocchi+Rachev+Fabozzi+stable+distributions+Black-Litterman", note:"Stable/t priors, VaR/CVaR risk in BL."},
  {id:"harvey2010", label:"Harvey et al 2010", year:2010, c:"blnn", url:"https://doi.org/10.1080/14697681003756877", note:"Full Bayesian portfolio choice under a skew-normal likelihood (skew/kurtosis + parameter uncertainty); MCMC + utility maximization."},
- {id:"hiddentrunc2023", label:"Hidden-truncation BL 2023", year:2023, c:"blnn", url:"https://arxiv.org/abs/2310.12333", note:"BL posterior skewed via a hidden-truncation (Arnold-Beaver) family."},
- {id:"martellini2010", label:"Martellini–Ziemann 2010", year:2010, c:"blnn", url:"https://scholar.google.com/scholar?q=Martellini+Ziemann+higher-order+comoments+portfolio+selection", note:"Improved coskewness/cokurtosis estimators; the 'villain' of estimation-heavy higher-moment allocation (comoment-tensor dimensionality)."},
+ {id:"hiddentrunc2023", label:"Park–Nguyen 2025 (skew-normal BL)", year:2025, c:"blnn", url:"https://doi.org/10.1007/s11579-025-00387-1", note:"Math. & Financial Economics 19(2):407-444 (arXiv:2310.12333): the BL posterior is hidden-truncation SKEW-NORMAL in closed form, optimized via Simaan's three-moment risk model. The nearest skew-aware BL competitor — but it is skew-NORMAL (no skew-t, no joint lower tail), needs the third moment, and runs an MVS optimizer; no race inverse, no tail-co-movement view."},
+ {id:"martellini2010", label:"Martellini–Ziemann 2010", year:2010, c:"blnn", url:"https://doi.org/10.1093/rfs/hhp099", note:"Improved coskewness/cokurtosis estimators; the 'villain' of estimation-heavy higher-moment allocation (comoment-tensor dimensionality the empirical-simulation race never forms)."},
  {id:"sahamkhadam2022", label:"Sahamkhadam et al 2022", year:2022, c:"blnn", url:"https://doi.org/10.1016/j.ejor.2021.06.015", note:"EJOR: BL posterior via R-vine copulas (asymmetric tail dependence) -> mean-CVaR. The explicit tail-aware-BL lineage — BUT the copula supplies return scenarios; the reverse step is still returns-only Pi=lambda*Sigma*w."},
+ // skewness-aware allocation (the higher-moment way to be asymmetry-aware: comoment tensors + optimization)
+ {id:"kraus1976", label:"Kraus–Litzenberger 1976", year:1976, c:"blnn", url:"https://doi.org/10.1111/j.1540-6261.1976.tb01961.x", note:"J. Finance: three-moment CAPM — investors like positive skewness, so systematic COSKEWNESS with the market is priced alongside beta. The origin of skewness preference."},
+ {id:"harveysiddique2000", label:"Harvey–Siddique 2000", year:2000, c:"blnn", url:"https://doi.org/10.1111/0022-1082.00247", note:"J. Finance: time-varying CONDITIONAL coskewness with the market carries a premium and helps explain the cross-section beyond Fama-French."},
+ {id:"simaan1993", label:"Simaan 1993", year:1993, c:"blnn", url:"https://doi.org/10.1287/mnsc.39.5.568", note:"Mgmt Science: a three-parameter (location-scale + asymmetry) framework admitting skewness preference without a full comoment tensor — the three-moment risk model the skew-normal BL optimizes against."},
+ {id:"lai1991", label:"Lai 1991 (PGP)", year:1991, c:"blnn", url:"https://doi.org/10.1007/BF02408382", note:"Originates polynomial goal programming for mean-variance-SKEWNESS: trade mean/variance/skewness as competing objectives. Needs the coskewness tensor AND an optimizer."},
+ {id:"briec2007", label:"Briec–Kerstens–Jokung 2007", year:2007, c:"blnn", url:"https://doi.org/10.1287/mnsc.1060.0596", note:"Mgmt Science: a shortage / directional-distance function gauges mean-variance-SKEWNESS efficiency over the non-convex MVS frontier. Comoment tensor + nonlinear optimization."},
+ {id:"boudt2020", label:"Boudt–Cornilly–Verdonck 2020", year:2020, c:"blnn", url:"https://doi.org/10.1093/jjfinec/nby022", note:"J. Financial Econometrics: shrinks the sample COSKEWNESS matrix toward structured targets (unbiased-MSE intensity) — the remedy for the comoment tensor's dimensionality. Still an estimate-then-optimize pipeline."},
 
  // tail-dependence allocation
  {id:"lohre2020", label:"Lohre–Rother–Schäfer 2020", year:2020, c:"taildep", url:"https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3513399", note:"HRP using LOWER-TAIL DEPENDENCE as linkage; re-weights the simplex by recursive bisection with NO covariance inversion — closest in mechanism to 'reweight without inverting Sigma' — but no view, no reverse-opt, no inverse map (a clustering heuristic)."},
@@ -152,6 +158,16 @@ const EDGES = [
  {s:"giacometti2007", t:"hiddentrunc2023", type:"lineage"},
  {s:"meucci2006", t:"sahamkhadam2022", type:"lineage", label:"copula views"},
  {s:"bl1992", t:"sahamkhadam2022", type:"lineage"},
+ // skewness-aware allocation lineage
+ {s:"kraus1976", t:"harveysiddique2000", type:"lineage", label:"unconditional → conditional coskewness"},
+ {s:"kraus1976", t:"simaan1993", type:"lineage"},
+ {s:"lai1991", t:"briec2007", type:"lineage", label:"PGP → efficiency gauging"},
+ {s:"martellini2010", t:"boudt2020", type:"lineage", label:"comoment estimation → shrinkage"},
+ {s:"harvey2010", t:"hiddentrunc2023", type:"lineage", label:"Bayesian higher-moment prior"},
+ {s:"simaan1993", t:"hiddentrunc2023", type:"lineage", label:"three-moment risk model"},
+ // skewness-aware vs the race
+ {s:"briec2007", t:"hub", type:"contrast", label:"mean-var-SKEW via comoment tensors + optimization; the race gets skew/coskew for free"},
+ {s:"hiddentrunc2023", t:"hub", type:"gap", label:"skew-NORMAL BL: 3rd moment + MVS optimizer, no skew-t, no race inverse"},
  // tail-dep lineage
  {s:"taildepclust2018", t:"lohre2020", type:"lineage", label:"tail-dependence linkage"},
  {s:"taildepclust2018", t:"tailriskparity", type:"lineage"},
