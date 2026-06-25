@@ -15,6 +15,30 @@ ranking, similarity-diversity indices in ecology), the wedge is the **smoothness
 combination, not clone-consistency alone. The share→share tilt operator itself appears novel
 (closest prior art, GEV / Hotz–Miller inversion, stops at estimation).
 
+## What makes a *direct* hit (and why MoE is not one)
+
+The operator is a smooth, dependence-aware, entropy-regularized tilt of a soft distribution:
+`w = argmax_{p∈Δ} ⟨θ,p⟩ − Ω_S(p)`. It is a **direct hit** iff:
+1. the deliverable is a **soft distribution on the full simplex**, consumed as a distribution;
+2. the semantics are **choice / selection probability** (or entropy-diversification is genuinely the
+   objective);
+3. there is redundancy/dependence among the alternatives to tilt for; and
+4. smoothness / low churn is valued (repeated updates).
+
+It is **not** a fit when there is a hard **cardinality** constraint (top-k) or the value is purely
+**coalitional-combination** (a subset's cooperative output). Those are constrained-portfolio /
+submodular / ℓ0 problems with their own machinery; the race (single-winner *selection*, no
+coalitions — see `experiments/coalition_credit.py`) can at best supply a redundancy-aware *prior*
+to such a solver, not the solution.
+
+**MoE top-k routing fails on both counts** — it is cardinality-constrained (exactly k experts) and
+its value is the *combined* output of the chosen experts (a constrained portfolio). The router demo
+(`experiments/moe_router.py`) shows the race correctly de-duplicates redundant experts — a useful
+sub-problem — but it does not solve the constrained combination, so MoE is at most a *partial* fit.
+**Recommender top-k slates** and **sparse feature selection** sit on the same boundary (cardinality
++ slate-combination value). LARS/LASSO live on the *sparse* side of this line; the race is the
+smooth, full-simplex analogue of their correlated-predictor sharing.
+
 ## Opportunities by field (fit, the gap, best-in-field)
 
 | Field | Best application | Fit | The gap the operator fills |
@@ -38,11 +62,22 @@ replicator dynamics / similarity-diversity indices (already smooth / already clo
 ad budget allocation as single-winner (continuous-split mechanism mismatch; portfolio theory already
 owns correlation+turnover).
 
-## Top cross-field picks
-1. **MoE routing** — largest, most acute, genuinely-open pain; all three properties land at once.
-2. **Ensemble/stacking** — most mature theory, clone-consistency provable, and already validated by our M4 combination result; the natural proof-of-concept feeding the MoE story.
-3. **MMM reallocation** + **variant nowcasting** + **electoral-college tails** — cleanest "replace the blunt instrument" drop-ins, each with a documented incumbent failure.
-4. **Sports outright markets** — best low-effort demonstrator (BT/PL = the race verbatim).
+## Top cross-field picks (re-ranked by the direct-hit criterion)
+Most direct = soft simplex, native choice/win-probability semantics, no cardinality constraint:
+1. **Sports / prediction-market outright win-probability fields** — the *most* direct hit: BT/PL
+   literally *is* the race, the object is `P(win)`, no cardinality, tilt for correlated contenders.
+2. **Discrete-choice shares** — market share, vote/poll share, pathogen-variant frequency — genuine
+   choice-probability distributions you tilt for substitution; each has a documented incumbent
+   failure (cannibalization; correlated polling/tail errors; ad-hoc clade collapsing).
+3. **Continuous allocation via the implied objective** — portfolio weights, MMM / RTB budget split
+   (soft, churn-sensitive); direct because the entropy-regularized-diversification objective is what
+   is wanted, even though the value is combinational.
+4. **Ensemble / stacking weights** — soft combination weights; clone-consistency provable, validated
+   by our M4 result. (Mild caveat: the *value* is combinational, so it leans on the implied objective
+   rather than selection semantics.)
+
+Boundary / partial fits (cardinality or coalition — the race is a prior, not the solution):
+**MoE top-k routing**, **recommender top-k slates**, **sparse feature selection**.
 
 ## Strategic implication
 The breadth (ML, marketing, epidemiology, politics, IR/sports — not just finance) supports the
