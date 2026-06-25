@@ -12,10 +12,13 @@ whole-universe market portfolio, a non-Lucian object no investor on a restricted
 universe actually holds (\Cref{sec:capm}).
 
 The reason to read allocation as a Thurstonian rather than a Lucian choice is a
-single property: \emph{redundancy consistency}. Add a second asset that behaves
-almost exactly like one already held, and a sensible rule should \emph{split} the
-position across the two near-duplicates and leave the rest of the book untouched;
-it must not let the duplicated exposure count twice. This is the portfolio form of
+single property---\emph{clone consistency}: cloning an option should not create
+value. Add a second asset that behaves almost exactly like one already held, and a
+sensible rule should \emph{split} the position across the two near-duplicates and
+leave the rest of the book untouched; it must not let the duplicated exposure count
+twice. Everything else this paper advertises---robustness without inverting a
+covariance, low turnover, feasibility at scale---is downstream of meeting this one
+axiom with a smooth order-statistic race rather than a hard clustering or an inverse. This is the portfolio form of
 the red-bus/blue-bus problem that unseated the logit model in discrete choice
 \parencite{mcfadden1974}. A Lucian rule---capitalization weighting included---fixes
 the ratio of any two weights independently of the rest of the field, so inserting a

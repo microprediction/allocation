@@ -329,7 +329,15 @@ attribution and selection experiments---is controlled by a concentration
 (inverse-temperature) parameter $\beta$: scaling the calibrated strengths by $\beta$
 drives a sub-maximal contributor's credit to zero as $\beta\to\infty$ while leaving
 the even split among genuine duplicates intact, trading the leak against the
-smoothness of the map (developed in the companion paper). The construction and its calibration inverse are implemented in the
+smoothness of the map (developed in the companion paper). A complementary device is
+an \emph{outside option}: a null competitor whose winning probability $w_0$ absorbs
+mass no real contributor deserves (an interpretable baseline---unexplained credit, or
+cash / market-mode in the portfolio reading). Empirically the null preserves the even
+split and softens the leak with a mild bias toward weak contributors, but it shaves
+mass roughly in proportion to share, so it is a smooth interpretable floor rather than
+a targeted leak remover; temperature is the sharper tool. The whole construction is,
+in one line, a replacement of additive marginal contribution by the probability of
+being the \emph{non-redundant winner in the actual field}. It is implemented in the
 open-source \texttt{allocation} package, built on \texttt{thurstone}.
 
 \printbibliography

@@ -192,10 +192,13 @@ co-movement deepens---$M_G$ rising stochastically while the marginals, and even 
 full correlation, are held fixed---the subgroup's combined weight falls from the
 head-count value toward the single-competitor value, so its \emph{tail-effective}
 cardinality runs from $|G|$ to $1$. For one independent asset racing a symmetric
-cluster that limit is $\tfrac12$ regardless of $|G|$. Whether a given parametric
-family (Clayton, say, at fixed margins) deepens $M_G$ monotonically is a
-family-specific question; \Cref{fig:tail} shows that it does for the family used
-there.
+cluster that limit is $\tfrac12$ regardless of $|G|$. Put another way, the
+\emph{effective number of bets is state-dependent}: in calm states $|G|$ names may be
+$|G|$ partial bets, while in a crash they are one. A covariance averages across
+states and cannot represent that collapse; an order-statistic race can, because the
+winning event is itself a tail event. Whether a given parametric family (Clayton,
+say, at fixed margins) deepens $M_G$ monotonically is a family-specific question;
+\Cref{fig:tail} shows that it does for the family used there.
 
 \begin{figure}[h]
   \centering
@@ -276,11 +279,15 @@ minus a convex \emph{diversification penalty} $\Omega_C$ that is determined by
 the correlation---a mean--(convex-risk) allocator whose feasible set is the
 simplex, which is why the solution is long-only and fully invested. This is the
 random-utility ``social-surplus'' / perturbed-optimizer construction
-\parencite{mcfadden1981, williams1977, berthet2020}. The choice of perturbation
-is decisive: Gumbel noise yields $\Omega = $ Shannon entropy and $w = $ softmax,
-a \emph{correlation-blind} (Lucian) allocator; Gaussian noise with covariance
-$C$ makes $\Omega_C$ \emph{correlation-aware}, which is precisely what produces
-the redundancy consistency of \Cref{prop:redundancy}. Finally, since
+\parencite{mcfadden1981, williams1977, berthet2020}. The perturbation law indexes a
+whole \emph{family of dependence-aware entropies}---$\Omega_S(p)$ is the cost of
+concentrating choice probability on $p$ under dependence $S$. The choice is decisive:
+Gumbel noise yields $\Omega = $ Shannon entropy and $w = $ softmax, a
+\emph{correlation-blind} (Lucian) allocator; Gaussian noise with covariance $C$
+makes $\Omega_C$ \emph{correlation-aware}, which is precisely what produces the
+redundancy consistency of \Cref{prop:redundancy}; a tail-dependent law makes it
+\emph{tail-aware} (\Cref{prop:tail}). Spreading across independent names is rewarded;
+spreading across comonotone names is not---the entropy knows the dependence. Finally, since
 $w = \nabla G_C(\theta)$ is the gradient of a convex potential, it is
 automatically smooth---consistent with \Cref{thm:smooth}. (For general $C$ the
 regularizer $\Omega_C$ has no closed form, unlike the entropy/softmax special

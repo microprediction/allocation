@@ -93,12 +93,16 @@ whole-universe market portfolio, a non-Lucian object no investor on a
 restricted universe actually holds (<a href="#sec:capm"
 data-reference-type="ref+Label" data-reference="sec:capm">2.1</a>).</p>
 <p>The reason to read allocation as a Thurstonian rather than a Lucian
-choice is a single property: <em>redundancy consistency</em>. Add a
-second asset that behaves almost exactly like one already held, and a
-sensible rule should <em>split</em> the position across the two
-near-duplicates and leave the rest of the book untouched; it must not
-let the duplicated exposure count twice. This is the portfolio form of
-the red-bus/blue-bus problem that unseated the logit model in discrete
+choice is a single property—<em>clone consistency</em>: cloning an
+option should not create value. Add a second asset that behaves almost
+exactly like one already held, and a sensible rule should <em>split</em>
+the position across the two near-duplicates and leave the rest of the
+book untouched; it must not let the duplicated exposure count twice.
+Everything else this paper advertises—robustness without inverting a
+covariance, low turnover, feasibility at scale—is downstream of meeting
+this one axiom with a smooth order-statistic race rather than a hard
+clustering or an inverse. This is the portfolio form of the
+red-bus/blue-bus problem that unseated the logit model in discrete
 choice <span class="citation" data-cites="mcfadden1974">(McFadden
 1974)</span>. A Lucian rule—capitalization weighting included—fixes the
 ratio of any two weights independently of the rest of the field, so
@@ -1084,12 +1088,17 @@ from <span class="math inline">\(|G|\)</span> to <span
 class="math inline">\(1\)</span>. For one independent asset racing a
 symmetric cluster that limit is <span
 class="math inline">\(\tfrac12\)</span> regardless of <span
-class="math inline">\(|G|\)</span>. Whether a given parametric family
-(Clayton, say, at fixed margins) deepens <span
-class="math inline">\(M_G\)</span> monotonically is a family-specific
-question; <a href="#fig:tail" data-reference-type="ref+Label"
-data-reference="fig:tail">1</a> shows that it does for the family used
-there.</p>
+class="math inline">\(|G|\)</span>. Put another way, the <em>effective
+number of bets is state-dependent</em>: in calm states <span
+class="math inline">\(|G|\)</span> names may be <span
+class="math inline">\(|G|\)</span> partial bets, while in a crash they
+are one. A covariance averages across states and cannot represent that
+collapse; an order-statistic race can, because the winning event is
+itself a tail event. Whether a given parametric family (Clayton, say, at
+fixed margins) deepens <span class="math inline">\(M_G\)</span>
+monotonically is a family-specific question; <a href="#fig:tail"
+data-reference-type="ref+Label" data-reference="fig:tail">1</a> shows
+that it does for the family used there.</p>
 <figure id="fig:tail" data-latex-placement="h">
 <img src="figures/tail_consistency.png" style="width:80.0%" />
 <figcaption>Tail consistency. One independent asset versus a <span
@@ -1190,18 +1199,26 @@ simplex, which is why the solution is long-only and fully invested. This
 is the random-utility “social-surplus” / perturbed-optimizer
 construction <span class="citation"
 data-cites="mcfadden1981 williams1977 berthet2020">(McFadden 1981;
-Williams 1977; Berthet et al. 2020)</span>. The choice of perturbation
-is decisive: Gumbel noise yields <span class="math inline">\(\Omega
+Williams 1977; Berthet et al. 2020)</span>. The perturbation law indexes
+a whole <em>family of dependence-aware entropies</em>—<span
+class="math inline">\(\Omega_S(p)\)</span> is the cost of concentrating
+choice probability on <span class="math inline">\(p\)</span> under
+dependence <span class="math inline">\(S\)</span>. The choice is
+decisive: Gumbel noise yields <span class="math inline">\(\Omega
 =\)</span> Shannon entropy and <span class="math inline">\(w =\)</span>
 softmax, a <em>correlation-blind</em> (Lucian) allocator; Gaussian noise
 with covariance <span class="math inline">\(C\)</span> makes <span
 class="math inline">\(\Omega_C\)</span> <em>correlation-aware</em>,
 which is precisely what produces the redundancy consistency of <a
 href="#prop:redundancy" data-reference-type="ref+Label"
-data-reference="prop:redundancy">5</a>. Finally, since <span
-class="math inline">\(w = \nabla G_C(\theta)\)</span> is the gradient of
-a convex potential, it is automatically smooth—consistent with <a
-href="#thm:smooth" data-reference-type="ref+Label"
+data-reference="prop:redundancy">5</a>; a tail-dependent law makes it
+<em>tail-aware</em> (<a href="#prop:tail"
+data-reference-type="ref+Label" data-reference="prop:tail">7</a>).
+Spreading across independent names is rewarded; spreading across
+comonotone names is not—the entropy knows the dependence. Finally, since
+<span class="math inline">\(w = \nabla G_C(\theta)\)</span> is the
+gradient of a convex potential, it is automatically smooth—consistent
+with <a href="#thm:smooth" data-reference-type="ref+Label"
 data-reference="thm:smooth">2</a>. (For general <span
 class="math inline">\(C\)</span> the regularizer <span
 class="math inline">\(\Omega_C\)</span> has no closed form, unlike the
