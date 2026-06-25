@@ -67,8 +67,12 @@ probability that it wins,
   w_i \;=\; \Prob\!\Big( X_i = \max_j X_j \Big).
   \label{eq:winprob}
 \end{equation}
-This is the Thurstonian choice probability, and the vector $w = W_S(\theta)$ is the
-gradient of an expected-maximum potential (\Cref{sec:rule}). Read as credit it has
+We follow the lowest-\emph{score}-wins convention of the \texttt{thurstone} package
+and \textcite{cotton2021}: $\theta_i$ is a \emph{strength}, the negated score, so the
+lowest-score contributor is the $\argmaxop$ winner in \eqref{eq:winprob}; in the
+loss-based applications of \Cref{sec:apps} the score is a loss and the lowest-loss
+contributor wins. This is the Thurstonian choice probability, and $w = W_S(\theta)$
+is the gradient of an expected-maximum potential (\Cref{sec:rule}). Read as credit it has
 three things going for it at once. It is redundancy-aware by construction: two
 contributors that move together compete with \emph{each other}, so a co-moving pair
 collapses toward a single winner and shares one contributor's credit. It is
