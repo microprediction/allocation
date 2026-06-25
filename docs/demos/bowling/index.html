@@ -108,14 +108,17 @@
   is real tail risk living <em>above</em> all pairwise information — invisible to any
   correlation-based method. A tail-aware overlay races the assets under the actual cascading
   simulation instead, so co-defaulters de-duplicate automatically.</p>
-  <p class="muted">Stated plainly, with the honesty the lab demands: de-duplication is a
-  <em>mechanism</em>, not a free lunch. In the
-  <a href="https://github.com/microprediction/allocation/blob/main/experiments/bowling_lab.py">bowling
-  lab</a> the full overlay, taken to a standalone portfolio, over-concentrates and worsens the tail;
-  it is a benchmark <em>tilt</em> to dial, which is what the
-  <a href="../tail-black-litterman/index.html">tail-sensitive Black–Litterman demo</a> does on the
-  Dow. The reusable generator and the copula-deviation test are in
-  <a href="https://github.com/microprediction/allocation/blob/main/experiments/bowling_sim.py">bowling_sim.py</a>.</p>
+  <p class="muted">Because this world is fully known, it doubles as a laboratory for
+  <strong>credit portfolios</strong>: score any default-aware allocator against the <em>true</em>
+  cascading tail rather than the copula's — the regime where a covariance-based optimiser is
+  blindest. The reusable generator, this copula-deviation test, and the out-of-sample portfolio
+  harness are in
+  <a href="https://github.com/microprediction/allocation/blob/main/experiments/bowling_sim.py">bowling_sim.py</a>
+  and
+  <a href="https://github.com/microprediction/allocation/blob/main/experiments/bowling_lab.py">bowling_lab.py</a>.
+  (Honest aside: as an <em>equity-return</em> overlay the de-duplication tilt did not reduce realised
+  tail risk — it is a dialled benchmark tilt, which is what the
+  <a href="../tail-black-litterman/index.html">tail-sensitive Black–Litterman demo</a> does.)</p>
 </main>
 
 <footer>Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.</footer>
