@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Bowling for contagion — allocation</title>
-  <meta name="description" content="A bowling-alley generative model for markets: companies are pins grouped by sector; a shock cascades a whole sector at once (contagion), and a tail-aware overlay underweights the names that default together.">
+  <meta name="description" content="A bowling-alley generative model for markets: companies are pins grouped by sector; random shocks cascade sectors, the correlation matrix emerges and settles, and the joint-default tail pulls away from the Gaussian copula it implies.">
   <style>
     :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
       --accent:#4a3aff;--border:#e2e2e2;--ink:#1f1d3d;}
@@ -22,23 +22,23 @@
     h1{font-size:2.0rem;margin:0 0 4px} .subtitle{color:var(--muted);font-size:1.1rem;margin:0 0 20px}
     h2{font-size:1.25rem;margin:1.8em 0 .5em;border-bottom:1px solid var(--border);padding-bottom:4px}
     p{margin:.8em 0} .muted{color:var(--muted)} code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em}
-    .stage{display:grid;grid-template-columns:1fr 290px;gap:20px;align-items:start;margin:18px 0}
+    .stage{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;margin:18px 0}
     @media(max-width:820px){.stage{grid-template-columns:1fr}}
-    canvas{background:#171526;border:1px solid var(--border);border-radius:8px;width:100%;height:auto;display:block}
+    canvas#cv{background:#171526;border:1px solid var(--border);border-radius:8px;width:100%;height:auto;display:block}
     .panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px}
-    .panel h3{margin:0 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .panel h3{margin:0 0 8px;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .panel h3 .n{float:right;color:var(--faint);text-transform:none;letter-spacing:0;font-weight:400}
+    #heat{width:100%;background:#fff;border:1px solid var(--border);border-radius:6px;display:block}
     .controls{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;align-items:center}
     button{padding:9px 14px;border-radius:6px;border:1px solid var(--border);background:var(--accent);color:#fff;
       font-weight:600;cursor:pointer;font-size:.95rem} button.sec{background:#fff;color:var(--text)} button:hover{opacity:.9}
-    .controls label{color:var(--muted);font-size:.9rem}
     .readout{font-size:.95rem;min-height:1.6em;margin:6px 0} .readout b{color:var(--text)}
-    .bar{display:flex;align-items:center;gap:6px;font-size:.8rem;margin:2px 0}
-    .bar .nm{width:50px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
-    .bar .track{flex:1;height:11px;background:#f0f0f4;border-radius:3px;position:relative;overflow:hidden}
-    .bar .fill{position:absolute;top:0;bottom:0;left:0}
-    .loading{color:var(--faint);font-style:italic;padding:20px 0;text-align:center}
     .legend{font-size:.82rem;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
     .legend span{display:inline-flex;align-items:center;gap:5px} .sw{width:11px;height:11px;border-radius:50%}
+    table.tail{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:6px}
+    table.tail th,table.tail td{padding:3px 5px;text-align:right;border-bottom:1px solid var(--border)}
+    table.tail th:first-child,table.tail td:first-child{text-align:left;color:var(--muted)}
+    table.tail td.r{font-weight:700}
     footer{max-width:980px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
   </style>
 </head>
@@ -60,194 +60,229 @@
 
 <main>
   <h1>Bowling for contagion</h1>
-  <p class="subtitle">Companies are pins. Sectors crash together. The overlay knows.</p>
+  <p class="subtitle">Companies are pins. Sectors crash together. The covariance can't tell.</p>
 
   <p class="lead">A bowling alley is a generative model for a market. Each pin is a
-  <strong>company</strong>; companies in a <strong>sector</strong> stand close together — so when a
-  shock caroms through, they tend to <em>fall together</em>: <strong>default contagion</strong>. A
-  covariance sees only smooth co-movement and misses the all-or-nothing cascade — but a tail-aware
-  overlay, reading weights as winning probabilities of a crash race, <strong>de-duplicates the names
-  that default together</strong>. Throw a shock (aim and fire, or send one in from a random angle).</p>
+  <strong>company</strong>; companies in a <strong>sector</strong> stand close together, so a shock
+  (a random chord across the table) caroms through and topples them <em>together</em> —
+  <strong>default contagion</strong>. Throw a few, or hit <em>Fast +1000</em>, and watch two things
+  emerge: the <strong>correlation matrix</strong> settles down, and the
+  <strong>joint-default tail</strong> pulls away from the Gaussian copula that very correlation
+  implies — the tail risk a covariance cannot see.</p>
 
   <div class="stage">
     <div>
       <canvas id="cv" width="820" height="500"></canvas>
       <div class="legend" id="legend"></div>
       <div class="controls">
-        <label>aim <input type="range" id="aim" min="0" max="1" step="0.01" value="0.5" style="vertical-align:middle"></label>
-        <button onclick="doThrow()">▶ Throw</button>
-        <button class="sec" onclick="randomThrow()">🎲 Random chord</button>
-        <button class="sec" onclick="resetPins()">↺ Reset</button>
+        <button onclick="doThrow()">▶ Throw a shock</button>
+        <button class="sec" onclick="fastMode()">⏩ Fast +1000</button>
+        <button class="sec" onclick="resetAll()">↺ Reset</button>
       </div>
-      <div class="readout" id="readout">Aim with the slider and throw, or send a shock in from a random angle.</div>
+      <div class="readout" id="readout">Each shock is a random chord. Throw a few, or run Fast +1000.</div>
+      <p class="muted" style="font-size:.8rem;margin:.3em 0 0">After shocks accumulate: <b>pin size</b> =
+      marginal probability of being hit; <b>pin ring</b> = the overlay tilt (<span style="color:#1e8449">green</span>
+      keep / <span style="color:#d62828">red</span> trim the herd-defaulters). Right: the fitted correlation and the
+      joint-hit tail it implies under a Gaussian copula.</p>
     </div>
     <div class="panel">
-      <h3>Tail overlay weights</h3>
-      <div id="bars"><div class="loading">learning the crash race…</div></div>
-      <p class="muted" style="font-size:.82rem;margin-top:10px">How often each company is the single
-      worst crasher across many random shocks. Sector-mates split that credit, so the overlay
-      <b>underweights</b> tightly-clustered co-defaulters (short bars) and keeps more in the lonelier
-      names (long bars). Bar colour = sector.</p>
+      <h3>Correlation of returns <span class="n" id="nsim">N = 0</span></h3>
+      <canvas id="heat" width="280" height="280"></canvas>
+      <h3 style="margin-top:14px">Joint default: market vs Gaussian copula</h3>
+      <div id="tail" class="muted" style="font-size:.82rem">throw some shocks…</div>
     </div>
   </div>
 
   <h2>Why this is the point</h2>
-  <p>Minimum-variance and Black–Litterman both run on a covariance, and a covariance fit to this
-  world matches a Gaussian copula that <em>cannot</em> represent a whole sector defaulting at once —
-  so they could over-concentrate into a cluster that looks calm on variance and then blows up
-  together. The overlay never inverts a covariance; it races the assets under the real (cascading)
-  simulation, and co-defaulters cannibalise each other's wins, so the win-share of any one contagion
-  cluster is de-duplicated automatically — the bars show that de-duplication.</p>
-  <p class="muted">A caveat worth stating plainly: the bars are the <em>de-duplication mechanism</em>,
-  not a claim of superior returns. In the
+  <p>The correlation matrix on the right is exactly what minimum-variance and Black–Litterman run on.
+  But fit a Gaussian copula to that <em>same</em> correlation and it cannot make a whole sector
+  default at once — so its joint-default tail (the table) falls away from the market's. The cascade
+  is real tail risk that lives above second moments, invisible to any covariance method. A
+  tail-aware overlay races the assets under the actual (cascading) simulation instead of inverting a
+  covariance, so co-defaulters de-duplicate automatically.</p>
+  <p class="muted">Stated plainly, with the honesty the lab demands: de-duplication is a
+  <em>mechanism</em>, not a free lunch. In the
   <a href="https://github.com/microprediction/allocation/blob/main/experiments/bowling_lab.py">bowling
-  lab</a> — the same generator run as an out-of-sample horse race across many random markets — the
-  full overlay (taken all the way to a standalone portfolio) actually <em>over-concentrates</em> and
-  takes a worse tail than equal weight or minimum-variance. The lesson the lab teaches: this is a
-  benchmark <em>tilt</em> to apply with a confidence dial, not a free lunch. The
-  <a href="../tail-black-litterman/index.html">tail-sensitive Black–Litterman demo</a> is the same
-  overlay, dialled, on the Dow.</p>
+  lab</a> the full overlay, taken to a standalone portfolio, over-concentrates and worsens the tail;
+  it is a benchmark <em>tilt</em> to dial, which is what the
+  <a href="../tail-black-litterman/index.html">tail-sensitive Black–Litterman demo</a> does on the
+  Dow. The reusable generator and the copula-deviation test are in
+  <a href="https://github.com/microprediction/allocation/blob/main/experiments/bowling_sim.py">bowling_sim.py</a>.</p>
 </main>
 
 <footer>Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.</footer>
 
 <script>
-// ---- company universe: each sector is a tidy RING of names, well separated ----
-const SECTORS = [
-  {name:"Tech",     color:"#7c6cff", cx:165, cy:165, names:["AAPL","MSFT","NVDA","GOOGL","META"]},
-  {name:"Banks",    color:"#33d17a", cx:415, cy:140, names:["JPM","GS","BAC","MS","C"]},
-  {name:"Energy",   color:"#f0a830", cx:665, cy:175, names:["XOM","CVX","COP","SLB"]},
-  {name:"Health",   color:"#ff7a7a", cx:250, cy:355, names:["UNH","JNJ","PFE","MRK"]},
-  {name:"Consumer", color:"#24c2ad", cx:560, cy:360, names:["WMT","KO","PG","MCD","NKE"]},
+// ---- company universe: each sector is a tidy ring of names, well separated ----
+const SECTORS = [   // deliberately uneven sizes: bigger sectors default in bigger herds
+  {name:"Tech",     color:"#7c6cff", cx:360, cy:215, names:["AAPL","MSFT","NVDA","GOOGL","META","AMD","CRM"]},
+  {name:"Banks",    color:"#33d17a", cx:505, cy:190, names:["JPM","GS","BAC","MS","C"]},
+  {name:"Energy",   color:"#f0a830", cx:615, cy:255, names:["XOM","CVX","SLB"]},
+  {name:"Health",   color:"#ff7a7a", cx:390, cy:335, names:["UNH","JNJ"]},
+  {name:"Consumer", color:"#24c2ad", cx:520, cy:335, names:["WMT","KO","PG","MCD","NKE","HD"]},
 ];
-const W=820, H=500, BR=11, PR=9, RING=30, BARRIER=26;
-const MB=8, MP=1, EBP=0.35, EPP=0.4, PF=0.90, BF=0.985;   // calmer than a real lane: hits stay local
+const W=820, H=500, BR=16, PR=9, RING=34, BARRIER=26;   // big intra-cluster, packed sectors => a chord spans several
+const MB=11, MP=1, EBP=0.4, EPP=0.5, PF=0.965, BF=0.99;
 let rng = mulberry32(42);
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
 
-const NAMES=[], SEC=[], X0=[], Y0=[], LX=[], LY=[];      // LX,LY = outward label offset direction
+const NAMES=[], SEC=[], X0=[], Y0=[], LX=[], LY=[];
 for(const s of SECTORS){ const m=s.names.length;
   s.names.forEach((nm,j)=>{ const a=-Math.PI/2 + 2*Math.PI*j/m;
-    NAMES.push(nm); SEC.push(s);
-    X0.push(s.cx + RING*Math.cos(a)); Y0.push(s.cy + RING*Math.sin(a));
+    NAMES.push(nm); SEC.push(s); X0.push(s.cx+RING*Math.cos(a)); Y0.push(s.cy+RING*Math.sin(a));
     LX.push(Math.cos(a)); LY.push(Math.sin(a)); });
 }
 const n = NAMES.length;
 let X=X0.slice(), Y=Y0.slice(), defaulted=new Array(n).fill(false);
+let Rad=new Array(n).fill(PR), tiltArr=new Float64Array(n), statsView=false;
 const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const heat=document.getElementById("heat"), hx=heat.getContext("2d");
 
-// entry specifications -------------------------------------------------------
-function directed(aimU){ const sp=8+2*rng(), ang=(-6+12*rng())*Math.PI/180;
-  return {bx:120+aimU*(W-240), by:H-20, bvx:sp*Math.sin(ang), bvy:-sp*Math.cos(ang), bsp:-1.5+3*rng()}; }
-function randomChord(r){ // enter from a random point on the boundary, aim across (a random chord)
-  const cx=W/2, cy=H/2, R=Math.hypot(W,H)/2, th=2*Math.PI*r();
-  const bx=cx+R*Math.cos(th), by=cy+R*Math.sin(th);
-  const tx=cx+(r()-0.5)*W*0.5, ty=cy+(r()-0.5)*H*0.5, d=Math.hypot(tx-bx,ty-by)||1, sp=8+2*r();
-  return {bx, by, bvx:sp*(tx-bx)/d, bvy:sp*(ty-by)/d, bsp:-1.5+3*r()}; }
+function randomChord(r){ // uniform chord: two random boundary points => uniform sweep
+  const cx=W/2, cy=H/2, R=Math.hypot(W,H)/2, a1=2*Math.PI*r(), a2=2*Math.PI*r();
+  const bx=cx+R*Math.cos(a1), by=cy+R*Math.sin(a1), ex=cx+R*Math.cos(a2), ey=cy+R*Math.sin(a2);
+  const d=Math.hypot(ex-bx,ey-by)||1, sp=10+2*r();
+  return {bx,by,bvx:sp*(ex-bx)/d,bvy:sp*(ey-by)/d,bsp:0}; }
 
 function simulate(entry, record){
   let x=X0.slice(), y=Y0.slice(), vx=new Array(n).fill(0), vy=new Array(n).fill(0);
-  let {bx,by,bvx,bvy,bsp}=entry; const frames = record ? [] : null;
+  let {bx,by,bvx,bvy,bsp}=entry; const frames=record?[]:null;
   for(let f=0; f<220; f++){
-    const bV2=bvx*bvx+bvy*bvy; let mv=false;
-    for(let i=0;i<n;i++){ if(vx[i]*vx[i]+vy[i]*vy[i]>0.05){mv=true;break;} }
-    if(bV2<0.05 && !mv) break;
+    let mv=false; for(let i=0;i<n;i++){ if(vx[i]*vx[i]+vy[i]*vy[i]>0.05){mv=true;break;} }
+    if(bvx*bvx+bvy*bvy<0.05 && !mv) break;
     bx+=bvx; by+=bvy; bvx+=bsp*0.010; bsp*=0.985; bvx*=BF; bvy*=BF;
-    if(bx<20||bx>W-20||by<20||by>H-20){ if(!mv && f>4) break; }   // ball left the table
+    if((bx<10||bx>W-10||by<10||by>H-10) && !mv && f>4) break;
     for(let i=0;i<n;i++){ if(vx[i]||vy[i]){ x[i]+=vx[i]; y[i]+=vy[i]; vx[i]*=PF; vy[i]*=PF; } }
-    for(let i=0;i<n;i++){ // ball-pin
-      const dx=x[i]-bx, dy=y[i]-by, d2=dx*dx+dy*dy, md=BR+PR;
+    for(let i=0;i<n;i++){ const dx=x[i]-bx, dy=y[i]-by, d2=dx*dx+dy*dy, md=BR+PR;
       if(d2>=md*md||d2<1e-6) continue;
-      const d=Math.sqrt(d2), nx=dx/d, ny=dy/d, vr=(vx[i]-bvx)*nx+(vy[i]-bvy)*ny;
-      if(vr>0) continue;
-      const j=-(1+EBP)*vr/(1/MB+1/MP), jx=j*nx, jy=j*ny;
-      bvx-=jx/MB; bvy-=jy/MB; vx[i]+=jx/MP; vy[i]+=jy/MP;
-      const ov=md-d+0.5; bx-=nx*ov*0.1; by-=ny*ov*0.1; x[i]+=nx*ov*0.9; y[i]+=ny*ov*0.9;
-    }
-    for(let i=0;i<n;i++){ // pin-pin (the carom / contagion)
-      const aM=vx[i]*vx[i]+vy[i]*vy[i]>1e-4;
-      for(let k=i+1;k<n;k++){
-        if(!aM && !(vx[k]*vx[k]+vy[k]*vy[k]>1e-4)) continue;
-        const dx=x[k]-x[i], dy=y[k]-y[i], d2=dx*dx+dy*dy, md=2*PR;
-        if(d2>=md*md||d2<1e-6) continue;
-        const d=Math.sqrt(d2), nx=dx/d, ny=dy/d, vr=(vx[k]-vx[i])*nx+(vy[k]-vy[i])*ny;
-        if(vr>0) continue;
-        const j=-(1+EPP)*vr/(2/MP);
-        vx[i]-=j*nx/MP; vy[i]-=j*ny/MP; vx[k]+=j*nx/MP; vy[k]+=j*ny/MP;
-        const ov=md-d+0.5; x[i]-=nx*ov*0.5; y[i]-=ny*ov*0.5; x[k]+=nx*ov*0.5; y[k]+=ny*ov*0.5;
-      }
-    }
+      const d=Math.sqrt(d2), nx=dx/d, ny=dy/d, vr=(vx[i]-bvx)*nx+(vy[i]-bvy)*ny; if(vr>0) continue;
+      const j=-(1+EBP)*vr/(1/MB+1/MP); bvx-=j*nx/MB; bvy-=j*ny/MB; vx[i]+=j*nx/MP; vy[i]+=j*ny/MP;
+      const ov=md-d+0.5; bx-=nx*ov*0.1; by-=ny*ov*0.1; x[i]+=nx*ov*0.9; y[i]+=ny*ov*0.9; }
+    for(let i=0;i<n;i++){ const aM=vx[i]*vx[i]+vy[i]*vy[i]>1e-4;
+      for(let k=i+1;k<n;k++){ if(!aM && !(vx[k]*vx[k]+vy[k]*vy[k]>1e-4)) continue;
+        const dx=x[k]-x[i], dy=y[k]-y[i], d2=dx*dx+dy*dy, md=2*PR; if(d2>=md*md||d2<1e-6) continue;
+        const d=Math.sqrt(d2), nx=dx/d, ny=dy/d, vr=(vx[k]-vx[i])*nx+(vy[k]-vy[i])*ny; if(vr>0) continue;
+        const j=-(1+EPP)*vr/(2/MP); vx[i]-=j*nx/MP; vy[i]-=j*ny/MP; vx[k]+=j*nx/MP; vy[k]+=j*ny/MP;
+        const ov=md-d+0.5; x[i]-=nx*ov*0.5; y[i]-=ny*ov*0.5; x[k]+=nx*ov*0.5; y[k]+=ny*ov*0.5; } }
     if(record) frames.push({bx,by,x:x.slice(),y:y.slice()});
   }
-  const disp = x.map((xi,i)=>Math.hypot(xi-X0[i], y[i]-Y0[i]));
-  return {disp, frames};
+  return {disp:x.map((xi,i)=>Math.hypot(xi-X0[i],y[i]-Y0[i])), frames};
 }
 
-// ---- overlay weights: win-prob of being the worst crasher (mixed entries) ----
-let W_overlay=null;
-function learnOverlay(){
-  const N=700, D=[];
-  for(let t=0;t<N;t++){ const e = rng()<0.5 ? directed(rng()) : randomChord(rng); D.push(simulate(e,false).disp); }
-  const mean=new Array(n).fill(0), sd=new Array(n).fill(0);
-  for(const d of D) for(let i=0;i<n;i++) mean[i]+=d[i]/N;
-  for(const d of D) for(let i=0;i<n;i++) sd[i]+=(d[i]-mean[i])**2/N;
-  for(let i=0;i<n;i++) sd[i]=Math.sqrt(sd[i])||1;
-  const win=new Array(n).fill(0);
-  for(const d of D){ let bi=0,bv=-1e9; for(let i=0;i<n;i++){const z=(d[i]-mean[i])/sd[i]; if(z>bv){bv=z;bi=i;}} win[bi]++; }
-  W_overlay = win.map(w=>w/N); renderBars();
+// ---- running state: correlation + default tail accumulated across shocks ----
+let S1, S2, defCnt, co, histo, N;
+function resetState(){ S1=new Float64Array(n); S2=Array.from({length:n},()=>new Float64Array(n));
+  defCnt=new Float64Array(n); co=new Float64Array(n); histo=new Float64Array(n+1); N=0; }
+function record(disp){
+  const r=disp.map(v=>-v); let tot=0; const dd=disp.map(v=>v>BARRIER);
+  for(let i=0;i<n;i++) if(dd[i]) tot++;
+  histo[tot]++;
+  for(let i=0;i<n;i++){ if(dd[i]){ defCnt[i]++; co[i]+=tot-1; } S1[i]+=r[i]; const Si=S2[i]; for(let k=0;k<n;k++) Si[k]+=r[i]*r[k]; }
+  N++;
 }
-function renderBars(){
-  const eq=1/n, mx=Math.max(...W_overlay, eq);
-  const idx=[...Array(n).keys()].sort((a,b)=>W_overlay[a]-W_overlay[b]);
-  document.getElementById("bars").innerHTML = idx.map(i=>{
-    const pct=Math.max(4,W_overlay[i]/mx*100).toFixed(0), under=W_overlay[i]<eq;
-    return `<div class="bar"><span class="nm">${NAMES[i]}</span>`+
-      `<span class="track"><span class="fill" style="width:${pct}%;background:${SEC[i].color};opacity:${under?0.5:1}"></span></span></div>`;
-  }).join("");
+function corrMatrix(){
+  const m=S1.map(s=>s/N), C=Array.from({length:n},()=>new Float64Array(n));
+  for(let i=0;i<n;i++) for(let k=0;k<n;k++) C[i][k]=S2[i][k]/N - m[i]*m[k];
+  const sd=new Float64Array(n); for(let i=0;i<n;i++) sd[i]=Math.sqrt(Math.max(C[i][i],1e-12));
+  for(let i=0;i<n;i++) for(let k=0;k<n;k++) C[i][k]/=(sd[i]*sd[k]); return C;
+}
+// inverse standard normal CDF (Acklam)
+function phiInv(p){ if(p<=0)return -6; if(p>=1)return 6;
+  const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],
+   b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+   c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+   d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416], pl=0.02425; let q,r2;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p<=1-pl){q=p-0.5;r2=q*q;return(((((a[0]*r2+a[1])*r2+a[2])*r2+a[3])*r2+a[4])*r2+a[5])*q/(((((b[0]*r2+b[1])*r2+b[2])*r2+b[3])*r2+b[4])*r2+1);}
+  q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+function chol(C){ const L=Array.from({length:n},()=>new Float64Array(n));
+  for(let i=0;i<n;i++) for(let k=0;k<=i;k++){ let s=C[i][k]; for(let j=0;j<k;j++) s-=L[i][j]*L[k][j];
+    L[i][k]= i===k ? Math.sqrt(Math.max(s,1e-9)) : s/L[k][k]; } return L; }
+function gauss(){ let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+function copulaTail(C, p, ks, M){
+  const Cr=C.map((row,i)=>row.map((v,k)=>i===k?v+0.02:v)), L=chol(Cr);
+  const thr=p.map(pp=>phiInv(Math.min(Math.max(pp,1e-4),1-1e-4))), cnt=new Float64Array(n+1), z=new Float64Array(n);
+  for(let s=0;s<M;s++){ for(let i=0;i<n;i++) z[i]=gauss(); let tot=0;
+    for(let i=0;i<n;i++){ let v=0; const Li=L[i]; for(let k=0;k<=i;k++) v+=Li[k]*z[k]; if(v<thr[i]) tot++; }
+    cnt[tot]++; }
+  return ks.map(k=>{ let e=0; for(let t=k;t<=n;t++) e+=cnt[t]; return e/M; });
 }
 
-// ---- drawing ----
+// ---- heatmap + tail table ----
+function colorFor(c){ if(c>=0){ const t=Math.min(c,1); return `rgb(255,${Math.round(255*(1-t))},${Math.round(255*(1-0.6*t))})`; }
+  const t=Math.min(-c,1); return `rgb(${Math.round(255*(1-t))},${Math.round(255*(1-t))},255)`; }
+function refreshStats(){
+  document.getElementById("nsim").textContent = "N = "+N;
+  if(N<3){ return; }
+  // (ii) fitted correlation matrix -> heatmap
+  const C=corrMatrix(), cell=heat.width/n;
+  for(let i=0;i<n;i++) for(let k=0;k<n;k++){ hx.fillStyle=colorFor(C[i][k]); hx.fillRect(k*cell,i*cell,cell+1,cell+1); }
+  // (i) marginal hit probability -> pin size;  (iv) tilt (de-dup herd-defaulters) -> pin ring
+  const p=Array.from(defCnt,c=>c/N), maxp=Math.max(...p,1e-9);
+  const contag=p.map((_,i)=>defCnt[i]?co[i]/defCnt[i]:0);
+  const w=contag.map(c=>1/(1+c)); let wsum=0; for(const v of w) wsum+=v;
+  const eq=1/n, tilt=w.map(v=>v/wsum-eq), mt=Math.max(...tilt.map(Math.abs),1e-9);
+  for(let i=0;i<n;i++){ tiltArr[i]=tilt[i]/mt; Rad[i]=6+9*(p[i]/maxp); }
+  if(statsView) drawState();
+  // (iii) joint-hit probabilities: market vs the Gaussian copula those (i)+(ii) imply
+  const ks=[3,6,10];
+  const emp=ks.map(k=>{ let e=0; for(let t=k;t<=n;t++) e+=histo[t]; return e/N; });
+  const cop = N>=25 ? copulaTail(C,p,ks,2500) : ks.map(_=>NaN);
+  const rows = ks.map((k,j)=>{ const r = cop[j]>0 ? (emp[j]/cop[j]).toFixed(1)+"×" : "—";
+    return `<tr><td>≥ ${k}</td><td>${(emp[j]*100).toFixed(1)}%</td><td>${isNaN(cop[j])?"…":(cop[j]*100).toFixed(1)+"%"}</td><td class="r">${isNaN(cop[j])?"":r}</td></tr>`; });
+  document.getElementById("tail").innerHTML =
+    `<table class="tail"><tr><th>same shock</th><th>market</th><th>copula</th><th>ratio</th></tr>${rows.join("")}</table>`+
+    `<div style="margin-top:6px">avg hit prob ${(p.reduce((a,b)=>a+b,0)/n*100).toFixed(0)}%/firm. Ratio &gt; 1 deep in the tail = contagion the copula can't represent.</div>`;
+}
+
+// ---- drawing the alley ----
 function drawState(bx,by){
   ctx.clearRect(0,0,W,H);
-  for(let i=0;i<n;i++){
-    const dn=defaulted[i];
-    ctx.beginPath(); ctx.arc(X[i],Y[i],PR,0,7);
-    ctx.fillStyle = dn ? "#2c2940" : SEC[i].color; ctx.fill();
-    if(dn){ ctx.strokeStyle="#555"; ctx.lineWidth=1; ctx.stroke(); }
-    ctx.fillStyle = dn ? "#7a7a8c" : "#fff"; ctx.font="bold 11px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText(NAMES[i], X[i]+LX[i]*16, Y[i]+LY[i]*16);
-  }
+  for(let i=0;i<n;i++){ const dn=defaulted[i], rad=statsView?Rad[i]:PR;
+    ctx.beginPath(); ctx.arc(X[i],Y[i],rad,0,7); ctx.fillStyle=dn?"#2c2940":SEC[i].color; ctx.fill();
+    if(statsView && !dn){ const tl=tiltArr[i]; ctx.lineWidth=2.4;
+      ctx.strokeStyle = tl<0 ? `rgba(214,40,40,${Math.min(1,Math.abs(tl))})` : `rgba(44,160,44,${Math.min(1,Math.abs(tl))})`; ctx.stroke(); }
+    else if(dn){ ctx.strokeStyle="#555"; ctx.lineWidth=1; ctx.stroke(); }
+    ctx.fillStyle=dn?"#7a7a8c":"#fff"; ctx.font="bold 10px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(NAMES[i], X[i]+LX[i]*(rad+8), Y[i]+LY[i]*(rad+8)); }
   if(bx!==undefined){ ctx.beginPath(); ctx.arc(bx,by,BR,0,7); ctx.fillStyle="#ff8a2a"; ctx.fill(); }
 }
-function resetPins(){ X=X0.slice(); Y=Y0.slice(); defaulted.fill(false); drawState(); document.getElementById("readout").textContent="Reset. Aim and throw, or send a random chord."; }
+function resetPinsView(){ X=X0.slice(); Y=Y0.slice(); defaulted.fill(false); drawState(); }
+function resetAll(){ statsView=false; resetState(); resetPinsView(); hx.clearRect(0,0,heat.width,heat.height);
+  document.getElementById("tail").innerHTML="throw some shocks…"; refreshStats();
+  document.getElementById("readout").textContent="Reset. Throw a shock or run Fast +1000."; }
 
+let busy=false;
 function animate(frames, disp){
-  let f=0;
+  let f=0; busy=true;
   (function step(){
-    if(f>=frames.length){
-      const last=frames.length?frames[frames.length-1]:{x:X0,y:Y0};
+    if(f>=frames.length){ const last=frames.length?frames[frames.length-1]:{x:X0,y:Y0};
       for(let i=0;i<n;i++){ X[i]=last.x[i]; Y[i]=last.y[i]; defaulted[i]=disp[i]>BARRIER; }
-      drawState();
-      const hits={}; for(let i=0;i<n;i++) if(defaulted[i]) hits[SEC[i].name]=(hits[SEC[i].name]||0)+1;
-      const tot=Object.values(hits).reduce((a,b)=>a+b,0);
-      const worst=Object.entries(hits).sort((a,b)=>b[1]-a[1])[0];
-      document.getElementById("readout").innerHTML = tot===0
-        ? "Shock glanced off — <b>no defaults</b>. Most shocks are quiet."
-        : `<b>${tot}</b> default`+(tot>1?"s":"")+` — mostly <b>${worst[0]}</b>`+
-          (Object.keys(hits).length>1?`, spilling into ${Object.keys(hits).length-1} more sector(s)`:` (the whole sector at once)`)+`.`;
-      return;
-    }
+      record(disp); statsView=true; refreshStats(); drawState();
+      const tot=defaulted.filter(Boolean).length;
+      document.getElementById("readout").innerHTML = tot===0 ? "Shock glanced off — <b>no defaults</b>."
+        : `<b>${tot}</b> default`+(tot>1?"s":"")+` this shock. Watch the matrix settle.`;
+      busy=false; return; }
     const fr=frames[f]; for(let i=0;i<n;i++){X[i]=fr.x[i];Y[i]=fr.y[i];} drawState(fr.bx,fr.by); f+=1; requestAnimationFrame(step);
   })();
 }
-function fire(entry){ const {disp,frames}=simulate(entry,true); animate(frames,disp); }
-function doThrow(){ fire(directed(parseFloat(document.getElementById("aim").value))); }
-function randomThrow(){ fire(randomChord(Math.random)); }
+function doThrow(){ if(busy) return; statsView=false; const {disp,frames}=simulate(randomChord(rng),true); animate(frames,disp); }
 
-document.getElementById("legend").innerHTML = SECTORS.map(s=>
-  `<span><span class="sw" style="background:${s.color}"></span>${s.name}</span>`).join("");
-drawState();
-setTimeout(learnOverlay, 30);
+function fastMode(){ if(busy) return; busy=true; statsView=false; let done=0; const target=1000;
+  document.getElementById("readout").textContent="running 1000 shocks…";
+  (function chunk(){
+    for(let t=0;t<80;t++){ record(simulate(randomChord(rng),false).disp); done++; }
+    refreshStats();
+    if(done<target){ requestAnimationFrame(chunk); }
+    else { statsView=true; resetPinsView(); refreshStats(); busy=false;
+      document.getElementById("readout").innerHTML = `<b>${N}</b> shocks — the correlation matrix has settled; pin size = hit probability, ring = overlay tilt.`; }
+  })();
+}
+
+document.getElementById("legend").innerHTML = SECTORS.map(s=>`<span><span class="sw" style="background:${s.color}"></span>${s.name}</span>`).join("");
+resetState(); drawState(); refreshStats();
 </script>
 </body>
 </html>

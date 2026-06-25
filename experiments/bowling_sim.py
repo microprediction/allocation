@@ -84,3 +84,39 @@ def generate(n=30, T=2500, seed=7, k=3, sd=5.0, carry=0.10, scale=120.0):
     disp = np.array([throw(X0, Y0, rng.random(4)) for _ in range(T)])
     R = carry - disp / scale + 0.01 * rng.standard_normal((T, n))
     return R, disp > BARRIER, disp, X0, Y0
+
+def tail_summary(R, default, ks=(3, 5, 8, 12), n_copula=300_000, seed=11):
+    """Characterize a market's tail: correlation of returns + the joint-default tail ratios
+    that DEVIATE from a Gaussian copula matched to the same marginals AND correlation.
+    Returns (corr, marginal_default_rates, ratios{k:(bowling, copula)}, p_zero(bowling,copula))."""
+    from scipy.stats import norm
+    n = R.shape[1]
+    C = np.corrcoef(((R - R.mean(0)) / R.std(0)).T)
+    pmarg = default.mean(0)
+    Z = default_rng(seed).multivariate_normal(np.zeros(n), C, size=n_copula)
+    gdef = Z < norm.ppf(np.clip(pmarg, 1e-4, 1 - 1e-4))
+    nb, ng = default.sum(1), gdef.sum(1)
+    ratios = {k: (float(np.mean(nb >= k)), float(np.mean(ng >= k))) for k in ks}
+    return C, pmarg, ratios, (float(np.mean(nb == 0)), float(np.mean(ng == 0)))
+
+def fast(n=30, T=1000, seed=7, k=3, sd=5.0):
+    """FAST MODE: ~T sims -> correlation matrix + Gaussian-copula tail-deviation ratios."""
+    R, default, disp, X0, Y0 = generate(n=n, T=T, seed=seed, k=k, sd=sd)
+    C, pmarg, ratios, pz = tail_summary(R, default)
+    return dict(R=R, default=default, disp=disp, corr=C, pmarg=pmarg,
+                tail_ratios=ratios, p_zero=pz, X0=X0, Y0=Y0)
+
+if __name__ == "__main__":
+    import sys
+    n_, T_ = 30, (int(sys.argv[1]) if len(sys.argv) > 1 else 1000)
+    s = fast(n=n_, T=T_)
+    off = s["corr"][~np.eye(n_, dtype=bool)]
+    print(f"FAST MODE: {n_} firms, {T_} sims")
+    print(f"correlation (off-diagonal): mean {off.mean():+.3f}, max {off.max():.3f}  "
+          f"(full matrix in result['corr'])")
+    print(f"marginal default rate: mean {s['pmarg'].mean():.1%}, max {s['pmarg'].max():.1%}")
+    print(f"\n  P(0 defaults)  bowling {s['p_zero'][0]:.3f}  Gauss copula {s['p_zero'][1]:.3f}")
+    print(f"  {'k+ default together':22}{'bowling':>10}{'copula':>10}{'ratio':>8}")
+    for kk, (e, g) in s["tail_ratios"].items():
+        print(f"  >= {kk:<3}{'':14}{e:>10.4f}{g:>10.4f}{(f'{e/g:.1f}x' if g else '>>'):>8}")
+    print("\n  (ratio > 1 in the deep tail = contagion the Gaussian copula cannot represent)")
