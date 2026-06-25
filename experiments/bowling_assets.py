@@ -34,8 +34,8 @@ def random_setup(rng, n=30, k=3):
     traditional triangle: randomizing the setup gives a different market each time.)"""
     cx, cy = rng.uniform(300, 500, k), rng.uniform(200, 330, k)
     per = [n // k + (1 if i < n % k else 0) for i in range(k)]
-    X0 = np.concatenate([cx[i] + rng.normal(0, 15, per[i]) for i in range(k)])
-    Y0 = np.concatenate([cy[i] + rng.normal(0, 15, per[i]) for i in range(k)])
+    X0 = np.concatenate([cx[i] + rng.normal(0, 5, per[i]) for i in range(k)])
+    Y0 = np.concatenate([cy[i] + rng.normal(0, 5, per[i]) for i in range(k)])
     return X0, Y0
 
 def decode(u):                              # wide aim so most throws graze, cascades are rare
@@ -106,12 +106,13 @@ gdef = Z < thr
 nb, ng = default.sum(1), gdef.sum(1)
 print(f"  P(0 defaults)   bowling {np.mean(nb==0):.3f}   Gauss copula {np.mean(ng==0):.3f}  (more 'all quiet')")
 print(f"{'k+ firms default same scenario':32}{'bowling':>10}{'Gauss copula':>14}{'ratio':>8}")
-for k in (3, 6, 9, 12, 16):
+for k in (5, 10, 15, 20):
     e = float(np.mean(nb >= k)); g = float(np.mean(ng >= k))
     print(f"  >= {k:2d}{'':24}{e:>10.4f}{g:>14.4f}{(f'{e/g:.1f}x' if g else '>>'):>8}")
-print("  bowling is BIMODAL: its curve barely falls 3->12 (a cascade takes a whole cluster),")
-print("  while the Gaussian copula -- same marginals AND correlation -- decays smoothly. The")
-print("  copula thus OVER-states moderate co-defaults and UNDER-states the all-or-nothing tail.\n")
+print("  bowling is BIMODAL: mostly all-quiet, punctuated by whole-cluster wipeouts -- so its")
+print("  tail falls far slower than the Gaussian copula (same marginals AND correlation) and the")
+print("  gap GROWS with severity (the rising ratio above). Tail-independence cannot represent")
+print("  all-or-nothing contagion -- the 2008 lesson, from pure mechanics.\n")
 
 # --- tail-sensitive BL overlay on the continuous returns ---
 M = 1 << 16
