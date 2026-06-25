@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tail-sensitive Black–Litterman — allocation</title>
+  <meta name="description" content="A crash-proofing overlay for any portfolio: calibrate to the correlation, simulate the tail, and shade the names that crash together more than their correlation implies.">
+  <style>
+    :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
+      --accent:#4a3aff;--accent-soft:#ecebfb;--border:#e2e2e2;--ink:#1f1d3d;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.6;font-size:17px}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:860px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    main{max-width:860px;margin:32px auto;padding:0 24px 60px}
+    h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2}
+    .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 24px}
+    .lead{font-size:1.07rem}
+    h2{font-size:1.3rem;margin:2.2em 0 .6em;border-bottom:1px solid var(--border);padding-bottom:4px}
+    p{margin:.8em 0} .muted{color:var(--muted)}
+    code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+    pre{background:#f3f3f7;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:16px 0}
+    pre code{background:none;padding:0;font-size:.88em}
+    img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid var(--border);border-radius:8px}
+    .table-wrap{overflow-x:auto;margin:18px 0}
+    table.impl{width:100%;border-collapse:collapse;font-size:.95rem}
+    table.impl th,table.impl td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--border)}
+    table.impl thead th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
+      font-weight:600;border-bottom:2px solid var(--border)}
+    table.impl tbody td:first-child{font-weight:600;white-space:nowrap}
+    table.impl td.num{text-align:right;font-variant-numeric:tabular-nums}
+    .steps{padding-left:1.1em} .steps li{margin:.4em 0}
+    footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../">allocation</a>
+    <nav>
+      <a href="../../">Home</a>
+      <a href="../../papers/">Papers</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>Tail-sensitive Black–Litterman</h1>
+  <p class="subtitle">A crash-proofing overlay for any portfolio.</p>
+
+  <p class="lead">Black–Litterman lets you tilt a benchmark by a view on <em>returns</em>.
+  But the view you often want before a crash is on <em>co-movement</em>: <em>these names
+  crash together more than their correlation implies.</em> That is a tail view, and a
+  covariance cannot encode it. Here is an overlay that expresses it — calibrate to the
+  correlation, simulate the tail, and shade the names whose tail dependence exceeds their
+  correlation.</p>
+
+  <h2>The Dow crashes together far more than a Gaussian allows</h2>
+  <p>Daily returns of 28 Dow constituents, 2010–2024. How often does the <em>whole</em>
+  index fall by more than <code>q</code> on the same day, empirically versus under a
+  Gaussian fit to the same mean and covariance?</p>
+  <div class="table-wrap">
+    <table class="impl">
+      <thead><tr><th>all names down by &gt; q</th><th class="num">empirical</th><th class="num">Gaussian fit</th><th class="num">ratio</th></tr></thead>
+      <tbody>
+        <tr><td>&gt; 1.0%</td><td class="num">0.318%</td><td class="num">0.083%</td><td class="num">4×</td></tr>
+        <tr><td>&gt; 1.5%</td><td class="num">0.212%</td><td class="num">0.012%</td><td class="num">18×</td></tr>
+        <tr><td>&gt; 2.0%</td><td class="num">0.106%</td><td class="num">0.001%</td><td class="num">96×</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">The joint crash is invisible to a covariance — it lives in the lower-tail
+  copula. A second moment averages across states and cannot see that, in a crash, many
+  names behave as one.</p>
+
+  <h2>The recipe</h2>
+  <ol class="steps">
+    <li><strong>Take the empirical data</strong> — the realised return vectors (bootstrap if you like).</li>
+    <li><strong>Fit assuming its correlation</strong> — calibrate latent abilities so a Gaussian
+      race with the empirical correlation reproduces your benchmark. This prices the
+      second-moment structure into the anchor (a fast, exact, inversion-free ability inverse).</li>
+    <li><strong>Simulate to capture the tail</strong> — run the forward race under the
+      <em>empirical</em> simulation (resampled real return vectors: same correlation, real fat
+      joint tail). Read off the tilted weights.</li>
+  </ol>
+  <p>Because the reference and the tilt share the empirical correlation, the tilt isolates the
+  <strong>pure tail residual</strong> — the joint-crash structure <em>beyond</em> second
+  moments. It is reverse optimization with a tail view: Black–Litterman’s confidence dial over
+  co-crash co-movement, driven by the empirical simulation directly, benchmark-anchored and
+  never inverting a covariance.</p>
+
+  <h2>What it does to an equal-weight Dow</h2>
+  <img src="figure.png" alt="Per-name tail tilt on the Dow: names that crash together are shaded down (red), crash-decorrelated hedges lifted (green)." />
+  <p>Starting from equal weight, the overlay <strong>shades the names with more tail dependence
+  than their correlation implies</strong> — IBM, CSCO, WMT, CRM, BA crash <em>with</em> the field
+  beyond what covariance sees — and <strong>lifts those with less</strong> — JPM, UNH, AAPL, GS.
+  The benchmark is reproduced exactly under the correlation; only the tail moves the weights.</p>
+
+  <h2>Use it on any portfolio</h2>
+  <p>Feed your current weights as the benchmark. The overlay returns them unchanged in calm
+  co-movement and shades the excess-tail-dependent names as your confidence in the tail view
+  rises — a smooth, inversion-free crash-proofing tilt that a return-view Black–Litterman cannot
+  express and a covariance cannot see.</p>
+  <p class="muted">Reproducible: <code>experiments/tail_black_litterman.py</code> in the
+  <a href="https://github.com/microprediction/allocation">allocation</a> repo. The construction
+  and its theory are in the <a href="../../papers/">Thurstone Portfolios</a> paper.</p>
+</main>
+
+<footer>
+  Part of <a href="../../">allocation</a> — online portfolio construction. MIT © Peter Cotton.
+</footer>
+</body>
+</html>
