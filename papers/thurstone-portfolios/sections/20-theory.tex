@@ -203,9 +203,10 @@ there.
   \caption{Tail consistency. One independent asset versus a $99$-name cluster
   with Clayton lower-tail dependence $\lambda_L$ (assets crash together, rally
   independently; standard-normal margins; $M=1.5\times10^5$; loss-side race on
-  centred performances). As $\lambda_L\to1$ the cluster's combined weight falls
-  toward the two-body limit $\tfrac12$ (\Cref{prop:tail})---the $99$ names
-  de-duplicate to a single horse. Driving the race by the downside semicovariance
+  centred performances). As $\lambda_L\to1$ \emph{within this Clayton family} the
+  cluster's combined weight falls toward the two-body limit $\tfrac12$
+  (\Cref{prop:tail} gives the comonotone endpoint; the monotone descent is
+  family-specific)---the $99$ names de-duplicate to a single horse. Driving the race by the downside semicovariance
   (lower partial co-moments) recovers almost all of the effect; the full
   covariance is tail-blind and stays far above. The small residual gap between the
   downside-covariance summary and the true tail copula is the part of the
@@ -541,7 +542,7 @@ $C^\infty$ in $C$ (and in $a$). Moreover, on any compact subset whose smallest
 eigenvalue is bounded below by $\lambda > 0$, the map is Lipschitz:
 \begin{equation}
   \|w(C_1) - w(C_0)\|_1 \;\le\; L_\lambda \,\|C_1 - C_0\|_F,
-  \qquad L_\lambda = O(1/\lambda).
+  \qquad L_\lambda < \infty,\ \ L_\lambda \to \infty \text{ as } \lambda \downarrow 0.
   \label{eq:lip}
 \end{equation}
 \end{theorem}
@@ -559,7 +560,10 @@ for $j \neq k$---followed by the divergence theorem over the cone $A_i$ rewrites
 $\partial w_i/\partial C_{jk}$ as an integral of $\varphi_C$ over the boundary
 faces of $A_i$ (the pairwise-tie hyperplanes), which is finite. The gradient is
 therefore bounded; since the conditioning of $C$ controls the tie-boundary
-density, the bound is $O(1/\lambda)$, giving \eqref{eq:lip}.
+density, the bound deteriorates as $\lambda\downarrow0$, giving \eqref{eq:lip}. (We
+do not claim the exact power of $1/\lambda$; the square-root recolouring below
+suggests the milder $1/\sqrt\lambda$, and the qualitative degradation near
+singularity is what matters.)
 \end{proof}
 
 The Lipschitz constant degrades as $C$ approaches singularity
@@ -593,8 +597,9 @@ Moreover we only ever \emph{multiply} by $C^{1/2}$, never solve with it, and
 $\operatorname{cond}(C^{1/2}) = \sqrt{\operatorname{cond}(C)}$, so ill-conditioning
 does not propagate. What degrades near degeneracy is thus not the allocation but
 the turnover bound: $C^{1/2}$ is continuous through coincident eigenvalues yet only
-H\"older-$\tfrac12$ there ($\partial_\lambda\sqrt\lambda \sim \lambda^{-1/2}$),
-which is the $O(1/\lambda)$ of \eqref{eq:lip}. The factor route of
+H\"older-$\tfrac12$ there ($\partial_\lambda\sqrt\lambda \sim \lambda^{-1/2}$), the
+$\lambda\downarrow0$ degradation of \eqref{eq:lip} (and the reason we do not pin its
+power tightly). The factor route of
 \Cref{sec:computation} removes even this: with
 $C = BB^\top + \operatorname{diag}(\psi)$ the idiosyncratic floor bounds
 $\lambda_{\min}\ge\min_i\psi_i$, regularizing both the root and the Lipschitz

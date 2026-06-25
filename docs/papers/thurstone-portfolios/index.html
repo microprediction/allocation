@@ -64,21 +64,21 @@ behaviour mean–variance attains only by inverting a covariance that is
 singular exactly where the redundancy lives. Because redundancy is
 near-singularity, three properties usually treated apart are one: the
 race is robust to ill-conditioning (it samples from a correlation rather
-than inverting one), it turns over little (its weights are Lipschitz in
-the correlation), and it de-duplicates correlated holdings smoothly. One
-property stands apart, being no matter of conditioning: driven by a
-tail-dependent simulation the race responds to lower-tail co-movement no
-covariance can encode, so assets that crash together share a single
-position. The construction is feasible on the simplex without
-optimization, reproduces a chosen benchmark by construction, admits an
-arbitrary performance simulation so dependence beyond second moments can
-be matched, and solves an implied mean–(convex-regularizer) program
-whose penalty the simulation fixes; capitalization weighting appears as
-its degenerate, correlation-blind member. We prove the supporting
-properties (feasibility, index reproduction, redundancy and tail
-consistency, the implied objective, and a Lipschitz turnover bound) and
-implement the method in the <code>allocation</code> package, built on
-<code>thurstone</code>.</p></div>
+than inverting one), it turns over little (its weights are locally
+Lipschitz in the correlation), and it de-duplicates correlated holdings
+smoothly. One property stands apart, being no matter of conditioning:
+driven by a tail-dependent simulation the race responds to lower-tail
+co-movement no covariance can encode, so assets that crash together
+share a single position. The construction is feasible on the simplex
+without optimization, reproduces a chosen benchmark by construction,
+admits an arbitrary performance simulation so dependence beyond second
+moments can be matched, and solves an implied mean–(convex-regularizer)
+program whose penalty the simulation fixes; capitalization weighting
+appears as its degenerate, correlation-blind member. We prove the
+supporting properties (feasibility, index reproduction, redundancy and
+tail consistency, the implied objective, and a Lipschitz turnover bound)
+and implement the method in the <code>allocation</code> package, built
+on <code>thurstone</code>.</p></div>
 <h1 data-number="1" id="sec:intro"><span
 class="header-section-number">1</span> Introduction</h1>
 <p>We develop <em>Thurstone portfolios</em>, a long-only allocation
@@ -658,8 +658,11 @@ coordinate can be driven to <span class="math inline">\(0\)</span> or
 class="math inline">\(\mp\infty\)</span>. ◻</p>
 </div>
 <p>The benchmark must lie in the open simplex: a zero target weight
-sends its ability to <span class="math inline">\(-\infty\)</span>, so
-zero-weight assets are dropped or floored before calibration.</p>
+sends its strength <span class="math inline">\(\theta_i\)</span> to
+<span class="math inline">\(-\infty\)</span> (equivalently its ability
+<span class="math inline">\(a_i\)</span> to <span
+class="math inline">\(+\infty\)</span>), so zero-weight assets are
+dropped or floored before calibration.</p>
 <div class="algorithm">
 <p class="algo-title"><strong>Algorithm 1.</strong> Ability tilt (Thurstone portfolio)</p>
 <ol class="algo">
@@ -1095,12 +1098,14 @@ dependence <span class="math inline">\(\lambda_L\)</span> (assets crash
 together, rally independently; standard-normal margins; <span
 class="math inline">\(M=1.5\times10^5\)</span>; loss-side race on
 centred performances). As <span
-class="math inline">\(\lambda_L\to1\)</span> the cluster’s combined
-weight falls toward the two-body limit <span
-class="math inline">\(\tfrac12\)</span> (<a href="#prop:tail"
-data-reference-type="ref+Label" data-reference="prop:tail">7</a>)—the
-<span class="math inline">\(99\)</span> names de-duplicate to a single
-horse. Driving the race by the downside semicovariance (lower partial
+class="math inline">\(\lambda_L\to1\)</span> <em>within this Clayton
+family</em> the cluster’s combined weight falls toward the two-body
+limit <span class="math inline">\(\tfrac12\)</span> (<a
+href="#prop:tail" data-reference-type="ref+Label"
+data-reference="prop:tail">7</a> gives the comonotone endpoint; the
+monotone descent is family-specific)—the <span
+class="math inline">\(99\)</span> names de-duplicate to a single horse.
+Driving the race by the downside semicovariance (lower partial
 co-moments) recovers almost all of the effect; the full covariance is
 tail-blind and stays far above. The small residual gap between the
 downside-covariance summary and the true tail copula is the part of the
@@ -1560,7 +1565,8 @@ smallest eigenvalue is bounded below by <span
 class="math inline">\(\lambda &gt; 0\)</span>, the map is Lipschitz:
 <span class="math display">\[\begin{equation}
   \|w(C_1) - w(C_0)\|_1 \;\le\; L_\lambda \,\|C_1 - C_0\|_F,
-  \qquad L_\lambda = O(1/\lambda).
+  \qquad L_\lambda &lt; \infty,\ \ L_\lambda \to \infty \text{ as }
+\lambda \downarrow 0.
   \label{eq:lip}
 \end{equation}\]</span></em></p>
 </div>
@@ -1591,9 +1597,14 @@ boundary faces of <span class="math inline">\(A_i\)</span> (the
 pairwise-tie hyperplanes), which is finite. The gradient is therefore
 bounded; since the conditioning of <span
 class="math inline">\(C\)</span> controls the tie-boundary density, the
-bound is <span class="math inline">\(O(1/\lambda)\)</span>, giving <a
+bound deteriorates as <span
+class="math inline">\(\lambda\downarrow0\)</span>, giving <a
 href="#eq:lip" data-reference-type="eqref"
-data-reference="eq:lip">[eq:lip]</a>. ◻</p>
+data-reference="eq:lip">[eq:lip]</a>. (We do not claim the exact power
+of <span class="math inline">\(1/\lambda\)</span>; the square-root
+recolouring below suggests the milder <span
+class="math inline">\(1/\sqrt\lambda\)</span>, and the qualitative
+degradation near singularity is what matters.) ◻</p>
 </div>
 <p>The Lipschitz constant degrades as <span
 class="math inline">\(C\)</span> approaches singularity (<span
@@ -1651,10 +1662,11 @@ the turnover bound: <span class="math inline">\(C^{1/2}\)</span> is
 continuous through coincident eigenvalues yet only Hölder-<span
 class="math inline">\(\tfrac12\)</span> there (<span
 class="math inline">\(\partial_\lambda\sqrt\lambda \sim
-\lambda^{-1/2}\)</span>), which is the <span
-class="math inline">\(O(1/\lambda)\)</span> of <a href="#eq:lip"
-data-reference-type="eqref" data-reference="eq:lip">[eq:lip]</a>. The
-factor route of <a href="#sec:computation"
+\lambda^{-1/2}\)</span>), the <span
+class="math inline">\(\lambda\downarrow0\)</span> degradation of <a
+href="#eq:lip" data-reference-type="eqref"
+data-reference="eq:lip">[eq:lip]</a> (and the reason we do not pin its
+power tightly). The factor route of <a href="#sec:computation"
 data-reference-type="ref+Label" data-reference="sec:computation">5</a>
 removes even this: with <span class="math inline">\(C = BB^\top +
 \operatorname{diag}(\psi)\)</span> the idiosyncratic floor bounds <span
@@ -1977,17 +1989,18 @@ is wild when series are few and settles only once the error covariance
 is well estimated; the equal-weight average is dominated; non-negative
 least-squares stacking <span class="citation"
 data-cites="breiman1996">(Breiman 1996)</span> is a strong, stable
-baseline. The ability tilt is the <em>lowest-variance</em> combiner at
-every sample size, and the best when forecasters are of comparable
-quality and the fitting data is scarce (M4 Yearly at five to ten series,
-Quarterly at five). Where one method dominates the pool, concentration
-wins and stacking takes over—exactly what the redundancy property (<a
-href="#prop:redundancy" data-reference-type="ref+Label"
-data-reference="prop:redundancy">5</a>) would predict. We report this as
-suggestive rather than settled: the tilt is the stable, small-sample
-member of the combination family, not a uniformly better combiner, and
-the case for it as a general non-negative regression and stacking tool
-is a direction we mean to pursue, not a result we claim here.</p>
+baseline. Across the swept sample sizes the ability tilt is the
+<em>lowest-variance</em> combiner, and competitive on level when
+forecasters are of comparable quality and the fitting data is scarce (M4
+Yearly at five to ten series, Quarterly at five). Where one method
+dominates the pool, concentration wins and stacking takes over—exactly
+what the redundancy property (<a href="#prop:redundancy"
+data-reference-type="ref+Label" data-reference="prop:redundancy">5</a>)
+would predict. We report this as promising but inconclusive, claiming no
+out-of-sample superiority: the tilt is a stable small-sample member of
+the combination family, not a uniformly better combiner, and the case
+for it as a general non-negative regression and stacking tool is a
+direction we mean to pursue, not a result we claim here.</p>
 <figure id="fig:combine" data-latex-placement="h">
 <img src="figures/m4_combination.png" />
 <figcaption>Forecast combination on M4. Held-out sMAPE against the

@@ -33,9 +33,9 @@ differentiable in the contributors' abilities, it updates online, and it costs
 $O(Mn)$ in a single Monte-Carlo pass with no coalition enumeration. We place it next
 to the Shapley value while keeping the units straight: the winning probability is the
 \emph{gradient field} of the expected-maximum potential, and its diagonal line
-integral is an Aumann--Shapley value of the ability-scaling game, but the probability
-itself is not the Shapley value of the membership game---a cousin, not a drop-in, and
-in different units. The practical separation is one of \emph{form}: the race returns
+integral (weighted by the abilities) is an Aumann--Shapley value of the
+ability-scaling game, but the probability itself is not the Shapley value of the
+membership game---a cousin, not a drop-in, and in different units. The practical separation is one of \emph{form}: the race returns
 the gradient credit in a single differentiable pass, where a generic Shapley
 evaluator faces $2^n$ coalitions (the specialized max-game value is cheaper, but not
 a one-pass gradient). We show that the headline redundancy property---an even split
@@ -173,8 +173,8 @@ $x\odot\theta$ scales ability $i$ by $x_i$.
   over a random coalition $T$ of the marginal $v(T\cup\{i\}) - v(T)$, which equals
   $\E[(X_i - \max_{j\in T} X_j)^+]$ for $T\neq\varnothing$ and $\E[X_i]$ for
   $T = \varnothing$. This payoff-valued, coalition-averaged quantity is a different
-  object from the probability $w_i = \Prob(X_i = \max_N)$; they coincide (after
-  normalization) only in the fully symmetric case.
+  object from the probability $w_i = \Prob(X_i = \max_N)$, and the two generally
+  differ (they agree in the fully symmetric case).
 \end{enumerate}
 \end{proposition}
 \begin{proof}
@@ -214,9 +214,10 @@ exchanging two contributors with the same marginal and dependence leaves $G_S$, 
 $\nabla G_S$, invariant. For argmax nullity, if $X_i \le \max_{j\neq i} X_j$ a.s.\
 then $i$ is never the argmax, so $w_i = 0$, and $\max_N X = \max_{N\setminus\{i\}} X$
 leaves the others unchanged. Non-additivity is direct: $w = \nabla G_S$ is the
-gradient of a strictly convex potential, hence nonlinear in $\theta$, so the map from
-game to credit is not linear ($w(\theta+\theta') \neq w(\theta) + w(\theta')$---the
-right-hand side need not even lie on the simplex).
+gradient of a convex potential, nonlinear in $\theta$ (strictly convex only on the
+quotient $\R^n/\!\operatorname{span}\{\mathbf 1\}$, being affine along $\mathbf 1$),
+so the map from game to credit is not linear ($w(\theta+\theta') \neq w(\theta) +
+w(\theta')$---the right-hand side need not even lie on the simplex).
 \end{proof}
 
 These are the right analogues: they are statements about a probability share, not the
@@ -305,7 +306,15 @@ weak features, and a higher per-call price than a single fit.
 The winning probability is a fast, differentiable, online, redundancy-aware credit
 rule---a cousin of the Shapley value with an exact Aumann--Shapley reading on the
 ability game, and a large computational advantage where redundancy-aware credit is
-what is wanted. Its redundancy guarantee is exact for the calibrated equal-ability
+what is wanted. The distinction from Shapley is best read as a choice of question,
+not an approximation: Shapley measures \emph{coalitional fairness}---a contributor's
+average marginal value as coalitions are assembled, a counterfactual-historical
+quantity---while the winning probability measures \emph{field relevance}, how often a
+contributor is uniquely the best in the field one actually has. For legal or moral
+credit the coalitional average is the right object; for live selection---ensemble
+weighting, feature screening, routing, ``which signal do I rely on now?''---the
+full-field endpoint question is the operational one, and it is the one the race
+answers. Its redundancy guarantee is exact for the calibrated equal-ability
 race, which is the construction to use; raw scores give only a winner-take-all
 screen. Its axiomatic standing is settled by \Cref{prop:axioms}: it keeps
 efficiency, symmetry, and the null-player property, trading away only additivity.

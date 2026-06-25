@@ -97,16 +97,16 @@ expected bias--variance crossover. The variance-optimal Bates--Granger
 combination ($w \propto \Sigma_e^{-1}\mathbf 1$) is wild when series are few and
 settles only once the error covariance is well estimated; the equal-weight
 average is dominated; non-negative least-squares stacking \parencite{breiman1996}
-is a strong, stable baseline. The ability tilt is the \emph{lowest-variance}
-combiner at every sample size, and the best when forecasters are of comparable
-quality and the fitting data is scarce (M4 Yearly at five to ten series,
+is a strong, stable baseline. Across the swept sample sizes the ability tilt is the
+\emph{lowest-variance} combiner, and competitive on level when forecasters are of
+comparable quality and the fitting data is scarce (M4 Yearly at five to ten series,
 Quarterly at five). Where one method dominates the pool, concentration wins and
 stacking takes over---exactly what the redundancy property
-(\Cref{prop:redundancy}) would predict. We report this as suggestive rather than
-settled: the tilt is the stable, small-sample member of the combination family,
-not a uniformly better combiner, and the case for it as a general non-negative
-regression and stacking tool is a direction we mean to pursue, not a result we
-claim here.
+(\Cref{prop:redundancy}) would predict. We report this as promising but
+inconclusive, claiming no out-of-sample superiority: the tilt is a stable
+small-sample member of the combination family, not a uniformly better combiner, and
+the case for it as a general non-negative regression and stacking tool is a
+direction we mean to pursue, not a result we claim here.
 
 \begin{figure}[h]
   \centering
