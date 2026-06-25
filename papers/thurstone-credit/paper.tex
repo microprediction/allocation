@@ -30,18 +30,19 @@ rule for attributing credit among correlated contributors. It is a probability s
 ($\sum_i w_i = 1$), symmetric, and \emph{redundancy-aware} (contributors that move
 together share a single contributor's credit rather than double-counting); it is
 differentiable in the contributors' abilities, it updates online, and it costs
-$O(Mn)$ in a single Monte-Carlo pass with no coalition enumeration. We place it next
-to the Shapley value while keeping the units straight: the winning probability is the
-\emph{gradient field} of the expected-maximum potential, and its diagonal line
-integral (weighted by the abilities) is an Aumann--Shapley value of the
-ability-scaling game, but the probability itself is not the Shapley value of the
-membership game---a cousin, not a drop-in, and in different units. The practical separation is one of \emph{form}: the race returns
-the gradient credit in a single differentiable pass, where a generic Shapley
-evaluator faces $2^n$ coalitions (the specialized max-game value is cheaper, but not
-a one-pass gradient). We show that the headline redundancy property---an even split
-of credit among near-duplicates---is a property of the \emph{calibrated} equal-ability
-race rather than of raw scores, and we demonstrate the rule on forecast combination
-and feature attribution. This develops the credit reading of the construction in the
+$O(Mn)$ in a single Monte-Carlo pass with no coalition enumeration. It is \emph{not} a
+Shapley value and does not try to be: Shapley measures coalitional cooperation---a
+contributor's average marginal value as coalitions form---whereas the winning
+probability measures \emph{selection relevance}, how often a contributor is the single
+best in the field at hand. The two answer different questions, and a contributor that
+is never individually best yet improves every blend it joins earns Shapley credit but
+little race credit; the race does not capture such coalitional value. (There is a
+clean mathematical link---the winning-probability field integrates along the diagonal
+to an Aumann--Shapley value of an ability-scaling game---which we record but do not
+lean on.) We show that the headline redundancy property---an even split of credit
+among near-duplicates---is a property of the \emph{calibrated} equal-ability race
+rather than of raw scores, and we demonstrate the rule on forecast combination and
+feature attribution. This develops the credit reading of the construction in the
 companion paper on Thurstone portfolios.
 \end{abstract}
 
@@ -134,7 +135,7 @@ dependence-rich law $S_1$. With $S_1 = S_0$ the benchmark is reproduced; with $S
 carrying the contributors' empirical dependence, \eqref{eq:tilt} re-weights the
 benchmark for redundancy.
 
-\section{Relationship to the Shapley value}
+\section{Relationship to the Shapley value: a contrast, not a substitute}
 \label{sec:shapley}
 
 The winning probability is naturally compared to the Shapley value, and the
@@ -192,13 +193,19 @@ Owen's identity integrates this over $T$. It is payoff-valued and averages over
 coalitions, unlike the grand-coalition probability $w_i$.
 \end{proof}
 
-So the winning probability is the \emph{gradient field} of the expected-maximum
-potential, and its diagonal line integral (weighted by the abilities) is an
-Aumann--Shapley value of the ability-scaling game. It is not itself a Shapley value
-of the membership game $v$---it is a probability share, in different units---and the
-two agree only under full symmetry. What can be said axiomatically is about the
-probability share directly, and it should not be dressed in the Shapley axioms (which
-are conditions on a payoff value of $v$).
+So there is a clean mathematical link---the winning-probability field integrates
+along the diagonal to an Aumann--Shapley value of the ability-scaling game---but it
+should not be read as ``approximately Shapley.'' The winning probability is a
+probability share, in different units, and it answers a different question:
+\emph{selection relevance} (who is the single best in the field) rather than
+\emph{coalitional cooperation} (average marginal value across coalitions). The sharp
+way to see the gap: a contributor that is never individually the best but improves
+every blend it joins---a pure diversifier---carries real coalitional value and earns
+essentially \emph{no} race credit, because the race only ever rewards being the
+winner. Where credit means cooperation or combined value, the right object is the
+Shapley value of a combination-value game, not this. What can be said axiomatically
+is about the probability share directly, and it should not be dressed in the Shapley
+axioms (which are conditions on a payoff value of $v$).
 
 \begin{proposition}[Properties of the probability-share credit]
 \label{prop:axioms}
@@ -304,13 +311,14 @@ weak features, and a higher per-call price than a single fit.
 \label{sec:discussion}
 
 The winning probability is a fast, differentiable, online, redundancy-aware credit
-rule---a cousin of the Shapley value with an exact Aumann--Shapley reading on the
-ability game, and a large computational advantage where redundancy-aware credit is
-what is wanted. The distinction from Shapley is best read as a choice of question,
-not an approximation: Shapley measures \emph{coalitional fairness}---a contributor's
-average marginal value as coalitions are assembled, a counterfactual-historical
-quantity---while the winning probability measures \emph{field relevance}, how often a
-contributor is uniquely the best in the field one actually has. For legal or moral
+rule, useful where redundancy-aware credit is wanted and a coalition-by-coalition
+computation is too expensive. It is \emph{not} a Shapley value, and the distinction is
+a choice of question, not an approximation: Shapley measures \emph{coalitional
+fairness}---a contributor's average marginal value as coalitions are assembled, a
+counterfactual-historical quantity---while the winning probability measures
+\emph{field relevance}, how often a contributor is uniquely the best in the field one
+actually has. The race does not see coalitional value at all: a pure diversifier,
+never individually best, earns no race credit however much it improves blends. For legal or moral
 credit the coalitional average is the right object; for live selection---ensemble
 weighting, feature screening, routing, ``which signal do I rely on now?''---the
 full-field endpoint question is the operational one, and it is the one the race
