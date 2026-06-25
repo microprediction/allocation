@@ -34,13 +34,13 @@
 <body>
 <header class="site-header">
   <div class="nav-inner">
-    <a class="brand" href="../">allocation</a>
+    <a class="brand" href="../index.html">allocation</a>
     <nav>
-      <a href="../#methods">Methods</a>
-      <a href="../#regimes">What works</a>
-      <a href="../#estimators">Estimators</a>
-      <a href="../papers/">Papers</a>
-      <a href="../demos/tail-black-litterman/">Demo</a>
+      <a href="../index.html#methods">Methods</a>
+      <a href="../index.html#regimes">What works</a>
+      <a href="../index.html#estimators">Estimators</a>
+      <a href="../papers/index.html">Papers</a>
+      <a href="../demos/tail-black-litterman/index.html">Demo</a>
       <a href="./tail-black-litterman.html">Map</a>
       <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
       <a href="https://github.com/microprediction/allocation">GitHub</a>
@@ -70,7 +70,7 @@
   <div id="graph"></div>
   <p class="hint">Compiled from two literature sweeps (BL tail/non-normal extensions; reverse
   optimization &amp; implied dependence views). Some venues are provisional pending verification.
-  See also the <a href="../demos/tail-black-litterman/">interactive demo</a>.</p>
+  See also the <a href="../demos/tail-black-litterman/index.html">interactive demo</a>.</p>
 </div>
 <div id="tooltip"></div>
 
@@ -89,8 +89,8 @@ const CLUSTERS = {
 
 const NODES = [
  {id:"fat", label:"FAST ABILITY TRANSFORM", year:2021, c:"hub", r:17, url:"https://doi.org/10.1137/19M1276261", note:"Cotton 2021, 'Inferring Relative Ability from Winning Probability in Multientrant Contests,' SIAM J. Financial Math. 12(1):295-317. A fast EXACT inverse of the order-statistic (Thurstonian) race, shares -> latent abilities. The enabling object at the center: it makes the nonlinear reverse step exact, where BL's inverse is linear and BLP's is iterative. No published fast exact inverse of a CORRELATED race existed before it."},
- {id:"hub", label:"Tail-sensitive Black–Litterman", year:2026, c:"hub", r:13, url:"../demos/tail-black-litterman/", note:"The headline application: reverse-optimize a benchmark to latent abilities of a correlated race (via the FAT), then re-weight on the simplex under a view on LOWER-TAIL co-movement — a tail-sensitive analogue of Pi=lambda*Sigma*w that never inverts a covariance and never runs an optimizer."},
- {id:"thportfolios", label:"Thurstone Portfolios (this work)", year:2026, c:"hub", r:11, url:"../papers/", note:"The portfolios paper: weights as winning probabilities of a race; redundancy/clone consistency; the tail-sensitive-BL reading. Built on the FAT."},
+ {id:"hub", label:"Tail-sensitive Black–Litterman", year:2026, c:"hub", r:13, url:"../demos/tail-black-litterman/index.html", note:"The headline application: reverse-optimize a benchmark to latent abilities of a correlated race (via the FAT), then re-weight on the simplex under a view on LOWER-TAIL co-movement — a tail-sensitive analogue of Pi=lambda*Sigma*w that never inverts a covariance and never runs an optimizer."},
+ {id:"thportfolios", label:"Thurstone Portfolios (this work)", year:2026, c:"hub", r:11, url:"../papers/index.html", note:"The portfolios paper: weights as winning probabilities of a race; redundancy/clone consistency; the tail-sensitive-BL reading. Built on the FAT."},
 
  // reverse / inverse optimization
  {id:"sharpe1974", label:"Sharpe 1974", year:1974, c:"reverseopt", url:"https://scholar.google.com/scholar?q=Sharpe+1974+Imputing+Expected+Security+Returns+from+Portfolio+Composition", note:"JFQA: impute the expected returns that make held weights MV-optimal. The conceptual ancestor of the BL reverse step. Returns only; Sigma given."},
