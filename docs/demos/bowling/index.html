@@ -72,7 +72,7 @@
 
   <div class="stage">
     <div>
-      <canvas id="cv" width="820" height="500"></canvas>
+      <canvas id="cv" width="560" height="500"></canvas>
       <div class="legend" id="legend"></div>
       <div class="controls">
         <button onclick="doThrow()">▶ Throw a shock</button>
@@ -86,7 +86,7 @@
       joint-hit tail it implies under a Gaussian copula.</p>
     </div>
     <div class="panel">
-      <h3>Correlation of returns <span class="n" id="nsim">N = 0</span></h3>
+      <h3>Pairwise default correlation <span class="n" id="nsim">N = 0</span></h3>
       <canvas id="heat" width="280" height="280"></canvas>
       <h3 style="margin-top:14px">Joint default: market vs Gaussian copula</h3>
       <div id="tail" class="muted" style="font-size:.82rem">throw some shocks…</div>
@@ -95,17 +95,19 @@
 
   <h2>Why this is the point</h2>
   <p class="muted" style="border-left:3px solid var(--accent);padding-left:12px">This demo is a working
-  version of a talk given long before the crisis proved its point:
-  <a href="https://www.fields.utoronto.ca/audio/07-08/finance_seminar/cotton/">Peter Cotton,
-  <em>“Bowling Alone. Do Copula Models Washout?”</em></a>, Fields Institute Seminar Series on
-  Quantitative Finance, March 26, 2008 — the bowling metaphor for copula breakdown, from the very
-  year the Gaussian copula washed out.</p>
-  <p>The correlation matrix on the right is exactly what minimum-variance and Black–Litterman run on.
-  But fit a Gaussian copula to that <em>same</em> correlation and it cannot make a whole sector
-  default at once — so its joint-default tail (the table) falls away from the market's. The cascade
-  is real tail risk that lives above second moments, invisible to any covariance method. A
-  tail-aware overlay races the assets under the actual (cascading) simulation instead of inverting a
-  covariance, so co-defaulters de-duplicate automatically.</p>
+  version of <a href="https://www.fields.utoronto.ca/audio/07-08/finance_seminar/cotton/">Peter Cotton,
+  <em>“Bowling Alone. Do Copula Models Washout?”</em></a> (Fields Institute Seminar Series on
+  Quantitative Finance, March 26, 2008 — Bear Stearns week). The author had founded Julius Finance in
+  January 2007 to address shortcomings in CDO risk modeling; the bowling metaphor for copula breakdown
+  was delivered as the Gaussian copula was washing out in real time.</p>
+  <p>The matrix on the right is the <em>tetrachoric</em> correlation — the unique latent Gaussian
+  correlation that reproduces <em>every pairwise</em> default probability exactly. So the Gaussian
+  copula built from it is the best possible second-moment model: it matches all the pairs by
+  construction (the ≥2 ratio sits at ~1×). Yet it still cannot make a whole sector default at once,
+  so the higher-order joint-default tail (≥3, ≥4, …) pulls steadily away from the market's. That gap
+  is real tail risk living <em>above</em> all pairwise information — invisible to any
+  correlation-based method. A tail-aware overlay races the assets under the actual cascading
+  simulation instead, so co-defaulters de-duplicate automatically.</p>
   <p class="muted">Stated plainly, with the honesty the lab demands: de-duplication is a
   <em>mechanism</em>, not a free lunch. In the
   <a href="https://github.com/microprediction/allocation/blob/main/experiments/bowling_lab.py">bowling
@@ -127,38 +129,41 @@ const SECTORS = [   // deliberately uneven sizes: bigger sectors default in bigg
   {name:"Health",   color:"#ff7a7a", names:["UNH","JNJ"]},
   {name:"Consumer", color:"#24c2ad", names:["WMT","KO","PG","MCD","NKE","HD"]},
 ];
-const W=820, H=500, CX=W/2, CY=H/2, RBIG=210, SR=64, BR=15, PR=9, BARRIER=30, CENTRAL="Banks";
-const MB=11, MP=1, EBP=0.45, EPP=0.55, PF=0.97, BF=0.99;   // packed rack, Banks at the hub: a centre hit can cascade the whole rack (a "strike")
+const W=560, H=500, CX=W/2, CY=H/2, RBIG=244, D=60, ROWH=60*0.866, BR=26, PR=27, BARRIER=74;
+const MB=13, MP=1, EBP=0.5, EPP=0.62, PF=0.975, BF=0.99;   // ONE connected triangular rack: a hit near the apex cascades the whole thing
 let rng = mulberry32(42);
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
 
-// a packed RACK: the central sector (Banks) is the head pin at the hub; the rest ring it
-// closely so a centre hit can chain across sectors. Each sector is a filled sunflower disk.
-const GOLD = Math.PI*(3-Math.sqrt(5));
+// ONE connected TRIANGULAR rack (real bowling): all names packed apex-up, spacing D so they
+// nearly touch -> a hit near the apex cascades down through the widening rows: a devastating
+// strike. Sectors fill contiguous bands of the triangle.
+const HEAD="Banks";   // the head-pin cluster sits at the apex
+const ORDER=[...SECTORS].sort((a,b)=>(a.name===HEAD?-1:b.name===HEAD?1:0));
+const FLAT=[]; ORDER.forEach(s=>s.names.forEach(nm=>FLAT.push({nm,s})));
+const TOT=FLAT.length;
+let rowsNeeded=0, acc=0; while(acc<TOT){ rowsNeeded++; acc+=rowsNeeded; }
+const triTopY = CY - (rowsNeeded-1)*ROWH/2;
 const NAMES=[], SEC=[], X0=[], Y0=[], LX=[], LY=[];
-const peri = SECTORS.filter(s=>s.name!==CENTRAL); let pidx=0;
-SECTORS.forEach((s)=>{
-  let ccx, ccy;
-  if(s.name===CENTRAL){ ccx=CX; ccy=CY; }
-  else { const ca=-Math.PI/2 + 2*Math.PI*pidx/peri.length; pidx++; ccx=CX+SR*Math.cos(ca); ccy=CY+SR*Math.sin(ca); }
-  const m=s.names.length, Rc=10+7.5*Math.sqrt(m);
-  s.names.forEach((nm,j)=>{ const rr=Rc*Math.sqrt((j+0.5)/m), aa=j*GOLD + pidx;
-    const px=ccx+rr*Math.cos(aa), py=ccy+rr*Math.sin(aa);
-    NAMES.push(nm); SEC.push(s); X0.push(px); Y0.push(py);
-    const ox=px-CX, oy=py-CY, on=Math.hypot(ox,oy)||1; LX.push(ox/on); LY.push(oy/on); });  // labels fan to the rim
-});
+let idx=0;
+for(let r=0; r<rowsNeeded && idx<TOT; r++){
+  for(let c=0; c<=r && idx<TOT; c++){
+    const x=CX+(c-r/2)*D, y=triTopY+r*ROWH, it=FLAT[idx++];
+    NAMES.push(it.nm); SEC.push(it.s); X0.push(x); Y0.push(y);
+    const ox=x-CX, oy=y-CY, on=Math.hypot(ox,oy)||1; LX.push(ox/on); LY.push(oy/on);
+  }
+}
 const n = NAMES.length;
 let X=X0.slice(), Y=Y0.slice(), defaulted=new Array(n).fill(false);
 let Rad=new Array(n).fill(PR), tiltArr=new Float64Array(n), statsView=false;
 const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
 const heat=document.getElementById("heat"), hx=heat.getContext("2d");
 
-function randomChord(r){ // a TRUE random chord of the circle: two random points on the rim
-  let a1=2*Math.PI*r(), a2=2*Math.PI*r();
-  while(Math.abs(((a2-a1)%(2*Math.PI)))<0.5) a2=2*Math.PI*r();   // avoid degenerate near-tangent chords
-  const bx=CX+RBIG*Math.cos(a1), by=CY+RBIG*Math.sin(a1), ex=CX+RBIG*Math.cos(a2), ey=CY+RBIG*Math.sin(a2);
-  const d=Math.hypot(ex-bx,ey-by)||1, sp=10+2*r();
-  return {bx,by,bvx:sp*(ex-bx)/d,bvy:sp*(ey-by)/d,bsp:0}; }
+function randomChord(r){ // a bowling throw: enter from the top arc, aim head-on at the apex (with spread)
+  const th=-Math.PI/2 + (r()-0.5)*1.8;                                  // upper rim, +/-~52deg
+  const bx=CX+RBIG*Math.cos(th), by=CY+RBIG*Math.sin(th);
+  const tx=CX+(r()-0.5)*D*3, ty=triTopY + r()*(rowsNeeded-1)*ROWH*0.5;  // aim into the head / upper rows
+  const d=Math.hypot(tx-bx,ty-by)||1, sp=12+4*r();
+  return {bx,by,bvx:sp*(tx-bx)/d,bvy:sp*(ty-by)/d,bsp:0}; }
 
 function simulate(entry, record){
   let x=X0.slice(), y=Y0.slice(), vx=new Array(n).fill(0), vy=new Array(n).fill(0);
@@ -185,22 +190,40 @@ function simulate(entry, record){
   return {disp:x.map((xi,i)=>Math.hypot(xi-X0[i],y[i]-Y0[i])), frames};
 }
 
-// ---- running state: correlation + default tail accumulated across shocks ----
-let S1, S2, defCnt, co, histo, N;
-function resetState(){ S1=new Float64Array(n); S2=Array.from({length:n},()=>new Float64Array(n));
-  defCnt=new Float64Array(n); co=new Float64Array(n); histo=new Float64Array(n+1); N=0; }
+// ---- running state: marginals + pairwise joint defaults + default-count histogram ----
+let defCnt, co, DD, histo, N;
+function resetState(){ defCnt=new Float64Array(n); co=new Float64Array(n);
+  DD=Array.from({length:n},()=>new Float64Array(n)); histo=new Float64Array(n+1); N=0; }
 function record(disp){
-  const r=disp.map(v=>-v); let tot=0; const dd=disp.map(v=>v>BARRIER);
-  for(let i=0;i<n;i++) if(dd[i]) tot++;
+  const dd=disp.map(v=>v>BARRIER); let tot=0; for(let i=0;i<n;i++) if(dd[i]) tot++;
   histo[tot]++;
-  for(let i=0;i<n;i++){ if(dd[i]){ defCnt[i]++; co[i]+=tot-1; } S1[i]+=r[i]; const Si=S2[i]; for(let k=0;k<n;k++) Si[k]+=r[i]*r[k]; }
+  for(let i=0;i<n;i++){ if(!dd[i]) continue; defCnt[i]++; co[i]+=tot-1; const Di=DD[i];
+    for(let j=0;j<n;j++) if(dd[j]) Di[j]++; }
   N++;
 }
-function corrMatrix(){
-  const m=S1.map(s=>s/N), C=Array.from({length:n},()=>new Float64Array(n));
-  for(let i=0;i<n;i++) for(let k=0;k<n;k++) C[i][k]=S2[i][k]/N - m[i]*m[k];
-  const sd=new Float64Array(n); for(let i=0;i<n;i++) sd[i]=Math.sqrt(Math.max(C[i][i],1e-12));
-  for(let i=0;i<n;i++) for(let k=0;k<n;k++) C[i][k]/=(sd[i]*sd[k]); return C;
+// standard normal CDF (erf approx) and the bivariate-normal CDF, for the tetrachoric fit
+function erf(x){ const s=x<0?-1:1; x=Math.abs(x); const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x); return s*y; }
+function Phi(x){ return 0.5*(1+erf(x/Math.SQRT2)); }
+// P(Z1<a, Z2<b ; rho) = Phi(a)Phi(b) + integral_0^rho of the bivariate density (Simpson)
+function biv(a,b,rho){ const base=Phi(a)*Phi(b); if(Math.abs(rho)<1e-6) return base;
+  const M=24, h=rho/M, f=t=>{ const o=1-t*t; return Math.exp(-(a*a-2*t*a*b+b*b)/(2*o))/(2*Math.PI*Math.sqrt(o)); };
+  let s=f(0)+f(rho); for(let i=1;i<M;i++) s+=(i%2?4:2)*f(i*h); return base + s*h/3; }
+// tetrachoric: the UNIQUE latent rho that reproduces the pairwise joint-default prob pij
+function tetra(a,b,pij){ let lo=-0.9999, hi=0.9999, mid=0;
+  for(let it=0;it<44;it++){ mid=(lo+hi)/2; if(biv(a,b,mid)<pij) lo=mid; else hi=mid; } return mid; }
+function buildTetra(){
+  const p=Array.from(defCnt,c=>c/N), a=p.map(pp=>phiInv(Math.min(Math.max(pp,1e-4),1-1e-4)));
+  const C=Array.from({length:n},()=>new Float64Array(n));
+  for(let i=0;i<n;i++){ C[i][i]=1;
+    for(let j=i+1;j<n;j++){ let rho=0;
+      if(defCnt[i]>=2 && defCnt[j]>=2){
+        const lo=Math.max(0,p[i]+p[j]-1)+1e-6, hi=Math.min(p[i],p[j])-1e-6;
+        const pij=Math.min(Math.max(DD[i][j]/N, lo), Math.max(lo,hi));
+        rho=tetra(a[i],a[j],pij);
+      }
+      C[i][j]=C[j][i]=rho; } }
+  return {C,p,a};
 }
 // inverse standard normal CDF (Acklam)
 function phiInv(p){ if(p<=0)return -6; if(p>=1)return 6;
@@ -217,9 +240,9 @@ function chol(C){ const L=Array.from({length:n},()=>new Float64Array(n));
     L[i][k]= i===k ? Math.sqrt(Math.max(s,1e-9)) : s/L[k][k]; } return L; }
 function gauss(){ let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random();
   return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
-function copulaTail(C, p, ks, M){
+function copulaTail(C, thr, ks, M){
   const Cr=C.map((row,i)=>row.map((v,k)=>i===k?v+0.02:v)), L=chol(Cr);
-  const thr=p.map(pp=>phiInv(Math.min(Math.max(pp,1e-4),1-1e-4))), cnt=new Float64Array(n+1), z=new Float64Array(n);
+  const cnt=new Float64Array(n+1), z=new Float64Array(n);
   for(let s=0;s<M;s++){ for(let i=0;i<n;i++) z[i]=gauss(); let tot=0;
     for(let i=0;i<n;i++){ let v=0; const Li=L[i]; for(let k=0;k<=i;k++) v+=Li[k]*z[k]; if(v<thr[i]) tot++; }
     cnt[tot]++; }
@@ -232,20 +255,20 @@ function colorFor(c){ if(c>=0){ const t=Math.min(c,1); return `rgb(255,${Math.ro
 function refreshStats(){
   document.getElementById("nsim").textContent = "N = "+N;
   if(N<3){ return; }
-  // (ii) fitted correlation matrix -> heatmap
-  const C=corrMatrix(), cell=heat.width/n;
+  // (ii) tetrachoric correlation that reproduces every pairwise default prob -> heatmap
+  const {C,p,a}=buildTetra(), cell=heat.width/n;
   for(let i=0;i<n;i++) for(let k=0;k<n;k++){ hx.fillStyle=colorFor(C[i][k]); hx.fillRect(k*cell,i*cell,cell+1,cell+1); }
   // (i) marginal hit probability -> pin size;  (iv) tilt (de-dup herd-defaulters) -> pin ring
-  const p=Array.from(defCnt,c=>c/N), maxp=Math.max(...p,1e-9);
+  const maxp=Math.max(...p,1e-9);
   const contag=p.map((_,i)=>defCnt[i]?co[i]/defCnt[i]:0);
   const w=contag.map(c=>1/(1+c)); let wsum=0; for(const v of w) wsum+=v;
   const eq=1/n, tilt=w.map(v=>v/wsum-eq), mt=Math.max(...tilt.map(Math.abs),1e-9);
-  for(let i=0;i<n;i++){ tiltArr[i]=tilt[i]/mt; Rad[i]=6+9*(p[i]/maxp); }
+  for(let i=0;i<n;i++){ tiltArr[i]=tilt[i]/mt; Rad[i]=14+15*(p[i]/maxp); }
   if(statsView) drawState();
   // (iii) joint-hit probabilities: market vs the Gaussian copula those (i)+(ii) imply
-  const ks=[2,3,4,5,6,8,10,12];
+  const ks=Array.from({length:15},(_,i)=>i+2);   // 2..16, the whole monotone curve
   const emp=ks.map(k=>{ let e=0; for(let t=k;t<=n;t++) e+=histo[t]; return e/N; });
-  const cop = N>=25 ? copulaTail(C,p,ks,6000) : ks.map(_=>NaN);
+  const cop = N>=25 ? copulaTail(C,a,ks,6000) : ks.map(_=>NaN);
   const rows = ks.map((k,j)=>{ const r = cop[j]>0 ? (emp[j]/cop[j]).toFixed(1)+"×" : "—";
     return `<tr><td>≥ ${k}</td><td>${(emp[j]*100).toFixed(1)}%</td><td>${isNaN(cop[j])?"…":(cop[j]*100).toFixed(1)+"%"}</td><td class="r">${isNaN(cop[j])?"":r}</td></tr>`; });
   document.getElementById("tail").innerHTML =
@@ -262,7 +285,7 @@ function drawState(bx,by){
     if(statsView && !dn){ const tl=tiltArr[i]; ctx.lineWidth=2.4;
       ctx.strokeStyle = tl<0 ? `rgba(214,40,40,${Math.min(1,Math.abs(tl))})` : `rgba(44,160,44,${Math.min(1,Math.abs(tl))})`; ctx.stroke(); }
     else if(dn){ ctx.strokeStyle="#555"; ctx.lineWidth=1; ctx.stroke(); }
-    ctx.fillStyle=dn?"#7a7a8c":"#fff"; ctx.font="bold 10px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillStyle=dn?"#7a7a8c":"#fff"; ctx.font="bold 12px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText(NAMES[i], X[i]+LX[i]*(rad+8), Y[i]+LY[i]*(rad+8)); }
   if(bx!==undefined){ ctx.beginPath(); ctx.arc(bx,by,BR,0,7); ctx.fillStyle="#ff8a2a"; ctx.fill(); }
 }
