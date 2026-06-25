@@ -231,9 +231,9 @@ function refreshStats(){
   for(let i=0;i<n;i++){ tiltArr[i]=tilt[i]/mt; Rad[i]=6+9*(p[i]/maxp); }
   if(statsView) drawState();
   // (iii) joint-hit probabilities: market vs the Gaussian copula those (i)+(ii) imply
-  const ks=[3,6,10];
+  const ks=[2,3,4,5,6,8];
   const emp=ks.map(k=>{ let e=0; for(let t=k;t<=n;t++) e+=histo[t]; return e/N; });
-  const cop = N>=25 ? copulaTail(C,p,ks,2500) : ks.map(_=>NaN);
+  const cop = N>=25 ? copulaTail(C,p,ks,6000) : ks.map(_=>NaN);
   const rows = ks.map((k,j)=>{ const r = cop[j]>0 ? (emp[j]/cop[j]).toFixed(1)+"×" : "—";
     return `<tr><td>≥ ${k}</td><td>${(emp[j]*100).toFixed(1)}%</td><td>${isNaN(cop[j])?"…":(cop[j]*100).toFixed(1)+"%"}</td><td class="r">${isNaN(cop[j])?"":r}</td></tr>`; });
   document.getElementById("tail").innerHTML =
