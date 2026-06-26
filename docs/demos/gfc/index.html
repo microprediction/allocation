@@ -32,8 +32,8 @@
     .controls label{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:8px}
     .controls input[type=range]{accent-color:var(--accent);vertical-align:middle}
     .val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent)}
-    button.rhob{padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text);font-weight:600;cursor:pointer;font-size:.9rem}
-    button.rhob:hover{border-color:var(--accent)}
+    button.rhob,button.kb{padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text);font-weight:600;cursor:pointer;font-size:.9rem}
+    button.rhob:hover,button.kb:hover{border-color:var(--accent)}
     canvas{width:100%;height:auto;display:block;margin:6px 0}
     table.tr{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:10px}
     table.tr th,table.tr td{padding:6px 10px;border-bottom:1px solid var(--border);text-align:right}
@@ -261,6 +261,67 @@
   practitioner who had lived through a crisis or two (and who, as it happens, also held a doctorate;
   my own manager had two). When the people who can see the flaw report to the people being paid not to,
   the flaw is safe.</p>
+
+  <h3>The diversity score: a heuristic that hides the only lever that matters</h3>
+  <p>A favourite defence of the agencies is that they never touched these fancy copulas — they used
+  simpler, supposedly sturdier <em>non-models</em>. Moody's flagship was the Binomial Expansion
+  Technique: take a pool of <em>N</em> correlated names, replace it with <em>D</em> <em>independent</em>
+  identical names — the famous <em>diversity score</em> — and read the loss off a binomial. <em>D</em>
+  comes out smaller than <em>N</em> because names in the same industry are deemed to count for less, via
+  a fixed table. It sounds prudent; it is the opposite of robust. The diversity score is a function of
+  how many industries the pool spans and almost nothing else, so it bakes a single, fixed, invisible
+  correlation into the rating and gives you no way to move it. The most important number in the whole
+  problem is welded shut and painted the colour of the wall.</p>
+
+  <div class="widget">
+    <div class="controls">
+      <label>copula correlation ρ <input type="range" id="drho" min="0" max="0.9" step="0.01" value="0.25"><span class="val" id="drhoV">0.25</span></label>
+      <label style="opacity:.5">diversity-score correlation <input type="range" min="0" max="0.9" value="0.04" disabled><span class="val">🔒 ~4% · no dial</span></label>
+    </div>
+    <canvas id="dscv" width="840" height="320"></canvas>
+    <div class="method" id="dsmethod"></div>
+  </div>
+  <p class="muted">Drag the copula's correlation: more clustering, a fatter loss tail, a senior tranche
+  that slides from safe to ruined. Now watch the diversity-score curve — it <em>never moves</em>. The
+  Binomial Expansion Technique has no correlation input; the diversity score fixed it (here ≈4%) the
+  instant the pool's industries were counted, and there is no dial to turn. That is what "robust
+  non-model" meant in practice: a model that cannot be <em>wrong</em> about correlation because it is
+  not permitted to have an opinion that changes. Coval–Jurek–Stafford showed the resulting AAA was
+  extraordinarily fragile to exactly the input the heuristic had hidden.</p>
+
+  <h3>The wrong correlation: actuarial history vs the implied market</h3>
+  <p>And here is the subtler failure — the one that survives even when an agency <em>did</em> reach for a
+  copula. They fed it the wrong correlation. The number came from <em>historical, actuarial</em> studies
+  of how often rated companies had defaulted together — and it landed, routinely, in the low single
+  digits, often around <em>5%</em>. Meanwhile, two screens away, the inter-dealer market in CDO tranches
+  was quoting prices that <em>implied</em> a far higher correlation. <em>Implied correlation</em> is the
+  number you must put into the model to reproduce a traded price — exactly as <em>implied volatility</em>
+  is read out of option prices. It is a flawed lens: like the options <em>smile</em>, different tranches
+  imply different correlations, so it is not globally consistent. But it is <em>absolutely critical</em>,
+  because it is the market's own view of joint-default risk, priced by people with money at stake. The
+  agencies looked at the actuarial 5% and looked away from the market. Below, back the implied
+  correlation out of a simple contract — one that pays if <em>k</em> or more of a five-name basket
+  default — and see how far above 5% the market's number sat.</p>
+
+  <div class="widget">
+    <div class="controls">
+      <span style="color:var(--muted);font-size:.9rem">contract pays if</span>
+      <button class="kb" data-k="2">2+ of 5</button>
+      <button class="kb" data-k="3">3+ of 5</button>
+      <button class="kb" data-k="4">4+ of 5</button>
+      <label>per-name default prob <input id="icp" type="range" min="0.02" max="0.15" step="0.01" value="0.05"><span class="val" id="icpV">5%</span></label>
+      <label>market price <input id="icprice" type="range" min="0.001" max="0.06" step="0.0005" value="0.015"><span class="val" id="icpriceV">1.5%</span></label>
+    </div>
+    <canvas id="iccv" width="840" height="320"></canvas>
+    <div class="method" id="icmethod"></div>
+  </div>
+  <p class="muted">The curve is the contract's fair price as a function of correlation (one-factor
+  Gaussian copula, marginals fixed by CDS). Drag the <em>market price</em>: where your price meets the
+  curve is the <em>implied correlation</em>. The dashed line is the agencies' actuarial ≈5% — read off
+  how little they charged for joint default, and how much further right the market's implied number sat.
+  Switch contracts (2+/3+/4+) and the implied correlation shifts: that is the correlation <em>smile</em>
+  — inconsistent, exactly like the options smile, and exactly as indispensable.</p>
+
   <div class="stub">The rest of the first-person account — leverage, the run on repo, ratings and
   incentives, and tail risk that was <em>manufactured and known</em> rather than mismeasured
   (Acharya et al.) — continues here.</div>
@@ -379,6 +440,79 @@ draw();
     b.style.background="var(--accent)"; b.style.color="#fff"; draw(); }));
   const init=document.querySelector('.rhob[data-i="1"]'); if(init){init.style.background="var(--accent)";init.style.color="#fff";}
   window.addEventListener("resize",draw); draw();
+})();
+</script>
+
+<script>
+/* diversity-score: copula loss dist (responds to rho) vs Moody's BET (inert) */
+(function(){
+  const cv=document.getElementById("dscv"); if(!cv||typeof lossDist==="undefined") return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1, P_FIX=0.05, DIV=20, rhoBET=(N-DIV)/(DIV*(N-1));
+  const logCD=j=>lf[DIV]-lf[j]-lf[DIV-j];
+  function betDist(p){ const Q=new Float64Array(DIV+1), lp=Math.log(p), l1=Math.log(1-p); for(let j=0;j<=DIV;j++) Q[j]=Math.exp(logCD(j)+j*lp+(DIV-j)*l1); return Q; }
+  function betEL(Q,A,D){ let e=0; for(let j=0;j<=DIV;j++){ const L=LGD*j/DIV; e+=Q[j]*Math.max(0,Math.min(1,(Math.min(L,D)-Math.min(L,A))/(D-A))); } return e; }
+  const dr=document.getElementById("drho"), drv=document.getElementById("drhoV"), meth=document.getElementById("dsmethod");
+  function draw(){
+    const rho=+dr.value; drv.textContent=rho.toFixed(2);
+    const P=lossDist(rho,P_FIX,33).P, Q=betDist(P_FIX);
+    const cssW=cv.clientWidth||840,cssH=320; cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    const W=cssW,H=cssH,padL=20,padR=14,padT=16,padB=28,pw=W-padL-padR,ph=H-padT-padB, XMAX=0.45;
+    const dC=(k)=>P[k]/(LGD/N), dB=(j)=>Q[j]/(LGD/DIV);
+    let ymax=0.02; for(let k=1;k<=N;k++){ const x=LGD*k/N; if(x>0.02&&x<=XMAX) ymax=Math.max(ymax,dC(k)); }
+    for(let j=1;j<=DIV;j++){ const x=LGD*j/DIV; if(x>0.02&&x<=XMAX) ymax=Math.max(ymax,dB(j)); }
+    const X=x=>padL+(x/XMAX)*pw, Y=v=>padT+ph-(Math.min(v,ymax)/ymax)*ph;
+    ctx.clearRect(0,0,W,H); ctx.font="11px sans-serif";
+    ctx.strokeStyle="#ddd";ctx.beginPath();ctx.moveTo(padL,padT+ph);ctx.lineTo(W-padR,padT+ph);ctx.stroke();
+    ctx.fillStyle="#999";ctx.textAlign="center";for(let x=0;x<=XMAX+1e-9;x+=0.1)ctx.fillText((x*100).toFixed(0)+"%",X(x),H-9);
+    // copula filled area
+    ctx.fillStyle="rgba(74,58,255,.18)";ctx.strokeStyle="#4a3aff";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(0),Y(0));
+    for(let k=0;k<=N;k++){const x=LGD*k/N; if(x>XMAX)break; ctx.lineTo(X(x),Y(dC(k)));} ctx.lineTo(X(XMAX),Y(0));ctx.closePath();ctx.fill();ctx.stroke();
+    // BET line + dots
+    ctx.strokeStyle="#d62728";ctx.lineWidth=2;ctx.beginPath(); let st=false;
+    for(let j=0;j<=DIV;j++){const x=LGD*j/DIV; if(x>XMAX)break; const px=X(x),py=Y(dB(j)); if(!st){ctx.moveTo(px,py);st=true;}else ctx.lineTo(px,py);} ctx.stroke();
+    for(let j=0;j<=DIV;j++){const x=LGD*j/DIV; if(x>XMAX)break; ctx.fillStyle="#d62728";ctx.beginPath();ctx.arc(X(x),Y(dB(j)),2.5,0,7);ctx.fill();}
+    ctx.textAlign="left";ctx.fillStyle="#4a3aff";ctx.fillText("■ Gaussian copula (moves with ρ)",W-260,padT+12);
+    ctx.fillStyle="#d62728";ctx.fillText("■ diversity score / BET (inert)",W-260,padT+28);
+    ctx.fillStyle="#888";ctx.textAlign="center";ctx.fillText("portfolio loss",padL+pw/2,padT+ph+24);
+    const senCop=trancheEL(P,0.07,1.0), senBET=betEL(Q,0.07,1.0);
+    meth.innerHTML=`Copula implied correlation: <b>${(rho*100).toFixed(0)}%</b> (you set it). Diversity-score implied correlation: <b>${(rhoBET*100).toFixed(1)}%</b> 🔒 — fixed by D=${DIV}, no dial. Senior [7–100%] expected loss — copula: <b>${(senCop*100).toFixed(2)}%</b>, diversity score: <b>${(senBET*100).toFixed(2)}%</b> (never changes).`;
+  }
+  dr.addEventListener("input",draw); window.addEventListener("resize",draw); draw();
+})();
+</script>
+
+<script>
+/* implied correlation: back rho out of a "k of 5 default" contract price */
+(function(){
+  const cv=document.getElementById("iccv"); if(!cv||typeof Phi==="undefined") return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1, NB=5, CC=[1,5,10,10,5,1]; let k=3;
+  function pGE(kk,rho,p){ const a=phiInv(p),sr=Math.sqrt(rho),sc=Math.sqrt(1-rho),NQ=41,Mx=5.5,dm=2*Mx/(NQ-1); let acc=0,ws=0;
+    for(let q=0;q<NQ;q++){ const m=-Mx+q*dm,w=Math.exp(-m*m/2)*dm; ws+=w; let pc=rho<1e-9?p:Phi((a-sr*m)/sc); pc=Math.min(Math.max(pc,1e-12),1-1e-12);
+      let s=0; for(let j=kk;j<=NB;j++) s+=CC[j]*Math.pow(pc,j)*Math.pow(1-pc,NB-j); acc+=w*s; } return acc/ws; }
+  function impRho(kk,price,p){ if(price<=pGE(kk,0,p))return 0; if(price>=pGE(kk,0.95,p))return 0.95; let lo=0,hi=0.95; for(let i=0;i<42;i++){const m=(lo+hi)/2; if(pGE(kk,m,p)<price)lo=m;else hi=m;} return (lo+hi)/2; }
+  const pEl=document.getElementById("icp"), pV=document.getElementById("icpV"), prEl=document.getElementById("icprice"), prV=document.getElementById("icpriceV"), meth=document.getElementById("icmethod");
+  function draw(){
+    const p=+pEl.value, price=+prEl.value; pV.textContent=(p*100).toFixed(0)+"%"; prV.textContent=(price*100).toFixed(1)+"%";
+    const cssW=cv.clientWidth||840,cssH=320; cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    const W=cssW,H=cssH,padL=52,padR=14,padT=16,padB=28,pw=W-padL-padR,ph=H-padT-padB, RMAX=0.6;
+    const ymax=Math.max(price*1.15, pGE(k,RMAX,p)*1.1, 0.02);
+    const X=r=>padL+(r/RMAX)*pw, Y=v=>padT+ph-(Math.min(v,ymax)/ymax)*ph;
+    ctx.clearRect(0,0,W,H); ctx.font="11px sans-serif";
+    ctx.fillStyle="#999";ctx.textAlign="center";for(let r=0;r<=RMAX+1e-9;r+=0.1)ctx.fillText((r*100).toFixed(0)+"%",X(r),H-9);
+    ctx.save();ctx.translate(13,padT+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign="center";ctx.fillStyle="#888";ctx.fillText("fair price of the contract",0,0);ctx.restore();
+    ctx.fillStyle="#888";ctx.textAlign="center";ctx.fillText("correlation ρ",padL+pw/2,padT+ph+24);
+    ctx.strokeStyle="#4a3aff";ctx.lineWidth=2.5;ctx.beginPath();for(let i=0;i<=120;i++){const r=RMAX*i/120,px=X(r),py=Y(pGE(k,r,p));if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}ctx.stroke();
+    ctx.strokeStyle="#bbb";ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(X(0.05),padT);ctx.lineTo(X(0.05),padT+ph);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle="#999";ctx.textAlign="left";ctx.fillText("agency ~5%",X(0.05)+4,padT+12);
+    const ir=impRho(k,price,p);
+    ctx.strokeStyle="#d62728";ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(padL,Y(price));ctx.lineTo(W-padR,Y(price));ctx.stroke();ctx.beginPath();ctx.moveTo(X(ir),padT);ctx.lineTo(X(ir),Y(price));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle="#d62728";ctx.beginPath();ctx.arc(X(ir),Y(price),4,0,7);ctx.fill();ctx.textAlign="center";ctx.fillText("implied ρ = "+(ir*100).toFixed(0)+"%",X(ir),Y(price)-8);
+    meth.innerHTML=`Pays if <b>${k}+ of 5</b> default · per-name prob ${(p*100).toFixed(0)}% · market price <b>${(price*100).toFixed(1)}%</b> ⇒ implied correlation <b>${(ir*100).toFixed(0)}%</b>. At the agencies' actuarial ρ≈5%, the same contract is worth only <b>${(pGE(k,0.05,p)*100).toFixed(2)}%</b> — they marked joint-default risk at a fraction of where the market traded it.`;
+  }
+  document.querySelectorAll(".kb").forEach(b=>b.addEventListener("click",()=>{ k=+b.dataset.k; document.querySelectorAll(".kb").forEach(x=>{x.style.background="";x.style.color="";}); b.style.background="var(--accent)";b.style.color="#fff"; draw(); }));
+  pEl.addEventListener("input",draw); prEl.addEventListener("input",draw); window.addEventListener("resize",draw);
+  const ik=document.querySelector('.kb[data-k="3"]'); if(ik){ik.style.background="var(--accent)";ik.style.color="#fff";}
+  draw();
 })();
 </script>
 </body>
