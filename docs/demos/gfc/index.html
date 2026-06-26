@@ -32,6 +32,8 @@
     .controls label{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:8px}
     .controls input[type=range]{accent-color:var(--accent);vertical-align:middle}
     .val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent)}
+    button.rhob{padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text);font-weight:600;cursor:pointer;font-size:.9rem}
+    button.rhob:hover{border-color:var(--accent)}
     canvas{width:100%;height:auto;display:block;margin:6px 0}
     table.tr{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:10px}
     table.tr th,table.tr td{padding:6px 10px;border-bottom:1px solid var(--border);text-align:right}
@@ -71,10 +73,19 @@
   <h2><span class="part">Part 1 · the very confused version</span><br>The Normal-distribution fallacy</h2>
   <p>The loudest version (Taleb's bell-curve "Great Intellectual Fraud," amplified into "the formula
   that killed Wall Street") blames the <em>Normal distribution</em>. But the structured-credit
-  machinery ran on a Gaussian <em>copula</em>, and by Sklar's theorem a copula says <em>nothing</em>
-  about marginal tails — you can bolt a Gaussian copula onto arbitrarily fat-tailed marginals. The
-  drama in a CDO² loss distribution comes from the <em>dependence</em> and the tranching
-  nonlinearity, not the bell curve. <em>The Normal marginal didn't cause it.</em></p>
+  machinery ran on a Gaussian <em>copula</em>, and the marginals were never a modelling choice at all:
+  each name's default probability was <strong>pinned by its CDS spread</strong> — the market-implied
+  default probability. The one free knob was the <strong>correlation</strong>, and you could dial it
+  as high as you liked. By Sklar's theorem the copula carries the dependence entirely separately from
+  those CDS-fixed marginals, so the dramatic shape of a CDO² loss distribution comes from
+  <em>cranking the correlation</em> and the tranching nonlinearity — not from the bell curve. The
+  Normal marginal didn't cause it; the marginals were never Normal and were never the free parameter.</p>
+  <p>It is worth saying plainly: this strand of the critique never warranted a real response from
+  anyone who did credit analytics for a living. Taleb's bell-curve sermon was handwaving by someone
+  who, on the evidence, knew essentially nothing about how these instruments were actually modelled —
+  it conflated the marginal distribution with the dependence structure the models turned on. (The
+  author once made a short video mocking it, which went
+  <a href="https://www.youtube.com/watch?v=A72cc8mM5gY">micro-viral</a>.)</p>
   <div class="stub">Interactive Sklar's-theorem demo (R³ → unit cube → default-time space → default
   order) — forthcoming.</div>
 
@@ -98,7 +109,9 @@
   <p><strong>Two — the banks were a step ahead: the <em>fast</em> model.</strong> Nobody on a desk priced
   a CDO by brute-force Monte Carlo over a copula. At Morgan Stanley the author devised, implemented and
   deployed the fast semi-analytic version, and — without any doubt — the same happened independently at
-  other banks at much the same time. It had to: the method is forced by the problem.</p>
+  other banks at much the same time. It had to: the method is forced by the problem. At Morgan Stanley
+  it shipped, gloriously, as an <em>Excel add-in compiled from MATLAB</em> with the old MATLAB compiler
+  — if that doesn't make anyone nostalgic, nothing will.</p>
   <p><strong>Three — there was nothing to be dazzled by.</strong> Pricing a CDO in the one-factor model
   is a routine exercise in <strong>conditioning, convolution, and quadrature</strong>. Condition on the
   one common factor and the names become independent; convolve their conditional default indicators into
@@ -109,7 +122,7 @@
     <div class="controls">
       <label>correlation ρ <input type="range" id="rho" min="0" max="0.95" step="0.01" value="0.2"><span class="val" id="rhoV">0.20</span></label>
       <label>default prob p <input type="range" id="p" min="0.01" max="0.30" step="0.01" value="0.05"><span class="val" id="pV">5%</span></label>
-      <label>quadrature nodes <input type="range" id="nq" min="5" max="60" step="1" value="33"><span class="val" id="nqV">33</span></label>
+      <label>quadrature nodes <input type="range" id="nq" min="11" max="60" step="1" value="33"><span class="val" id="nqV">33</span></label>
     </div>
     <canvas id="chart" width="840" height="340"></canvas>
     <table class="tr" id="tranches"></table>
@@ -121,9 +134,55 @@
   the common factor; the bold bars are their quadrature average. Drop the node count and watch how few
   points it takes to converge — that is the whole "fast model." The senior tranche, riskless-looking at
   low ρ, becomes a catastrophe bond as ρ rises — the structural fragility, driven entirely by
-  <em>correlation</em>, with the marginal <code>p</code> held fixed.</p>
+  <em>correlation</em>, with the marginal <code>p</code> held fixed. Here <code>p</code> is the
+  <strong>CDS-implied default probability</strong> — the market-given marginal; on a desk you fit it to
+  the single-name CDS and then turn only ρ.</p>
 
-  <h2><span class="part">Part 4 · the truth</span><br>What actually happened</h2>
+  <h2><span class="part">Part 4 · the model was ugly, not beautiful</span><br>Sklar on time, and the hazards that jump</h2>
+  <p>The romance — math professors and disaffected string theorists, dazzled by an elegant object —
+  gets the aesthetics exactly backwards. The construction is <em>ugly</em>. It takes Sklar's theorem
+  (which is just the distributional transform — a near-triviality the conformal-prediction crowd now
+  makes a song and dance about) and staples it onto <strong>temporal</strong> quantities, the default
+  <em>times</em>. That immediately begs a question the static picture cannot answer: <strong>what
+  happens after <em>t</em> &gt; 0?</strong></p>
+  <p>The only honest move is to <strong>condition</strong> on what you have learned — which names have
+  defaulted, and when; which survive. But the moment you do, two things go wrong. First, conditioning
+  on survival is a condition on a <em>rectangle</em> in latent space, and the conditional law is no
+  longer a Gaussian copula of the kind you started with — <strong>you have left your own model
+  class</strong>. Second, the implied <strong>hazard rates of the survivors jump</strong> — and the
+  jumps are not subtle. Below, a five-name basket: simulate the default times, then watch each
+  surviving name's hazard, as a multiple of its standalone rate, walk through time and lurch at every
+  default.</p>
+
+  <div class="widget">
+    <div class="controls">
+      <span style="color:var(--muted);font-size:.9rem">correlation ρ:</span>
+      <button class="rhob" data-i="0">0.3</button>
+      <button class="rhob" data-i="1">0.5</button>
+      <button class="rhob" data-i="2">0.7</button>
+    </div>
+    <canvas id="hz" width="820" height="320"></canvas>
+    <p class="muted" style="font-size:.9rem;margin-top:6px">Each line is a surviving name's hazard rate
+    as a multiple of its standalone (CDS-implied) rate; the line ends when that name defaults (grey
+    verticals). Between defaults the multiplier drifts <em>below 1</em> — surviving together is read as
+    good news — then, the instant any name defaults, every survivor's hazard <strong>jumps
+    discontinuously upward</strong> (at ρ=0.7, by 3–4× on a single default). No real credit reprices
+    like that. This isn't a calibration nuisance; it is the model telling you it has no dynamics.</p>
+  </div>
+
+  <h3>The same name, two baskets, two hazards</h3>
+  <p>And here is the corollary — obvious once you have seen the jumps. The conditioning that produced
+  them is <strong>basket-specific</strong>: a survivor's implied hazard depends on the default-and-survival
+  pattern of <em>the other names in its basket</em>. So a single underlying name — and in 2006 a name
+  like Ford or GMAC sat inside <em>dozens</em> of CDOs at once — is handed a <strong>different default
+  process by every basket it belongs to</strong>. Ask CDO&nbsp;A and CDO&nbsp;B how likely that name is
+  to default tomorrow given what has happened, and they disagree, because each conditions on its own
+  peers. A coherent model attaches an intensity to the <em>name</em>, driven by observable state; the
+  copula attaches it to the <em>basket</em>, and the baskets contradict each other. That inconsistency,
+  not the bell curve, is the genuinely damning property — and it is invisible until you ask the static
+  picture to live through time.</p>
+
+  <h2><span class="part">Part 5 · the truth</span><br>What actually happened</h2>
   <div class="stub">The first-person account — leverage, the run on repo, ratings and incentives, and
   tail risk that was <em>manufactured and known</em> rather than mismeasured (Acharya et al.) — to come.</div>
 </main>
@@ -212,6 +271,36 @@ const rho_=document.getElementById("rho"), p_=document.getElementById("p"), nq_=
 [rho_,p_,nq_].forEach(el=>el.addEventListener("input",draw));
 window.addEventListener("resize",draw);
 draw();
+</script>
+
+<script src="hazard_data.js"></script>
+<script>
+(function(){
+  if(typeof HZ==="undefined") return;
+  const cv=document.getElementById("hz"); if(!cv) return; const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1;
+  const COL={A:"#4a3aff",B:"#1e8449",C:"#e08e0b",D:"#c0392b",E:"#1591a3"};
+  let wi=1;
+  function draw(){
+    const w=HZ.worlds[wi], t=w.t, T=HZ.T;
+    const cssW=cv.clientWidth||820, cssH=320; cv.width=cssW*dpr; cv.height=cssH*dpr; cv.style.height=cssH+"px"; ctx.setTransform(dpr,0,0,dpr,0,0);
+    const W=cssW,H=cssH,padL=48,padR=14,padT=24,padB=26,pw=W-padL-padR,ph=H-padT-padB;
+    let rmax=1.2; for(const nm of HZ.names) for(const v of w.R[nm]) if(v!=null && v>rmax) rmax=v; rmax=Math.ceil(rmax+0.3);
+    const X=tt=>padL+(tt/T)*pw, Y=r=>padT+ph-(Math.min(r,rmax)/rmax)*ph;
+    ctx.clearRect(0,0,W,H); ctx.font="11px sans-serif";
+    for(let r=0;r<=rmax;r++){ ctx.strokeStyle=r===1?"#bbb":"#eee"; ctx.setLineDash(r===1?[4,4]:[]); ctx.beginPath(); ctx.moveTo(padL,Y(r)); ctx.lineTo(W-padR,Y(r)); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle="#aaa"; ctx.textAlign="right"; ctx.fillText(r+"×",padL-6,Y(r)+4); }
+    ctx.textAlign="center"; ctx.fillStyle="#999"; for(let yr=0;yr<=T;yr++) ctx.fillText(yr+"y",X(yr),H-9);
+    for(const d of w.defaults){ ctx.strokeStyle="#d9c2c2"; ctx.beginPath(); ctx.moveTo(X(d.time),padT); ctx.lineTo(X(d.time),padT+ph); ctx.stroke(); ctx.fillStyle="#a55"; ctx.textAlign="center"; ctx.fillText(d.name+" ↓",X(d.time),padT-6); }
+    for(const nm of HZ.names){ const R=w.R[nm]; ctx.strokeStyle=COL[nm]; ctx.lineWidth=2; ctx.beginPath(); let started=false;
+      for(let k=0;k<t.length;k++){ if(R[k]==null){ started=false; continue;} const px=X(t[k]),py=Y(R[k]); if(!started){ctx.moveTo(px,py);started=true;} else ctx.lineTo(px,py); } ctx.stroke();
+      const f=R.findIndex(v=>v!=null); if(f>=0){ ctx.fillStyle=COL[nm]; ctx.textAlign="left"; ctx.font="bold 11px sans-serif"; ctx.fillText(nm,X(t[f])+3,Y(R[f])-4); ctx.font="11px sans-serif"; } }
+    ctx.save(); ctx.translate(13,padT+ph/2); ctx.rotate(-Math.PI/2); ctx.textAlign="center"; ctx.fillStyle="#888"; ctx.fillText("hazard ÷ standalone rate",0,0); ctx.restore();
+  }
+  document.querySelectorAll(".rhob").forEach(b=>b.addEventListener("click",()=>{ wi=+b.dataset.i;
+    document.querySelectorAll(".rhob").forEach(x=>{x.style.background="";x.style.color="";});
+    b.style.background="var(--accent)"; b.style.color="#fff"; draw(); }));
+  const init=document.querySelector('.rhob[data-i="1"]'); if(init){init.style.background="var(--accent)";init.style.color="#fff";}
+  window.addEventListener("resize",draw); draw();
+})();
 </script>
 </body>
 </html>
