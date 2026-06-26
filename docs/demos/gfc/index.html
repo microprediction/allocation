@@ -41,6 +41,11 @@
     table.tr td.bar{width:40%}
     .elbar{height:12px;border-radius:3px;background:var(--accent)}
     .method{font-size:.86rem;color:var(--muted);margin-top:8px}
+    .eqn{margin:20px 0;padding:14px 10px;display:flex;justify-content:center;align-items:flex-end;gap:14px;flex-wrap:wrap;background:#f7f7fb;border-radius:8px;overflow-x:auto}
+    .eqn .term{display:flex;flex-direction:column;align-items:center;gap:5px}
+    .eqn .lbl{font-size:.72rem;font-style:italic;color:var(--accent)}
+    .eqn .expr{font-family:Georgia,"Times New Roman",serif;font-size:1.18rem;border-top:1px solid #c9c6e2;padding-top:4px}
+    .eqn .eq{font-size:1.3rem;color:var(--muted);align-self:center;padding-bottom:6px}
     footer{max-width:880px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
   </style>
 </head>
@@ -62,7 +67,8 @@
 
 <main>
   <h1>The Global Financial Crisis</h1>
-  <p class="subtitle">Told through simulation — by someone who built the correlation-trading tools.</p>
+  <p class="subtitle">The true story of the role of quantitative methods in the financial crisis — told in
+  demonstrations, by someone who led the modelling at Morgan Stanley.</p>
 
   <p class="lead">The crisis has a popular telling: clever quants, dazzled by an elegant formula, let
   the maths blind them, and the tails they ignored blew up the world. This essay takes that story
@@ -376,6 +382,88 @@
   Feynman</a> piece and a <a href="https://conformalprediction.net/demos/15-de-finetti.html">demo of the
   finite (Szekely) decomposition</a> of exchangeable variables. The topic is deep, and the connections
   keep multiplying.</p>
+
+  <h3>The same trick, during COVID of all things</h3>
+  <p>I came back to this from an unlikely direction. In 2020 I noticed the identical move solves a problem
+  in epidemiology, and wrote up a
+  <a href="https://www.linkedin.com/pulse/fundamental-theorem-epidemiology-peter-cotton-phd/">"Fundamental
+  Theorem of Epidemiology"</a> — and, with it, a clean
+  <a href="https://arxiv.org/abs/2006.07341">resolution of the herd-immunity paradox</a>. The link is not
+  really a coincidence: epidemiological compartmental models <em>are</em> negative-interest-rate models
+  (and often bad ones, with flat term structures) — a correspondence that seems to have gone unremarked
+  until my working papers pointed it out. If you care about my meagre contributions there, see
+  <a href="https://arxiv.org/abs/2005.10311">repeat contacts and the spread</a>. The reason the trick
+  carries over is exactly the symmetry above. Suppose you only care about an aggregate — the number of
+  infections after three days, say, or the number of defaults in a pool. That quantity is a symmetric
+  function of who-is-who, so it cannot tell nature's true (heterogeneous) model apart from its
+  symmetrized twin, nor from <em>any</em> model sharing the same orbit under relabelling:</p>
+
+  <div class="eqn">
+    <span class="term"><span class="lbl">nature's true model</span><span class="expr">𝔼<sub>φ*</sub>[ i(t=3) ]</span></span>
+    <span class="eq">=</span>
+    <span class="term"><span class="lbl">nature's symmetrized model</span><span class="expr">𝔼<sub>ψ=Uφ*</sub>[ i(t=3) ]</span></span>
+    <span class="eq">=</span>
+    <span class="term"><span class="lbl">any model in the same orbit</span><span class="expr">𝔼<sub>φ∈O(φ*)</sub>[ i(t=3) ]</span></span>
+  </div>
+  <p class="muted">So you will accidentally get the right answer, as it were, as long as you are close to the
+  orbit — and you may as well do your computation on the simplest representative of it: the exchangeable one.</p>
+
+  <h3>See it: a heterogeneous pool and its exchangeable twin</h3>
+  <p>Three names with <em>different</em> default probabilities and a positive correlation. The left panel is
+  nature's heterogeneous joint distribution over all eight default outcomes; the middle panel is its
+  symmetrization — average over the six relabellings — which is <em>perfectly exchangeable</em> (its three
+  marginals are now identical, and every outcome with the same number of defaults is equally likely). They
+  are visibly different distributions. Yet the right panel — the distribution of the <em>number</em> of
+  defaults, which is all a CDO waterfall ever sees — is <strong style="font-weight:inherit"><em>bit-for-bit
+  identical</em></strong> under the two models. Drag the sliders; the two aggregate distributions move in
+  perfect lockstep, because one is the permutation-average of the other and the aggregate cannot tell them
+  apart.</p>
+
+  <div class="widget">
+    <div class="controls">
+      <label>P(default) A <input class="sp" id="sa" type="range" min="0.01" max="0.4" step="0.01" value="0.05"><span class="val" id="saV">5%</span></label>
+      <label>B <input class="sp" id="sb" type="range" min="0.01" max="0.4" step="0.01" value="0.12"><span class="val" id="sbV">12%</span></label>
+      <label>C <input class="sp" id="sc" type="range" min="0.01" max="0.4" step="0.01" value="0.25"><span class="val" id="scV">25%</span></label>
+      <label>correlation ρ <input class="sp" id="srho" type="range" min="0" max="0.85" step="0.01" value="0.3"><span class="val" id="srhoV">0.30</span></label>
+    </div>
+    <canvas id="symcv" width="840" height="300"></canvas>
+    <div class="method" id="symmethod"></div>
+  </div>
+  <p class="muted">This is not special to the Gaussian copula — it holds for <em>any</em> default model
+  whatsoever, because it is a statement about the payout's symmetry, not the model's form. It is also the
+  honest version of the diversity score: not "pretend the names are identical," but "replace them with the
+  exact exchangeable law that prices identically, then decompose <em>that</em>."</p>
+
+  <blockquote>"Negative energies and probabilities should not be considered as nonsense. They are
+  well-defined concepts mathematically, like a negative of money." — P. A. M. Dirac, 1942</blockquote>
+  <p>A further aside, for the connoisseur. The finite de Finetti / Szekely decomposition writes the
+  exchangeable law as a mixture of conditionally-independent ones — and in general the mixing weights are a
+  <em>signed</em> measure: you may have to dip into the negative-probability region to represent it, which,
+  pace Dirac, is perfectly respectable. But here is the quiet gift of this particular problem: <em>you
+  generally do not need to.</em> When defaults are <em>positively</em> correlated — as credit defaults
+  overwhelmingly are — the decomposition stays inside the genuine, non-negative simplex. That is the benefit
+  of positive correlation in defaults. (Then there is the Wigner quasiprobability distribution… for another
+  day.)</p>
+
+  <h2><span class="part">Part 8 · how the trick was actually used</span><br>Back to the narrative in which Taleb is a genius and the rest of us are morons</h2>
+  <p>Anyway — back to the narrative in which Taleb is a genius and the rest of us are morons. You might
+  reasonably ask: this lovely computational trick, ignored to this day and applicable to <em>every</em>
+  model rather than just the Gaussian copula — did Morgan Stanley race to weaponise the secret sauce? Did
+  the traders with PhDs in statistics fall upon it? Here the <em>true</em> story — not the one
+  <em>inferred</em> by outsiders from a comfortable distance — takes a more curious turn.</p>
+  <p>By this point the pendulum had swung hard toward origination. Consider the economics: a bank could
+  assemble a CDO, sell <em>n−1</em> slices of the pie for roughly the price of the whole pie, and keep the
+  <em>n</em>-th slice almost for free. Maybe the free slice ends up worthless; maybe it doesn't. Either way
+  the only quantity anyone is really optimising is <em>how fast you can originate the next one</em>. Take
+  the money and run. In that climate, an exact, elegant method for tracing CDO dynamics through time is not
+  a competitive advantage anyone is clamouring for. It is overhead.</p>
+  <p>And it was right around then that I wandered over to the desk of the man who would become my next
+  manager, to ask what he needed. The timing, as it turned out, was auspicious. He was setting out on the
+  most ambitious use I ever saw of the very arbitrage I have been describing — the gap between the rating
+  agencies' actuarial default probabilities and the risk-neutral probabilities the market was actually
+  quoting.</p>
+  <div class="stub">The rest — what that desk did with the actuarial-vs-risk-neutral arbitrage, and how it
+  ended — continues here.</div>
 </main>
 
 <footer>Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.</footer>
@@ -564,6 +652,59 @@ draw();
   pEl.addEventListener("input",draw); prEl.addEventListener("input",draw); window.addEventListener("resize",draw);
   const ik=document.querySelector('.kb[data-k="3"]'); if(ik){ik.style.background="var(--accent)";ik.style.color="#fff";}
   draw();
+})();
+</script>
+
+<script>
+/* symmetrization: heterogeneous 3-asset joint vs its exchangeable twin -> identical aggregate */
+(function(){
+  const cv=document.getElementById("symcv"); if(!cv||typeof Phi==="undefined") return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1;
+  const COLK=["#9aa0b4","#4a3aff","#e08e0b","#c0392b"], C3=[1,3,3,1];
+  const ORDER=[0,1,2,4,3,5,6,7], BITS=s=>[s&1,(s>>1)&1,(s>>2)&1], POP=s=>(s&1)+((s>>1)&1)+((s>>2)&1);
+  const lbl=s=>{const b=BITS(s);return (b[0]?"A":"·")+(b[1]?"B":"·")+(b[2]?"C":"·");};
+  const sa=document.getElementById("sa"),sb=document.getElementById("sb"),sc=document.getElementById("sc"),srho=document.getElementById("srho");
+  const saV=document.getElementById("saV"),sbV=document.getElementById("sbV"),scV=document.getElementById("scV"),srhoV=document.getElementById("srhoV");
+  function cp(pi,m,sr,sc2){let v=sr<1e-9?pi:Phi((phiInv(pi)-sr*m)/sc2);return Math.min(Math.max(v,1e-12),1-1e-12);}
+  function joint(pA,pB,pC,rho){
+    const sr=Math.sqrt(rho),sc2=Math.sqrt(1-rho),NQ=41,Mx=5.5,dm=2*Mx/(NQ-1),P=new Float64Array(8);let ws=0;
+    for(let q=0;q<NQ;q++){const m=-Mx+q*dm,w=Math.exp(-m*m/2)*dm;ws+=w;
+      const a=cp(pA,m,sr,sc2),b=cp(pB,m,sr,sc2),c=cp(pC,m,sr,sc2);
+      for(let s=0;s<8;s++){const x=BITS(s);P[s]+=w*(x[0]?a:1-a)*(x[1]?b:1-b)*(x[2]?c:1-c);}}
+    for(let s=0;s<8;s++)P[s]/=ws;return P;
+  }
+  function panel(x0,w0,title,drawer,ymax){
+    const H=cv.clientHeight||300,padT=30,padB=34,ph=H-padT-padB;
+    ctx.fillStyle="#444";ctx.font="bold 12px sans-serif";ctx.textAlign="center";ctx.fillText(title,x0+w0/2,18);
+    ctx.strokeStyle="#ddd";ctx.beginPath();ctx.moveTo(x0+6,padT+ph);ctx.lineTo(x0+w0-6,padT+ph);ctx.stroke();
+    drawer(x0,w0,padT,ph,ymax);
+  }
+  function draw(){
+    const pA=+sa.value,pB=+sb.value,pC=+sc.value,rho=+srho.value;
+    saV.textContent=(pA*100).toFixed(0)+"%";sbV.textContent=(pB*100).toFixed(0)+"%";scV.textContent=(pC*100).toFixed(0)+"%";srhoV.textContent=rho.toFixed(2);
+    const P=joint(pA,pB,pC,rho),agg=new Float64Array(4);for(let s=0;s<8;s++)agg[POP(s)]+=P[s];
+    const Psym=new Float64Array(8);for(let s=0;s<8;s++)Psym[s]=agg[POP(s)]/C3[POP(s)];
+    const cssW=cv.clientWidth||840,cssH=300;cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+    const gap=18,w3=(cssW-2*gap)/3;
+    let ymax8=0;for(let s=0;s<8;s++){ymax8=Math.max(ymax8,P[s],Psym[s]);}ymax8*=1.12;
+    let ymaxA=0;for(let k=0;k<4;k++)ymaxA=Math.max(ymaxA,agg[k]);ymaxA*=1.12;
+    const bars8=(arr)=>(x0,w0,padT,ph,ym)=>{const bw=(w0-12)/8;
+      ctx.font="9px sans-serif";
+      ORDER.forEach((s,i)=>{const x=x0+6+i*bw,h=arr[s]/ym*ph;ctx.fillStyle=COLK[POP(s)];ctx.fillRect(x+bw*0.12,padT+ph-h,bw*0.76,h);
+        ctx.save();ctx.translate(x+bw/2,padT+ph+4);ctx.rotate(Math.PI/2);ctx.fillStyle="#999";ctx.textAlign="left";ctx.fillText(lbl(s),0,3);ctx.restore();});};
+    panel(0,w3,"nature (heterogeneous)",bars8(P),ymax8);
+    panel(w3+gap,w3,"symmetrized (exchangeable)",bars8(Psym),ymax8);
+    panel(2*(w3+gap),w3,"# defaults — IDENTICAL",(x0,w0,padT,ph,ym)=>{const bw=(w0-12)/4;
+      for(let k=0;k<4;k++){const x=x0+6+k*bw,h=agg[k]/ymaxA*ph;ctx.fillStyle=COLK[k];ctx.fillRect(x+bw*0.15,padT+ph-h,bw*0.7,h);
+        ctx.fillStyle="#777";ctx.font="10px sans-serif";ctx.textAlign="center";ctx.fillText(k,x+bw/2,padT+ph+16);}
+      ctx.fillStyle="#777";ctx.fillText("(both models)",x0+w0/2,padT+ph+30);},ymaxA);
+    const avg=(pA+pB+pC)/3, g2=agg[2]+agg[3];
+    document.getElementById("symmethod").innerHTML=
+      `heterogeneous marginals <b>${(pA*100).toFixed(0)}/${(pB*100).toFixed(0)}/${(pC*100).toFixed(0)}%</b> &rarr; exchangeable marginals <b>${(avg*100).toFixed(1)}%</b> each. `+
+      `A tranche paying on <b>2+ of 3</b> defaults is worth <b>${(g2*100).toFixed(2)}%</b> under <em>both</em> models — identical, exactly.`;
+  }
+  [sa,sb,sc,srho].forEach(e=>e.addEventListener("input",draw));window.addEventListener("resize",draw);draw();
 })();
 </script>
 </body>
