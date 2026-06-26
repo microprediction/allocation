@@ -503,26 +503,26 @@
   <p>And here is the subtler failure, the one that survives even when an agency <em>did</em> reach for a
   copula. They fed it the wrong correlation, taken from <em>historical, actuarial</em> studies, and the
   numbers were strikingly low.</p>
-  <p>The <em>asset</em> correlation — the dependence between the latent variables driving default — was
+  <p>The <em>asset</em> correlation, the dependence between the latent variables driving default, was
   modest: S&amp;P's CDO Evaluator assumed <em>0%</em> across industries before late 2005 (30% within);
   Moody's used roughly <em>3%</em> across sectors (15% within).</p>
-  <p>The <em>default</em> correlation — the chance two names actually go down <em>together</em>, naturally
-  a small number — was lower still and demonstrably too low:
+  <p>The <em>default</em> correlation, the chance two names actually go down <em>together</em> and
+  naturally a small number, was lower still and demonstrably too low:
   <a href="https://doi.org/10.1016/j.jfineco.2017.06.011">Nickerson &amp; Griffin (2017)</a> find agencies
   assumed about <em>1%</em> for CLOs (raised to a still-inadequate 3% after the crisis) where roughly
   <em>12%</em> was appropriate.</p>
   <p>Meanwhile, two screens away, the inter-dealer market in CDO tranches was quoting prices that
   <em>implied</em> a far higher correlation. <em>Implied correlation</em> is the number you must put into
-  the model to reproduce a traded price — exactly as <em>implied volatility</em> is read out of option
+  the model to reproduce a traded price, exactly as <em>implied volatility</em> is read out of option
   prices.</p>
   <p>It is a flawed lens. Like the options <em>smile</em>, different tranches imply different correlations,
   so it is not globally consistent. But it is <em>absolutely critical</em>, because it is the market's own
-  view of joint-default risk, priced by people with money at stake — the one-eyed man in the land of the
+  view of joint-default risk, priced by people with money at stake: the one-eyed man in the land of the
   blind. The agencies stared at their single-digit actuarial numbers and looked away from him (the
   sensitivity of senior-tranche ratings to exactly this input is the thesis of
   <a href="https://doi.org/10.1257/jep.23.1.3">Coval, Jurek &amp; Stafford 2009</a>).</p>
   <p>Ignoring a live market price in favour of a stale historical estimate is not a venial sin; it is
-  close to the cardinal one. I have since argued that this sin needs a name — the <em>Indispensable Markets
+  close to the cardinal one. I have since argued that this sin needs a name, the <em>Indispensable Markets
   Hypothesis</em>: in the presence of a well-established market, anyone who eschews its prices as inputs
   will under-perform out of sample
   (<a href="https://github.com/microprediction/home/blob/main/workingpapers/The_Indispensible_Markets_Hypothesis.pdf">working
@@ -533,8 +533,8 @@
   data, imagine the self-inflicted wound of rating a half-trillion-dollar market off historical tables
   while the implied number sat, ignored, on the next screen.</p>
   <p>Below, back the implied
-  correlation out of a simple contract — one that pays if <em>k</em> or more of a five-name basket
-  default — and see how far above 5% the market's number sat.</p>
+  correlation out of a simple contract, one that pays if <em>k</em> or more of a five-name basket
+  default, and see how far above 5% the market's number sat.</p>
 
   <div class="widget">
     <div class="controls">
@@ -550,20 +550,20 @@
   </div>
   <p class="muted">The curve is the contract's fair price as a function of correlation (one-factor
   Gaussian copula, marginals fixed by CDS). Drag the <em>market price</em>: where your price meets the
-  curve is the <em>implied correlation</em>. The dashed line is the agencies' actuarial ≈5% — read off
+  curve is the <em>implied correlation</em>. The dashed line is the agencies' actuarial ≈5%. Read off
   how little they charged for joint default, and how much further right the market's implied number sat.
-  Switch contracts (2+/3+/4+) and the implied correlation shifts: that is the correlation <em>smile</em>
-  — inconsistent, exactly like the options smile, and exactly as indispensable.</p>
+  Switch contracts (2+/3+/4+) and the implied correlation shifts: that is the correlation <em>smile</em>,
+  inconsistent, exactly like the options smile, and exactly as indispensable.</p>
 
-  <div class="stub">The rest of the first-person account — leverage, the run on repo, ratings and
-  incentives, and tail risk that was <em>manufactured and known</em> rather than mismeasured
-  (Acharya et al.) — continues here.</div>
+  <div class="stub">The rest of the first-person account (leverage, the run on repo, ratings and
+  incentives, and tail risk that was <em>manufactured and known</em> rather than mismeasured,
+  Acharya et al.) continues here.</div>
 
   <h2><span class="part">Part 7 · twenty years later</span><br>Symmetry, de Finetti, and an unexpected second life</h2>
   <details class="think">
   <summary>Indulge me for a moment</summary>
-  <p>I will return to the central theme — incorrect inputs and the violation of the Indispensable Markets
-  Hypothesis — in due course. But first, I am sure you are dying to know what became of all that hard work.
+  <p>I will return to the central theme, incorrect inputs and the violation of the Indispensable Markets
+  Hypothesis, in due course. But first, I am sure you are dying to know what became of all that hard work.
   Oh, you're not? Well, too bad. I have the mic just now, and having listened to twenty years of mostly
   bullshit, I don't much care to be interrupted.</p>
   </details>
@@ -573,14 +573,14 @@
   <em>de Finetti</em>-style decompositions of the joint default distribution. I will fold the full account
   into this essay sooner or later; here is the spine of it.</p>
   <p>First, a word on <em>exchangeable</em>. A collection of random variables is exchangeable if its joint
-  distribution is unchanged when you relabel — permute — them: only <em>how many</em> take each value
+  distribution is unchanged when you relabel (permute) them: only <em>how many</em> take each value
   matters, never <em>which</em> ones. Identical names are exchangeable; so is any law that treats its
   members symmetrically. <em>de Finetti's theorem</em> is the deep payoff: an (infinite) exchangeable
-  sequence is exactly a <em>mixture of conditionally-independent</em> ones — independent draws, with the
+  sequence is exactly a <em>mixture of conditionally-independent</em> ones, independent draws with the
   common probability itself drawn from some distribution. That mixing distribution is where dependence
   hides.</p>
   <details class="think">
-  <summary>Going deeper — references</summary>
+  <summary>Going deeper: references</summary>
   <p><a href="https://en.wikipedia.org/wiki/Exchangeable_random_variables">Exchangeable random variables</a>
   · <a href="https://en.wikipedia.org/wiki/De_Finetti%27s_theorem">de Finetti's theorem</a> (the infinite
   case) · the <a href="https://en.wikipedia.org/wiki/De_Finetti%27s_theorem#Finite_exchangeability">finite</a>
@@ -590,14 +590,14 @@
   demo</a>.</p>
   </details>
   <p>The symmetry answers an objection you have probably been forming. The companies in a CDO are plainly
-  <em>not</em> exchangeable — Ford is not GMAC is not a Florida homebuilder. True. But the CDO's cashflows
+  <em>not</em> exchangeable; Ford is not GMAC is not a Florida homebuilder. True. But the CDO's cashflows
   <em>are</em>. The waterfall pays out of <em>aggregate</em> losses; it never mentions a company by name.
-  The payout is a symmetric function of the default vector — invariant under any permutation of the names.
+  The payout is a symmetric function of the default vector, invariant under any permutation of the names.
   And that lets you move the symmetry from one side of the problem to the other: for the sole purpose of
   simulating CDO cashflows, there is <em>always</em> a purely <em>exchangeable</em> default model that
   reproduces <em>exactly</em> the same cashflow distribution as the original heterogeneous one. The
   heterogeneity that felt essential is, for pricing, something you can symmetrize away losing nothing.</p>
-  <p>Once the defaults are exchangeable, de Finetti — or, in the finite case, Szekely's — decomposition
+  <p>Once the defaults are exchangeable, the de Finetti decomposition (in the finite case, Szekely's)
   applies: an exchangeable law is a mixture of conditionally-independent laws. The diversity score was a
   crude, frozen shadow of exactly this (replace <em>N</em> heterogeneous names with <em>D</em> exchangeable
   ones) collapsed into a single number instead of an exact, dynamic decomposition. Done properly, that
