@@ -291,19 +291,19 @@
   the single-name CDS and then turn only ρ.</p>
 
   <h2><span class="part">Part 4 · the model was ugly, not beautiful</span><br>Sklar on time, and the hazards that jump</h2>
-  <p>The romance — math professors and disaffected string theorists, dazzled by an elegant object —
+  <p>The romance (math professors and disaffected string theorists, dazzled by an elegant object)
   gets the aesthetics exactly backwards. Physicists and mathematicians are raised on <em>actual</em>
   beauty, and the odds of one of them finding a CDO model elegant are about those a rating agency would
   assign to a super-senior tranche taking a loss. The construction is <em>ugly</em>. It takes Sklar's theorem
-  (which is just the distributional transform — a near-triviality the conformal-prediction crowd now
+  (which is just the distributional transform, a near-triviality the conformal-prediction crowd now
   makes a song and dance about) and staples it onto <em>temporal</em> quantities, the default
   <em>times</em>. That immediately begs a question the static picture cannot answer: <em>what
   happens after <em>t</em> &gt; 0?</em></p>
-  <p>The only honest move is to <em>condition</em> on what you have learned — which names have
+  <p>The only honest move is to <em>condition</em> on what you have learned: which names have
   defaulted, and when; which survive. But the moment you do, two things go wrong. First, conditioning
   on survival is a condition on a <em>rectangle</em> in latent space, and the conditional law is no
-  longer a Gaussian copula of the kind you started with — <em>you have left your own model
-  class</em>. Second, the implied <em>hazard rates of the survivors jump</em> — and the
+  longer a Gaussian copula of the kind you started with. <em>You have left your own model class.</em>
+  Second, the implied <em>hazard rates of the survivors jump</em>, and the
   jumps are not subtle. Below, a five-name basket: simulate the default times, then watch each
   surviving name's hazard, as a multiple of its standalone rate, walk through time and lurch at every
   default.</p>
@@ -318,53 +318,53 @@
     <canvas id="hz" width="820" height="320"></canvas>
     <p class="muted" style="font-size:.9rem;margin-top:6px">Each line is a surviving name's hazard rate
     as a multiple of its standalone (CDS-implied) rate; the line ends when that name defaults (grey
-    verticals). Between defaults the multiplier drifts <em>below 1</em> — surviving together is read as
-    good news — then, the instant any name defaults, every survivor's hazard <em>jumps
+    verticals). Between defaults the multiplier drifts <em>below 1</em> (surviving together is read as
+    good news); then, the instant any name defaults, every survivor's hazard <em>jumps
     discontinuously upward</em> (at ρ=0.7, by 3–4× on a single default). No real credit reprices
     like that. This isn't a calibration nuisance; it is the model telling you it has no dynamics.</p>
   </div>
 
-  <p>Now, in fairness, there is more to the story. You can, if you wish, enrich the <em>filtration</em> —
+  <p>Now, in fairness, there is more to the story. You can, if you wish, enrich the <em>filtration</em>,
   the quant's term for telling the model more as time passes: partial information about the deteriorating
-  credit of a name that has not yet defaulted. There is even a <em>graceful</em> — too strong a word —
+  credit of a name that has not yet defaulted. There is even a <em>graceful</em> (too strong a word)
   way to marry the <em>direct</em> modelling of instantaneous default intensities (stochastic hazard
   rates: jump processes, affine models, regime-switching) to the copula. You let the copula generate the
   exponential random variables, then run the integrated stochastic hazard <code>∫₀ᵗ λ(s) ds</code> and
-  wait for it to <em>catch up</em> to each drawn exponential — whoever's integral arrives first defaults
-  first. That awkwardly unifies the two warring halves of the 1990s credit literature — reduced-form
-  intensities and copulas — and at Morgan Stanley we even patented it. <span class="muted">(A demo of
+  wait for it to <em>catch up</em> to each drawn exponential; whoever's integral arrives first defaults
+  first. That awkwardly unifies the two warring halves of the 1990s credit literature, reduced-form
+  intensities and copulas, and at Morgan Stanley we even patented it. <span class="muted">(A demo of
   that time-change construction may follow.)</span> None of it, however, removes the inescapable
   ugliness we come to next.</p>
 
   <h3>The same name, two baskets, two hazards</h3>
-  <p>And here is the corollary — obvious once you have seen the jumps. The conditioning that produced
+  <p>And here is the corollary, obvious once you have seen the jumps. The conditioning that produced
   them is <em>basket-specific</em>: a survivor's implied hazard depends on the default-and-survival
-  pattern of <em>the other names in its basket</em>. So a single underlying name — and in 2006 a name
-  like Ford or GMAC sat inside <em>dozens</em> of CDOs at once — is handed a <em>different default
+  pattern of <em>the other names in its basket</em>. So a single underlying name (and in 2006 a name
+  like Ford or GMAC sat inside <em>dozens</em> of CDOs at once) is handed a <em>different default
   process by every basket it belongs to</em>. Ask CDO&nbsp;A and CDO&nbsp;B how likely that name is
   to default tomorrow given what has happened, and they disagree, because each conditions on its own
   peers. A coherent model attaches an intensity to the <em>name</em>, driven by observable state; the
   copula attaches it to the <em>basket</em>, and the baskets contradict each other. That inconsistency,
-  not the bell curve, is the genuinely damning property — and it is invisible until you ask the static
+  not the bell curve, is the genuinely damning property, and it is invisible until you ask the static
   picture to live through time.</p>
 
   <h3>One hedge, two risks</h3>
   <p>I will not dwell on the next point, because it is thoroughly well appreciated and I have nothing
-  original to add to it — but it has to be stated. Beneath everything above sits a flaw no choice of copula
+  original to add to it, but it has to be stated. Beneath everything above sits a flaw no choice of copula
   can repair, because it belongs to the market and not the model. A CDO tranche carries (at least) two
-  distinct exposures in each name: <em>default risk</em> — the name suddenly jumps to default — and
-  <em>spread risk</em> — its credit spread drifts and reprices the tranche. But there is exactly one liquid
+  distinct exposures in each name: <em>default risk</em>, the name suddenly jumping to default, and
+  <em>spread risk</em>, its credit spread drifting and repricing the tranche. But there is exactly one liquid
   instrument with which to hedge a name: its single-name <em>CDS</em>. One instrument cannot span two
   independent risk factors, so the market is fundamentally <em>incomplete</em>: the tranche cannot be
   replicated, there is no unique arbitrage-free price, and the hedge ratios the model reports are artifacts
-  of the model rather than properties of the world (the standard texts make this plain — Schönbucher 2003;
-  Bielecki &amp; Rutkowski 2002 — and the hedging literature confirms the ratios are model-dependent:
-  <a href="https://doi.org/10.1137/090750937">Cont &amp; Kan 2011</a>;
+  of the model rather than properties of the world. The standard texts make this plain (Schönbucher 2003;
+  Bielecki &amp; Rutkowski 2002), and the hedging literature confirms the ratios are model-dependent
+  (<a href="https://doi.org/10.1137/090750937">Cont &amp; Kan 2011</a>;
   <a href="https://doi.org/10.1080/14697680903390126">Laurent, Cousin &amp; Fermanian 2011</a>). I was not pricing by replication; I was marking to a convention and hoping the
   unhedgeable residual stayed small. On a desk, everyone knew this too.</p>
   <p>If you want a single date when the market admitted as much, take <em>May 2005</em>. The downgrade of
-  General Motors and Ford to junk detonated the fashionable "correlation trade" — long the equity tranche,
-  short the mezzanine — and as positions were unwound the <em>implied correlations of different tranches
+  General Motors and Ford to junk detonated the fashionable "correlation trade" (long the equity tranche,
+  short the mezzanine), and as positions were unwound the <em>implied correlations of different tranches
   slipped in incompatible directions</em>, driven by raw supply and demand rather than by anything a single
   coherent model could produce. The clinical study of the episode
   (<a href="https://doi.org/10.1142/S2010139215500068">Acharya, Schaefer &amp; Zhang, 2015</a>) shows the
