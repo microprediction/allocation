@@ -346,6 +346,36 @@
   <div class="stub">The rest of the first-person account — leverage, the run on repo, ratings and
   incentives, and tail risk that was <em>manufactured and known</em> rather than mismeasured
   (Acharya et al.) — continues here.</div>
+
+  <h2><span class="part">Part 7 · twenty years later</span><br>Symmetry, de Finetti, and an unexpected second life</h2>
+  <p>Twenty years on, I find myself slowly recreating that work — which, as far as I know, has never been
+  rebuilt since. It rested on two ideas I still think are important: the <em>symmetries</em> of a CDO, and
+  <em>de Finetti</em>-style decompositions of the joint default distribution. I will fold the full account
+  into this essay sooner or later; here is the spine of it.</p>
+  <p>The symmetry answers an objection you have probably been forming. The companies in a CDO are plainly
+  <em>not</em> exchangeable — Ford is not GMAC is not a Florida homebuilder. True. But the CDO's cashflows
+  <em>are</em>. The waterfall pays out of <em>aggregate</em> losses; it never mentions a company by name.
+  The payout is a symmetric function of the default vector — invariant under any permutation of the names.
+  And that lets you move the symmetry from one side of the problem to the other: for the sole purpose of
+  simulating CDO cashflows, there is <em>always</em> a purely <em>exchangeable</em> default model that
+  reproduces <em>exactly</em> the same cashflow distribution as the original heterogeneous one. The
+  heterogeneity that felt essential is, for pricing, something you can symmetrize away losing nothing.</p>
+  <p>Once the defaults are exchangeable, de Finetti — or, in the finite case, Szekely's — decomposition
+  applies: an exchangeable law is a mixture of conditionally-independent laws. The diversity score was a
+  crude, frozen shadow of exactly this (replace <em>N</em> heterogeneous names with <em>D</em> exchangeable
+  ones) collapsed into a single number instead of an exact, dynamic decomposition. Done properly, that
+  decomposition is the natural language for tracing CDO dynamics through time, self- and
+  market-consistently.</p>
+  <p>The deep version of this is, oddly, having a second life. I keep noticing that <em>conformal
+  prediction</em> — which I never paid much attention to — is in some sense a univariate cousin of the CDO
+  analytics from 2000: both turn on exchangeability and the distributional transform. Technical readers
+  might (I say <em>might</em>) be interested in a new result
+  <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6979679">(SSRN&nbsp;6979679)</a> and the
+  work in progress at <a href="https://conformalprediction.net/papers/">conformalprediction.net</a> — in
+  particular the <a href="https://conformalprediction.net/papers/definetti-feynman/">de&nbsp;Finetti /
+  Feynman</a> piece and a <a href="https://conformalprediction.net/demos/15-de-finetti.html">demo of the
+  finite (Szekely) decomposition</a> of exchangeable variables. The topic is deep, and the connections
+  keep multiplying.</p>
 </main>
 
 <footer>Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.</footer>
