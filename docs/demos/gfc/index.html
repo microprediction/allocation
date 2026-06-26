@@ -84,9 +84,8 @@
 
 <main>
   <h1>The Global Financial Crisis</h1>
-  <p class="subtitle">The true story of the role of quantitative models, and of the Indispensable Markets
-  Hypothesis, in the financial crisis. Told in demonstrations, by someone who led the CDO modelling at
-  Morgan Stanley.</p>
+  <p class="subtitle">The true story of the role of quantitative models in the financial crisis. Told in
+  demonstrations, by someone who led the CDO modelling at Morgan Stanley.</p>
 
   <div class="measures">
     <div class="m"><div class="sym">&#8473;</div><div class="nm">objective probability</div>
@@ -733,6 +732,43 @@
   the only quantity anyone is really optimising is <em>how fast you can originate the next one</em>. Take
   the money and run. In that climate, an exact, elegant method for tracing CDO dynamics through time is not
   a competitive advantage anyone is clamouring for. It is overhead.</p>
+
+  <h3>A company that does nothing</h3>
+  <p>One piece of plumbing first, because the whole trick hides inside it: the difference between a
+  <em>cash</em> CDO and a <em>synthetic</em> one.</p>
+  <p>A cash CDO actually buys the bonds. Real money leaves, real paper arrives. There is a vehicle, and
+  inside it a genuine pile of asset-backed securities throwing off coupons, which the vehicle slices into
+  tranches and pays out top-down. It owns things. Cash in, cash out.</p>
+  <p>A synthetic CDO owns nothing of the kind. It never funds the assets. It <em>sells protection</em>,
+  writing credit-default swaps on the names, and so takes on exactly the credit risk of the bonds without
+  ever buying them. The risk is referenced, not held: the same losses in the same order as if you had
+  bought the portfolio, conjured out of a stack of contracts.</p>
+  <p>Picture the cash version. Somewhere warm:</p>
+  <pre style="overflow-x:auto;background:#fdfdfb;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:.78rem;line-height:1.35;color:#555">           &#9728;   GRAND CAYMAN   &#9728;
+                 &#127796;     &#127796;
+      +-----------------------------+
+      |       AURORA FUNDING        |    owns ...... a pile of bonds
+      |         (Cayman) Ltd        |    employs ... nobody
+      |   +---------------------+   |    does ...... nothing
+      |   |    bonds    bonds   |   |
+      |   +---------------------+   |
+      +-----------------------------+
+        coupons in  -&gt;  tranche payments out</pre>
+  <p>An orphan entity on an island, bankruptcy-remote, no staff, no premises, no business. It buys bonds
+  and passes the cash flows through. That is the entire enterprise.</p>
+  <p>Here is the question you are supposed to ask, the one almost nobody asked out loud: <em>how could a
+  company that does nothing be worth setting up in the first place?</em></p>
+  <p>If all it does is hold bonds you could hold yourself, where does the value come from? You have added a
+  lawyer, a trustee, a jurisdiction and a brass plate, and subtracted nothing risky. On the assets alone
+  the thing is worth less than its inputs. It is pure cost.</p>
+  <p>It was never about the assets. It was about the ratings. The empty company is a
+  ratings-transformation machine: pour in a pool of BBB collateral, paper the market prices as plainly
+  risky, tranche it, and the agencies' model hands most of the stack back stamped AAA. The value created
+  out of nothing is precisely the gap between the rating of what went in and the ratings of what came out.
+  That gap is the only reason the island, the trustee and the brass plate ever paid for themselves.</p>
+  <p>Which is the cleanest statement of the whole thesis: the company that does nothing is worth building
+  only because somebody, somewhere, is rating off a <em>model</em> instead of off the <em>price</em>.</p>
+
   <p>And it was right around then that I wandered over to the desk of the man who would become my next
   manager, to ask what he needed. The timing, as it turned out, was auspicious. He was setting out on the
   most ambitious use I ever saw of the very arbitrage I have been describing: the gap between the rating
