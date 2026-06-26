@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Opiates for the Mathless — allocation</title>
+  <title>Opiate for the Mathless: The R-Measure and its Role in the Global Financial Crisis — allocation</title>
   <meta name="description" content="The Global Financial Crisis told through simulation, by someone who built the correlation-trading tools. Sklar's theorem vs the bell curve, hidden tail dependence, and the truth about the 'formula that killed Wall Street'.">
   <style>
     :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
@@ -21,6 +21,7 @@
     main{max-width:880px;margin:30px auto;padding:0 24px 60px}
     h1{font-size:2.2rem;margin:0 0 4px;line-height:1.15} .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 22px}
     h2{font-size:1.4rem;margin:2em 0 .5em} h3{font-size:1.12rem;margin:1.4em 0 .3em}
+    h2.lead-h{margin-top:1em;font-size:1.55rem}
     .part{font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700}
     p{margin:.85em 0} .muted{color:var(--muted)} em{font-style:italic}
     code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;font-family:"SFMono-Regular",Menlo,Consolas,monospace}
@@ -32,6 +33,8 @@
     .controls label{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:8px}
     .controls input[type=range]{accent-color:var(--accent);vertical-align:middle}
     .val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent)}
+    button.snap{font:inherit;font-size:.82rem;color:var(--accent);background:#fff;border:1px solid var(--accent);
+      border-radius:6px;padding:4px 10px;cursor:pointer} button.snap:hover{background:var(--accent);color:#fff}
     button.rhob,button.kb{padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text);font-weight:600;cursor:pointer;font-size:.9rem}
     button.rhob:hover,button.kb:hover{border-color:var(--accent)}
     canvas{width:100%;height:auto;display:block;margin:6px 0}
@@ -83,9 +86,8 @@
 </header>
 
 <main>
-  <h1>Opiates for the Mathless</h1>
-  <p class="subtitle">An insider debunks the mathematical explanations for the Global Credit Crisis, told
-  in demonstrations, by someone who led the CDO modelling at Morgan Stanley.</p>
+  <h1>Opiate for the Mathless: The R-Measure and its Role in the Global Financial Crisis</h1>
+  <p class="subtitle">Told in demonstrations, by someone who led the CDO modelling at Morgan Stanley.</p>
 
   <div class="measures">
     <div class="m"><div class="sym">&#8473;</div><div class="nm">objective probability</div>
@@ -93,10 +95,119 @@
     <div class="m"><div class="sym">&#8474;</div><div class="nm">risk-neutral probability</div>
       <div class="ds">implied by market prices; discounted prices are martingales and derivatives are valued under it. The sophisticated worldview stops here.</div></div>
     <div class="m todo"><div class="sym">&#8477;&#8201;?</div><div class="nm">the measure that caused the financial crisis</div>
-      <div class="ds">…&nbsp;to be explained (Parts&nbsp;6 &amp; 8). The one almost nobody will tell you exists. Mnemonic: <em>R</em> for rating agencies, though the flaw is ubiquitous.</div></div>
+      <div class="ds">…&nbsp;the gap this whole essay is about (developed in Parts&nbsp;6 &amp; 8). The one you were never taught. Mnemonic: <em>R</em> for rating agencies, though the flaw is ubiquitous.</div></div>
   </div>
   <p class="mcap">There are <em>three</em> probability measures in finance, not two. Understanding the
   <em>trichotomy</em> is the key to this whole story.</p>
+
+  <h2 class="lead-h">A company that does nothing</h2>
+  <p class="lead">Somewhere warm, there is a company:</p>
+  <pre style="overflow-x:auto;background:#fdfdfb;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:.78rem;line-height:1.35;color:#555">           &#9728;   GRAND CAYMAN   &#9728;
+                 &#127796;     &#127796;
+      +-----------------------------+
+      |       AURORA FUNDING        |    owns ...... a pile of bonds
+      |         (Cayman) Ltd        |    employs ... maybe some lawyers
+      |   +---------------------+   |    does ...... nothing
+      |   |    bonds    bonds   |   |
+      |   +---------------------+   |
+      +-----------------------------+
+        coupons in  -&gt;  tranche payments out</pre>
+  <p>An orphan entity on an island: bankruptcy-remote, no staff, no premises, no business. It buys a pile of
+  bonds, collects the coupons, and passes the cash through to investors in slices, or <em>tranches</em>, in
+  strict order of seniority: the top slice is made whole before the next sees a cent, and losses eat the
+  bottom slice first. That is the entire enterprise.</p>
+  <p>The company is not the thing that gets sold. What gets sold are the notes it issues, each one a claim
+  on those cash flows, collateralized by the pool of debt the company holds. A note of that kind is a
+  <em>collateralized debt obligation</em>, a CDO. The company is just the vehicle; the CDO is the
+  security.</p>
+  <details class="think">
+  <summary>Want to know what I really think?</summary>
+  <p>If you want to know whether a commentator on the crisis is an idiot, just see how often they use the
+  word <em>complex</em> when applied to a company that does nothing.</p>
+  <p>I find it maddening that this construct was ever described as complex. It is clearly the least complex
+  company on the planet. And the only concept is the oldest one in finance: subordination.</p>
+  </details>
+  <p><em>How could a company that does nothing be worth setting up in the first place?</em></p>
+  <p>If all it does is hold bonds you could hold yourself, where does the value come from? You have added a
+  lawyer, a trustee, a jurisdiction and a brass plate, and subtracted nothing risky. On the assets alone
+  the thing is worth less than its inputs. It is pure cost.</p>
+  <p>It was never about the assets. It was about the ratings. The empty company is a
+  ratings-transformation machine: pour in a pool of BBB collateral, paper the market prices as plainly
+  risky, apply subordination, and the agencies' model hands most of the stack back stamped AAA. The value created
+  out of nothing is precisely the gap between the rating of what went in and the ratings of what came out.
+  That gap is the only reason the island, the trustee and the brass plate ever paid for themselves.</p>
+
+  <h2>Two measures</h2>
+  <p>Two probabilities are in play here, two of the three from the top of the page.
+  The first is the one the market quotes: the coupons flowing into the vehicle are the spread investors
+  demand for holding risky names instead of risk-free bonds, and that spread <em>implies</em> a default
+  probability. The second is the one the rating agency uses to bless the senior tranche.</p>
+  <p>If the two agree, nothing happens. Price every tranche on the way out under the same implied
+  probability the collateral came in at, and the books balance to the cent: money in equals money out, no
+  perpetual-motion machine. A profit appears only when the second probability is <em>lower</em> than the
+  first, so the senior tranche is sold for more than the market would charge to bear its risk. That gap,
+  and nothing else, is the rating-agency arbitrage. Watch:</p>
+
+  <div class="widget">
+    <div class="controls">
+      <label>collateral spread <input id="raSpread" type="range" min="0.005" max="0.06" step="0.0025" value="0.03"><span class="val" id="raSpreadV">3.0%</span></label>
+      <label>correlation ρ <input id="raRho" type="range" min="0" max="0.6" step="0.01" value="0.20"><span class="val" id="raRhoV">0.20</span></label>
+      <label>agency default prob (senior priced here) <input id="raAg" type="range" min="0.005" max="0.10" step="0.0025" value="0.01"><span class="val" id="raAgV">1.0%</span></label>
+      <button type="button" id="raSame" class="snap">use the same probability (no free lunch)</button>
+    </div>
+    <canvas id="raCanvas" width="780" height="360"></canvas>
+    <div class="method" id="raMethod"></div>
+  </div>
+  <p class="muted">The collateral spread fixes the market-implied default probability (spread ÷ loss-given-default).
+  Each tranche's <em>fair</em> coupon is its expected loss under that probability, and those fair coupons sum
+  back to the pool spread exactly, money in equals money out, arranger profit zero. Now drag the
+  <em>agency default probability</em> below the implied one: that is the only thing the rating changes, and
+  the only place a profit can come from. Set it equal to the implied probability and the free lunch
+  vanishes.</p>
+
+  <p>In fairness, there is a more benevolent, if still mildly dubious, reading. Perhaps the senior buyers
+  were not fooled at all; perhaps they were knowingly paying for <em>diversification as a service</em>,
+  handing the arranger a fee to turn a messy pool into the one clean exposure they wanted. In a free
+  country that is entirely their right. But two things are also true: they did an enormous amount of it,
+  and the fee for this economic service was very large. So whichever reading you prefer, the cynical or the
+  charitable, any honest account of the crisis has to explain the same object: <em>how</em> the
+  perpetual-motion machine actually worked.</p>
+
+  <p>Hollywood, naturally, reached for behavioural economics, or at least for a behavioural economist to
+  explain it to the masses. <a href="https://www.youtube.com/watch?v=OsoY_MmdqZI">The
+  movie</a> only really explained "derivative": Selena Gomez, Richard&nbsp;H.&nbsp;Thaler, a blackjack table,
+  "back-betting." The mechanics, as you have now seen, need a tad more precision than that. I've no beef with
+  Thaler at all, but since this essay is partly about clearing away distractions, I'll mention up front that
+  the lack of crispness is mildly unsettling. Thaler is a behavioural economist, and behavioural economics
+  can easily become a God of the Gaps when things go south.</p>
+  <details class="think">
+  <summary>Want to know what I really think?</summary>
+  <p>I am skeptical. The line between behavioural economics and hindsight bias is pretty thin at the best of
+  times. Shit goes up and then comes down, because it has to: markets are roughly efficient, prices are
+  roughly martingales, and coming back down is what martingales do. Which, ironically, generates endless
+  opportunity for behavioural this-or-that, and for people quietly buying verbal put options against the
+  crash that was always going to arrive eventually.</p>
+  <p>So my advice: when there are very clear <em>structural</em> reasons for a major dislocation, hunting
+  for behavioural inefficiencies is mostly a distraction. Any real explanation for events needs to account
+  for the fact that Howie Hubler had a <em>short</em> position on the junior tranches of mortgage-backed
+  securities, not a long opinion, yet somehow managed to lose ten yards. He certainly did not suffer from
+  "irrational exuberance" about the state of the credit market.</p>
+  </details>
+  <h2>Cash and synthetic</h2>
+  <p>Well, at least Selena helps us understand the notion of a derivative; but then again, so does the
+  recent betting craze. Everything I have drawn so far buys the bonds outright, with real money: that is a
+  <em>cash</em> CDO. A <em>synthetic</em> CDO is more or less the same thing, except that instead of buying
+  the bonds it receives coupons for writing insurance against those bonds defaulting, through credit-default
+  swaps. It never funds the assets; it just references them. Economically there is really not much
+  difference. Practically there were differences, and important ones, which I will return to.</p>
+  <p>Either way, and this is the part worth holding on to, the two are at heart the same bet, and it is worth
+  being clear what the bet is <em>on</em>: the number of companies (or mortgages) that default. That is the
+  whole game. Everything in this essay is, in the end, an argument about how to put a probability on joint
+  defaults.</p>
+  <p>And there is the crisis in one line: put a probability on those joint defaults with the wrong measure,
+  and the company that does nothing prints money. That gap, the difference between what the market charges
+  and what the model blesses, is the hinge of everything that follows. It is the third measure at the top of
+  this page, <em>&#8477;</em>, the one you were never taught.</p>
 
   <p class="lead">The crisis has a popular telling: clever quants, dazzled by an elegant formula, let
   the maths blind them, and the tails they ignored blew up the world. This essay takes that story
@@ -114,7 +225,7 @@
   my authoritah.</p>
   </details>
 
-  <h2><span class="part">Part 1 · the very confused version that is not worth our time</span><br>The Normal-distribution fallacy: an opiate for the mathless</h2>
+  <h2><span class="part">Part 1 · the very confused version that is not worth our time</span><br>The Normal-distribution fallacy</h2>
   <p>The loudest version (Taleb's bell-curve "Great Intellectual Fraud," amplified into "the formula
   that killed Wall Street") blames the <em>Normal distribution</em>. But the structured-credit
   machinery ran on a Gaussian <em>copula</em>, and the marginals were never a modelling choice at all:
@@ -197,16 +308,16 @@
   you have mispriced the instrument long before any tail subtlety could matter.</p>
   <p>How an entire market came to hold assumptions that wrong is the genuinely interesting question, and
   the answer goes to the very heart of quantitative finance (and, as it happens, to the heart of
-  functional analysis). Here I am going to do something I do not believe anyone in finance has done in
-  print before: insist that there are <em>three</em> important probability measures, not two.</p>
-  <p>Watch the ladder. Newcomers, most of the machine-learning crowd now wading in, think there is only
+  functional analysis). It is where the <em>third</em> measure I put at the top of this page earns its
+  keep.</p>
+  <p>Recall the ladder. Newcomers, most of the machine-learning crowd now wading in, think there is only
   <em>one</em> measure: objective, physical probability, the frequency with which things actually happen.
   The more sophisticated know there are <em>two</em>: that real-world measure, and the <em>risk-neutral</em>
   measure under which discounted prices are martingales and derivatives are valued. Even Taleb is
-  comfortably smart enough to know there are two.</p>
-  <p>But to understand the crisis you need a <em>third</em>.
-  And, save for one genuinely obscure blog post from about fifteen years ago that I can barely turn up
-  myself, I am not aware of anyone who will tell you it exists. This is not a conspiracy. It is just that,
+  comfortably smart enough to know there are two. To understand the crisis you need the <em>third</em>, and,
+  save for one genuinely obscure blog post from about fifteen years ago that I can barely turn up myself, I
+  am not aware of anyone in print who will tell you it exists.</p>
+  <p>This is not a conspiracy. It is just that,
   having watched an adjacent desk
   <a href="https://www.reddit.com/r/todayilearned/comments/4cao5v/til_that_howie_hubler_a_morgan_stanley_bond/">lose
   some nine billion dollars on a single trade</a> (the
@@ -215,10 +326,9 @@
   ever made</a>, are worth your time), I happen to have spent more time reflecting on this than most. I
   think the <em>P / Q / R</em> trichotomy is probably the cleanest pedagogical device for it. I will
   return to the <em>true</em> story of the relationship
-  between copulas and the famous ten-billion-dollar trade in due course, but we have some preliminaries.
-  I will name the third measure, and show how its conflation with the other two is what put the marginals
-  off by a factor of two and the correlation off by more than that, carefully, further down
-  (Parts&nbsp;6 and 8).</p>
+  between copulas and the famous nine-billion-dollar trade in due course; for now, what matters is how the
+  conflation of these three measures put the marginals off by a factor of two and the correlation off by
+  more than that. That, carefully, is Parts&nbsp;6 and 8.</p>
 
   <p>Taleb, by the way, knows all this as well as most. His early, seriously quantitative derivatives
   books, <a href="https://www.wiley.com/en-us/Dynamic+Hedging%3A+Managing+Vanilla+and+Exotic+Options-p-9780471152804"><em>Dynamic
@@ -364,7 +474,6 @@
   short the mezzanine), and as positions were unwound the <em>implied correlations of different tranches
   slipped in incompatible directions</em>, driven by raw supply and demand rather than by anything a single
   coherent model could produce. The clinical study of the episode
-  (<a href="https://doi.org/10.1142/S2010139215500068">Acharya, Schaefer &amp; Zhang, 2015</a>) shows the
   (<a href="https://doi.org/10.1142/S2010139215500068">Acharya, Schaefer &amp; Zhang, 2015</a>) shows the
   co-movement spike was a transient, sharply mean-reverting artifact of dealer-quote imbalances and
   liquidity, not a change in any fundamental correlation. The quoted correlation was revealed for what it
@@ -547,7 +656,8 @@
   </div>
   <p class="muted">The curve is the contract's fair price as a function of correlation (one-factor
   Gaussian copula, marginals fixed by CDS). Drag the <em>market price</em>: where your price meets the
-  curve is the <em>implied correlation</em>. The dashed line is the agencies' actuarial ≈5%. Read off
+  curve is the <em>implied correlation</em>. The dashed line is the agencies' actuarial correlation, a
+  blend of the low cross- and within-industry asset figures above (here ≈5%). Read off
   how little they charged for joint default, and how much further right the market's implied number sat.
   Switch contracts (2+/3+/4+) and the implied correlation shifts: that is the correlation <em>smile</em>,
   inconsistent, exactly like the options smile, and exactly as indispensable.</p>
@@ -732,101 +842,11 @@
   the money and run. In that climate, an exact, elegant method for tracing CDO dynamics through time is not
   a competitive advantage anyone is clamouring for. It is overhead.</p>
 
-  <h3>A company that does nothing</h3>
-  <p>But oh dear, I am ahead of myself again. I forgot the cinematic aside.</p>
-  <p>I realize we are well into this essay and I still have not said what a synthetic CDO actually is, or
-  how it came about. So let me explain the original special-purpose company first, and then we can think
-  of the synthetic CDO as simply its artificial equivalent.</p>
-  <p>Here is where we depart from <a href="https://www.youtube.com/watch?v=OsoY_MmdqZI">the movie</a>. It
-  turns out that neither Selena Gomez nor Richard H. Thaler is capable of constructing a remotely accurate
-  analogy for a CDO beyond "back-betting."</p>
-  <details class="think">
-  <summary>Want to know what I really think?</summary>
-  <p>Apologies to anyone who thought it a good idea to bring a behavioural economist to a gun fight, but
-  the mechanics matter well past "it's a derivative," which is the only part their analogy actually
-  carries.</p>
-  <p>The line between behavioural economics and hindsight bias is pretty thin at the best of times. Shit
-  goes up and then comes down, because it has to: markets are roughly efficient, prices are roughly
-  martingales, and coming back down is what martingales do. Which, ironically, generates endless
-  opportunity for behavioural this-or-that, and for people quietly buying verbal put options against the
-  crash that was always going to arrive eventually.</p>
-  <p>So my advice: when there are very clear <em>structural</em> reasons for a major dislocation, hunting
-  for behavioural inefficiencies is mostly a distraction. Any real explanation for events needs to account
-  for the fact that Howie Hubler had a <em>short</em> position on the junior tranches of mortgage-backed
-  securities, not a long opinion, yet somehow managed to lose ten yards. He certainly did not suffer from
-  "irrational exuberance" about the state of the credit market.</p>
-  </details>
-  <p>A cash CDO actually buys the bonds. Real money leaves, real paper arrives. There is a vehicle, and
-  inside it a genuine pile of asset-backed securities throwing off coupons, which the vehicle slices into
-  tranches and pays out top-down. It owns things. Cash in, cash out.</p>
-  <p>A synthetic CDO owns nothing of the kind. It never funds the assets. It <em>sells protection</em>,
-  writing credit-default swaps on the names, and so takes on exactly the credit risk of the bonds without
-  ever buying them. The risk is referenced, not held: the same losses in the same order as if you had
-  bought the portfolio, conjured out of a stack of contracts.</p>
-  <p>The distinction matters structurally and organizationally, as we will see, even though at heart the
-  two are the same bet: on the number of companies (or mortgages) that default.</p>
-  <p>Picture the cash version. Somewhere warm:</p>
-  <pre style="overflow-x:auto;background:#fdfdfb;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:.78rem;line-height:1.35;color:#555">           &#9728;   GRAND CAYMAN   &#9728;
-                 &#127796;     &#127796;
-      +-----------------------------+
-      |       AURORA FUNDING        |    owns ...... a pile of bonds
-      |         (Cayman) Ltd        |    employs ... maybe some lawyers
-      |   +---------------------+   |    does ...... nothing
-      |   |    bonds    bonds   |   |
-      |   +---------------------+   |
-      +-----------------------------+
-        coupons in  -&gt;  tranche payments out</pre>
-  <p>An orphan entity on an island, bankruptcy-remote, no staff, no premises, no business. It buys bonds
-  and passes the cash flows through. That is the entire enterprise.</p>
-  <p>Here is the question you are supposed to ask, the one almost nobody asked out loud: <em>how could a
-  company that does nothing be worth setting up in the first place?</em></p>
-  <p>If all it does is hold bonds you could hold yourself, where does the value come from? You have added a
-  lawyer, a trustee, a jurisdiction and a brass plate, and subtracted nothing risky. On the assets alone
-  the thing is worth less than its inputs. It is pure cost.</p>
-  <p>It was never about the assets. It was about the ratings. The empty company is a
-  ratings-transformation machine: pour in a pool of BBB collateral, paper the market prices as plainly
-  risky, tranche it, and the agencies' model hands most of the stack back stamped AAA. The value created
-  out of nothing is precisely the gap between the rating of what went in and the ratings of what came out.
-  That gap is the only reason the island, the trustee and the brass plate ever paid for themselves.</p>
-  <p>Which is the cleanest statement of the whole thesis: the company that does nothing is worth building
-  only because somebody, somewhere, is rating off a <em>model</em> instead of off the <em>price</em>.</p>
-
-  <p>You do not have to take my word for it. The accounting is an identity. The coupons coming in to the
-  vehicle are exactly the spread investors demand for holding risky names instead of risk-free bonds, so
-  they <em>imply</em> a default probability. Price every tranche coming out under that <em>same</em>
-  implied probability and the books balance to the cent: there is no perpetual-motion machine. A profit
-  appears out the other side only if the probabilities used on the way out are <em>different</em>, lower,
-  on the senior tranche the rating blesses. That gap is the whole of the rating-agency arbitrage. Watch:</p>
-
-  <div class="widget">
-    <div class="controls">
-      <label>collateral spread <input id="raSpread" type="range" min="0.005" max="0.06" step="0.0025" value="0.03"><span class="val" id="raSpreadV">3.0%</span></label>
-      <label>correlation ρ <input id="raRho" type="range" min="0" max="0.6" step="0.01" value="0.20"><span class="val" id="raRhoV">0.20</span></label>
-      <label>agency default prob (senior priced here) <input id="raAg" type="range" min="0.005" max="0.05" step="0.0025" value="0.01"><span class="val" id="raAgV">1.0%</span></label>
-    </div>
-    <table class="impl" id="raTable" style="font-size:.9rem"></table>
-    <div class="method" id="raMethod"></div>
-  </div>
-  <p class="muted">The collateral spread fixes the market-implied default probability (spread ÷ loss-given-default).
-  Each tranche's <em>fair</em> coupon is its expected loss under that probability, and those fair coupons sum
-  back to the pool spread exactly, money in equals money out, arranger profit zero. Now drag the
-  <em>agency default probability</em> below the implied one: that is the only thing the rating changes, and
-  the only place a profit can come from. Set it equal to the implied probability and the free lunch
-  vanishes.</p>
-
-  <p>In fairness, there is a more benevolent, if still mildly dubious, reading. Perhaps the senior buyers
-  were not fooled at all; perhaps they were knowingly paying for <em>diversification as a service</em>,
-  handing the arranger a fee to turn a messy pool into the one clean exposure they wanted. In a free
-  country that is entirely their right. But two things are also true: they did an enormous amount of it,
-  and the fee for this economic service was very large. So whichever reading you prefer, the cynical or the
-  charitable, any honest account of the crisis has to explain the same object: <em>how</em> the
-  perpetual-motion machine actually worked.</p>
-
   <p>And it was right around then that I wandered over to the desk of the man who would become my next
   manager, to ask what he needed. The timing, as it turned out, was auspicious. He was setting out on the
-  most ambitious use I ever saw of the very arbitrage I have been describing: the gap between the rating
+  most ambitious use I ever saw of the very arbitrage I described at the outset: the gap between the rating
   agencies' actuarial default probabilities and the risk-neutral probabilities the market was actually
-  quoting.</p>
+  quoting. The empty company on its island, the perpetual-motion machine, was about to be run at scale.</p>
   <p>Guess what they did with this sneakiness.</p>
   <div class="stub">The rest (what that desk did with the actuarial-vs-risk-neutral arbitrage, and how it
   ended) continues here.</div>
@@ -1129,44 +1149,98 @@ draw();
 </script>
 
 <script>
-/* ratings arbitrage: conservation under one measure (no free lunch) vs senior sold at the agency probability */
+/* ratings arbitrage: a company on an island, coupons in vs coupons out per tranche */
 (function(){
-  const tbl=document.getElementById("raTable"); if(!tbl||typeof lossDist==="undefined") return;
+  const cv=document.getElementById("raCanvas"); if(!cv||typeof lossDist==="undefined") return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1;
   const sp=document.getElementById("raSpread"), spv=document.getElementById("raSpreadV"),
         rh=document.getElementById("raRho"), rhv=document.getElementById("raRhoV"),
         ag=document.getElementById("raAg"), agv=document.getElementById("raAgV"),
         meth=document.getElementById("raMethod");
-  const TR=[["Equity",0,0.03],["Mezzanine",0.03,0.07],["Senior (AAA)",0.07,1.0]];
+  const TR=[["Equity","0–3%",0,0.03,"#d62728"],["Mezzanine","3–7%",0.03,0.07,"#f0a830"],["Senior (AAA)","7–100%",0.07,1.0,"#2ca02c"]];
   const pct=x=>(x*100).toFixed(2)+"%";
+  function arrow(x1,y1,x2,y2,col,w){ ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=w;
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    const a=Math.atan2(y2-y1,x2-x1),h=7+w;
+    ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-h*Math.cos(a-0.4),y2-h*Math.sin(a-0.4));
+    ctx.lineTo(x2-h*Math.cos(a+0.4),y2-h*Math.sin(a+0.4));ctx.closePath();ctx.fill(); }
+  function rrect(x,y,w,h,r){ ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath(); }
+  let lockSame=false;
   function draw(){
     const spread=+sp.value, rho=+rh.value, pQ=Math.min(spread/LGD,0.6);
-    const pAg=Math.min(+ag.value, pQ);
+    if(lockSame) ag.value=Math.min(pQ,+ag.max);          // keep the thumb on the implied prob
+    const pAg=lockSame?pQ:Math.min(+ag.value,pQ);
     spv.textContent=(spread*100).toFixed(2)+"%"; rhv.textContent=rho.toFixed(2); agv.textContent=(pAg*100).toFixed(2)+"%";
     const PQ=lossDist(rho,pQ,33).P, PA=lossDist(rho,pAg,33).P;
-    let rows="<tr><th>tranche</th><th>width</th><th>fair coupon<br>(market ρ-prob)</th><th>sold coupon<br>(as priced)</th></tr>", poolOut=0;
-    TR.forEach(([nm,a,d])=>{
-      const w=d-a, elQ=trancheEL(PQ,a,d);
-      const sold = nm.startsWith("Senior") ? trancheEL(PA,a,d) : elQ;   // only the senior is sold at the agency prob
-      poolOut += w*sold;
-      rows+=`<tr><td>${nm} <span class="muted">[${(a*100).toFixed(0)}–${(d*100).toFixed(0)}%]</span></td>`+
-            `<td class="num">${(w*100).toFixed(0)}%</td><td class="num">${pct(elQ)}</td>`+
-            `<td class="num">${nm.startsWith("Senior")?"<b>"+pct(sold)+"</b>":pct(sold)}</td></tr>`;
+    const poolIn=LGD*pQ; let poolOut=0;
+    const rowsData=TR.map(([nm,wl,a,d,col])=>{ const w=d-a, fair=trancheEL(PQ,a,d),
+      sold=nm.startsWith("Senior")?trancheEL(PA,a,d):fair; poolOut+=w*sold; return {nm,wl,w,fair,sold,col}; });
+    const profit=poolIn-poolOut, eps=profit<1e-5;
+
+    const W=cv.clientWidth||780, H=360; cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,W,H); ctx.textBaseline="middle"; ctx.font="12px sans-serif";
+    const cx=W*0.44, cy=H*0.52, bw=146, bh=86;
+    // collateral pool (left): the assets the SPV buys
+    const pw=120, ph=104, px=12, py=cy-ph/2;
+    ctx.fillStyle="#eef0ff"; ctx.strokeStyle="#4a3aff"; ctx.lineWidth=1.4; rrect(px,py,pw,ph,8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle="#4a3aff"; ctx.font="bold 11px sans-serif"; ctx.textAlign="center"; ctx.fillText("collateral pool",px+pw/2,py+15);
+    ctx.fillStyle="#9aa0ff"; for(let k=0;k<4;k++){ ctx.fillRect(px+14,py+28+k*15,pw-28,9); }
+    ctx.fillStyle="#666"; ctx.font="9px sans-serif"; ctx.fillText("risky bonds / loans",px+pw/2,py+ph-10);
+    // island + sun + palm
+    ctx.fillStyle="#f0c674"; ctx.beginPath(); ctx.ellipse(cx, cy+bh/2+20, 116, 22, 0, 0, 7); ctx.fill();
+    ctx.font="20px sans-serif"; ctx.textAlign="center"; ctx.fillText("☀",cx+68,cy-bh/2-14); ctx.fillText("🌴",cx-76,cy-bh/2+6);
+    // the SPV box
+    ctx.fillStyle="#171526"; rrect(cx-bw/2,cy-bh/2,bw,bh,10); ctx.fill();
+    ctx.fillStyle="#fff"; ctx.font="bold 12px sans-serif"; ctx.fillText("AURORA FUNDING",cx,cy-bh/2+18);
+    ctx.font="11px sans-serif"; ctx.fillStyle="#b9b6d6"; ctx.fillText("(Cayman) Ltd · the SPV",cx,cy-bh/2+34);
+    ctx.fillText("owns bonds,",cx,cy+6); ctx.fillText("does nothing",cx,cy+22);
+    // arrow pool -> SPV (coupons in)
+    const inX0=px+pw+4, inX1=cx-bw/2-6, inMid=(inX0+inX1)/2;
+    arrow(inX0, cy, inX1, cy, "#4a3aff", 3);
+    ctx.fillStyle="#4a3aff"; ctx.font="bold 11px sans-serif"; ctx.textAlign="center";
+    ctx.fillText("coupons in", inMid, cy-22); ctx.font="bold 13px sans-serif"; ctx.fillText(pct(poolIn), inMid, cy-7);
+    ctx.font="9px sans-serif"; ctx.fillStyle="#888"; ctx.fillText("⇒ "+(pQ*100).toFixed(1)+"% default", inMid, cy+11);
+    // capital structure OUT (right): Senior on top (tall), Mezzanine thin, Equity thin at the bottom
+    const tx=W-178, tbw=170, yT=H*0.06, yB=H*0.93, eqH=30, mzH=34, snH=(yB-yT)-eqH-mzH;
+    const segs=[{r:rowsData[2],y:yT,h:snH},{r:rowsData[1],y:yT+snH,h:mzH},{r:rowsData[0],y:yT+snH+mzH,h:eqH}];
+    segs.forEach(({r,y,h})=>{
+      const ymid=y+h/2;
+      arrow(cx+bw/2+6, cy, tx-6, ymid, "#bbb", 2);
+      ctx.fillStyle="#fff"; ctx.fillRect(tx,y,tbw,h);
+      ctx.strokeStyle=r.col; ctx.lineWidth=1.6; ctx.strokeRect(tx,y,tbw,h);
+      ctx.textAlign="left";
+      if(r.nm.startsWith("Senior")){
+        ctx.fillStyle="#333"; ctx.font="bold 13px sans-serif"; ctx.fillText(r.nm,tx+12,y+20);
+        ctx.font="10px sans-serif"; ctx.fillStyle="#888"; ctx.fillText(r.wl+" · width "+(r.w*100).toFixed(0)+"%",tx+12,y+38);
+        ctx.font="10px sans-serif"; ctx.fillStyle="#999"; ctx.fillText("annual coupon (% of tranche):",tx+12,y+h-32);
+        ctx.font="11px sans-serif"; ctx.fillStyle="#999"; ctx.fillText("fair "+pct(r.fair),tx+12,y+h-14);
+        ctx.fillStyle=eps?"#1e8449":"#d62728"; ctx.font="bold 11px sans-serif"; ctx.fillText("sold "+pct(r.sold),tx+82,y+h-14);
+      } else {
+        ctx.fillStyle="#333"; ctx.font="bold 11px sans-serif"; ctx.fillText(r.nm,tx+12,ymid);
+        ctx.textAlign="right"; ctx.font="10px sans-serif"; ctx.fillStyle="#888";
+        ctx.fillText(r.wl+" · coupon "+pct(r.fair),tx+tbw-12,ymid); ctx.textAlign="left";
+      }
     });
-    tbl.innerHTML=rows;
-    const poolIn=LGD*pQ;                       // coupons in = pool spread (= sum of fair tranche coupons, by conservation)
-    const profit=poolIn-poolOut;               // arranger carry, in fraction of pool notional
-    const eps=profit<1e-5;
+    // profit callout
+    ctx.textAlign="center"; ctx.font="bold 13px sans-serif"; ctx.fillStyle=eps?"#1e8449":"#d62728";
+    ctx.fillText(eps?"arranger keeps 0 — no free lunch":("arranger keeps "+(profit*100).toFixed(2)+"% of pool, from nowhere"), cx, H-14);
+
     meth.innerHTML=
       `Coupons <b>in</b> (pool spread) = <b>${pct(poolIn)}</b>, implying a market default probability of `+
       `<b>${(pQ*100).toFixed(1)}%</b>. Funded at the fair (market-ρ) coupons, the tranche coupons sum back to `+
       `<b>${pct(poolIn)}</b>: money in equals money out, arranger carry <b>0</b>. `+
       (eps
-        ? `With the agency probability set equal to the implied one, that is exactly what happens — <b>no free lunch</b>.`
+        ? `With the agency probability set equal to the implied one, that is exactly what happens: <b>no free lunch</b>.`
         : `But the AAA senior is sold at the agency probability of <b>${(pAg*100).toFixed(1)}%</b>, a lower coupon, so coupons out fall to `+
           `<b>${pct(poolOut)}</b> and the arranger pockets <b>${(profit*100).toFixed(2)}%</b> of pool notional from nowhere. `+
           `That gap is the rating-agency arbitrage (or, charitably, the fee for diversification): it is precisely the senior tranche's mispricing.`);
   }
-  [sp,rh,ag].forEach(e=>e.addEventListener("input",draw)); window.addEventListener("resize",draw); draw();
+  sp.addEventListener("input",draw); rh.addEventListener("input",draw);
+  ag.addEventListener("input",()=>{lockSame=false;draw();});           // moving the dial unlocks
+  const same=document.getElementById("raSame");
+  if(same) same.addEventListener("click",()=>{lockSame=true;draw();}); // snap agency prob onto the implied one
+  window.addEventListener("resize",draw); draw();
 })();
 </script>
 </body>
