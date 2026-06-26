@@ -174,10 +174,10 @@
 
   <h2><span class="part">Part 2 · the less confused red herring</span><br>Did Gaussian dependence hide the tail risk?</h2>
   <p>The slightly more plausible, but mostly ill-informed, story is the one a numerate
-  critic reaches for: the Gaussian copula has a real, provable sin — <em>zero tail dependence</em>. Joint
+  critic reaches for: the Gaussian copula has a real, provable sin, <em>zero tail dependence</em>. Joint
   extremes vanish asymptotically for any correlation below one; fit it to <em>every</em> pairwise default
   probability and <em>every</em> marginal and it <em>still</em> cannot make a whole sector default at
-  once. That is true, it is elegant, and I find it genuinely interesting — interesting enough that I built
+  once. That is true, it is elegant, and I find it genuinely interesting. Interesting enough that I built
   <a href="../bowling/index.html">a whole demo</a> of it, not to mention
   <a href="../../papers/thurstone-portfolios/index.html">invented an entirely new way to put tail risk into
   any portfolio allocation</a>. The demo shows the copula cannot reproduce a systemic co-default tail no
@@ -189,49 +189,49 @@
     <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Live, in this page (the
     <a href="../bowling/index.html">Bowling for contagion</a> demo). Throw shocks, or hit <em>Fast +1000</em>:
     the correlation matrix settles, yet the joint-default tail pulls steadily away from the Gaussian copula
-    fitted to those very same pairwise correlations. All true — and, as I argue next, not the cause.</figcaption>
+    fitted to those very same pairwise correlations. All true, and, as I argue next, not the cause.</figcaption>
   </figure>
 
   <p>It is the wrong culprit, and I want to be as plain about this as I was about the bell curve. The
   crisis did not turn on a subtle higher-order property that a covariance cannot see. The failure was far
-  cruder, and entirely first-order: the <em>marginals</em> were wrong — by roughly a factor of two — and
-  the <em>correlation</em> was wrong — by more than a factor of two. When your inputs are off by
+  cruder, and entirely first-order: the <em>marginals</em> were wrong, by roughly a factor of two, and
+  the <em>correlation</em> was wrong, by more than a factor of two. When your inputs are off by
   <em>multiples</em>, whether your copula has exactly the right asymptotic tail is an academic question;
   you have mispriced the instrument long before any tail subtlety could matter.</p>
-  <p>How an entire market came to hold assumptions that wrong is the genuinely interesting question — and
+  <p>How an entire market came to hold assumptions that wrong is the genuinely interesting question, and
   the answer goes to the very heart of quantitative finance (and, as it happens, to the heart of
   functional analysis). Here I am going to do something I do not believe anyone in finance has done in
   print before: insist that there are <em>three</em> important probability measures, not two.</p>
-  <p>Watch the ladder. Newcomers — most of the machine-learning crowd now wading in — think there is only
+  <p>Watch the ladder. Newcomers, most of the machine-learning crowd now wading in, think there is only
   <em>one</em> measure: objective, physical probability, the frequency with which things actually happen.
   The more sophisticated know there are <em>two</em>: that real-world measure, and the <em>risk-neutral</em>
   measure under which discounted prices are martingales and derivatives are valued. Even Taleb is
   comfortably smart enough to know there are two.</p>
-  <p>But to understand the crisis you need a <em>third</em> —
-  and, save for one genuinely obscure blog post from about fifteen years ago that I can barely turn up
+  <p>But to understand the crisis you need a <em>third</em>.
+  And, save for one genuinely obscure blog post from about fifteen years ago that I can barely turn up
   myself, I am not aware of anyone who will tell you it exists. This is not a conspiracy. It is just that,
   having watched an adjacent desk
   <a href="https://www.reddit.com/r/todayilearned/comments/4cao5v/til_that_howie_hubler_a_morgan_stanley_bond/">lose
   some nine billion dollars on a single trade</a> (the
   <a href="https://www.shortform.com/blog/howie-hubler/">full story</a>, and its place among the
   <a href="https://www.cbsnews.com/media/6-ugliest-trades-in-the-history-of-investing/">ugliest trades
-  ever made</a>, are worth your time), I happen to have spent more time reflecting on this than most — and
-  I think the <em>P / Q / R</em> trichotomy is probably the cleanest pedagogical device for it. I will
+  ever made</a>, are worth your time), I happen to have spent more time reflecting on this than most. I
+  think the <em>P / Q / R</em> trichotomy is probably the cleanest pedagogical device for it. I will
   return to the <em>true</em> story of the relationship
-  between copulas and the famous ten-billion-dollar trade in due course — but we have some preliminaries.
+  between copulas and the famous ten-billion-dollar trade in due course, but we have some preliminaries.
   I will name the third measure, and show how its conflation with the other two is what put the marginals
-  off by a factor of two and the correlation off by more than that — carefully, further down
+  off by a factor of two and the correlation off by more than that, carefully, further down
   (Parts&nbsp;6 and 8).</p>
 
-  <p>Taleb, by the way, knows all this as well as most — his early, seriously quantitative derivatives
+  <p>Taleb, by the way, knows all this as well as most. His early, seriously quantitative derivatives
   books, <a href="https://www.wiley.com/en-us/Dynamic+Hedging%3A+Managing+Vanilla+and+Exotic+Options-p-9780471152804"><em>Dynamic
   Hedging</em></a> (1997) chief among them, are real practitioner's texts, and he made genuinely useful
   contributions long before he accidentally authored the worst mis-explanation in financial history. He
   was, apparently, too taken with the delicious curves of the Gaussian distribution to think outside the
   box and finger <em>measure choice</em> as the real culprit.</p>
 
-  <p>But first we have to dispense, quickly, with the obvious nonsense — the bell curve here, the
-  elegant-but-irrelevant tail-dependence story just now — so that the real account has clean ground to
+  <p>But first we have to dispense, quickly, with the obvious nonsense (the bell curve here, the
+  elegant-but-irrelevant tail-dependence story just now) so that the real account has clean ground to
   stand on. I shall not apologize. It is not my fault that a reasonable amount needs to be un-learned
   before the actual explanation can breathe.</p>
 
