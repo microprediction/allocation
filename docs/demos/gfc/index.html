@@ -604,11 +604,11 @@
   decomposition is the natural language for tracing CDO dynamics through time, self- and
   market-consistently.</p>
   <p>The deep version of this is, oddly, having a second life. I keep noticing that <em>conformal
-  prediction</em> — which I never paid much attention to — is in some sense a univariate cousin of the CDO
+  prediction</em>, which I never paid much attention to, is in some sense a univariate cousin of the CDO
   analytics from 2000: both turn on exchangeability and the distributional transform. Technical readers
   might (I say <em>might</em>) be interested in a new result
   <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6979679">(SSRN&nbsp;6979679)</a> and the
-  work in progress at <a href="https://conformalprediction.net/papers/">conformalprediction.net</a> — in
+  work in progress at <a href="https://conformalprediction.net/papers/">conformalprediction.net</a>, in
   particular the <a href="https://conformalprediction.net/papers/definetti-feynman/">de&nbsp;Finetti /
   Feynman</a> piece and a <a href="https://conformalprediction.net/demos/15-de-finetti.html">demo of the
   finite (Szekely) decomposition</a> of exchangeable variables. The topic is deep, and the connections
@@ -618,13 +618,13 @@
   <p>I came back to this from an unlikely direction. In 2020 I noticed the identical move solves a problem
   in epidemiology, and wrote up a
   <a href="https://www.linkedin.com/pulse/fundamental-theorem-epidemiology-peter-cotton-phd/">"Fundamental
-  Theorem of Epidemiology"</a> — and, with it, a clean
+  Theorem of Epidemiology"</a> and, with it, a clean
   <a href="https://arxiv.org/abs/2006.07341">resolution of the herd-immunity paradox</a>. The link is not
   really a coincidence: epidemiological compartmental models <em>are</em> negative-interest-rate models
-  (and often bad ones, with flat term structures) — a correspondence that seems to have gone unremarked
+  (and often bad ones, with flat term structures), a correspondence that seems to have gone unremarked
   until my working papers pointed it out. If you care about my meagre contributions there, see
   <a href="https://arxiv.org/abs/2005.10311">repeat contacts and the spread</a>. The reason the trick
-  carries over is exactly the symmetry above. Suppose you only care about an aggregate — the number of
+  carries over is exactly the symmetry above. Suppose you only care about an aggregate: the number of
   infections after three days, say, or the number of defaults in a pool. That quantity is a symmetric
   function of who-is-who, so it cannot tell nature's true (heterogeneous) model apart from its
   symmetrized twin, nor from <em>any</em> model sharing the same orbit under relabelling:</p>
@@ -637,7 +637,7 @@
     <span class="term"><span class="lbl">any model in the same orbit</span><span class="expr">𝔼<sub>φ∈O(φ*)</sub>[ i(t=3) ]</span></span>
   </div>
   <p class="muted">So you will accidentally get the right answer, as it were, as long as you are close to the
-  orbit — and you may as well do your computation on the simplest representative of it: the exchangeable one.</p>
+  orbit, and you may as well do your computation on the simplest representative of it: the exchangeable one.</p>
 
   <figure style="margin:20px 0">
     <svg viewBox="0 0 720 350" style="width:100%;height:auto;background:#fff;border:1px solid var(--border);border-radius:8px" role="img" aria-label="Orbits of the symmetric group: nature's true model and the exchangeable model lie on the same orbit and are operationally equivalent">
@@ -665,7 +665,7 @@
       <!-- labels -->
       <text x="60" y="128" text-anchor="middle" font-size="13" fill="#333">Nature's true model</text>
       <text x="640" y="290" text-anchor="middle" font-size="13" fill="#333">Exchangeable model</text>
-      <text x="512" y="60" text-anchor="middle" font-size="11.5" fill="#555">Simple model — far from nature's real</text>
+      <text x="512" y="60" text-anchor="middle" font-size="11.5" fill="#555">Simple model, far from nature's real</text>
       <text x="512" y="74" text-anchor="middle" font-size="11.5" fill="#555">model, but operationally equivalent</text>
       <!-- complicated, poor-prediction model (off-orbit), X'd out -->
       <circle cx="120" cy="300" r="13" fill="#7c6cff" stroke="#fff" stroke-width="2"/>
@@ -677,7 +677,7 @@
     </svg>
     <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Every model on one orbit of the
     relabelling group <em>S(n)</em> yields the same permutation-invariant observable. So nature's true,
-    hopelessly heterogeneous model and the simple exchangeable model are <em>operationally equivalent</em> —
+    hopelessly heterogeneous model and the simple exchangeable model are <em>operationally equivalent</em>;
     you compute on the easy one. (Diagram adapted from my epidemiology write-up, where the same picture
     resolves the herd-immunity paradox.)</figcaption>
   </figure>
@@ -685,10 +685,10 @@
   <h3>See it: a heterogeneous pool and its exchangeable twin</h3>
   <p>Three names with <em>different</em> default probabilities and a positive correlation. The left panel is
   nature's heterogeneous joint distribution over all eight default outcomes; the middle panel is its
-  symmetrization — average over the six relabellings — which is <em>perfectly exchangeable</em> (its three
+  symmetrization (the average over the six relabellings), which is <em>perfectly exchangeable</em> (its three
   marginals are now identical, and every outcome with the same number of defaults is equally likely). They
-  are visibly different distributions. Yet the right panel — the distribution of the <em>number</em> of
-  defaults, which is all a CDO waterfall ever sees — is <strong style="font-weight:inherit"><em>bit-for-bit
+  are visibly different distributions. Yet the right panel, the distribution of the <em>number</em> of
+  defaults, which is all a CDO waterfall ever sees, is <strong style="font-weight:inherit"><em>bit-for-bit
   identical</em></strong> under the two models. Drag the sliders; the two aggregate distributions move in
   perfect lockstep, because one is the permutation-average of the other and the aggregate cannot tell them
   apart.</p>
@@ -703,30 +703,30 @@
     <canvas id="symcv" width="840" height="300"></canvas>
     <div class="method" id="symmethod"></div>
   </div>
-  <p class="muted">This is not special to the Gaussian copula — it holds for <em>any</em> default model
+  <p class="muted">This is not special to the Gaussian copula; it holds for <em>any</em> default model
   whatsoever, because it is a statement about the payout's symmetry, not the model's form. It is also the
   honest version of the diversity score: not "pretend the names are identical," but "replace them with the
   exact exchangeable law that prices identically, then decompose <em>that</em>."</p>
 
   <blockquote>"Negative energies and probabilities should not be considered as nonsense. They are
-  well-defined concepts mathematically, like a negative of money." — P. A. M. Dirac, 1942</blockquote>
+  well-defined concepts mathematically, like a negative of money." (P. A. M. Dirac, 1942)</blockquote>
   <p>A further aside, for the connoisseur. The finite de Finetti / Szekely decomposition writes the
-  exchangeable law as a mixture of conditionally-independent ones — and in general the mixing weights are a
+  exchangeable law as a mixture of conditionally-independent ones, and in general the mixing weights are a
   <em>signed</em> measure: you may have to dip into the negative-probability region to represent it, which,
   pace Dirac, is perfectly respectable. But here is the quiet gift of this particular problem: <em>you
-  generally do not need to.</em> When defaults are <em>positively</em> correlated — as credit defaults
-  overwhelmingly are — the decomposition stays inside the genuine, non-negative simplex. That is the benefit
+  generally do not need to.</em> When defaults are <em>positively</em> correlated, as credit defaults
+  overwhelmingly are, the decomposition stays inside the genuine, non-negative simplex. That is the benefit
   of positive correlation in defaults. (Then there is the Wigner quasiprobability distribution… for another
   day.)</p>
 
   <h2><span class="part">Part 8 · how the trick was actually used</span><br>Back to the narrative in which Taleb is a genius and you are a minor one</h2>
-  <p>Anyway — back to the narrative in which Taleb is a genius and convinces you that you, too, are a minor
-  genius, because you can grasp so quickly why <em>I</em> am an idiot — whether or not I am also a
-  <em>SUPER DUPER QUANTITATIVE</em> — because I cannot grasp subtle epistemological nuances, etc. You might
+  <p>Anyway, back to the narrative in which Taleb is a genius and convinces you that you, too, are a minor
+  genius, because you can grasp so quickly why <em>I</em> am an idiot (whether or not I am also a
+  <em>SUPER DUPER QUANTITATIVE</em>) because I cannot grasp subtle epistemological nuances, etc. You might
   reasonably ask: this lovely computational trick, ignored to this day and applicable to <em>every</em>
-  model rather than just the Gaussian copula — did Morgan Stanley race to weaponise the secret sauce? Did
-  the traders with PhDs in statistics fall upon it? Here the <em>true</em> story — not the one
-  <em>inferred</em> by outsiders from a comfortable distance — takes a more curious turn.</p>
+  model rather than just the Gaussian copula, did Morgan Stanley race to weaponise the secret sauce? Did
+  the traders with PhDs in statistics fall upon it? Here the <em>true</em> story, not the one
+  <em>inferred</em> by outsiders from a comfortable distance, takes a more curious turn.</p>
   <p><em>Backdrop.</em> By this point the pendulum had swung hard toward the desk and away from the risk and quant managers. Consider the economics: a bank could
   assemble a CDO, sell <em>n−1</em> slices of the pie for roughly the price of the whole pie, and keep the
   <em>n</em>-th slice almost for free. Maybe the free slice ends up worthless; maybe it doesn't. Either way
