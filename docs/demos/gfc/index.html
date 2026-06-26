@@ -83,8 +83,8 @@
   <p>It is worth saying plainly: this strand of the critique never warranted a real response from
   anyone who did credit analytics for a living. The bell-curve sermon conflated the marginal
   distribution with the dependence structure the models actually turned on — handwaving from someone
-  who, on the evidence, knew essentially nothing about how these instruments were built. The author
-  said so in a short
+  who, on the evidence, knew essentially nothing about how these instruments were built. I said so in a
+  short
   <a href="https://www.youtube.com/watch?v=A72cc8mM5gY">video</a> that went micro-viral and that —
   to their credit — even
   <a href="https://www.blackswanreport.com/blog/2010/12/nassim-taleb-educates-a-quant/comment-page-1/">Taleb's
@@ -93,7 +93,7 @@
   <em>"some type of failed quant/mathematician with savantic attributes."</em></p>
   <p>That last phrase was not an accident of temper. <em>The Black Swan</em> leaned throughout on autism
   as an epithet — science as "an autistic enterprise," the recurring "Dr John" caricature of the
-  literal-minded fool — and the author was among the very few at the time to call it for what it was: a
+  literal-minded fool — and I was among the very few at the time to call it for what it was: a
   brazen attack on autistic people, dressed as iconoclasm. It went entirely unremarked by the
   <em>Harvard Business Review</em> and every other respectable outlet that lionised the book. Whatever
   one concludes about copulas, that was a genuinely dark turn in public discourse — worth remembering
@@ -119,7 +119,7 @@
   (1974) and the single-factor portfolio model to Vasicek (1987). The paper named a practice; it did
   not start one.</p>
   <p><strong>Two — the banks were a step ahead: the <em>fast</em> model.</strong> Nobody on a desk priced
-  a CDO by brute-force Monte Carlo over a copula. At Morgan Stanley the author devised, implemented and
+  a CDO by brute-force Monte Carlo over a copula. At Morgan Stanley I devised, implemented and
   deployed the fast semi-analytic version, and — without any doubt — the same happened independently at
   other banks at much the same time. It had to: the method is forced by the problem. At Morgan Stanley
   it shipped, gloriously, as an <em>Excel add-in compiled from MATLAB</em> with the old MATLAB compiler
@@ -194,7 +194,33 @@
   not the bell curve, is the genuinely damning property — and it is invisible until you ask the static
   picture to live through time.</p>
 
-  <h2><span class="part">Part 5 · the truth</span><br>What actually happened</h2>
+  <h3>One hedge, two risks</h3>
+  <p>Beneath even that sits a flaw no choice of copula can repair, because it belongs to the market and
+  not the model. A CDO tranche carries (at least) two distinct exposures in each name: <strong>default
+  risk</strong> — the name suddenly jumps to default — and <strong>spread risk</strong> — its credit
+  spread drifts and reprices the tranche. But there is exactly one liquid instrument with which to hedge
+  a name: its single-name <strong>CDS</strong>. One instrument cannot span two independent risk factors,
+  so the market is fundamentally <strong>incomplete</strong>: the tranche cannot be replicated, there is
+  no unique arbitrage-free price, and the hedge ratios the model reports are artifacts of the model
+  rather than properties of the world. I was not pricing by replication; I was marking to a convention
+  and hoping the unhedgeable residual stayed small. On a desk, everyone knew this too.</p>
+
+  <h2><span class="part">Part 5 · the quants knew</span><br>You don't start a company to fix something you think is great</h2>
+  <p>The last myth to fall is the one about the people. The story <em>needs</em> the quants to be naive
+  — dazzled, overconfident, blind to the cracks — because a catastrophe caused by a beautiful mistake
+  is a tidier morality tale than one caused by leverage and incentives. But none of the flaws in Part 4
+  were hidden from the desk. They were obvious to anyone who pushed the model past <em>t</em>&nbsp;=&nbsp;0,
+  and they were discussed openly among people who, at Morgan Stanley, mostly held PhDs — even the
+  traders had doctorates in statistics or rates.</p>
+  <p>The dispositive evidence is the simplest kind: <strong>you do not start a company to fix something
+  you believe is already great.</strong> At the end of 2006 — the issuance machine running flat out, and
+  my warnings going unheeded — I left to found <strong>Julius Finance</strong>, a company whose entire
+  reason for existing was to fix the credit models. That is not the act of someone seduced by an elegant
+  copula. It is the act of someone who had seen precisely where it broke and could not get anyone to
+  care while the carry was good. The quants were not fooled by the formula. We were <em>ignored</em> —
+  which, as Part 6 argues, is the part of the story that actually matters.</p>
+
+  <h2><span class="part">Part 6 · the truth</span><br>What actually happened</h2>
   <div class="stub">The first-person account — leverage, the run on repo, ratings and incentives, and
   tail risk that was <em>manufactured and known</em> rather than mismeasured (Acharya et al.) — to come.</div>
 </main>
