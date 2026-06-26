@@ -67,15 +67,15 @@
   <p class="lead">The crisis has a popular telling: clever quants, dazzled by an elegant formula, let
   the maths blind them, and the tails they ignored blew up the world. This essay takes that story
   apart in stages — with simulations you can run — and replaces it with what actually happened.
-  The arc: first <strong>blame the marginal</strong>, then <strong>blame the dependence</strong>,
-  then the <strong>truth</strong>.</p>
+  The arc: first <em>blame the marginal</em>, then <em>blame the dependence</em>,
+  then the <em>truth</em>.</p>
 
   <h2><span class="part">Part 1 · the very confused version</span><br>The Normal-distribution fallacy</h2>
   <p>The loudest version (Taleb's bell-curve "Great Intellectual Fraud," amplified into "the formula
   that killed Wall Street") blames the <em>Normal distribution</em>. But the structured-credit
   machinery ran on a Gaussian <em>copula</em>, and the marginals were never a modelling choice at all:
-  each name's default probability was <strong>pinned by its CDS spread</strong> — the market-implied
-  default probability. The one free knob was the <strong>correlation</strong>, and you could dial it
+  each name's default probability was <em>pinned by its CDS spread</em> — the market-implied
+  default probability. The one free knob was the <em>correlation</em>, and you could dial it
   as high as you liked. By Sklar's theorem the copula carries the dependence entirely separately from
   those CDS-fixed marginals, so the dramatic shape of a CDO² loss distribution comes from
   <em>cranking the correlation</em> and the tranching nonlinearity — not from the bell curve. The
@@ -102,7 +102,7 @@
   order) — forthcoming.</div>
 
   <h2><span class="part">Part 2 · the less confused version</span><br>Gaussian dependence hid the tail risk</h2>
-  <p>The better story: the Gaussian copula's real, provable sin is <strong>zero tail dependence</strong>
+  <p>The better story: the Gaussian copula's real, provable sin is <em>zero tail dependence</em>
   (joint extremes asymptotically vanish for any correlation below 1). Fit it to <em>every</em>
   pairwise default probability and <em>every</em> marginal and it <em>still</em> can't make a whole
   sector default at once — so the systemic tail is hidden. That points at tail risk / contagion as the
@@ -114,18 +114,18 @@
   Formula That Killed Wall Street”</em>) is that David Li <em>invented</em> the Gaussian copula around
   2000, that quants uncritically lapped it up, and that overconfidence in this beautiful object did the
   damage. Three things are wrong with that.</p>
-  <p><strong>One — Li was late.</strong> Factor and copula models of correlated default were already in
+  <p><em>One — Li was late.</em> Factor and copula models of correlated default were already in
   use at multiple banks before the 2000 paper; the latent-Gaussian threshold idea goes back to Merton
   (1974) and the single-factor portfolio model to Vasicek (1987). The paper named a practice; it did
   not start one.</p>
-  <p><strong>Two — the banks were a step ahead: the <em>fast</em> model.</strong> Nobody on a desk priced
+  <p><em>Two — the banks were a step ahead: the <em>fast</em> model.</em> Nobody on a desk priced
   a CDO by brute-force Monte Carlo over a copula. At Morgan Stanley I devised, implemented and
   deployed the fast semi-analytic version, and — without any doubt — the same happened independently at
   other banks at much the same time. It had to: the method is forced by the problem. At Morgan Stanley
   it shipped, gloriously, as an <em>Excel add-in compiled from MATLAB</em> with the old MATLAB compiler
   — if that doesn't make anyone nostalgic, nothing will.</p>
-  <p><strong>Three — there was nothing to be dazzled by.</strong> Pricing a CDO in the one-factor model
-  is a routine exercise in <strong>conditioning, convolution, and quadrature</strong>. Condition on the
+  <p><em>Three — there was nothing to be dazzled by.</em> Pricing a CDO in the one-factor model
+  is a routine exercise in <em>conditioning, convolution, and quadrature</em>. Condition on the
   one common factor and the names become independent; convolve their conditional default indicators into
   a loss distribution; integrate that over the factor by quadrature. A handful of nodes, exact, instant.
   No Monte Carlo, no mystique. You can run it right here.</p>
@@ -141,27 +141,27 @@
     <div class="method" id="method"></div>
   </div>
   <p class="muted">Drag ρ: the loss distribution swings from a tight binomial (ρ≈0, defaults roughly
-  independent) to an <strong>all-or-nothing</strong> bimodal shape (ρ→1, mostly no defaults punctuated by
+  independent) to an <em>all-or-nothing</em> bimodal shape (ρ→1, mostly no defaults punctuated by
   the whole pool going). The thin curves are the <em>conditional</em> loss distributions at three values of
   the common factor; the bold bars are their quadrature average. Drop the node count and watch how few
   points it takes to converge — that is the whole "fast model." The senior tranche, riskless-looking at
   low ρ, becomes a catastrophe bond as ρ rises — the structural fragility, driven entirely by
   <em>correlation</em>, with the marginal <code>p</code> held fixed. Here <code>p</code> is the
-  <strong>CDS-implied default probability</strong> — the market-given marginal; on a desk you fit it to
+  <em>CDS-implied default probability</em> — the market-given marginal; on a desk you fit it to
   the single-name CDS and then turn only ρ.</p>
 
   <h2><span class="part">Part 4 · the model was ugly, not beautiful</span><br>Sklar on time, and the hazards that jump</h2>
   <p>The romance — math professors and disaffected string theorists, dazzled by an elegant object —
   gets the aesthetics exactly backwards. The construction is <em>ugly</em>. It takes Sklar's theorem
   (which is just the distributional transform — a near-triviality the conformal-prediction crowd now
-  makes a song and dance about) and staples it onto <strong>temporal</strong> quantities, the default
-  <em>times</em>. That immediately begs a question the static picture cannot answer: <strong>what
-  happens after <em>t</em> &gt; 0?</strong></p>
-  <p>The only honest move is to <strong>condition</strong> on what you have learned — which names have
+  makes a song and dance about) and staples it onto <em>temporal</em> quantities, the default
+  <em>times</em>. That immediately begs a question the static picture cannot answer: <em>what
+  happens after <em>t</em> &gt; 0?</em></p>
+  <p>The only honest move is to <em>condition</em> on what you have learned — which names have
   defaulted, and when; which survive. But the moment you do, two things go wrong. First, conditioning
   on survival is a condition on a <em>rectangle</em> in latent space, and the conditional law is no
-  longer a Gaussian copula of the kind you started with — <strong>you have left your own model
-  class</strong>. Second, the implied <strong>hazard rates of the survivors jump</strong> — and the
+  longer a Gaussian copula of the kind you started with — <em>you have left your own model
+  class</em>. Second, the implied <em>hazard rates of the survivors jump</em> — and the
   jumps are not subtle. Below, a five-name basket: simulate the default times, then watch each
   surviving name's hazard, as a multiple of its standalone rate, walk through time and lurch at every
   default.</p>
@@ -177,17 +177,29 @@
     <p class="muted" style="font-size:.9rem;margin-top:6px">Each line is a surviving name's hazard rate
     as a multiple of its standalone (CDS-implied) rate; the line ends when that name defaults (grey
     verticals). Between defaults the multiplier drifts <em>below 1</em> — surviving together is read as
-    good news — then, the instant any name defaults, every survivor's hazard <strong>jumps
-    discontinuously upward</strong> (at ρ=0.7, by 3–4× on a single default). No real credit reprices
+    good news — then, the instant any name defaults, every survivor's hazard <em>jumps
+    discontinuously upward</em> (at ρ=0.7, by 3–4× on a single default). No real credit reprices
     like that. This isn't a calibration nuisance; it is the model telling you it has no dynamics.</p>
   </div>
 
+  <p>Now, in fairness, there is more to the story. You can, if you wish, enrich the <em>filtration</em> —
+  the quant's term for telling the model more as time passes: partial information about the deteriorating
+  credit of a name that has not yet defaulted. There is even a <em>graceful</em> — too strong a word —
+  way to marry the <em>direct</em> modelling of instantaneous default intensities (stochastic hazard
+  rates: jump processes, affine models, regime-switching) to the copula. You let the copula generate the
+  exponential random variables, then run the integrated stochastic hazard <code>∫₀ᵗ λ(s) ds</code> and
+  wait for it to <em>catch up</em> to each drawn exponential — whoever's integral arrives first defaults
+  first. That awkwardly unifies the two warring halves of the 1990s credit literature — reduced-form
+  intensities and copulas — and at Morgan Stanley we even patented it. <span class="muted">(A demo of
+  that time-change construction may follow.)</span> None of it, however, removes the inescapable
+  ugliness we come to next.</p>
+
   <h3>The same name, two baskets, two hazards</h3>
   <p>And here is the corollary — obvious once you have seen the jumps. The conditioning that produced
-  them is <strong>basket-specific</strong>: a survivor's implied hazard depends on the default-and-survival
+  them is <em>basket-specific</em>: a survivor's implied hazard depends on the default-and-survival
   pattern of <em>the other names in its basket</em>. So a single underlying name — and in 2006 a name
-  like Ford or GMAC sat inside <em>dozens</em> of CDOs at once — is handed a <strong>different default
-  process by every basket it belongs to</strong>. Ask CDO&nbsp;A and CDO&nbsp;B how likely that name is
+  like Ford or GMAC sat inside <em>dozens</em> of CDOs at once — is handed a <em>different default
+  process by every basket it belongs to</em>. Ask CDO&nbsp;A and CDO&nbsp;B how likely that name is
   to default tomorrow given what has happened, and they disagree, because each conditions on its own
   peers. A coherent model attaches an intensity to the <em>name</em>, driven by observable state; the
   copula attaches it to the <em>basket</em>, and the baskets contradict each other. That inconsistency,
@@ -196,11 +208,11 @@
 
   <h3>One hedge, two risks</h3>
   <p>Beneath even that sits a flaw no choice of copula can repair, because it belongs to the market and
-  not the model. A CDO tranche carries (at least) two distinct exposures in each name: <strong>default
-  risk</strong> — the name suddenly jumps to default — and <strong>spread risk</strong> — its credit
+  not the model. A CDO tranche carries (at least) two distinct exposures in each name: <em>default
+  risk</em> — the name suddenly jumps to default — and <em>spread risk</em> — its credit
   spread drifts and reprices the tranche. But there is exactly one liquid instrument with which to hedge
-  a name: its single-name <strong>CDS</strong>. One instrument cannot span two independent risk factors,
-  so the market is fundamentally <strong>incomplete</strong>: the tranche cannot be replicated, there is
+  a name: its single-name <em>CDS</em>. One instrument cannot span two independent risk factors,
+  so the market is fundamentally <em>incomplete</em>: the tranche cannot be replicated, there is
   no unique arbitrage-free price, and the hedge ratios the model reports are artifacts of the model
   rather than properties of the world. I was not pricing by replication; I was marking to a convention
   and hoping the unhedgeable residual stayed small. On a desk, everyone knew this too.</p>
@@ -212,17 +224,21 @@
   were hidden from the desk. They were obvious to anyone who pushed the model past <em>t</em>&nbsp;=&nbsp;0,
   and they were discussed openly among people who, at Morgan Stanley, mostly held PhDs — even the
   traders had doctorates in statistics or rates.</p>
-  <p>The dispositive evidence is the simplest kind: <strong>you do not start a company to fix something
-  you believe is already great.</strong> At the end of 2006 — the issuance machine running flat out, and
-  my warnings going unheeded — I left to found <strong>Julius Finance</strong>, a company whose entire
+  <p>The dispositive evidence is the simplest kind: <em>you do not start a company to fix something
+  you believe is already great.</em> At the end of 2006 — the issuance machine running flat out, and
+  my warnings going unheeded — I left to found <em>Julius Finance</em>, a company whose entire
   reason for existing was to fix the credit models. That is not the act of someone seduced by an elegant
   copula. It is the act of someone who had seen precisely where it broke and could not get anyone to
   care while the carry was good. The quants were not fooled by the formula. We were <em>ignored</em> —
   which, as Part 6 argues, is the part of the story that actually matters.</p>
 
   <h2><span class="part">Part 6 · the truth</span><br>What actually happened</h2>
-  <div class="stub">The first-person account — leverage, the run on repo, ratings and incentives, and
-  tail risk that was <em>manufactured and known</em> rather than mismeasured (Acharya et al.) — to come.</div>
+  <p>"Ignored" is a bit strong. The warnings landed — they simply changed nothing, because nothing in
+  the incentive structure rewarded acting on them. The carry was good, the capital rules did not charge
+  for the systematic tail, and a flaw everyone could see was a flaw nobody was paid to fix.</p>
+  <div class="stub">The rest of the first-person account — leverage, the run on repo, ratings and
+  incentives, and tail risk that was <em>manufactured and known</em> rather than mismeasured
+  (Acharya et al.) — continues here.</div>
 </main>
 
 <footer>Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.</footer>
