@@ -261,6 +261,19 @@
   practitioner who had lived through a crisis or two (and who, as it happens, also held a doctorate;
   my own manager had two). When the people who can see the flaw report to the people being paid not to,
   the flaw is safe.</p>
+  <p>None of which is to say the desks were blind to the value of a model, or unwilling to credit the
+  people who helped them understand the shifting combinatorics of the CDO market — and profit handsomely
+  from it. They were neither.</p>
+  <p>By chance I once fell into an off-hand conversation with the senior person who ran the entire
+  derivative-products business. He was genuinely curious, and I walked him through the flaws. He asked
+  exactly the right question — what would the <em>fix</em> be? — and I gave him the philosophically
+  obvious if technically forbidding answer: build applied-mathematical methods that trace the dynamics of
+  a CDO <em>through time</em> in a way that is at once <em>self-consistent</em> and <em>market-consistent</em>.
+  That conversation spun up a dedicated research effort inside Morgan Stanley, probably unlike most on the
+  Street. Its output was never published, but it made real inroads: drastically lower computation time,
+  and dynamic modelling of CDOs — and even CDO-squareds (<span class="muted">their own demo, to
+  come</span>) — that was reasonably fast, reasonably plausible, and reasonably well calibrated. The firm
+  was not ignoring the problem. Parts of it were quietly trying to solve it.</p>
 
   <h3>The diversity score: a heuristic that hides the only lever that matters</h3>
   <p>A favourite defence of the agencies is that they never touched these fancy copulas — they used
@@ -288,6 +301,14 @@
   non-model" meant in practice: a model that cannot be <em>wrong</em> about correlation because it is
   not permitted to have an opinion that changes. Coval–Jurek–Stafford showed the resulting AAA was
   extraordinarily fragile to exactly the input the heuristic had hidden.</p>
+  <p>None of this exonerates the copula — fed a low, stable correlation, it was wrong too. But there is a
+  world of difference between getting a number <em>wrong out loud</em>, where it can be stressed and
+  re-marked, and refusing to let the number exist at all. When correlation finally marched toward one in
+  2008, the diversity score had no channel to say so — Moody's diversity scores were, if anything, being
+  <em>raised</em> even as the system seized — so the ratings did not degrade gracefully; they fell off a
+  cliff of mass downgrades. Moody's later abandoned the zero-residual-correlation assumption altogether
+  and moved to an explicit Gaussian-copula model. The remediation was, precisely, to stop hiding the
+  lever.</p>
 
   <h3>The wrong correlation: actuarial history vs the implied market</h3>
   <p>And here is the subtler failure — the one that survives even when an agency <em>did</em> reach for a
