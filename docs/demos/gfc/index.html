@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Global Financial Crisis — allocation</title>
+  <meta name="description" content="The Global Financial Crisis told through simulation, by someone who built the correlation-trading tools. Sklar's theorem vs the bell curve, hidden tail dependence, and the truth about the 'formula that killed Wall Street'.">
+  <style>
+    :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
+      --accent:#4a3aff;--border:#e2e2e2;--ink:#1f1d3d;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.65;font-size:17px}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:880px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    main{max-width:880px;margin:30px auto;padding:0 24px 60px}
+    h1{font-size:2.2rem;margin:0 0 4px;line-height:1.15} .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 22px}
+    h2{font-size:1.4rem;margin:2em 0 .5em} h3{font-size:1.12rem;margin:1.4em 0 .3em}
+    .part{font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700}
+    p{margin:.85em 0} .muted{color:var(--muted)} em{font-style:italic}
+    code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+    .lead{font-size:1.06rem}
+    blockquote{margin:1em 0;padding:.4em 0 .4em 16px;border-left:3px solid var(--accent);color:var(--muted)}
+    .stub{border:1px dashed var(--border);border-radius:8px;padding:14px 16px;color:var(--faint);font-style:italic;margin:14px 0}
+    .widget{border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin:18px 0;background:var(--panel)}
+    .controls{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+    .controls label{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .controls input[type=range]{accent-color:var(--accent);vertical-align:middle}
+    .val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent)}
+    canvas{width:100%;height:auto;display:block;margin:6px 0}
+    table.tr{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:10px}
+    table.tr th,table.tr td{padding:6px 10px;border-bottom:1px solid var(--border);text-align:right}
+    table.tr th:first-child,table.tr td:first-child{text-align:left}
+    table.tr td.bar{width:40%}
+    .elbar{height:12px;border-radius:3px;background:var(--accent)}
+    .method{font-size:.86rem;color:var(--muted);margin-top:8px}
+    footer{max-width:880px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <a href="../../index.html#methods">Methods</a>
+      <a href="../../index.html#estimators">Estimators</a>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>The Global Financial Crisis</h1>
+  <p class="subtitle">Told through simulation — by someone who built the correlation-trading tools.</p>
+
+  <p class="lead">The crisis has a popular telling: clever quants, dazzled by an elegant formula, let
+  the maths blind them, and the tails they ignored blew up the world. This essay takes that story
+  apart in stages — with simulations you can run — and replaces it with what actually happened.
+  The arc: first <strong>blame the marginal</strong>, then <strong>blame the dependence</strong>,
+  then the <strong>truth</strong>.</p>
+
+  <h2><span class="part">Part 1 · the very confused version</span><br>The Normal-distribution fallacy</h2>
+  <p>The loudest version (Taleb's bell-curve "Great Intellectual Fraud," amplified into "the formula
+  that killed Wall Street") blames the <em>Normal distribution</em>. But the structured-credit
+  machinery ran on a Gaussian <em>copula</em>, and by Sklar's theorem a copula says <em>nothing</em>
+  about marginal tails — you can bolt a Gaussian copula onto arbitrarily fat-tailed marginals. The
+  drama in a CDO² loss distribution comes from the <em>dependence</em> and the tranching
+  nonlinearity, not the bell curve. <em>The Normal marginal didn't cause it.</em></p>
+  <div class="stub">Interactive Sklar's-theorem demo (R³ → unit cube → default-time space → default
+  order) — forthcoming.</div>
+
+  <h2><span class="part">Part 2 · the less confused version</span><br>Gaussian dependence hid the tail risk</h2>
+  <p>The better story: the Gaussian copula's real, provable sin is <strong>zero tail dependence</strong>
+  (joint extremes asymptotically vanish for any correlation below 1). Fit it to <em>every</em>
+  pairwise default probability and <em>every</em> marginal and it <em>still</em> can't make a whole
+  sector default at once — so the systemic tail is hidden. That points at tail risk / contagion as the
+  candidate culprit. See the
+  <a href="../bowling/index.html">Bowling for contagion</a> demo, which shows exactly this gap.</p>
+
+  <h2><span class="part">Part 3 · the narrative arc</span><br>Were the quants blinded by the formula?</h2>
+  <p>Here is where the populist story breaks. The legend (canonised in <em>“Recipe for Disaster: The
+  Formula That Killed Wall Street”</em>) is that David Li <em>invented</em> the Gaussian copula around
+  2000, that quants uncritically lapped it up, and that overconfidence in this beautiful object did the
+  damage. Three things are wrong with that.</p>
+  <p><strong>One — Li was late.</strong> Factor and copula models of correlated default were already in
+  use at multiple banks before the 2000 paper; the latent-Gaussian threshold idea goes back to Merton
+  (1974) and the single-factor portfolio model to Vasicek (1987). The paper named a practice; it did
+  not start one.</p>
+  <p><strong>Two — the banks were a step ahead: the <em>fast</em> model.</strong> Nobody on a desk priced
+  a CDO by brute-force Monte Carlo over a copula. At Morgan Stanley the author devised, implemented and
+  deployed the fast semi-analytic version, and — without any doubt — the same happened independently at
+  other banks at much the same time. It had to: the method is forced by the problem.</p>
+  <p><strong>Three — there was nothing to be dazzled by.</strong> Pricing a CDO in the one-factor model
+  is a routine exercise in <strong>conditioning, convolution, and quadrature</strong>. Condition on the
+  one common factor and the names become independent; convolve their conditional default indicators into
+  a loss distribution; integrate that over the factor by quadrature. A handful of nodes, exact, instant.
+  No Monte Carlo, no mystique. You can run it right here.</p>
+
+  <div class="widget">
+    <div class="controls">
+      <label>correlation ρ <input type="range" id="rho" min="0" max="0.95" step="0.01" value="0.2"><span class="val" id="rhoV">0.20</span></label>
+      <label>default prob p <input type="range" id="p" min="0.01" max="0.30" step="0.01" value="0.05"><span class="val" id="pV">5%</span></label>
+      <label>quadrature nodes <input type="range" id="nq" min="5" max="60" step="1" value="33"><span class="val" id="nqV">33</span></label>
+    </div>
+    <canvas id="chart" width="840" height="340"></canvas>
+    <table class="tr" id="tranches"></table>
+    <div class="method" id="method"></div>
+  </div>
+  <p class="muted">Drag ρ: the loss distribution swings from a tight binomial (ρ≈0, defaults roughly
+  independent) to an <strong>all-or-nothing</strong> bimodal shape (ρ→1, mostly no defaults punctuated by
+  the whole pool going). The thin curves are the <em>conditional</em> loss distributions at three values of
+  the common factor; the bold bars are their quadrature average. Drop the node count and watch how few
+  points it takes to converge — that is the whole "fast model." The senior tranche, riskless-looking at
+  low ρ, becomes a catastrophe bond as ρ rises — the structural fragility, driven entirely by
+  <em>correlation</em>, with the marginal <code>p</code> held fixed.</p>
+
+  <h2><span class="part">Part 4 · the truth</span><br>What actually happened</h2>
+  <div class="stub">The first-person account — leverage, the run on repo, ratings and incentives, and
+  tail risk that was <em>manufactured and known</em> rather than mismeasured (Acharya et al.) — to come.</div>
+</main>
+
+<footer>Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.</footer>
+
+<script>
+// ---- normal CDF / inverse ----
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+function Phi(x){return 0.5*(1+erf(x/Math.SQRT2));}
+function phiInv(p){if(p<=0)return -6;if(p>=1)return 6;
+  const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],
+   b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+   c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+   d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416],pl=0.02425;let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p<=1-pl){q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+  q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+
+const N=100, LGD=0.6;                      // pool size; loss given default
+const lf=new Float64Array(N+1); for(let k=1;k<=N;k++) lf[k]=lf[k-1]+Math.log(k);   // log factorials
+const logC=k=>lf[N]-lf[k]-lf[N-k];
+const TR=[["Equity",0,0.03,"#d62728"],["Mezzanine",0.03,0.07,"#f0a830"],["Senior",0.07,1.0,"#2ca02c"]];
+
+// conditional binomial loss pmf given common factor m
+function condPMF(m,rho,a,sr,sc){
+  const out=new Float64Array(N+1);
+  let pc = rho<1e-9 ? Phi(a) : Phi((a - sr*m)/sc); pc=Math.min(Math.max(pc,1e-12),1-1e-12);
+  const lpc=Math.log(pc), l1=Math.log(1-pc);
+  for(let k=0;k<=N;k++) out[k]=Math.exp(logC(k)+k*lpc+(N-k)*l1);
+  return out;
+}
+// unconditional loss distribution via Gaussian quadrature over the factor
+function lossDist(rho,p,NQ){
+  const a=phiInv(p), sr=Math.sqrt(rho), sc=Math.sqrt(1-rho), Mmax=5.5, dm=2*Mmax/(NQ-1);
+  const P=new Float64Array(N+1); let wsum=0;
+  for(let j=0;j<NQ;j++){ const m=-Mmax+j*dm, w=Math.exp(-m*m/2)*dm;  wsum+=w;
+    const c=condPMF(m,rho,a,sr,sc); for(let k=0;k<=N;k++) P[k]+=w*c[k]; }
+  for(let k=0;k<=N;k++) P[k]/=wsum; return {P,a,sr,sc};
+}
+function trancheEL(P,A,D){ let el=0; for(let k=0;k<=N;k++){ const loss=LGD*k/N;
+  el+=P[k]*Math.max(0,Math.min(1,(Math.min(loss,D)-Math.min(loss,A))/(D-A))); } return el; }
+
+const cv=document.getElementById("chart"), ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1;
+function draw(){
+  const rho=+rho_.value, p=+p_.value, NQ=+nq_.value;
+  rhoV.textContent=rho.toFixed(2); pV.textContent=(p*100).toFixed(0)+"%"; nqV.textContent=NQ;
+  const {P,a,sr,sc}=lossDist(rho,p,NQ);
+  // layout
+  const cssW=cv.clientWidth||840, cssH=340; cv.width=cssW*dpr; cv.height=cssH*dpr; cv.style.height=cssH+"px"; ctx.setTransform(dpr,0,0,dpr,0,0);
+  const W=cssW,H=cssH, padL=40,padR=12,padT=14,padB=28, plotW=W-padL-padR, plotH=H-padT-padB;
+  const KMAX=N; const bw=plotW/(KMAX+1);
+  let pmax=0; for(let k=0;k<=N;k++) pmax=Math.max(pmax,P[k]);
+  // conditional curves at m = +2, 0, -2 (factor sweeps the conditional distribution)
+  const conds=[[2,"#9aa0c8"],[0,"#6b73b6"],[-2,"#c0392b"]];
+  let cmax=pmax; for(const [m] of conds){ const c=condPMF(m,rho,a,sr,sc); for(let k=0;k<=N;k++) cmax=Math.max(cmax,c[k]); }
+  const yS=plotH/(cmax*1.08), x=k=>padL+k*bw+bw/2, y=v=>padT+plotH-v*yS;
+  ctx.clearRect(0,0,W,H);
+  // axes
+  ctx.strokeStyle="#ccc"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padL,padT+plotH); ctx.lineTo(W-padR,padT+plotH); ctx.stroke();
+  ctx.fillStyle="#888"; ctx.font="11px sans-serif"; ctx.textAlign="center";
+  for(let k=0;k<=N;k+=10){ ctx.fillText(k, x(k), H-10); }
+  ctx.textAlign="left"; ctx.fillText("number of defaults (pool of "+N+")", padL, padT+10);
+  // unconditional bars
+  for(let k=0;k<=N;k++){ if(P[k]<1e-5) continue; ctx.fillStyle="rgba(74,58,255,.75)"; ctx.fillRect(x(k)-bw*0.4,y(P[k]),bw*0.8,plotT_(P[k],y,plotH,padT)); }
+  function plotT_(v,y,plotH,padT){ return (padT+plotH)-y(v); }
+  // conditional curves (thin lines)
+  for(const [m,col] of conds){ const c=condPMF(m,rho,a,sr,sc); ctx.strokeStyle=col; ctx.lineWidth=1.4; ctx.beginPath();
+    let started=false; for(let k=0;k<=N;k++){ if(c[k]<1e-6 && !started) continue; const px=x(k),py=y(c[k]); if(!started){ctx.moveTo(px,py);started=true;} else ctx.lineTo(px,py);} ctx.stroke(); }
+  // legend
+  ctx.font="11px sans-serif"; ctx.textAlign="left";
+  ctx.fillStyle="rgba(74,58,255,.9)"; ctx.fillText("■ loss distribution (quadrature avg)", W-250, padT+12);
+  ctx.fillStyle="#6b73b6"; ctx.fillText("— conditional at factor m = +2 / 0 / −2", W-250, padT+28);
+  // tranches
+  const rows=TR.map(([nm,A,D,col])=>{ const el=trancheEL(P,A,D), pct=(el*100);
+    return `<tr><td>${nm} <span class="muted">[${(A*100).toFixed(0)}–${(D*100).toFixed(0)}%]</span></td>`+
+      `<td>${pct.toFixed(2)}%</td><td class="bar"><div class="elbar" style="width:${Math.min(100,pct*4).toFixed(0)}%;background:${col}"></div></td></tr>`; });
+  document.getElementById("tranches").innerHTML =
+    `<tr><th>tranche</th><th>expected loss</th><th></th></tr>`+rows.join("");
+  document.getElementById("method").innerHTML =
+    `Loss distribution = ∫ Binomial(${N}, p(m)) · φ(m) dm, computed with <b>${NQ}</b> quadrature nodes over the common factor — exact, &lt;1&nbsp;ms, no Monte&nbsp;Carlo. `+
+    `Conditional default prob p(m)=Φ((Φ⁻¹(p)−√ρ·m)/√(1−ρ)).`;
+}
+const rho_=document.getElementById("rho"), p_=document.getElementById("p"), nq_=document.getElementById("nq");
+[rho_,p_,nq_].forEach(el=>el.addEventListener("input",draw));
+window.addEventListener("resize",draw);
+draw();
+</script>
+</body>
+</html>
