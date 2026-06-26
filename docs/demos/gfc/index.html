@@ -56,6 +56,8 @@
     .measures .m.todo{border:2px dashed var(--accent);background:#faf9ff}
     .measures .m.todo .sym,.measures .m.todo .nm{color:var(--accent)}
     .mcap{text-align:center;font-size:.92rem;color:var(--muted);margin:0 0 14px}
+    .points{border-left:3px solid var(--accent);background:#faf9ff;border-radius:0 8px 8px 0;padding:6px 18px;margin:18px 0}
+    .points p{margin:.7em 0} .points .h{font-weight:700;color:var(--accent)}
     .eqn{margin:20px 0;padding:14px 10px;display:flex;justify-content:center;align-items:flex-end;gap:14px;flex-wrap:wrap;background:#f7f7fb;border-radius:8px;overflow-x:auto}
     .eqn .term{display:flex;flex-direction:column;align-items:center;gap:5px}
     .eqn .lbl{font-size:.72rem;font-style:italic;color:var(--accent)}
@@ -235,21 +237,23 @@
   Formula That Killed Wall Street”</em>) is that David Li <em>invented</em> the Gaussian copula around
   2000, that quants uncritically lapped it up, and that overconfidence in this beautiful object did the
   damage. Three things are wrong with that.</p>
-  <p><em>One — Li was late.</em> Factor and copula models of correlated default were already in
+  <div class="points">
+  <p><span class="h">One — Li was late.</span> Factor and copula models of correlated default were already in
   use at multiple banks before the 2000 paper; the latent-Gaussian threshold idea goes back to Merton
   (1974) and the single-factor portfolio model to Vasicek (1987). The paper named a practice; it did
   not start one.</p>
-  <p><em>Two — the banks were a step ahead: the <em>fast</em> model.</em> Nobody on a desk priced
+  <p><span class="h">Two — the banks were a step ahead: the <em>fast</em> model.</span> Nobody on a desk priced
   a CDO by brute-force Monte Carlo over a copula. At Morgan Stanley I devised, implemented and
   deployed the fast semi-analytic version, and — without any doubt — the same happened independently at
   other banks at much the same time. It had to: the method is forced by the problem. At Morgan Stanley
   it shipped, gloriously, as an <em>Excel add-in compiled from MATLAB</em> with the old MATLAB compiler
   — if that doesn't make anyone nostalgic, nothing will.</p>
-  <p><em>Three — there was nothing to be dazzled by.</em> Pricing a CDO in the one-factor model
+  <p><span class="h">Three — there was nothing to be dazzled by.</span> Pricing a CDO in the one-factor model
   is a routine exercise in <em>conditioning, convolution, and quadrature</em>. Condition on the
   one common factor and the names become independent; convolve their conditional default indicators into
   a loss distribution; integrate that over the factor by quadrature. A handful of nodes, exact, instant.
   No Monte Carlo, no mystique. You can run it right here.</p>
+  </div>
   <p class="muted">One distraction to set aside: these subordination games are <em>not</em> path-dependent in
   any non-trivial way. A vanilla tranche is a call spread on the <em>terminal</em> cumulative loss, so only
   the terminal loss distribution matters and the quadrature above suffices — <em>when</em> the losses
@@ -482,26 +486,28 @@
   and moved to an explicit Gaussian-copula model. The remediation was, precisely, to stop hiding the
   lever.</p>
 
-  <h3>The wrong correlation: actuarial history vs the implied market</h3>
+  <h3>In the land of the blind</h3>
   <p>And here is the subtler failure — the one that survives even when an agency <em>did</em> reach for a
-  copula. They fed it the wrong correlation. The numbers came from <em>historical, actuarial</em> studies,
-  and they were strikingly low. The <em>asset</em> correlation — the dependence between the latent
-  variables driving default — was modest: S&amp;P's CDO Evaluator assumed <em>0%</em> across industries
-  before late 2005 (30% within); Moody's used roughly <em>3%</em> across sectors (15% within). And the
-  <em>default</em> correlation — the chance two names actually go down <em>together</em>, naturally a small
-  number — was lower still and demonstrably too low:
+  copula. They fed it the wrong correlation, taken from <em>historical, actuarial</em> studies, and the
+  numbers were strikingly low.</p>
+  <p>The <em>asset</em> correlation — the dependence between the latent variables driving default — was
+  modest: S&amp;P's CDO Evaluator assumed <em>0%</em> across industries before late 2005 (30% within);
+  Moody's used roughly <em>3%</em> across sectors (15% within).</p>
+  <p>The <em>default</em> correlation — the chance two names actually go down <em>together</em>, naturally
+  a small number — was lower still and demonstrably too low:
   <a href="https://doi.org/10.1016/j.jfineco.2017.06.011">Nickerson &amp; Griffin (2017)</a> find agencies
   assumed about <em>0.01</em> for CLOs (raised to a still-inadequate 0.03 after the crisis) where roughly
-  <em>0.12</em> was appropriate. Meanwhile, two screens away, the inter-dealer market in CDO tranches was
-  quoting prices that <em>implied</em> a far higher correlation — and the housing bust would soon drive
-  <em>realized</em> correlation toward one.
-  <em>Implied correlation</em> is the number you must put into the model to reproduce a traded price —
-  exactly as <em>implied volatility</em> is read out of option prices. It is a flawed lens: like the
-  options <em>smile</em>, different tranches imply different correlations, so it is not globally
-  consistent. But it is <em>absolutely critical</em>, because it is the market's own view of joint-default
-  risk, priced by people with money at stake. The agencies stared at their single-digit actuarial numbers
-  and looked away from the market (the sensitivity of senior-tranche ratings to exactly this input is the
-  thesis of <a href="https://doi.org/10.1257/jep.23.1.3">Coval, Jurek &amp; Stafford 2009</a>).</p>
+  <em>0.12</em> was appropriate.</p>
+  <p>Meanwhile, two screens away, the inter-dealer market in CDO tranches was quoting prices that
+  <em>implied</em> a far higher correlation. <em>Implied correlation</em> is the number you must put into
+  the model to reproduce a traded price — exactly as <em>implied volatility</em> is read out of option
+  prices.</p>
+  <p>It is a flawed lens. Like the options <em>smile</em>, different tranches imply different correlations,
+  so it is not globally consistent. But it is <em>absolutely critical</em>, because it is the market's own
+  view of joint-default risk, priced by people with money at stake — the one-eyed man in the land of the
+  blind. The agencies stared at their single-digit actuarial numbers and looked away from him (the
+  sensitivity of senior-tranche ratings to exactly this input is the thesis of
+  <a href="https://doi.org/10.1257/jep.23.1.3">Coval, Jurek &amp; Stafford 2009</a>).</p>
   <p>Ignoring a live market price in favour of a stale historical estimate is not a venial sin; it is
   close to the cardinal one. I have since argued the point at length as the <em>Indispensable Markets
   Hypothesis</em>: in the presence of a well-established market, anyone who eschews its prices as inputs
