@@ -43,8 +43,9 @@ The second practical property is feasibility. Beyond a few hundred names ($n > T
 the sample covariance is rank-deficient, so the dense \emph{inverse-covariance
 formulas} for minimum-variance and maximum-diversification ($\Sigma^{-1}\mathbf 1$,
 $\Sigma^{-1}\sigma$) are undefined; the long-only quadratic program
-$\min_{p\in\Delta} p^\top\Sigma p$ still has a solution, but a non-unique and
-unstable one. Only the inversion-free methods stay well-behaved. The factor-form
+$\min_{p\in\Delta} p^\top\Sigma p$ still has a solution---the simplex constraints can
+remove null directions---though it can be non-unique or unstable. Only the
+inversion-free methods stay well-behaved. The factor-form
 race never inverts and costs $O(Mnk)$, staying well-posed
 and fitting in a few seconds to $n = 3000$ (the Woodbury factor optimizers of
 \Cref{sec:computation} scale likewise, and faster).
@@ -96,16 +97,16 @@ expected bias--variance crossover. The variance-optimal Bates--Granger
 combination ($w \propto \Sigma_e^{-1}\mathbf 1$) is wild when series are few and
 settles only once the error covariance is well estimated; the equal-weight
 average is dominated; non-negative least-squares stacking \parencite{breiman1996}
-is a strong, stable baseline. The ability tilt is the \emph{lowest-variance}
-combiner at every sample size, and the best when forecasters are of comparable
-quality and the fitting data is scarce (M4 Yearly at five to ten series,
+is a strong, stable baseline. Across the swept sample sizes the ability tilt is the
+\emph{lowest-variance} combiner, and competitive on level when forecasters are of
+comparable quality and the fitting data is scarce (M4 Yearly at five to ten series,
 Quarterly at five). Where one method dominates the pool, concentration wins and
 stacking takes over---exactly what the redundancy property
-(\Cref{prop:redundancy}) would predict. We report this as suggestive rather than
-settled: the tilt is the stable, small-sample member of the combination family,
-not a uniformly better combiner, and the case for it as a general non-negative
-regression and stacking tool is a direction we mean to pursue, not a result we
-claim here.
+(\Cref{prop:redundancy}) would predict. We report this as promising but
+inconclusive, claiming no out-of-sample superiority: the tilt is a stable
+small-sample member of the combination family, not a uniformly better combiner, and
+the case for it as a general non-negative regression and stacking tool is a
+direction we mean to pursue, not a result we claim here.
 
 \begin{figure}[h]
   \centering
@@ -184,10 +185,11 @@ cheap online updates and gradient-based tuning.
 
 Open questions include the choice of reference correlation $C_{\mathrm{calib}}$
 (diagonal versus market) and of $\phi$; the treatment of estimation error in the
-abilities, a Thurstonian analogue of covariance shrinkage; and richer
-perturbations, such as a temperature controlling concentration or using
+abilities, a Thurstonian analogue of covariance shrinkage; and using
 $C_{\mathrm{tilt}}$ to express an explicit correlation view rather than the sample
-estimate.
+estimate. The concentration of the allocation is governed by the temperature of
+\Cref{prop:temperature}, which trades the weight that leaks to weak names against
+the turnover bound of \Cref{thm:smooth}.
 
 The tail-consistency result (\Cref{prop:tail}, \Cref{rem:anysim}) turns the
 fat-tailed-performances direction into a concrete programme: drive the race with an

@@ -50,7 +50,10 @@ single asset $k$.
 Perfectly correlated unit-variance Gaussians with equal mean are almost surely
 equal, $X_{k'} = X_{k''}$ a.s., so the field minimum---and hence every other
 asset's winning event---is unchanged, while the pair ties exactly when $k$ would
-have won. The even split halves that shared probability.
+have won. The even split halves that shared probability. This is a boundary case:
+mutual correlation $1$ makes the correlation matrix singular, so the statement is
+read in the positive-semidefinite limit (equivalently, by continuity as the
+mutual correlation $\uparrow 1$, with exact tie-splitting at the limit).
 \end{proof}
 
 \begin{remark}[Fixed abilities versus recalibration]
@@ -142,14 +145,21 @@ laws; the Slepian argument is what buys the stated case.
 \subsection{Tail consistency}
 \label{sec:tail}
 
+We fix the sign convention for this section, since the race uses
+\emph{minimum-performance-wins}: take $X_i$ to be a centred \emph{loss-side}
+performance, so a larger $X_i$ is worse and the winner is $\min_i X_i$. Lower-tail
+dependence in returns (assets crashing together) is then upper-tail dependence in
+these losses, and ``a cluster that crashes together'' is one whose loss-side
+performances are large together.
+
 \Cref{prop:monotone} de-weights a cluster by its \emph{full} correlation. Yet two
 clusters with an identical covariance can behave oppositely in the tail: one may
 crash together while the other merely co-moves on average. A symmetric second
 moment cannot tell them apart. If instead the race is driven by the assets'
-\emph{downside} dependence---their co-lower-partial-moments, or, exactly, a
-tail-dependent joint law for the performances---the de-weighting of
-\Cref{prop:monotone} keys to genuine tail co-movement rather than to average
-correlation. We call this \emph{tail consistency}.
+\emph{downside} dependence---approximately their co-lower-partial-moments (still a
+second moment, so an approximation), or, exactly, a tail-dependent joint law for the
+performances---the de-weighting of \Cref{prop:monotone} keys to genuine tail
+co-movement rather than to average correlation. We call this \emph{tail consistency}.
 
 \begin{proposition}[Tail consistency]
 \label{prop:tail}
@@ -182,10 +192,13 @@ co-movement deepens---$M_G$ rising stochastically while the marginals, and even 
 full correlation, are held fixed---the subgroup's combined weight falls from the
 head-count value toward the single-competitor value, so its \emph{tail-effective}
 cardinality runs from $|G|$ to $1$. For one independent asset racing a symmetric
-cluster that limit is $\tfrac12$ regardless of $|G|$. Whether a given parametric
-family (Clayton, say, at fixed margins) deepens $M_G$ monotonically is a
-family-specific question; \Cref{fig:tail} shows that it does for the family used
-there.
+cluster that limit is $\tfrac12$ regardless of $|G|$. Put another way, the
+\emph{effective number of bets is state-dependent}: in calm states $|G|$ names may be
+$|G|$ partial bets, while in a crash they are one. A covariance averages across
+states and cannot represent that collapse; an order-statistic race can, because the
+winning event is itself a tail event. Whether a given parametric family (Clayton,
+say, at fixed margins) deepens $M_G$ monotonically is a family-specific question;
+\Cref{fig:tail} shows that it does for the family used there.
 
 \begin{figure}[h]
   \centering
@@ -193,9 +206,10 @@ there.
   \caption{Tail consistency. One independent asset versus a $99$-name cluster
   with Clayton lower-tail dependence $\lambda_L$ (assets crash together, rally
   independently; standard-normal margins; $M=1.5\times10^5$; loss-side race on
-  centred performances). As $\lambda_L\to1$ the cluster's combined weight falls
-  toward the two-body limit $\tfrac12$ (\Cref{prop:tail})---the $99$ names
-  de-duplicate to a single horse. Driving the race by the downside semicovariance
+  centred performances). As $\lambda_L\to1$ \emph{within this Clayton family} the
+  cluster's combined weight falls toward the two-body limit $\tfrac12$
+  (\Cref{prop:tail} gives the comonotone endpoint; the monotone descent is
+  family-specific)---the $99$ names de-duplicate to a single horse. Driving the race by the downside semicovariance
   (lower partial co-moments) recovers almost all of the effect; the full
   covariance is tail-blind and stays far above. The small residual gap between the
   downside-covariance summary and the true tail copula is the part of the
@@ -265,24 +279,78 @@ minus a convex \emph{diversification penalty} $\Omega_C$ that is determined by
 the correlation---a mean--(convex-risk) allocator whose feasible set is the
 simplex, which is why the solution is long-only and fully invested. This is the
 random-utility ``social-surplus'' / perturbed-optimizer construction
-\parencite{mcfadden1981, williams1977, berthet2020}. The choice of perturbation
-is decisive: Gumbel noise yields $\Omega = $ Shannon entropy and $w = $ softmax,
-a \emph{correlation-blind} (Lucian) allocator; Gaussian noise with covariance
-$C$ makes $\Omega_C$ \emph{correlation-aware}, which is precisely what produces
-the redundancy consistency of \Cref{prop:redundancy}. Finally, since
+\parencite{mcfadden1981, williams1977, berthet2020}. The perturbation law indexes a
+whole \emph{family of dependence-aware entropies}---$\Omega_S(p)$ is the cost of
+concentrating choice probability on $p$ under dependence $S$. The choice is decisive:
+Gumbel noise yields $\Omega = $ Shannon entropy and $w = $ softmax, a
+\emph{correlation-blind} (Lucian) allocator; Gaussian noise with covariance $C$
+makes $\Omega_C$ \emph{correlation-aware}, which is precisely what produces the
+redundancy consistency of \Cref{prop:redundancy}; a tail-dependent law makes it
+\emph{tail-aware} (\Cref{prop:tail}). Spreading across independent names is rewarded;
+spreading across comonotone names is not---the entropy knows the dependence. Finally, since
 $w = \nabla G_C(\theta)$ is the gradient of a convex potential, it is
 automatically smooth---consistent with \Cref{thm:smooth}. (For general $C$ the
 regularizer $\Omega_C$ has no closed form, unlike the entropy/softmax special
 case, but it provably exists and is convex, which is all we use.)
+
+\subsection{Temperature and concentration}
+\label{sec:temperature}
+
+The program \eqref{eq:regularized} carries a free concentration parameter. Scaling
+the strengths by an inverse temperature $\beta > 0$,
+\begin{equation}
+  w^{\beta} = \nabla G_C(\beta\theta)
+  = \argmaxop_{p\in\Delta}\Big\{\langle\theta, p\rangle - \tfrac{1}{\beta}\,\Omega_C(p)\Big\},
+  \label{eq:temperature}
+\end{equation}
+reweights the diversification penalty: $\beta = 1$ is the calibrated tilt, larger
+$\beta$ down-weights $\Omega_C$ and concentrates, smaller $\beta$ enforces it and
+diversifies.
+
+\begin{proposition}[Concentration with redundancy preserved]
+\label{prop:temperature}
+For every $\beta > 0$ the map $w^{\beta} = \nabla G_C(\beta\theta)$ is a simplex
+allocation, and
+\begin{enumerate}
+\item[\textup{(i)}] it preserves redundancy and tail consistency: equal-strength
+  comonotone duplicates split evenly at every $\beta$
+  (\Cref{prop:redundancy,prop:tail});
+\item[\textup{(ii)}] a strictly sub-maximal competitor ($\theta_i < \max_j\theta_j$)
+  has $w^{\beta}_i \to 0$ as $\beta\to\infty$, the race tending to a hard
+  $\argmaxop$ on strength;
+\item[\textup{(iii)}] as $\beta\to 0$, $w^{\beta}\to\nabla G_C(0)$, the winning
+  probabilities of the dependence law alone, the strengths washed out.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+Scaling all strengths by $\beta$ leaves equal strengths equal and comonotone
+performances comonotone, so the tie arguments of
+\Cref{prop:redundancy,prop:tail} are untouched, giving~(i). For~(ii), with
+$j^\star = \argmaxop_j \theta_j$, $w^{\beta}_i \le
+\Prob\big(\eta_i - \eta_{j^\star} > \beta(\theta_{j^\star} - \theta_i)\big) \to 0$
+since $\theta_{j^\star} - \theta_i > 0$. For~(iii), $G_C$ is $C^1$, so
+$\nabla G_C(\beta\theta) \to \nabla G_C(0)$ as $\beta\to 0$.
+\end{proof}
+
+Temperature is the knob for the construction's one residual cost. When a cluster
+de-duplicates, the freed weight is shared with the rest of the field, including weak
+competitors; by \Cref{prop:temperature}(ii) that leak to sub-maximal names falls to
+zero as $\beta$ grows, while the even split among the duplicates is left intact
+by~(i). The price is smoothness: as $\beta\to\infty$ the map approaches a hard
+$\argmaxop$ and the Lipschitz bound of \Cref{thm:smooth} degrades, so $\beta$ trades
+concentration against turnover. The calibrated $\beta = 1$ sits at the smooth,
+benchmark-reproducing end.
 
 \subsection{Any simulation, and the implied penalty}
 \label{rem:anysim}
 
 Nothing in \Cref{thm:objective} uses Gaussianity. For any centred performance law
 $S$ set $G_S(\theta) = \E_{\eta\sim S}[\max_i(\theta_i + \eta_i)]$. This is convex
-in $\theta$, so $w = \nabla G_S(\theta) =
-\argmaxop_{p\in\Delta}\{\langle\theta, p\rangle - \Omega_S(p)\}$ with
-$\Omega_S = G_S^{*}$ convex on the simplex. The weights always solve a
+in $\theta$ for any $S$, so the tie-split winning vector is a selected subgradient,
+$w \in \partial G_S(\theta) = \argmaxop_{p\in\Delta}\{\langle\theta, p\rangle -
+\Omega_S(p)\}$ with $\Omega_S = G_S^{*}$ convex on the simplex; when $S$ is full-rank
+continuous this subgradient is the unique gradient $w = \nabla G_S(\theta)$. The
+weights always solve a
 mean--(convex regularizer) program; the simulation enters only through the penalty
 $\Omega_S$, which carries its full dependence, tails included.
 
@@ -380,6 +448,29 @@ and $\tfrac{\gamma}{2}p^\top\Delta\Sigma\,p \leftrightarrow \dot\Omega_{\Delta S
 Markowitz measures displacement from the benchmark by a quadratic form in
 $\Sigma_0$; the tilt measures it by the Bregman divergence of the reference race.
 
+\paragraph{Tail-sensitive Black--Litterman.}
+Read this way the tilt is reverse optimization with the view placed on
+\emph{dependence} rather than on returns. Calibration backs the abilities out of a
+benchmark---the choice analogue of Black--Litterman's equilibrium-implied returns
+\parencite{black1992}---and the tilt then expresses a view on how the alternatives
+\emph{co-move}, with $\phi$ its confidence ($\phi = 0$ reproduces the benchmark,
+$\phi = 1$ is full conviction): exactly the role of Black--Litterman's $\tau,\Omega$,
+but over a correlation or \emph{tail} view in place of a return view. That is a view
+Black--Litterman cannot state---``these names crash together more than the benchmark
+assumes'' is a tail-co-movement view, not an expected-return one---and the abilities
+are never touched, so skill (from the benchmark) and co-movement (the view) enter as
+orthogonal inputs. The reverse step is genuinely nonlinear here: Black--Litterman's
+implied returns are a linear first-order condition ($\mu = \gamma\Sigma_0 w^0$, no
+inverse), whereas the choice geometry requires the gradient inverse
+$(\nabla G_{S_0})^{-1}$---which the Fast Ability Transform \parencite{cotton2021}
+supplies exactly and in linear time. Only the simple \emph{reference} law is
+inverted; the rich correlation- or tail-dependent target enters by forward sampling,
+so the prohibitive inverse of the dependent race is never formed. The closest
+existing device is Meucci's entropy pooling \parencite{meucci2008}, which tilts a
+scenario \emph{distribution} to satisfy flexible views (tails included) and then
+re-optimizes; the difference is operational---the race tilts the weight vector
+\emph{directly} on the simplex, smoothly and without a second optimization.
+
 \paragraph{The displaced inverse.}
 Locally the two are closer still. For $p = w^0 + \delta$,
 $D_{\Omega_{S_0}}(w^0+\delta, w^0) = \tfrac12\delta^\top H_0\delta + O(\|\delta\|^3)$
@@ -401,12 +492,14 @@ and never forms $\Sigma^{-1}$---yet convex duality still leaves an inverse, now 
 bounded, simplex-supported curvature rather than a lever on small covariance
 eigenmodes. Singular dependence merely means some assets are effective duplicates
 in the race, not that the optimizer takes explosive offsetting positions.
-Numerically the contrast is stark: as the reference correlation is driven toward
-singularity---condition number into the hundreds---the choice-sensitivity
-$\nabla_\theta w$ stays uniformly scaled, its own condition number remaining near
-one, so the displaced inverse never inherits the ill-conditioning that defeats
-$\Sigma^{-1}$, and a Newton calibration step preconditioned by it converges in a
-handful of iterations.
+Numerically the contrast is suggestive: in a sweep driving the reference correlation
+toward singularity (condition number into the hundreds) the choice-sensitivity
+$\nabla_\theta w$ stayed uniformly scaled, its own condition number near one, and a
+Newton calibration step preconditioned by it converged in a handful of iterations.
+This is an empirical observation, not a theorem, and it has a known caveat: like the
+softmax Jacobian, $\nabla_\theta w$ degenerates as a weight $w_i \to 0$, so
+benchmarks with very small (or floored) weights can degrade the local inverse
+geometry near the simplex boundary even when the dependence is well conditioned.
 
 \paragraph{A selection identity.}
 For the Gaussian workhorse one identity sits behind this local geometry.
@@ -479,7 +572,7 @@ $C^\infty$ in $C$ (and in $a$). Moreover, on any compact subset whose smallest
 eigenvalue is bounded below by $\lambda > 0$, the map is Lipschitz:
 \begin{equation}
   \|w(C_1) - w(C_0)\|_1 \;\le\; L_\lambda \,\|C_1 - C_0\|_F,
-  \qquad L_\lambda = O(1/\lambda).
+  \qquad L_\lambda < \infty,\ \ L_\lambda \to \infty \text{ as } \lambda \downarrow 0.
   \label{eq:lip}
 \end{equation}
 \end{theorem}
@@ -497,7 +590,10 @@ for $j \neq k$---followed by the divergence theorem over the cone $A_i$ rewrites
 $\partial w_i/\partial C_{jk}$ as an integral of $\varphi_C$ over the boundary
 faces of $A_i$ (the pairwise-tie hyperplanes), which is finite. The gradient is
 therefore bounded; since the conditioning of $C$ controls the tie-boundary
-density, the bound is $O(1/\lambda)$, giving \eqref{eq:lip}.
+density, the bound deteriorates as $\lambda\downarrow0$, giving \eqref{eq:lip}. (We
+do not claim the exact power of $1/\lambda$; the square-root recolouring below
+suggests the milder $1/\sqrt\lambda$, and the qualitative degradation near
+singularity is what matters.)
 \end{proof}
 
 The Lipschitz constant degrades as $C$ approaches singularity
@@ -508,16 +604,17 @@ and regenerating the path ensemble when its effective sample size collapses.
 \paragraph{Finite paths.}
 \Cref{thm:smooth} is a statement about the population map $w(C)$. The realized
 common-seed estimator $\widehat w_M(C)$ is piecewise constant in $C$---it jumps when
-a simulated path crosses a tie boundary---so it is not literally Lipschitz. Under
-fixed seeds and a bounded tie-boundary density it is low-turnover only in
-expectation,
-\begin{equation*}
-  \E\,\|\widehat w_M(C+\Delta C) - \widehat w_M(C)\|_1
-  \;=\; O(\|\Delta C\|_F) \,+\, O(1/\sqrt M),
-\end{equation*}
-the first term the population motion of \eqref{eq:lip} and the second a Monte-Carlo
-floor from paths near a boundary. The finite-$M$ map inherits \emph{low turnover in
-expectation}, not smoothness---the honest content behind the common-seed transport.
+a simulated path crosses a tie boundary---so it is not literally Lipschitz. With
+common random numbers, $\widehat w_M(C+\Delta C) - \widehat w_M(C)$ estimates the
+population difference $w(C+\Delta C) - w(C)$ with no independent-resampling floor:
+its bias is zero given the shared transport, and its variability comes from paths
+crossing decision boundaries. Under a bounded tie-boundary density the expected
+number of crossing paths is $O(M\|\Delta C\|_F)$ and each moves the weight by
+$O(1/M)$, so the expected realized turnover is
+$\E\,\|\widehat w_M(C+\Delta C) - \widehat w_M(C)\|_1 = O(\|\Delta C\|_F)$---the
+population motion of \eqref{eq:lip}---with stochastic fluctuation of order
+$O(\sqrt{\|\Delta C\|_F/M})$ around it. Common seeds therefore reduce the difference
+noise; they do not make the finite-$M$ map Lipschitz.
 
 \paragraph{Rank deficiency and conditioning.}
 The square root is not the inversion it replaces, and the difference is what keeps
@@ -530,8 +627,9 @@ Moreover we only ever \emph{multiply} by $C^{1/2}$, never solve with it, and
 $\operatorname{cond}(C^{1/2}) = \sqrt{\operatorname{cond}(C)}$, so ill-conditioning
 does not propagate. What degrades near degeneracy is thus not the allocation but
 the turnover bound: $C^{1/2}$ is continuous through coincident eigenvalues yet only
-H\"older-$\tfrac12$ there ($\partial_\lambda\sqrt\lambda \sim \lambda^{-1/2}$),
-which is the $O(1/\lambda)$ of \eqref{eq:lip}. The factor route of
+H\"older-$\tfrac12$ there ($\partial_\lambda\sqrt\lambda \sim \lambda^{-1/2}$), the
+$\lambda\downarrow0$ degradation of \eqref{eq:lip} (and the reason we do not pin its
+power tightly). The factor route of
 \Cref{sec:computation} removes even this: with
 $C = BB^\top + \operatorname{diag}(\psi)$ the idiosyncratic floor bounds
 $\lambda_{\min}\ge\min_i\psi_i$, regularizing both the root and the Lipschitz

@@ -1,10 +1,14 @@
 \section{Introduction}
 \label{sec:intro}
 
-We develop \emph{Thurstone portfolios}, a long-only allocation scheme whose
-weights are the winning probabilities of a race among assets: each asset draws a
-noisy performance, and its weight is the probability that it comes out best. The
-race has a second reading as a Thurstonian model of choice, which we set against
+We develop \emph{Thurstone portfolio polishing}: a way to take an existing
+allocation on the simplex---a capitalization index, an equal-weight book, any
+benchmark---and re-tilt it under a view on \emph{dependence} rather than returns.
+The vehicle is a race among assets: each asset draws a noisy performance, and a
+weight is the probability that it comes out best. The abilities driving the race
+are backed out of the benchmark by a fast \emph{exact} inverse, and the polish is
+what happens when those same abilities are re-raced under a richer dependence law.
+The race has a second reading as a Thurstonian model of choice, which we set against
 the passive industry's capitalization weighting and its implicit appeal to Luce's
 choice axiom. That Lucian habit is only superficially supported by the Capital
 Asset Pricing Model (CAPM): what the CAPM endorses is the efficiency of the
@@ -12,10 +16,13 @@ whole-universe market portfolio, a non-Lucian object no investor on a restricted
 universe actually holds (\Cref{sec:capm}).
 
 The reason to read allocation as a Thurstonian rather than a Lucian choice is a
-single property: \emph{redundancy consistency}. Add a second asset that behaves
-almost exactly like one already held, and a sensible rule should \emph{split} the
-position across the two near-duplicates and leave the rest of the book untouched;
-it must not let the duplicated exposure count twice. This is the portfolio form of
+single property---\emph{clone consistency}: cloning an option should not create
+value. Add a second asset that behaves almost exactly like one already held, and a
+sensible rule should \emph{split} the position across the two near-duplicates and
+leave the rest of the book untouched; it must not let the duplicated exposure count
+twice. Everything else this paper advertises---robustness without inverting a
+covariance, low turnover, feasibility at scale---is downstream of meeting this one
+axiom with a smooth order-statistic race rather than a hard clustering or an inverse. This is the portfolio form of
 the red-bus/blue-bus problem that unseated the logit model in discrete choice
 \parencite{mcfadden1974}. A Lucian rule---capitalization weighting included---fixes
 the ratio of any two weights independently of the rest of the field, so inserting a
@@ -149,8 +156,9 @@ weight.
 \end{proof}
 
 The CAPM's support for the Lucian habit is therefore the single-point coincidence
-of \Cref{prop:restriction}: it endorses cap weighting on the one universe nobody
-trades, and is silent, indeed contrary, everywhere else. This is the
+of \Cref{prop:restriction}: it endorses cap weighting on the whole-market universe
+alone, and is silent, indeed contrary, on the restricted universes where weighting
+decisions are actually made. This is the
 choice-theoretic form of Roll's critique \parencite{roll1977}: the only testable
 content of the CAPM is the efficiency of the \emph{true} market portfolio, and no
 proxy on a restricted universe inherits it \parencite{prono2009}. We do not

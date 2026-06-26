@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tail-sensitive Black–Litterman: Literature Map</title>
+<meta name="description" content="An interactive map of the literatures around tail-sensitive Black-Litterman: reverse optimization, discrete-choice inversion, entropy/copula pooling, BL non-normal extensions, tail-dependence allocation, and the Thurstonian race. Dashed red edges are open research directions (the white space).">
+<style>
+  :root{--bg:#fafafa;--text:#1a1a1a;--muted:#5a5a5a;--accent:#4a3aff;--border:#e2e2e2;--ink:#1f1d3d;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.6}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+  header.site-header .nav-inner{max-width:1100px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+  header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+  header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+  #map-wrap{max-width:1100px;margin:18px auto;padding:0 24px 40px}
+  h1{font-size:1.9rem;margin:.2em 0 .3em}
+  #graph{width:100%;height:780px;border:1px solid var(--border);background:#fdfdfc;border-radius:6px}
+  .legend{font-size:.85em;color:#444;display:flex;flex-wrap:wrap;gap:10px 20px;margin:12px 0}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .line{width:26px;height:0;border-top:2.5px solid #999;display:inline-block}
+  #tooltip{position:absolute;pointer-events:none;background:rgba(34,34,34,.95);color:#eee;
+    padding:8px 11px;border-radius:4px;font-size:13px;max-width:340px;display:none;line-height:1.35;z-index:10}
+  text.nodelabel{font:11px sans-serif;fill:#222;pointer-events:none}
+  text.edgelabel{font:italic 9.5px sans-serif;pointer-events:none;
+    paint-order:stroke;stroke:#fdfdfc;stroke-width:3.5px;stroke-linejoin:round}
+  .hint{color:#666;font-size:.9em}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html">allocation</a>
+    <nav>
+      <a href="../index.html#methods">Methods</a>
+      <a href="../index.html#estimators">Estimators</a>
+      <a href="../papers/index.html">Papers</a>
+      <a href="../demos/index.html">Demos</a>
+      <a href="./tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div id="map-wrap">
+  <h1>Tail-sensitive Black–Litterman: Literature Map</h1>
+  <p>At the center is the <b>Fast Ability Transform</b> — a fast <i>exact</i> inverse of a
+  correlated Thurstonian race (shares&nbsp;&rarr;&nbsp;abilities), the enabling object with no
+  published predecessor. Tail-sensitive Black–Litterman is its headline application. Each node is
+  a paper (or a core concept); colors are literatures; solid edges are real connections;
+  <b style="color:#c0392b">dashed red edges are connections that do not yet exist</b> — the white
+  space, i.e. the research agenda. The application sits at the intersection of three populated axes
+  — <i>reverse optimization</i>, a <i>lower-tail co-movement view</i>, and a <i>fast exact inverse
+  of a correlated race</i> — whose pairwise edges all exist but whose triple does not. Click a node
+  to open the reference; drag to rearrange; hover for the one-line story.</p>
+  <div class="legend" id="cluster-legend"></div>
+  <div class="legend">
+    <span><span class="line" style="border-color:#888"></span> builds on / descends from</span>
+    <span><span class="line" style="border-color:#2471a3;border-top-width:3.5px"></span> same object, two readings</span>
+    <span><span class="line" style="border-color:#1e8449"></span> endpoint / special case</span>
+    <span><span class="line" style="border-top-style:dotted;border-color:#7d3c98"></span> contrast (competing approach)</span>
+    <span><span class="line" style="border-top-style:dashed;border-color:#c0392b"></span> GAP — does not exist yet</span>
+  </div>
+  <div id="graph"></div>
+  <p class="hint">Compiled from two literature sweeps (BL tail/non-normal extensions; reverse
+  optimization &amp; implied dependence views). Some venues are provisional pending verification.
+  See also the <a href="../demos/tail-black-litterman/index.html">interactive demo</a>.</p>
+</div>
+<div id="tooltip"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const CLUSTERS = {
+  hub:        {label:"Tail-sensitive BL (core)",      color:"#222222"},
+  reverseopt: {label:"Reverse / inverse optimization", color:"#2980b9"},
+  choice:     {label:"Discrete-choice inversion",      color:"#8e44ad"},
+  meucci:     {label:"Entropy / copula pooling",       color:"#16a085"},
+  blnn:       {label:"Higher-moment / skew",          color:"#d68910"},
+  taildep:    {label:"Tail-dependence allocation",     color:"#c0392b"},
+  thurstone:  {label:"Thurstonian race",               color:"#27ae60"},
+  empirical:  {label:"Empirical premise",              color:"#5d6d7e"},
+};
+
+const NODES = [
+ {id:"fat", label:"FAST ABILITY TRANSFORM", year:2021, c:"hub", r:17, url:"https://doi.org/10.1137/19M1276261", note:"Cotton 2021, 'Inferring Relative Ability from Winning Probability in Multientrant Contests,' SIAM J. Financial Math. 12(1):295-317. A fast EXACT inverse of the order-statistic (Thurstonian) race, shares -> latent abilities. The enabling object at the center: it makes the nonlinear reverse step exact, where BL's inverse is linear and BLP's is iterative. No published fast exact inverse of a CORRELATED race existed before it."},
+ {id:"hub", label:"Tail-sensitive Black–Litterman", year:2026, c:"hub", r:13, url:"../demos/tail-black-litterman/index.html", note:"The headline application: reverse-optimize a benchmark to latent abilities of a correlated race (via the FAT), then re-weight on the simplex under a view on LOWER-TAIL co-movement — a tail-sensitive analogue of Pi=lambda*Sigma*w that never inverts a covariance and never runs an optimizer."},
+ {id:"thportfolios", label:"Thurstone Portfolios (this work)", year:2026, c:"hub", r:11, url:"../papers/index.html", note:"The portfolios paper: weights as winning probabilities of a race; redundancy/clone consistency; the tail-sensitive-BL reading. Built on the FAT."},
+
+ // reverse / inverse optimization
+ {id:"sharpe1974", label:"Sharpe 1974", year:1974, c:"reverseopt", url:"https://scholar.google.com/scholar?q=Sharpe+1974+Imputing+Expected+Security+Returns+from+Portfolio+Composition", note:"JFQA: impute the expected returns that make held weights MV-optimal. The conceptual ancestor of the BL reverse step. Returns only; Sigma given."},
+ {id:"bl1992", label:"Black–Litterman 1992", year:1992, c:"reverseopt", url:"https://doi.org/10.2469/faj.v48.n5.28", note:"Pi=lambda*Sigma*w_mkt, then Bayesian view update; tau*Sigma confidence scaling (the dial our phi plays). Canonical — but views and inversion are on RETURNS; Sigma is exogenous."},
+ {id:"idzorek2005", label:"Idzorek 2005", year:2005, c:"reverseopt", url:"https://scholar.google.com/scholar?q=Idzorek+step-by-step+guide+Black-Litterman+model", note:"Practitioner guide; view-confidence -> Omega calibration. Still returns-only."},
+ {id:"qiangorman2001", label:"Qian–Gorman 2001", year:2001, c:"reverseopt", url:"https://doi.org/10.2469/faj.v57.n2.2432", note:"FAJ: BL with views on VOLATILITIES and CORRELATIONS -> a conditional covariance. The canonical 'view on dependence' BL — but second-moment only, and it re-inverts a covariance for MV."},
+ {id:"ahuja2001", label:"Ahuja–Orlin 2001", year:2001, c:"reverseopt", url:"https://doi.org/10.1287/opre.49.5.771.10607", note:"Foundational inverse-optimization theory: recover the objective making an observed solution optimal; itself an LP by duality."},
+ {id:"bertsimas2012", label:"Bertsimas–Gupta–Paschalidis 2012", year:2012, c:"reverseopt", url:"https://doi.org/10.1287/opre.1120.1115", note:"Oper.Res.: recasts BL as inverse optimization; extends to coherent (CVaR) risk. The closest reverse-opt neighbor — but it inverts via a conic optimization on returns/risk, not a fast exact nonlinear inverse to abilities, and the view is on risk/returns, not tail co-movement."},
+ {id:"inverseport2020", label:"Yu–Wang–Dong 2023", year:2023, c:"reverseopt", url:"https://doi.org/10.1016/j.ribaf.2023.101879", note:"'Learning Risk Preferences from Investment Portfolios Using Inverse Optimization' (Res. Int. Bus. Finance 64:101879; arXiv:2010.01687). BL's mirror image on the same Markowitz machine: BL fixes risk-aversion and backs out RETURNS, this fixes the return model and backs out the risk PREFERENCE. The tight reverse-opt neighbor — but it inverts the mean-variance OPTIMIZER (a QP, ill-conditioned near the active set) for a scalar on the MEAN side; we invert a race for an ability VECTOR on the DEPENDENCE/tail side, exactly and with no optimizer in the loop."},
+
+ // discrete-choice inversion
+ {id:"mcfadden1974", label:"McFadden 1974", year:1974, c:"choice", url:"https://scholar.google.com/scholar?q=McFadden+1974+conditional+logit+random+utility", note:"Random-utility foundation. Plain-logit share->utility inverse is CLOSED FORM (delta_j=log s_j - log s_0): the one exact-and-fast regime — but it assumes independence (no dependence view)."},
+ {id:"berry1994", label:"Berry 1994", year:1994, c:"choice", url:"https://doi.org/10.2307/2555829", note:"RAND: logit & nested-logit share systems invert in closed form to mean utilities, linearizing the demand system."},
+ {id:"blp1995", label:"Berry–Levinsohn–Pakes 1995", year:1995, c:"choice", url:"https://doi.org/10.2307/2171802", note:"Random-coefficients case has NO closed form; inverted by a contraction-mapping fixed point. The iterative analogue of the FAT for heterogeneous/correlated tastes."},
+ {id:"bgh2013", label:"Berry–Gandhi–Haile 2013", year:2013, c:"choice", url:"https://doi.org/10.3982/ECTA10135", note:"'Connected substitutes': conditions for global invertibility of a share system to the latent index — the existence/uniqueness backing for a share->ability inverse."},
+
+ // entropy / copula pooling
+ {id:"meucci2006", label:"Meucci 2006 (COP)", year:2006, c:"meucci", url:"https://papers.ssrn.com/sol3/papers.cfm?abstract_id=848407", note:"Copula-Opinion Pooling: views on realizations, skew-t marginals glued by a copula; posterior is the blended distribution -> downstream optimizer picks weights."},
+ {id:"meucci2008", label:"Meucci 2008 (Entropy Pooling)", year:2008, c:"meucci", url:"https://arxiv.org/abs/1012.2848", note:"Views (means, CORRELATIONS, CVaR, tail probabilities, rankings) as constraints on SCENARIO probabilities; posterior = min-KL projection. The strongest prior art for tilting a normalized object toward a tail view — but it reweights scenario probabilities (not shares/abilities) via a convex solve, and still needs a separate optimizer."},
+
+ // BL non-normal / higher-moment / copula-BL
+ {id:"giacometti2007", label:"Giacometti et al 2007", year:2007, c:"blnn", url:"https://scholar.google.com/scholar?q=Giacometti+Bertocchi+Rachev+Fabozzi+stable+distributions+Black-Litterman", note:"Stable/t priors, VaR/CVaR risk in BL."},
+ {id:"harvey2010", label:"Harvey et al 2010", year:2010, c:"blnn", url:"https://doi.org/10.1080/14697681003756877", note:"Full Bayesian portfolio choice under a skew-normal likelihood (skew/kurtosis + parameter uncertainty); MCMC + utility maximization."},
+ {id:"hiddentrunc2023", label:"Park–Nguyen 2025 (skew-normal BL)", year:2025, c:"blnn", url:"https://doi.org/10.1007/s11579-025-00387-1", note:"Math. & Financial Economics 19(2):407-444 (arXiv:2310.12333): the BL posterior is hidden-truncation SKEW-NORMAL in closed form, optimized via Simaan's three-moment risk model. The nearest skew-aware BL competitor — but it is skew-NORMAL (no skew-t, no joint lower tail), needs the third moment, and runs an MVS optimizer; no race inverse, no tail-co-movement view."},
+ {id:"martellini2010", label:"Martellini–Ziemann 2010", year:2010, c:"blnn", url:"https://doi.org/10.1093/rfs/hhp099", note:"Improved coskewness/cokurtosis estimators; the 'villain' of estimation-heavy higher-moment allocation (comoment-tensor dimensionality the empirical-simulation race never forms)."},
+ {id:"sahamkhadam2022", label:"Sahamkhadam et al 2022", year:2022, c:"blnn", url:"https://doi.org/10.1016/j.ejor.2021.06.015", note:"EJOR: BL posterior via R-vine copulas (asymmetric tail dependence) -> mean-CVaR. The explicit tail-aware-BL lineage — BUT the copula supplies return scenarios; the reverse step is still returns-only Pi=lambda*Sigma*w."},
+ // skewness-aware allocation (the higher-moment way to be asymmetry-aware: comoment tensors + optimization)
+ {id:"kraus1976", label:"Kraus–Litzenberger 1976", year:1976, c:"blnn", url:"https://doi.org/10.1111/j.1540-6261.1976.tb01961.x", note:"J. Finance: three-moment CAPM — investors like positive skewness, so systematic COSKEWNESS with the market is priced alongside beta. The origin of skewness preference."},
+ {id:"harveysiddique2000", label:"Harvey–Siddique 2000", year:2000, c:"blnn", url:"https://doi.org/10.1111/0022-1082.00247", note:"J. Finance: time-varying CONDITIONAL coskewness with the market carries a premium and helps explain the cross-section beyond Fama-French."},
+ {id:"simaan1993", label:"Simaan 1993", year:1993, c:"blnn", url:"https://doi.org/10.1287/mnsc.39.5.568", note:"Mgmt Science: a three-parameter (location-scale + asymmetry) framework admitting skewness preference without a full comoment tensor — the three-moment risk model the skew-normal BL optimizes against."},
+ {id:"lai1991", label:"Lai 1991 (PGP)", year:1991, c:"blnn", url:"https://doi.org/10.1007/BF02408382", note:"Originates polynomial goal programming for mean-variance-SKEWNESS: trade mean/variance/skewness as competing objectives. Needs the coskewness tensor AND an optimizer."},
+ {id:"briec2007", label:"Briec–Kerstens–Jokung 2007", year:2007, c:"blnn", url:"https://doi.org/10.1287/mnsc.1060.0596", note:"Mgmt Science: a shortage / directional-distance function gauges mean-variance-SKEWNESS efficiency over the non-convex MVS frontier. Comoment tensor + nonlinear optimization."},
+ {id:"boudt2020", label:"Boudt–Cornilly–Verdonck 2020", year:2020, c:"blnn", url:"https://doi.org/10.1093/jjfinec/nby022", note:"J. Financial Econometrics: shrinks the sample COSKEWNESS matrix toward structured targets (unbiased-MSE intensity) — the remedy for the comoment tensor's dimensionality. Still an estimate-then-optimize pipeline."},
+
+ // tail-dependence allocation
+ {id:"lohre2020", label:"Lohre–Rother–Schäfer 2020", year:2020, c:"taildep", url:"https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3513399", note:"HRP using LOWER-TAIL DEPENDENCE as linkage; re-weights the simplex by recursive bisection with NO covariance inversion — closest in mechanism to 'reweight without inverting Sigma' — but no view, no reverse-opt, no inverse map (a clustering heuristic)."},
+ {id:"taildepclust2018", label:"Tail-dependence clustering 2018", year:2018, c:"taildep", url:"https://doi.org/10.3390/risks6040115", note:"Cluster co-crashers by lower-tail (maximal) dependence; the de-duplication primitive, as a hard pre-step (De Luca-Zuccolotto lineage)."},
+ {id:"tailriskparity", label:"Tail-risk parity", year:2017, c:"taildep", url:"https://scholar.google.com/scholar?q=tail+risk+parity+expected+shortfall+contributions", note:"Equalize expected-shortfall contributions; weights driven by tail-fatness and tail correlations. A risk-contribution root-find, not a view-driven reverse map."},
+
+ // Thurstonian race
+ {id:"thurstone1927", label:"Thurstone 1927", year:1927, c:"thurstone", url:"https://scholar.google.com/scholar?q=Thurstone+1927+law+of+comparative+judgment", note:"Law of comparative judgment (Case V = probit). Weights as winning probabilities of a race among latent strengths."},
+ {id:"clark1961", label:"Clark 1961", year:1961, c:"thurstone", url:"https://doi.org/10.1287/opre.9.2.145", note:"Canonical moment-matching approximation of E[max] of correlated Gaussians (still the standard). Both the forward race and its inverse are APPROXIMATE in the standard literature — the FAT is the exact alternative."},
+ {id:"maydeu2005", label:"Maydeu-Olivares–Böckenholt 2005", year:2005, c:"thurstone", url:"https://scholar.google.com/scholar?q=Maydeu-Olivares+Bockenholt+2005+paired+comparison+ranking+SEM", note:"Latent-scale recovery by ML over order-statistic probabilities — numerical, not closed-form."},
+
+ // empirical premise
+ {id:"mallela2026", label:"Mallela–Leonelli 2026", year:2026, c:"empirical", url:"https://arxiv.org/abs/2606.16840", note:"Husler-Reiss extremal graphs: lower-tail network near-complete, upper-tail thin ('crash together, rally apart'). Independent EMPIRICAL support for the premise — cite as motivation, not competition."},
+];
+
+// type: lineage | identity | endpoint | contrast | gap
+const EDGES = [
+ // reverse-opt lineage
+ {s:"sharpe1974", t:"bl1992", type:"lineage", label:"reverse step -> BL prior"},
+ {s:"bl1992", t:"idzorek2005", type:"lineage"},
+ {s:"bl1992", t:"qiangorman2001", type:"lineage", label:"views on covariance"},
+ {s:"ahuja2001", t:"bertsimas2012", type:"lineage", label:"inverse-opt theory"},
+ {s:"bl1992", t:"bertsimas2012", type:"lineage", label:"BL as inverse optimization"},
+ {s:"bertsimas2012", t:"inverseport2020", type:"lineage"},
+ {s:"inverseport2020", t:"hub", type:"contrast", label:"learns the preference (mean side) by an ill-conditioned optimizer-inverse; we invert a race for abilities (dependence side), exactly"},
+ // choice lineage
+ {s:"mcfadden1974", t:"berry1994", type:"lineage"},
+ {s:"berry1994", t:"blp1995", type:"lineage", label:"random coefficients"},
+ {s:"blp1995", t:"bgh2013", type:"lineage", label:"invertibility conditions"},
+ // meucci + blnn lineage
+ {s:"meucci2006", t:"meucci2008", type:"lineage"},
+ {s:"bl1992", t:"giacometti2007", type:"lineage", label:"non-normal priors"},
+ {s:"bl1992", t:"harvey2010", type:"lineage"},
+ {s:"giacometti2007", t:"hiddentrunc2023", type:"lineage"},
+ {s:"meucci2006", t:"sahamkhadam2022", type:"lineage", label:"copula views"},
+ {s:"bl1992", t:"sahamkhadam2022", type:"lineage"},
+ // skewness-aware allocation lineage
+ {s:"kraus1976", t:"harveysiddique2000", type:"lineage", label:"unconditional → conditional coskewness"},
+ {s:"kraus1976", t:"simaan1993", type:"lineage"},
+ {s:"lai1991", t:"briec2007", type:"lineage", label:"PGP → efficiency gauging"},
+ {s:"martellini2010", t:"boudt2020", type:"lineage", label:"comoment estimation → shrinkage"},
+ {s:"harvey2010", t:"hiddentrunc2023", type:"lineage", label:"Bayesian higher-moment prior"},
+ {s:"simaan1993", t:"hiddentrunc2023", type:"lineage", label:"three-moment risk model"},
+ // skewness-aware vs the race
+ {s:"briec2007", t:"hub", type:"contrast", label:"mean-var-SKEW via comoment tensors + optimization; the race gets skew/coskew for free"},
+ {s:"hiddentrunc2023", t:"hub", type:"gap", label:"skew-NORMAL BL: 3rd moment + MVS optimizer, no skew-t, no race inverse"},
+ // tail-dep lineage
+ {s:"taildepclust2018", t:"lohre2020", type:"lineage", label:"tail-dependence linkage"},
+ {s:"taildepclust2018", t:"tailriskparity", type:"lineage"},
+ // thurstone lineage
+ {s:"thurstone1927", t:"clark1961", type:"lineage"},
+ {s:"thurstone1927", t:"maydeu2005", type:"lineage"},
+ {s:"thurstone1927", t:"fat", type:"lineage", label:"order-statistic race"},
+
+ // identity — same object, two readings
+ {s:"bl1992", t:"hub", type:"identity", label:"reverse step: return view ↔ dependence/tail view"},
+ {s:"thportfolios", t:"fat", type:"identity", label:"race weights = winning probabilities"},
+ {s:"fat", t:"hub", type:"identity", label:"the exact inverse the reverse step needs"},
+ {s:"blp1995", t:"fat", type:"identity", label:"share->latent inversion (iterative ↔ exact)"},
+ {s:"clark1961", t:"fat", type:"identity", label:"E[max] of a correlated race: approximate ↔ exact"},
+
+ // endpoint / special case
+ {s:"mcfadden1974", t:"fat", type:"endpoint", label:"logit log-shares = the independent, closed-form corner"},
+ {s:"qiangorman2001", t:"hub", type:"endpoint", label:"covariance view = the second-moment, no-tail corner"},
+
+ // contrast — competing approach
+ {s:"meucci2008", t:"hub", type:"contrast", label:"tail views, but scenario reweighting + convex solve"},
+ {s:"lohre2020", t:"hub", type:"contrast", label:"simplex reweight w/o Sigma, but a clustering heuristic"},
+ {s:"tailriskparity", t:"hub", type:"contrast", label:"tail-risk view, but a risk-contribution root-find"},
+
+ // GAP — the white space (dashed red)
+ {s:"bertsimas2012", t:"hub", type:"gap", label:"inverse-opt BL, but never inverts for DEPENDENCE/tail"},
+ {s:"sahamkhadam2022", t:"hub", type:"gap", label:"copula tail scenarios, but reverse step stays returns-only"},
+ {s:"blp1995", t:"fat", type:"gap", label:"no fast EXACT inverse of a CORRELATED race; not in portfolios"},
+ {s:"lohre2020", t:"taildepclust2018", type:"gap", label:"tail de-dup as a VIEW that tilts shares: nobody"},
+
+ // empirical premise
+ {s:"mallela2026", t:"hub", type:"lineage", label:"empirical premise (independent): crash together, rally apart"},
+];
+
+const STYLE = {
+  lineage:  {stroke:"#999", width:1.4, dash:null},
+  identity: {stroke:"#2471a3", width:2.8, dash:null},
+  endpoint: {stroke:"#1e8449", width:2.2, dash:null},
+  contrast: {stroke:"#7d3c98", width:1.8, dash:"2,4"},
+  gap:      {stroke:"#c0392b", width:2.2, dash:"7,5"},
+};
+
+const W = document.getElementById("graph").clientWidth, H = 780;
+const svg = d3.select("#graph").append("svg").attr("width","100%").attr("height",H).attr("viewBox",[0,0,W,H]);
+const g = svg.append("g");
+svg.call(d3.zoom().scaleExtent([0.4,3]).on("zoom", ev => g.attr("transform", ev.transform)));
+
+const links = EDGES.map(e => ({source:e.s, target:e.t, ...e}));
+const cx = W/2, cy = H/2, R_OUTER = 290;
+const sectors = {};
+Object.keys(CLUSTERS).forEach((k,i,arr)=>{ sectors[k] = (i/arr.length)*2*Math.PI - Math.PI/2; });
+const CORE = new Set(["hub","thportfolios","fat"]);
+NODES.forEach((d,i)=>{
+  if (d.id==="fat"){ d.fx=cx; d.fy=cy; return; }
+  const ring = CORE.has(d.id) ? 70 : R_OUTER;
+  const a = CORE.has(d.id) ? (i*2.2) : sectors[d.c] + ((i%5)-2)*0.16;
+  d.x = cx + ring*Math.cos(a); d.y = cy + ring*Math.sin(a);
+});
+
+const sim = d3.forceSimulation(NODES)
+  .force("link", d3.forceLink(links).id(d=>d.id).distance(d=>d.label?150:95).strength(0.1))
+  .force("charge", d3.forceManyBody().strength(-340))
+  .force("radial", d3.forceRadial(d=> d.id==="fat"?0:(CORE.has(d.id)?70:R_OUTER), cx, cy)
+                     .strength(d=> d.id==="fat"?1:(CORE.has(d.id)?0.8:0.28)))
+  .force("collide", d3.forceCollide().radius(d=>(d.r||9)+18));
+
+const tooltip = d3.select("#tooltip");
+const TYPE_NAMES = {lineage:"builds on / descends from", identity:"same object, two readings",
+  endpoint:"endpoint / special case", contrast:"contrast (competing approach)", gap:"GAP — does not exist yet"};
+
+const link = g.append("g").selectAll("line").data(links).join("line")
+  .attr("stroke",d=>STYLE[d.type].stroke).attr("stroke-width",d=>STYLE[d.type].width)
+  .attr("stroke-dasharray",d=>STYLE[d.type].dash).attr("opacity",0.75);
+const linkHover = g.append("g").selectAll("line").data(links).join("line")
+  .attr("stroke","transparent").attr("stroke-width",12)
+  .on("mousemove",(ev,d)=>{ tooltip.style("display","block")
+      .style("left",(ev.pageX+14)+"px").style("top",(ev.pageY+8)+"px")
+      .html(`<b>${d.source.label} → ${d.target.label}</b><br><i>${TYPE_NAMES[d.type]}</i>${d.label?"<br>"+d.label:""}`); })
+  .on("mouseout",()=>tooltip.style("display","none"));
+const edgeLabel = g.append("g").selectAll("text").data(links.filter(d=>d.label)).join("text")
+  .attr("class","edgelabel").attr("text-anchor","middle").attr("fill",d=>STYLE[d.type].stroke).text(d=>d.label);
+
+const node = g.append("g").selectAll("circle").data(NODES).join("circle")
+  .attr("r",d=>d.r||9).attr("fill",d=>CLUSTERS[d.c].color).attr("stroke","#fff").attr("stroke-width",1.5)
+  .style("cursor","pointer")
+  .on("click",(ev,d)=>{ if(d.url) window.open(d.url, d.url.startsWith("..")?"_self":"_blank"); })
+  .on("mousemove",(ev,d)=>{ tooltip.style("display","block")
+      .style("left",(ev.pageX+14)+"px").style("top",(ev.pageY+8)+"px")
+      .html(`<b>${d.label}</b>${d.year?" ("+d.year+")":""}<br>${d.note||""}`); })
+  .on("mouseout",()=>tooltip.style("display","none"))
+  .call(d3.drag()
+    .on("start",(ev,d)=>{ if(!ev.active) sim.alphaTarget(0.25).restart(); d.fx=d.x; d.fy=d.y; })
+    .on("drag",(ev,d)=>{ d.fx=ev.x; d.fy=ev.y; })
+    .on("end",(ev,d)=>{ if(!ev.active) sim.alphaTarget(0); if(d.id!=="fat"){ d.fx=null; d.fy=null; } }));
+
+const label = g.append("g").selectAll("text").data(NODES).join("text")
+  .attr("class","nodelabel").attr("text-anchor","middle").attr("dy",d=>-((d.r||9)+5))
+  .style("font-weight",d=>(d.id==="fat"||d.id==="hub")?"bold":"normal").text(d=>d.label);
+
+sim.on("tick",()=>{
+  link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  linkHover.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  edgeLabel.attr("x",d=>(d.source.x+d.target.x)/2).attr("y",d=>(d.source.y+d.target.y)/2 - 4);
+  node.attr("cx",d=>d.x=Math.max(20,Math.min(W-20,d.x))).attr("cy",d=>d.y=Math.max(20,Math.min(H-20,d.y)));
+  label.attr("x",d=>d.x).attr("y",d=>d.y);
+});
+
+d3.select("#cluster-legend").selectAll("span").data(Object.values(CLUSTERS)).join("span")
+  .html(d=>`<span class="dot" style="background:${d.color}"></span>${d.label}`);
+</script>
+</body>
+</html>

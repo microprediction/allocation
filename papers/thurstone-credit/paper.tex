@@ -26,21 +26,24 @@
 \begin{abstract}
 The probability that a competitor wins a noisy race---the Thurstonian choice
 probability, equivalently the gradient of an expected-maximum potential---is a
-rule for attributing credit among correlated contributors. It is efficient and
-symmetric (two of the Shapley axioms), it is \emph{redundancy-aware} (contributors
-that move together share a single contributor's credit rather than double-counting),
-it is differentiable in the contributors' abilities, it updates online, and it
-costs $O(Mn)$ in a single Monte-Carlo pass with no coalition enumeration. We place
-it next to the Shapley value: on the expected-maximum game its \emph{diagonal
-integral} is an Aumann--Shapley value, but the winning probability itself is a
-distinct, gradient-valued object, not the Shapley value of the membership game---a
-cousin, not a drop-in. The practical separation is computational: redundancy-aware
-credit in one linear pass where exact Shapley is $O(2^n)$ and sampled Shapley is
-$O(RMn)$ with $1/\sqrt R$ error. We show that the headline redundancy property---an
-even split of credit among near-duplicates---is a property of the \emph{calibrated}
-equal-ability race rather than of raw scores, and we demonstrate the rule on
-forecast combination and feature attribution. This develops the credit reading of
-the construction in the companion paper on Thurstone portfolios.
+rule for attributing credit among correlated contributors. It is a probability share
+($\sum_i w_i = 1$), symmetric, and \emph{redundancy-aware} (contributors that move
+together share a single contributor's credit rather than double-counting); it is
+differentiable in the contributors' abilities, it updates online, and it costs
+$O(Mn)$ in a single Monte-Carlo pass with no coalition enumeration. It is \emph{not} a
+Shapley value and does not try to be: Shapley measures coalitional cooperation---a
+contributor's average marginal value as coalitions form---whereas the winning
+probability measures \emph{selection relevance}, how often a contributor is the single
+best in the field at hand. The two answer different questions, and a contributor that
+is never individually best yet improves every blend it joins earns Shapley credit but
+little race credit; the race does not capture such coalitional value. (There is a
+clean mathematical link---the winning-probability field integrates along the diagonal
+to an Aumann--Shapley value of an ability-scaling game---which we record but do not
+lean on.) We show that the headline redundancy property---an even split of credit
+among near-duplicates---is a property of the \emph{calibrated} equal-ability race
+rather than of raw scores, and we demonstrate the rule on forecast combination and
+feature attribution. This develops the credit reading of the construction in the
+companion paper on Thurstone portfolios.
 \end{abstract}
 
 \section{Introduction}
@@ -65,8 +68,12 @@ probability that it wins,
   w_i \;=\; \Prob\!\Big( X_i = \max_j X_j \Big).
   \label{eq:winprob}
 \end{equation}
-This is the Thurstonian choice probability, and the vector $w = W_S(\theta)$ is the
-gradient of an expected-maximum potential (\Cref{sec:rule}). Read as credit it has
+We follow the lowest-\emph{score}-wins convention of the \texttt{thurstone} package
+and \textcite{cotton2021}: $\theta_i$ is a \emph{strength}, the negated score, so the
+lowest-score contributor is the $\argmaxop$ winner in \eqref{eq:winprob}; in the
+loss-based applications of \Cref{sec:apps} the score is a loss and the lowest-loss
+contributor wins. This is the Thurstonian choice probability, and $w = W_S(\theta)$
+is the gradient of an expected-maximum potential (\Cref{sec:rule}). Read as credit it has
 three things going for it at once. It is redundancy-aware by construction: two
 contributors that move together compete with \emph{each other}, so a co-moving pair
 collapses toward a single winner and shares one contributor's credit. It is
@@ -96,12 +103,13 @@ expected-maximum potential and its gradient,
   W_S(\theta) \;=\; \nabla G_S(\theta) \in \Delta,
   \label{eq:potential}
 \end{equation}
-where $\Delta$ is the simplex. When $S$ has a density the maximizer is a.s.\ unique,
-$G_S$ is smooth and convex, and $\nabla_i G_S(\theta) = \Prob(i = \argmaxop_j
-X_j) = w_i$, recovering \eqref{eq:winprob}; this is the Williams--Daly--Zachary /
-perturbed-maximum identity \parencite{williams1977, mcfadden1981, berthet2020}.
-Because $G_S(\theta + c\mathbf 1) = G_S(\theta) + c$, gradients and Jacobians live
-on the tangent space $T\Delta = \{v : \mathbf 1^\top v = 0\}$.
+where $\Delta$ is the simplex. $G_S$ is convex for any $S$; when $S$ is continuous and
+the usual dominated-differentiation conditions hold, the maximizer is a.s.\ unique,
+$G_S$ is differentiable, and $\nabla_i G_S(\theta) = \Prob(i = \argmaxop_j X_j) = w_i$,
+recovering \eqref{eq:winprob} (the Williams--Daly--Zachary / perturbed-maximum
+identity \parencite{williams1977, mcfadden1981, berthet2020}); for Gaussian $S$,
+$G_S$ is $C^\infty$. Because $G_S(\theta + c\mathbf 1) = G_S(\theta) + c$, gradients
+and Jacobians live on the tangent space $T\Delta = \{v : \mathbf 1^\top v = 0\}$.
 
 To use \eqref{eq:winprob} as an attribution we must fix the abilities. Given a
 \emph{benchmark} $w^0 \in \operatorname{int}\Delta$ of marginal credits and a
@@ -110,10 +118,14 @@ reference law $S_0$, calibration inverts the gradient map,
   \theta^0 \;=\; W_{S_0}^{-1}(w^0) \quad (\text{mod } \mathbf 1),
   \label{eq:calib}
 \end{equation}
-which is well posed: for Gaussian $S_0 = \mathcal N(0, C_0)$ with $C_0 \succ 0$ the
-map $W_{C_0} : \R^n/\!\operatorname{span}\{\mathbf 1\} \to \operatorname{int}\Delta$
-is a smooth bijection, and the diagonal case admits a linear-time, Monte-Carlo-free
-inverse (the Fast Ability Transform, \textcite{cotton2021}). The credit rule is then
+which is well posed: for Gaussian $S_0 = \mathcal N(0, C_0)$ with $C_0 \succ 0$,
+$G_{C_0}$ is a Legendre-type convex function on the quotient
+$\R^n/\!\operatorname{span}\{\mathbf 1\}$---smooth, strictly convex, and steep toward
+the boundary of its image---so $W_{C_0} = \nabla G_{C_0}$ is a smooth bijection onto
+$\operatorname{int}\Delta$; the diagonal case admits a linear-time, Monte-Carlo-free
+inverse (the Fast Ability Transform, \textcite{cotton2021}). A zero target weight
+sends its ability to $-\infty$, so such contributors are dropped or floored. The
+credit rule is then
 \begin{equation}
   T_{S_0\to S_1}(w^0) \;=\; W_{S_1}\!\big(W_{S_0}^{-1}(w^0)\big),
   \label{eq:tilt}
@@ -123,123 +135,122 @@ dependence-rich law $S_1$. With $S_1 = S_0$ the benchmark is reproduced; with $S
 carrying the contributors' empirical dependence, \eqref{eq:tilt} re-weights the
 benchmark for redundancy.
 
-\section{Relationship to the Shapley value}
+\section{Relationship to the Shapley value: a contrast, not a substitute}
 \label{sec:shapley}
 
-Both the winning probability and the Shapley value can distribute the same
-quantity. Take the cooperative game
+The winning probability is naturally compared to the Shapley value, and the
+relationship is real but easy to overstate, because the two are credit in different
+\emph{units}. The winning probabilities are \emph{probability shares},
+$\sum_i w_i = 1$. The Shapley value allocates a cooperative game's grand value: for
 \begin{equation}
   v(\mathcal S) \;=\; \E\Big[\max_{i\in\mathcal S} X_i\Big],
   \qquad v(\varnothing) = 0,
   \label{eq:game}
 \end{equation}
-whose grand value $v(N) = \E[\max_i X_i] = G_S(\theta)$. The winning-probability
-vector and the Shapley value of \eqref{eq:game} both lie on the simplex (after
-normalization) and both satisfy two Shapley axioms: \emph{efficiency} (the shares
-sum to the total) and \emph{symmetry} (interchangeable contributors receive equal
-credit). They differ on the third.
+with grand value $v(N) = \E[\max_i X_i] = G_S(\theta)$, the Shapley shares sum to
+$v(N)$---a payoff in the units of $X$, not to one. So $w$ is \emph{not} a Shapley
+value of $v$, and the two obey different efficiency conditions, $\sum_i w_i = 1$
+versus $\sum_i \phi_i = v(N)$. The honest connection is a gradient/integral one,
+through the ability-scaling game.
 
-\begin{proposition}[Gradient value versus coalitional value]
+\begin{proposition}[Gradient, integral, and the membership value]
 \label{prop:bridge}
-Let $S$ have a density, so $G_S$ is differentiable, and define the ability-scaling
-game $f(x) = G_S(x\odot\theta) - G_S(0)$ for $x\in[0,1]^n$, where $x\odot\theta$
-scales ability $i$ by $x_i$.
+Let $S$ be continuous with the usual dominated-differentiation conditions, and define
+the ability-scaling game $f(x) = G_S(x\odot\theta) - G_S(0)$ for $x\in[0,1]^n$, where
+$x\odot\theta$ scales ability $i$ by $x_i$.
 \begin{enumerate}
-\item[\textup{(i)}] \emph{Gradient.} $w = \nabla G_S(\theta)$ is the
-  winning-probability vector \eqref{eq:winprob}: the marginal of the grand
-  coalition's value in the abilities.
+\item[\textup{(i)}] \emph{Gradient.} The winning-probability vector is the endpoint
+  gradient, $w = \nabla G_S(\theta)$, with $\sum_i w_i = 1$.
 \item[\textup{(ii)}] \emph{Aumann--Shapley.} The diagonal Aumann--Shapley value of
-  $f$ \parencite{aumannshapley1974},
+  $f$ \parencite{aumannshapley1974} is
   $\mathrm{AS}_i = \int_0^1 \partial_{x_i} f(t\mathbf 1)\,dt
-   = \theta_i \int_0^1 W_S(t\theta)_i\,dt$,
-  is efficient, $\sum_i \mathrm{AS}_i = G_S(\theta) - G_S(0)$, and symmetric:
-  exchangeable contributors receive equal credit.
-\item[\textup{(iii)}] \emph{Distinct from the membership Shapley value.} The Shapley
-  value of \eqref{eq:game} is, by Owen's multilinear extension \parencite{owen1972},
-  the diagonal integral of the \emph{coalition-averaged} marginal
-  $\E[(X_i - \max_{j\in T}X_j)^+]$ over a random coalition $T$, whereas
-  $w_i = \Prob(X_i = \max_N)$ is the marginal at the grand coalition alone. The two
-  agree in the fully symmetric case and differ in general.
+   = \theta_i \int_0^1 W_S(t\theta)_i\,dt$, in payoff units; it is efficient,
+  $\sum_i \mathrm{AS}_i = G_S(\theta) - G_S(0)$, and symmetric. The
+  winning-probability field $\theta\mapsto W_S(\theta)$ is the \emph{gradient} whose
+  diagonal line integral (weighted by $\theta$) is $\mathrm{AS}$; $w$ is the endpoint
+  gradient, not the integral.
+\item[\textup{(iii)}] \emph{Membership Shapley.} The Shapley value of \eqref{eq:game}
+  is, by Owen's multilinear extension \parencite{owen1972}, the diagonal integral
+  over a random coalition $T$ of the marginal $v(T\cup\{i\}) - v(T)$, which equals
+  $\E[(X_i - \max_{j\in T} X_j)^+]$ for $T\neq\varnothing$ and $\E[X_i]$ for
+  $T = \varnothing$. This payoff-valued, coalition-averaged quantity is a different
+  object from the probability $w_i = \Prob(X_i = \max_N)$, and the two generally
+  differ (they agree in the fully symmetric case).
 \end{enumerate}
 \end{proposition}
 \begin{proof}
 (i) is the Williams--Daly--Zachary / perturbed-maximum identity
-\parencite{williams1977, berthet2020}. For (ii), the chain rule and (i) give
-$\partial_{x_i} f(x) = \theta_i\,\partial_{\theta_i} G_S(x\odot\theta) =
-\theta_i\, W_S(x\odot\theta)_i$, which on the diagonal is the stated integrand.
-Efficiency is the fundamental theorem of calculus along the diagonal,
-\[
-  \sum_i \mathrm{AS}_i
-  = \int_0^1 \nabla G_S(t\theta)\cdot\theta \,dt
-  = \int_0^1 \tfrac{d}{dt} G_S(t\theta)\,dt
-  = G_S(\theta) - G_S(0);
-\]
-symmetry holds because exchanging two equal-ability contributors leaves $G_S$, and
-hence each $W_S(t\theta)_i$, invariant. For (iii), the membership marginal is
-$v(T\cup\{i\}) - v(T) = \E[\max(\max_{j\in T} X_j,\, X_i)] - \E[\max_{j\in T} X_j]
-= \E[(X_i - \max_{j\in T} X_j)^+]$, and Owen's identity \parencite{owen1972}
-writes the Shapley value as its diagonal integral over $T$; this coalition-averaged
-exceedance is a different functional from the grand-coalition win probability
-$\Prob(X_i = \max_N)$, coinciding only when the marginal does not vary along the
-path, as under full symmetry.
+\parencite{williams1977, berthet2020}, valid under the stated regularity. For (ii),
+the chain rule and (i) give $\partial_{x_i} f(x) = \theta_i\, W_S(x\odot\theta)_i$;
+on the diagonal this is the stated integrand, and efficiency is the fundamental
+theorem of calculus,
+$\sum_i \mathrm{AS}_i = \int_0^1 \tfrac{d}{dt} G_S(t\theta)\,dt = G_S(\theta)-G_S(0)$;
+symmetry follows because exchanging equal-ability contributors leaves $G_S$
+invariant. For (iii), when $T\neq\varnothing$,
+$v(T\cup\{i\}) - v(T) = \E[\max(\max_{j\in T} X_j, X_i)] - \E[\max_{j\in T} X_j]
+= \E[(X_i - \max_{j\in T} X_j)^+]$, while $v(\{i\}) - v(\varnothing) = \E[X_i]$;
+Owen's identity integrates this over $T$. It is payoff-valued and averages over
+coalitions, unlike the grand-coalition probability $w_i$.
 \end{proof}
 
-The winning probability is therefore a \emph{cousin} of the Shapley value: an exact
-Aumann--Shapley value of the ability game, sharing efficiency and symmetry, but not
-the membership-game Shapley value itself. Exactly which Shapley axioms it keeps is
-worth stating, since it pins down what is traded for the gradient form.
+So there is a clean mathematical link---the winning-probability field integrates
+along the diagonal to an Aumann--Shapley value of the ability-scaling game---but it
+should not be read as ``approximately Shapley.'' The winning probability is a
+probability share, in different units, and it answers a different question:
+\emph{selection relevance} (who is the single best in the field) rather than
+\emph{coalitional cooperation} (average marginal value across coalitions). The sharp
+way to see the gap: a contributor that is never individually the best but improves
+every blend it joins---a pure diversifier---carries real coalitional value and earns
+essentially \emph{no} race credit, because the race only ever rewards being the
+winner. Where credit means cooperation or combined value, the right object is the
+Shapley value of a combination-value game, not this. What can be said axiomatically
+is about the probability share directly, and it should not be dressed in the Shapley
+axioms (which are conditions on a payoff value of $v$).
 
-\begin{proposition}[Which Shapley axioms hold]
+\begin{proposition}[Properties of the probability-share credit]
 \label{prop:axioms}
-On the expected-maximum game \eqref{eq:game}, the winning-probability credit
-$w = \nabla G_S(\theta)$ satisfies \emph{efficiency} ($\sum_i w_i = 1$),
-\emph{symmetry} (interchangeable contributors receive equal credit), and the
-\emph{null-player} property (a contributor almost surely never the maximizer
-receives $w_i = 0$, and its presence leaves the others' credit unchanged). It does
-\emph{not} satisfy \emph{additivity}.
+The credit $w = \nabla G_S(\theta)$ satisfies \emph{probabilistic efficiency}
+($\sum_i w_i = 1$); \emph{argmax symmetry} (interchangeable contributors receive
+equal credit); and \emph{argmax nullity} (a contributor almost surely never the
+maximizer receives $w_i = 0$ and leaves the others' credit unchanged). It is not a
+linear functional of the game, so it is not additive in the Shapley sense.
 \end{proposition}
 \begin{proof}
-Efficiency and $w_i\ge 0$ are immediate from $w$ being a probability vector.
-Symmetry holds because exchanging two contributors with the same marginal and the
-same dependence on the rest leaves $G_S$, hence $\nabla G_S$, invariant. For the
-null player, if $X_i \le \max_{j\neq i} X_j$ almost surely then $i$ is never the
-argmax, so $w_i = 0$; the field maximum equals the maximum without $i$, so every
-other winning probability is unchanged. Finally, the Shapley value is the
-\emph{unique} value satisfying efficiency, symmetry, null-player, and additivity
-\parencite{shapley1953}; $w$ satisfies the first three yet differs from it
-(\Cref{prop:bridge}), so it cannot satisfy additivity. Directly, $w = \nabla G_S$
-is the gradient of a strictly convex potential, a nonlinear function of the
-abilities, hence not a linear functional of the game.
+Probabilistic efficiency and $w_i \ge 0$ are immediate. Argmax symmetry holds because
+exchanging two contributors with the same marginal and dependence leaves $G_S$, hence
+$\nabla G_S$, invariant. For argmax nullity, if $X_i \le \max_{j\neq i} X_j$ a.s.\
+then $i$ is never the argmax, so $w_i = 0$, and $\max_N X = \max_{N\setminus\{i\}} X$
+leaves the others unchanged. Non-additivity is direct: $w = \nabla G_S$ is the
+gradient of a convex potential, nonlinear in $\theta$ (strictly convex only on the
+quotient $\R^n/\!\operatorname{span}\{\mathbf 1\}$, being affine along $\mathbf 1$),
+so the map from game to credit is not linear ($w(\theta+\theta') \neq w(\theta) +
+w(\theta')$---the right-hand side need not even lie on the simplex).
 \end{proof}
 
-So the trade is precise: the winning probability keeps efficiency, symmetry, and the
-null-player property---the content that makes it a sensible credit rule---and gives
-up only \emph{additivity}, the linearity axiom, which is what lets it be a cheap,
-differentiable gradient rather than a sum over $2^n$ coalitions.
+These are the right analogues: they are statements about a probability share, not the
+Shapley efficiency or null-player axioms, which concern a payoff value of $v$.
+Trading the linearity that pins down the Shapley value is what lets the credit be a
+cheap, differentiable gradient.
 
 \section{Computational complexity}
 \label{sec:complexity}
 
-The practical case for the winning probability as credit is its cost. All three
-schemes target a redundancy-aware split over $n$ contributors of the game
-\eqref{eq:game}:
-\begin{itemize}
-  \item exact Shapley enumerates $2^n$ coalitions;
-  \item sampled Shapley averages $R$ random permutations of running-maximum
-        marginals, $O(RMn)$, with error $O(1/\sqrt R)$;
-  \item the race takes one $\argmaxop$ sweep of $M$ draws, $O(Mn)$, returning all
-        $n$ shares at once and exact in $M$.
-\end{itemize}
-
-The separation is exponential, and provable by counting. Exact Shapley enumerates
-$2^n$ coalitions, infeasible beyond a few dozen contributors whatever the constants;
-sampled Shapley trades that for $O(RMn)$ work at $O(1/\sqrt R)$ error; the race
-returns all $n$ shares in one $O(Mn)$ pass and is exact in $M$. The gap is not
-asymptotic hairsplitting: a race over thousands of contributors is the routine cost
-of a single $\argmaxop$ sweep, while the corresponding $2^{n}$ is not a number one
-writes down. The race is moreover the gradient of the same potential, so it is
-differentiable in the abilities and admits a smooth online update; neither holds for
-the combinatorial value.
+The practical case for the winning probability as credit is its cost, stated against
+the right baseline. For a \emph{generic} black-box cooperative game, exact Shapley
+enumerates $2^n$ coalitions, and the usual recourse is permutation sampling,
+$O(RMn)$ at $O(1/\sqrt R)$ error. But the expected-maximum game \eqref{eq:game} is
+not black-box: on an empirical sample $X^{(1)},\dots,X^{(M)}$ the max-game Shapley
+value has order-statistic structure and can be computed in about $O(Mn\log n)$
+without enumerating coalitions. So the race's edge over a \emph{specialized} max-game
+Shapley algorithm is not exponential. What the race buys is different: it returns the
+endpoint-gradient credit---the probability share---in a single $\argmaxop$ pass over
+the $M$ draws, $O(Mn)$, with no coalition or permutation machinery, and as the
+gradient of a smooth potential it is differentiable in the abilities and supports
+cheap online updates. Against a generic Shapley evaluator the gap is the exponential
+one; against the best specialized one it is the constant factor of a single pass,
+plus differentiability. The race is \emph{exact for the empirical simulation law}
+defined by the $M$ draws; for the population law it carries the usual $O(M^{-1/2})$
+Monte-Carlo error.
 
 \section{Redundancy, and the calibration condition}
 \label{sec:redundancy}
@@ -248,10 +259,10 @@ The reason to prefer this credit rule over a correlation-blind one is redundancy
 
 \begin{proposition}[Redundancy consistency at fixed abilities]
 \label{prop:redundancy}
-If contributors $i,j$ have equal ability and comonotone performances, then either
-wins exactly when the other does; with symmetric tie-splitting each receives half
-of the single-contributor winning probability, and the pair's combined credit
-equals that of one contributor.
+If contributors $i,j$ have equal ability and \emph{identical} performances
+($X_i = X_j$ a.s.), then either wins exactly when the other does; with symmetric
+tie-splitting each receives half of the single-contributor winning probability, and
+the pair's combined credit equals that of one contributor.
 \end{proposition}
 
 This is a property of the race \emph{at fixed, equal abilities}. It does not follow
@@ -269,10 +280,12 @@ contributors; spreading credit and concentrating it cannot both be exact.
 \paragraph{Forecast combination.}
 Supplying the race with the base forecasters' per-period \emph{losses}
 $L_{k,t}$ (so the lowest-loss forecaster wins) yields combination weights that are a
-redundancy-aware credit split over models. On the M4 competition this is the
-stable, small-sample member of the combination family; the companion paper reports
-that study. The performance variable must be a loss, not a signed error, or the
-``winner'' is merely the most negatively biased forecaster.
+redundancy-aware credit split over models. On the M4 competition this is a promising
+but inconclusive direction (the companion paper reports that study): in the
+small-sample regime it is competitive with, and the most stable member of, the
+combination family, but we claim no out-of-sample superiority. The performance
+variable must be a loss, not a signed error, or the ``winner'' is merely the most
+negatively biased forecaster.
 
 \paragraph{Feature attribution.}
 For model interpretability the contributors are features and the credit is a
@@ -298,9 +311,18 @@ weak features, and a higher per-call price than a single fit.
 \label{sec:discussion}
 
 The winning probability is a fast, differentiable, online, redundancy-aware credit
-rule---a cousin of the Shapley value with an exact Aumann--Shapley reading on the
-ability game, and a large computational advantage where redundancy-aware credit is
-what is wanted. Its redundancy guarantee is exact for the calibrated equal-ability
+rule, useful where redundancy-aware credit is wanted and a coalition-by-coalition
+computation is too expensive. It is \emph{not} a Shapley value, and the distinction is
+a choice of question, not an approximation: Shapley measures \emph{coalitional
+fairness}---a contributor's average marginal value as coalitions are assembled, a
+counterfactual-historical quantity---while the winning probability measures
+\emph{field relevance}, how often a contributor is uniquely the best in the field one
+actually has. The race does not see coalitional value at all: a pure diversifier,
+never individually best, earns no race credit however much it improves blends. For legal or moral
+credit the coalitional average is the right object; for live selection---ensemble
+weighting, feature screening, routing, ``which signal do I rely on now?''---the
+full-field endpoint question is the operational one, and it is the one the race
+answers. Its redundancy guarantee is exact for the calibrated equal-ability
 race, which is the construction to use; raw scores give only a winner-take-all
 screen. Its axiomatic standing is settled by \Cref{prop:axioms}: it keeps
 efficiency, symmetry, and the null-player property, trading away only additivity.
@@ -309,9 +331,27 @@ As a variable-selection rule it is the stable, redundancy-aware option of
 well-conditioned even when the covariance is not: numerically its condition number
 stays near $1$ while the covariance's grows into the hundreds, so the
 ill-conditioning that defeats $\Sigma^{-1}$ never enters the choice-space inverse and
-calibration needs no preconditioning. The cost that does remain is how to control the
-redistribution of de-duplicated credit to weak contributors---the one weakness that
-recurs across the attribution and selection experiments. The construction and its calibration inverse are implemented in the
+calibration needs no preconditioning. $J$ is also informative in its own right: it is
+a \emph{substitutability matrix}---$J_{ij}$ measures how much contributors $i,j$
+compete for the same winning event---so clustering it recovers the redundancy groups
+\emph{endogenously}, from the allocation object itself, and in choice geometry rather
+than raw correlation. Two contributors can be highly correlated yet not substitutes
+in the race if one dominates and the other never wins; the correlation matrix cannot
+tell these apart but $J$ can. We leave this interpretability layer to future work. The cost that does remain---the de-duplicated
+credit that leaks to weak contributors, the one weakness recurring across the
+attribution and selection experiments---is controlled by a concentration
+(inverse-temperature) parameter $\beta$: scaling the calibrated strengths by $\beta$
+drives a sub-maximal contributor's credit to zero as $\beta\to\infty$ while leaving
+the even split among genuine duplicates intact, trading the leak against the
+smoothness of the map (developed in the companion paper). A complementary device is
+an \emph{outside option}: a null competitor whose winning probability $w_0$ absorbs
+mass no real contributor deserves (an interpretable baseline---unexplained credit, or
+cash / market-mode in the portfolio reading). Empirically the null preserves the even
+split and softens the leak with a mild bias toward weak contributors, but it shaves
+mass roughly in proportion to share, so it is a smooth interpretable floor rather than
+a targeted leak remover; temperature is the sharper tool. The whole construction is,
+in one line, a replacement of additive marginal contribution by the probability of
+being the \emph{non-redundant winner in the actual field}. It is implemented in the
 open-source \texttt{allocation} package, built on \texttt{thurstone}.
 
 \printbibliography
