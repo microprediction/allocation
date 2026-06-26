@@ -241,19 +241,19 @@
   2000, that quants uncritically lapped it up, and that overconfidence in this beautiful object did the
   damage. Three things are wrong with that.</p>
   <div class="points">
-  <p><span class="h">One — Li was late.</span> Factor and copula models of correlated default were already in
+  <p><span class="h">One. Li was late.</span> Factor and copula models of correlated default were already in
   use at multiple banks before the 2000 paper; the latent-Gaussian threshold idea goes back to Merton
   (1974) and the single-factor portfolio model to Vasicek (1987). The paper named a practice; it did
   not start one.</p>
-  <p><span class="h">Two — the banks were a step ahead: the <em>fast</em> model.</span> Nobody on a desk priced
+  <p><span class="h">Two. The banks were a step ahead: the <em>fast</em> model.</span> Nobody on a desk priced
   a CDO by brute-force Monte Carlo over a copula. At Morgan Stanley I devised, implemented and
-  deployed the fast semi-analytic version, and — without any doubt — the same happened independently at
+  deployed the fast semi-analytic version, and, without any doubt, the same happened independently at
   other banks at much the same time. It had to: the method is forced by the problem. I shipped it,
-  gloriously, as an <em>Excel add-in compiled from MATLAB</em> with the old MATLAB compiler — if that
+  gloriously, as an <em>Excel add-in compiled from MATLAB</em> with the old MATLAB compiler. If that
   doesn't make anyone nostalgic, nothing will. (Btw, try getting that to work across sixty different
   installations of Office in twelve different business groups and you will understand why there might
   never be a version 1.1.)</p>
-  <p><span class="h">Three — there was nothing to be dazzled by.</span> Pricing a CDO in the one-factor model
+  <p><span class="h">Three. There was nothing to be dazzled by.</span> Pricing a CDO in the one-factor model
   is a routine exercise in <em>conditioning, convolution, and quadrature</em>. (Yeah, I could do that
   without anyone telling me to, because, you know, I'm a <em>QUANTITATIVE</em>.) Condition on the
   one common factor and the names become independent; convolve their conditional default indicators into
@@ -262,11 +262,11 @@
   </div>
   <p class="muted">One distraction to set aside: these subordination games are <em>not</em> path-dependent in
   any non-trivial way. A vanilla tranche is a call spread on the <em>terminal</em> cumulative loss, so only
-  the terminal loss distribution matters and the quadrature above suffices — <em>when</em> the losses
+  the terminal loss distribution matters and the quadrature above suffices; <em>when</em> the losses
   arrive is irrelevant. Path-dependence enters only once you bolt on structural bells and whistles whose
-  cashflows depend on loss timing — cash-reserve accounts, excess-spread and principal/interest waterfalls,
-  OC/IC triggers, turbo amortization — at which point you fall back to simulating paths (the
-  Monte-Carlo-over-a-copula route à la Li) — unless, of course, you are cleverer than the average bear
+  cashflows depend on loss timing (cash-reserve accounts, excess-spread and principal/interest waterfalls,
+  OC/IC triggers, turbo amortization), at which point you fall back to simulating paths (the
+  Monte-Carlo-over-a-copula route à la Li). Unless, of course, you are cleverer than the average bear
   (read on) and <em>SUPER QUANTITATIVE</em>. Do not import that path intuition into the plain case, where it
   does not belong.</p>
 
@@ -284,10 +284,10 @@
   independent) to an <em>all-or-nothing</em> bimodal shape (ρ→1, mostly no defaults punctuated by
   the whole pool going). The thin curves are the <em>conditional</em> loss distributions at three values of
   the common factor; the bold bars are their quadrature average. Drop the node count and watch how few
-  points it takes to converge — that is the whole "fast model." The senior tranche, riskless-looking at
-  low ρ, becomes a catastrophe bond as ρ rises — the structural fragility, driven entirely by
+  points it takes to converge. That is the whole "fast model." The senior tranche, riskless-looking at
+  low ρ, becomes a catastrophe bond as ρ rises: the structural fragility, driven entirely by
   <em>correlation</em>, with the marginal <code>p</code> held fixed. Here <code>p</code> is the
-  <em>CDS-implied default probability</em> — the market-given marginal; on a desk you fit it to
+  <em>CDS-implied default probability</em>, the market-given marginal; on a desk you fit it to
   the single-name CDS and then turn only ρ.</p>
 
   <h2><span class="part">Part 4 · the model was ugly, not beautiful</span><br>Sklar on time, and the hazards that jump</h2>
