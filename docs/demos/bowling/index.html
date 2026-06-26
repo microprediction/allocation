@@ -40,6 +40,11 @@
     table.tail th:first-child,table.tail td:first-child{text-align:left;color:var(--muted)}
     table.tail td.r{font-weight:700}
     footer{max-width:980px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+    /* #embed mode: show only the demo stage (for inlining via iframe) */
+    body.embed{background:#fff}
+    body.embed>header,body.embed>footer{display:none}
+    body.embed>main{margin:6px auto;padding:0 10px}
+    body.embed>main>:not(.stage){display:none}
   </style>
 </head>
 <body>
@@ -327,5 +332,6 @@ function fastMode(){ if(busy) return; busy=true; statsView=false; let done=0; co
 document.getElementById("legend").innerHTML = SECTORS.map(s=>`<span><span class="sw" style="background:${s.color}"></span>${s.name}</span>`).join("");
 resetState(); drawState(); refreshStats();
 </script>
+<script>if(location.hash.indexOf("embed")>=0||location.search.indexOf("embed")>=0)document.body.classList.add("embed");</script>
 </body>
 </html>
