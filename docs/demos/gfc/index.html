@@ -48,6 +48,14 @@
     details.think[open]>summary::before{content:"▾ "}
     details.think[open]{padding-bottom:6px}
     details.think>summary:hover{text-decoration:underline}
+    .measures{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin:22px 0 4px}
+    .measures .m{flex:1;min-width:210px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+    .measures .m .sym{font-family:Georgia,"Times New Roman",serif;font-size:1.9rem;font-weight:700;color:var(--ink);line-height:1}
+    .measures .m .nm{font-weight:600;margin:4px 0 5px}
+    .measures .m .ds{font-size:.86rem;color:var(--muted);line-height:1.45}
+    .measures .m.todo{border:2px dashed var(--accent);background:#faf9ff}
+    .measures .m.todo .sym,.measures .m.todo .nm{color:var(--accent)}
+    .mcap{text-align:center;font-size:.92rem;color:var(--muted);margin:0 0 14px}
     .eqn{margin:20px 0;padding:14px 10px;display:flex;justify-content:center;align-items:flex-end;gap:14px;flex-wrap:wrap;background:#f7f7fb;border-radius:8px;overflow-x:auto}
     .eqn .term{display:flex;flex-direction:column;align-items:center;gap:5px}
     .eqn .lbl{font-size:.72rem;font-style:italic;color:var(--accent)}
@@ -180,6 +188,17 @@
   I will name the third measure, and show how its conflation with the other two is what put the marginals
   off by a factor of two and the correlation off by more than that — carefully, further down
   (Parts&nbsp;6 and 8).</p>
+
+  <div class="measures">
+    <div class="m"><div class="sym">&#8473;</div><div class="nm">objective probability</div>
+      <div class="ds">the real-world measure — the frequency with which things <em>actually</em> happen. The newcomer thinks this is the whole story.</div></div>
+    <div class="m"><div class="sym">&#8474;</div><div class="nm">risk-neutral probability</div>
+      <div class="ds">implied by market prices; discounted prices are martingales and derivatives are valued under it. The sophisticated worldview stops here.</div></div>
+    <div class="m todo"><div class="sym">&#8477;&#8201;?</div><div class="nm">the third measure</div>
+      <div class="ds">…&nbsp;to be explained. The one almost nobody will tell you exists — and the key to the crisis.</div></div>
+  </div>
+  <p class="mcap">Understanding the <em>trichotomy</em> of probability measures in finance is the key.</p>
+
   <p>But first we have to dispense, quickly, with the obvious nonsense — the bell curve here, the
   elegant-but-irrelevant tail-dependence story just now — so that the real account has clean ground to
   stand on.</p>
@@ -204,6 +223,14 @@
   one common factor and the names become independent; convolve their conditional default indicators into
   a loss distribution; integrate that over the factor by quadrature. A handful of nodes, exact, instant.
   No Monte Carlo, no mystique. You can run it right here.</p>
+  <p class="muted">One distraction to set aside: these subordination games are <em>not</em> path-dependent in
+  any non-trivial way. A vanilla tranche is a call spread on the <em>terminal</em> cumulative loss, so only
+  the terminal loss distribution matters and the quadrature above suffices — <em>when</em> the losses
+  arrive is irrelevant. Path-dependence enters only once you bolt on structural bells and whistles whose
+  cashflows depend on loss timing — cash-reserve accounts, excess-spread and principal/interest waterfalls,
+  OC/IC triggers, turbo amortization — at which point you fall back to simulating paths (the
+  Monte-Carlo-over-a-copula route à la Li). Do not import that path intuition into the plain case, where it
+  does not belong.</p>
 
   <div class="widget">
     <div class="controls">
@@ -282,15 +309,25 @@
   picture to live through time.</p>
 
   <h3>One hedge, two risks</h3>
-  <p>Beneath even that sits a flaw no choice of copula can repair, because it belongs to the market and
-  not the model. A CDO tranche carries (at least) two distinct exposures in each name: <em>default
-  risk</em> — the name suddenly jumps to default — and <em>spread risk</em> — its credit
-  spread drifts and reprices the tranche. But there is exactly one liquid instrument with which to hedge
-  a name: its single-name <em>CDS</em>. One instrument cannot span two independent risk factors,
-  so the market is fundamentally <em>incomplete</em>: the tranche cannot be replicated, there is
-  no unique arbitrage-free price, and the hedge ratios the model reports are artifacts of the model
-  rather than properties of the world. I was not pricing by replication; I was marking to a convention
-  and hoping the unhedgeable residual stayed small. On a desk, everyone knew this too.</p>
+  <p>I will not dwell on the next point, because it is thoroughly well appreciated and I have nothing
+  original to add to it — but it has to be stated. Beneath everything above sits a flaw no choice of copula
+  can repair, because it belongs to the market and not the model. A CDO tranche carries (at least) two
+  distinct exposures in each name: <em>default risk</em> — the name suddenly jumps to default — and
+  <em>spread risk</em> — its credit spread drifts and reprices the tranche. But there is exactly one liquid
+  instrument with which to hedge a name: its single-name <em>CDS</em>. One instrument cannot span two
+  independent risk factors, so the market is fundamentally <em>incomplete</em>: the tranche cannot be
+  replicated, there is no unique arbitrage-free price, and the hedge ratios the model reports are artifacts
+  of the model rather than properties of the world (the standard credit-derivatives texts make this
+  plain — Schönbucher 2003; Bielecki &amp; Rutkowski 2002 — and the hedging literature shows the ratios are
+  model-dependent). I was not pricing by replication; I was marking to a convention and hoping the
+  unhedgeable residual stayed small. On a desk, everyone knew this too.</p>
+  <p>If you want a single date when the market admitted as much, take <em>May 2005</em>. The downgrade of
+  General Motors and Ford to junk detonated the fashionable "correlation trade" — long the equity tranche,
+  short the mezzanine — and as positions were unwound the <em>implied correlations of different tranches
+  slipped in incompatible directions</em>, driven by raw supply and demand rather than by anything a single
+  coherent model could produce. The quoted correlation was revealed for what it was: a
+  technicals-driven price, not a parameter. <span class="muted">(Citations on May 2005 and on
+  incompleteness to be finalised.)</span></p>
 
   <h3>Base correlation: the kludge that became a market standard</h3>
   <p>If you still suspect the practitioners were <em>seduced by the elegance</em> of all this, let me
