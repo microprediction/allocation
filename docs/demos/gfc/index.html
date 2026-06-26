@@ -570,6 +570,23 @@
   <em>symmetries</em> of a CDO, and
   <em>de Finetti</em>-style decompositions of the joint default distribution. I will fold the full account
   into this essay sooner or later; here is the spine of it.</p>
+  <p>First, a word on <em>exchangeable</em>. A collection of random variables is exchangeable if its joint
+  distribution is unchanged when you relabel — permute — them: only <em>how many</em> take each value
+  matters, never <em>which</em> ones. Identical names are exchangeable; so is any law that treats its
+  members symmetrically. <em>de Finetti's theorem</em> is the deep payoff: an (infinite) exchangeable
+  sequence is exactly a <em>mixture of conditionally-independent</em> ones — independent draws, with the
+  common probability itself drawn from some distribution. That mixing distribution is where dependence
+  hides.</p>
+  <details class="think">
+  <summary>Going deeper — references</summary>
+  <p><a href="https://en.wikipedia.org/wiki/Exchangeable_random_variables">Exchangeable random variables</a>
+  · <a href="https://en.wikipedia.org/wiki/De_Finetti%27s_theorem">de Finetti's theorem</a> (the infinite
+  case) · the <a href="https://en.wikipedia.org/wiki/De_Finetti%27s_theorem#Finite_exchangeability">finite</a>
+  version (Diaconis–Freedman; the signed/approximate story) · and the modern conformal-prediction take in
+  my <a href="https://conformalprediction.net/papers/definetti-feynman/">de&nbsp;Finetti / Feynman</a>
+  write-up and its <a href="https://conformalprediction.net/demos/15-de-finetti.html">decomposition
+  demo</a>.</p>
+  </details>
   <p>The symmetry answers an objection you have probably been forming. The companies in a CDO are plainly
   <em>not</em> exchangeable — Ford is not GMAC is not a Florida homebuilder. True. But the CDO's cashflows
   <em>are</em>. The waterfall pays out of <em>aggregate</em> losses; it never mentions a company by name.
