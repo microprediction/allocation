@@ -16,6 +16,12 @@
       line-height:1.65;font-size:17px}
     a{color:var(--accent);text-decoration:none}
     a:hover{text-decoration:underline}
+    header.site-header{background:#1f1d3d;color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:720px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem}
+    header.site-header nav a:hover{opacity:1;text-decoration:none}
     code{background:#f1f1f4;padding:1px 5px;border-radius:3px;font-size:.92em;
       font-family:"SFMono-Regular",Menlo,Consolas,monospace}
 
@@ -42,10 +48,20 @@
 </head>
 <body>
 
-<div class="crumb">
-  <a href="../index.html">&larr; allocation</a>
-  <a href="https://github.com/microprediction/allocation">GitHub</a>
-</div>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html">allocation</a>
+    <nav>
+      <a href="../index.html#methods">Methods</a>
+      <a href="../index.html#estimators">Estimators</a>
+      <a href="index.html">Papers</a>
+      <a href="../demos/index.html">Demos</a>
+      <a href="../maps/tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
 
 <main>
   <h1>Papers</h1>
@@ -53,7 +69,7 @@
   theory behind the two novel methods. Drafts, revised as the work matures.</p>
 
   <div class="entry">
-    <h2><a href="thurstone-portfolios/index.html">Thurstone Portfolios: Allocation as Winning Probability</a>
+    <h2><a href="thurstone-portfolios/index.html">Thurstone Portfolio Polishing: Tail-Sensitive Black&ndash;Litterman and Beyond</a>
       <span class="by">&middot; Peter Cotton</span></h2>
     <p class="tag">Long-only allocation as the winning probabilities of a correlated race.</p>
     <p>Abilities calibrate the race to a benchmark; the tilt re-runs it under the
@@ -68,14 +84,20 @@
   </div>
 
   <div class="entry">
-    <h2>Schur-complementary allocation</h2>
+    <h2><a href="https://arxiv.org/abs/2411.05807">Schur-Complementary Allocation</a>
+      <span class="by">&middot; Peter Cotton</span></h2>
     <p class="tag">Robust, inversion-light allocation along a smooth Fiedler seriation.</p>
     <p>A one-parameter (<code>gamma</code>) bridge between hierarchical risk parity and
     minimum variance, ordered by Fiedler seriation rather than a dendrogram, so the
-    hierarchy and the weights are a smooth function of the covariance. Background,
+    hierarchy and the weights are a smooth function of the covariance. The idea first
+    appeared as a blog post; the theory and experiments are in the paper, with background,
     bibliography, and a literature map at
     <a href="https://schur.microprediction.org">schur.microprediction.org</a>.</p>
-    <p class="go"><a href="https://schur.microprediction.org">Explore &rarr;</a></p>
+    <p class="go"><a href="https://arxiv.org/abs/2411.05807">Paper (arXiv&nbsp;2411.05807) &rarr;</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://medium.com/geekculture/schur-complementary-portfolios-fix-hierarchical-risk-parity-28b0efa1f35f">Original blog</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://schur.microprediction.org">Background &amp; map</a></p>
   </div>
 </main>
 
