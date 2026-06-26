@@ -170,14 +170,16 @@
   order) — forthcoming.</div>
 
   <h2><span class="part">Part 2 · the less confused red herring</span><br>Did Gaussian dependence hide the tail risk?</h2>
-  <p>The slightly more plausible, but mostly wrong-headed and ill-informed, story is the one a numerate
+  <p>The slightly more plausible, but mostly ill-informed, story is the one a numerate
   critic reaches for: the Gaussian copula has a real, provable sin — <em>zero tail dependence</em>. Joint
   extremes vanish asymptotically for any correlation below one; fit it to <em>every</em> pairwise default
   probability and <em>every</em> marginal and it <em>still</em> cannot make a whole sector default at
   once. That is true, it is elegant, and I find it genuinely interesting — interesting enough that I built
-  <a href="../bowling/index.html">a whole demo</a> of it, showing the copula cannot reproduce a systemic
-  co-default tail no matter how carefully you calibrate the pairs. So tail risk and hidden contagion get
-  nominated as the culprit.</p>
+  <a href="../bowling/index.html">a whole demo</a> of it, not to mention
+  <a href="../../papers/thurstone-portfolios/index.html">invented an entirely new way to put tail risk into
+  any portfolio allocation</a>. The demo shows the copula cannot reproduce a systemic co-default tail no
+  matter how carefully you calibrate the pairs. So tail risk and hidden contagion get nominated as the
+  culprit.</p>
 
   <figure style="margin:18px 0">
     <iframe src="../bowling/index.html#embed" title="Bowling for contagion — interactive default-contagion demo" loading="lazy" style="width:100%;height:720px;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>
@@ -474,14 +476,17 @@
 
   <h3>The wrong correlation: actuarial history vs the implied market</h3>
   <p>And here is the subtler failure — the one that survives even when an agency <em>did</em> reach for a
-  copula. They fed it the wrong correlation. The numbers came from <em>historical, actuarial</em> studies
-  of how often rated names had defaulted together, and they were strikingly low: S&amp;P's CDO Evaluator
-  assumed <em>0%</em> correlation across industries before late 2005 (and 30% within); Moody's used roughly
-  <em>3%</em> across sectors and 15% within; and for the structured-finance, subprime-RMBS CDOs that
-  actually blew up, the agencies assumed a <em>default correlation of barely 0.01–0.02</em>
-  (<a href="https://doi.org/10.1016/j.jfineco.2017.06.011">Nickerson &amp; Griffin 2017</a>) — against a
-  realized correlation the housing bust drove toward <em>one</em>. Meanwhile, two screens away, the
-  inter-dealer market in CDO tranches was quoting prices that <em>implied</em> a far higher correlation.
+  copula. They fed it the wrong correlation. The numbers came from <em>historical, actuarial</em> studies,
+  and they were strikingly low. The <em>asset</em> correlation — the dependence between the latent
+  variables driving default — was modest: S&amp;P's CDO Evaluator assumed <em>0%</em> across industries
+  before late 2005 (30% within); Moody's used roughly <em>3%</em> across sectors (15% within). And the
+  <em>default</em> correlation — the chance two names actually go down <em>together</em>, naturally a small
+  number — was lower still and demonstrably too low:
+  <a href="https://doi.org/10.1016/j.jfineco.2017.06.011">Nickerson &amp; Griffin (2017)</a> find agencies
+  assumed about <em>0.01</em> for CLOs (raised to a still-inadequate 0.03 after the crisis) where roughly
+  <em>0.12</em> was appropriate. Meanwhile, two screens away, the inter-dealer market in CDO tranches was
+  quoting prices that <em>implied</em> a far higher correlation — and the housing bust would soon drive
+  <em>realized</em> correlation toward one.
   <em>Implied correlation</em> is the number you must put into the model to reproduce a traded price —
   exactly as <em>implied volatility</em> is read out of option prices. It is a flawed lens: like the
   options <em>smile</em>, different tranches imply different correlations, so it is not globally
