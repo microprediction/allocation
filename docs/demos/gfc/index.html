@@ -333,7 +333,7 @@
   <h3>Base correlation: the kludge that became a market standard</h3>
   <p>If you still suspect the practitioners were <em>seduced by the elegance</em> of all this, let me
   introduce the single most damning piece of evidence to the contrary — the thing the market actually
-  quoted. I will be honest: base correlation made me want to puke.</p>
+  quoted.</p>
   <p>The natural idea is <em>compound</em> (or <em>implied</em>) correlation: take a tranche's market price
   and back out the single Gaussian-copula correlation that reproduces it, exactly as you read implied
   volatility out of an option. It does not work. A <em>mezzanine</em> tranche's expected loss is
@@ -347,13 +347,17 @@
   <em>[0, d]</em> minus <em>[0, a]</em> — because a base (equity-like) tranche's loss <em>is</em> monotone
   in correlation, so each inverts to a <em>unique</em> base correlation. Bootstrap those upward across
   detachment points and you have a tidy, quotable number for every tranche.</p>
-  <p>Look at what that actually is. It is a <em>change of coordinates</em> chosen for no reason other than
-  to make a broken model emit a single number. The base correlations you back out are <em>not equal</em>
-  across detachments — they form a rising <em>skew</em> — which, if the single-correlation Gaussian copula
-  were true, could not happen: one model, one correlation. The skew is the model screaming that it is
-  wrong, and base correlation's contribution was to write the scream down neatly and call it a quote. That
-  is the opposite of being seduced by elegance. It is a profession holding its nose and agreeing on a
-  common lie so that trades can clear. Everyone knew. We quoted it anyway.</p>
+  <details class="think">
+  <summary>Want to know what I really think?</summary>
+  <p>I will be honest: base correlation made me want to puke. Look at what it actually is. It is a
+  <em>change of coordinates</em> chosen for no reason other than to make a broken model emit a single
+  number. The base correlations you back out are <em>not equal</em> across detachments — they form a rising
+  <em>skew</em> — which, if the single-correlation Gaussian copula were true, could not happen: one model,
+  one correlation. The skew is the model screaming that it is wrong, and base correlation's contribution
+  was to write the scream down neatly and call it a quote. That is the opposite of being seduced by
+  elegance. It is a profession holding its nose and agreeing on a common lie so that trades can clear.
+  Everyone knew. We quoted it anyway.</p>
+  </details>
 
   <div class="widget">
     <div class="controls">
