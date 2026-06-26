@@ -27,15 +27,17 @@ and `to_portfolio(X)` wraps the fitted weights as a skfolio `Portfolio`
 
 ## Why a separate package
 
-skfolio is the scikit-learn-native portfolio library, but it is *batch*: a
-changing universe is handled by NaN/incomplete-data mechanics, not by carrying
-per-asset state across streaming updates. `allocation` is the **online**
-complement — estimators with `partial_fit`, a keyed dynamic universe (in the
-spirit of [`precise`](https://github.com/microprediction/precise)), and turnover
-control by construction — while staying API-compatible so each estimator can also
-be contributed upstream to skfolio. It is all MIT-licensed and meant to be
-upstreamed: Max (river) and Hugo (skfolio) are welcome to take anything here and
-improve on it.
+Actually Hugo (mostly) and I did move a *batch* version of schur into skfolio and maybe more things here 
+will be upstreamed into skfolio or river (Max Halford). Hugo made some improvements that are *not*
+replicated in the streaming version of schur here, and the streaming versions of schur and HRP here also
+deal with changing universes and weight stability. 
+
+To be clear 
+ - `allocation` is the **online** complement in that sense — estimators with `partial_fit`
+ - It can also use a keyed dynamic universe (in the
+spirit of [`precise`](https://github.com/microprediction/precise) but also river-ml) while staying API-compatible to both.
+
+This is all MIT-licensed and anyone is welcome to take anything here. 
 
 ## Methods
 
