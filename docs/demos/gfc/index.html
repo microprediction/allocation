@@ -368,34 +368,35 @@
   slipped in incompatible directions</em>, driven by raw supply and demand rather than by anything a single
   coherent model could produce. The clinical study of the episode
   (<a href="https://doi.org/10.1142/S2010139215500068">Acharya, Schaefer &amp; Zhang, 2015</a>) shows the
+  (<a href="https://doi.org/10.1142/S2010139215500068">Acharya, Schaefer &amp; Zhang, 2015</a>) shows the
   co-movement spike was a transient, sharply mean-reverting artifact of dealer-quote imbalances and
-  liquidity — not a change in any fundamental correlation. The quoted correlation was revealed for what it
+  liquidity, not a change in any fundamental correlation. The quoted correlation was revealed for what it
   was: a technicals-driven price, not a parameter (BIS Quarterly Review, March and June 2005; IMF Global
   Financial Stability Report, April 2006).</p>
 
   <h3>Base correlation: the kludge that became a market standard</h3>
   <p>If you still suspect the practitioners were <em>seduced by the elegance</em> of all this, let me
-  introduce the single most damning piece of evidence to the contrary — the thing the market actually
+  introduce the single most damning piece of evidence to the contrary: the thing the market actually
   quoted.</p>
   <p>The natural idea is <em>compound</em> (or <em>implied</em>) correlation: take a tranche's market price
   and back out the single Gaussian-copula correlation that reproduces it, exactly as you read implied
   volatility out of an option. It does not work. A <em>mezzanine</em> tranche's expected loss is
-  <em>not monotone</em> in correlation — it rises, then falls — so a given market price can correspond to
+  <em>not monotone</em> in correlation. It rises, then falls, so a given market price can correspond to
   <em>two</em> correlations, or to <em>none at all</em>. The most important parameter in the model is not
   even a well-defined function of the price. Drag the market price below and watch the line cut the
   mezzanine curve twice.</p>
   <p>So J.P.&nbsp;Morgan published a fix (McGinty, Beinstein, Ahluwalia &amp; Watts, <em>Introducing Base
   Correlations</em>, 2004), and it became the market quoting convention almost overnight. The trick:
-  never quote the tranche <em>[a, d]</em> directly. Decompose it into two <em>base</em> tranches off zero —
-  <em>[0, d]</em> minus <em>[0, a]</em> — because a base (equity-like) tranche's loss <em>is</em> monotone
+  never quote the tranche <em>[a, d]</em> directly. Decompose it into two <em>base</em> tranches off zero,
+  <em>[0, d]</em> minus <em>[0, a]</em>, because a base (equity-like) tranche's loss <em>is</em> monotone
   in correlation, so each inverts to a <em>unique</em> base correlation. Bootstrap those upward across
   detachment points and you have a tidy, quotable number for every tranche.</p>
   <details class="think">
   <summary>Want to know what I really think?</summary>
   <p>I will be honest: base correlation made me want to puke. Look at what it actually is. It is a
   <em>change of coordinates</em> chosen for no reason other than to make a broken model emit a single
-  number. The base correlations you back out are <em>not equal</em> across detachments — they form a rising
-  <em>skew</em> — which, if the single-correlation Gaussian copula were true, could not happen: one model,
+  number. The base correlations you back out are <em>not equal</em> across detachments; they form a rising
+  <em>skew</em>, which, if the single-correlation Gaussian copula were true, could not happen: one model,
   one correlation. The skew is the model screaming that it is wrong, and base correlation's contribution
   was to write the scream down neatly and call it a quote. That is the opposite of being seduced by
   elegance. It is a profession holding its nose and agreeing on a common lie so that trades can clear.
@@ -410,10 +411,10 @@
     <canvas id="bccv" width="840" height="320"></canvas>
     <div class="method" id="bcmethod"></div>
   </div>
-  <p class="muted">Left — <em>compound correlation</em>: expected loss of the 3–7% mezzanine vs ρ is a
+  <p class="muted">Left, <em>compound correlation</em>: expected loss of the 3–7% mezzanine vs ρ is a
   <em>hump</em>, so your market-price line crosses it twice (or not at all). Which one is "the
-  correlation"? There is no answer. Right — <em>base correlation</em>: the [0–3%] and [0–7%] base tranches
-  are each monotone, so any level inverts to a single β — but the two βs differ, and that gap is the base-
+  correlation"? There is no answer. Right, <em>base correlation</em>: the [0–3%] and [0–7%] base tranches
+  are each monotone, so any level inverts to a single β, but the two βs differ, and that gap is the base-
   correlation <em>skew</em> a true one-correlation model could never produce. The kludge is well-posed and
   dishonest at the same time.</p>
 
