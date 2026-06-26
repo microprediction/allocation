@@ -318,17 +318,21 @@
   instrument with which to hedge a name: its single-name <em>CDS</em>. One instrument cannot span two
   independent risk factors, so the market is fundamentally <em>incomplete</em>: the tranche cannot be
   replicated, there is no unique arbitrage-free price, and the hedge ratios the model reports are artifacts
-  of the model rather than properties of the world (the standard credit-derivatives texts make this
-  plain — Schönbucher 2003; Bielecki &amp; Rutkowski 2002 — and the hedging literature shows the ratios are
-  model-dependent). I was not pricing by replication; I was marking to a convention and hoping the
+  of the model rather than properties of the world (the standard texts make this plain — Schönbucher 2003;
+  Bielecki &amp; Rutkowski 2002 — and the hedging literature confirms the ratios are model-dependent:
+  <a href="https://doi.org/10.1137/090750937">Cont &amp; Kan 2011</a>;
+  <a href="https://doi.org/10.1080/14697680903390126">Laurent, Cousin &amp; Fermanian 2011</a>). I was not pricing by replication; I was marking to a convention and hoping the
   unhedgeable residual stayed small. On a desk, everyone knew this too.</p>
   <p>If you want a single date when the market admitted as much, take <em>May 2005</em>. The downgrade of
   General Motors and Ford to junk detonated the fashionable "correlation trade" — long the equity tranche,
   short the mezzanine — and as positions were unwound the <em>implied correlations of different tranches
   slipped in incompatible directions</em>, driven by raw supply and demand rather than by anything a single
-  coherent model could produce. The quoted correlation was revealed for what it was: a
-  technicals-driven price, not a parameter. <span class="muted">(Citations on May 2005 and on
-  incompleteness to be finalised.)</span></p>
+  coherent model could produce. The clinical study of the episode
+  (<a href="https://doi.org/10.1142/S2010139215500068">Acharya, Schaefer &amp; Zhang, 2015</a>) shows the
+  co-movement spike was a transient, sharply mean-reverting artifact of dealer-quote imbalances and
+  liquidity — not a change in any fundamental correlation. The quoted correlation was revealed for what it
+  was: a technicals-driven price, not a parameter (BIS Quarterly Review, March and June 2005; IMF Global
+  Financial Stability Report, April 2006).</p>
 
   <h3>Base correlation: the kludge that became a market standard</h3>
   <p>If you still suspect the practitioners were <em>seduced by the elegance</em> of all this, let me
@@ -431,14 +435,14 @@
   <div class="widget">
     <div class="controls">
       <label>copula correlation ρ <input type="range" id="drho" min="0" max="0.9" step="0.01" value="0.25"><span class="val" id="drhoV">0.25</span></label>
-      <label style="opacity:.5">diversity-score correlation <input type="range" min="0" max="0.9" value="0.04" disabled><span class="val">🔒 ~4% · no dial</span></label>
+      <label style="opacity:.6;cursor:not-allowed" title="Sorry — you don't get a dial. The diversity score fixed your correlation back when it counted the industries (≈1%), and it is not taking questions.">diversity-score correlation <input type="range" min="0" max="0.9" value="0.01" disabled style="cursor:not-allowed"><span class="val">🔒 ~1% — no dial for you</span></label>
     </div>
     <canvas id="dscv" width="840" height="320"></canvas>
     <div class="method" id="dsmethod"></div>
   </div>
   <p class="muted">Drag the copula's correlation: more clustering, a fatter loss tail, a senior tranche
   that slides from safe to ruined. Now watch the diversity-score curve — it <em>never moves</em>. The
-  Binomial Expansion Technique has no correlation input; the diversity score fixed it (here ≈4%) the
+  Binomial Expansion Technique has no correlation input; the diversity score fixed it (here a paltry ≈1%) the
   instant the pool's industries were counted, and there is no dial to turn. That is what "robust
   non-model" meant in practice: a model that cannot be <em>wrong</em> about correlation because it is
   not permitted to have an opinion that changes. Coval–Jurek–Stafford showed the resulting AAA was
@@ -543,6 +547,49 @@
   </div>
   <p class="muted">So you will accidentally get the right answer, as it were, as long as you are close to the
   orbit — and you may as well do your computation on the simplest representative of it: the exchangeable one.</p>
+
+  <figure style="margin:20px 0">
+    <svg viewBox="0 0 720 350" style="width:100%;height:auto;background:#fff;border:1px solid var(--border);border-radius:8px" role="img" aria-label="Orbits of the symmetric group: nature's true model and the exchangeable model lie on the same orbit and are operationally equivalent">
+      <!-- orbit ellipses -->
+      <g transform="rotate(-7 360 175)">
+        <ellipse cx="360" cy="160" rx="300" ry="74" fill="none" stroke="#6b6580" stroke-width="1.4"/>
+        <ellipse cx="360" cy="205" rx="300" ry="74" fill="none" stroke="#bbb" stroke-width="1" stroke-dasharray="3 5"/>
+        <ellipse cx="360" cy="250" rx="300" ry="74" fill="none" stroke="#cfcfcf" stroke-width="1" stroke-dasharray="3 5"/>
+      </g>
+      <text x="360" y="232" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="15" fill="#8a849c">Orbits of the symmetric group S(n)</text>
+      <!-- dots along the top orbit (same orbit = same observable) -->
+      <g fill="#7c6cff" stroke="#fff" stroke-width="2">
+        <circle cx="78"  cy="150" r="14"/>
+        <circle cx="210" cy="103" r="14"/>
+        <circle cx="360" cy="92"  r="14"/>
+        <circle cx="510" cy="103" r="14"/>
+        <circle cx="640" cy="150" r="15"/>
+      </g>
+      <!-- exchangeable model: the chosen representative, ticked -->
+      <text x="664" y="148" font-size="22" fill="#1e8449">&#10003;</text>
+      <!-- convexity-adjustment arrow -->
+      <path d="M612 196 q24 -22 26 -40" fill="none" stroke="#2471a3" stroke-width="1.6" marker-end="url(#ar)"/>
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#2471a3"/></marker></defs>
+      <text x="556" y="214" font-size="12" fill="#2471a3" font-style="italic">convexity adjustment</text>
+      <!-- labels -->
+      <text x="60" y="128" text-anchor="middle" font-size="13" fill="#333">Nature's true model</text>
+      <text x="640" y="290" text-anchor="middle" font-size="13" fill="#333">Exchangeable model</text>
+      <text x="512" y="60" text-anchor="middle" font-size="11.5" fill="#555">Simple model — far from nature's real</text>
+      <text x="512" y="74" text-anchor="middle" font-size="11.5" fill="#555">model, but operationally equivalent</text>
+      <!-- complicated, poor-prediction model (off-orbit), X'd out -->
+      <circle cx="120" cy="300" r="13" fill="#7c6cff" stroke="#fff" stroke-width="2"/>
+      <g stroke="#d62728" stroke-width="3.5"><line x1="106" y1="286" x2="134" y2="314"/><line x1="134" y1="286" x2="106" y2="314"/></g>
+      <text x="120" y="332" text-anchor="middle" font-size="12" fill="#333">complicated model, poor predictions</text>
+      <!-- herd-immunity point on an inner orbit -->
+      <circle cx="430" cy="298" r="11" fill="#9a8cff" stroke="#fff" stroke-width="2"/>
+      <text x="430" y="330" text-anchor="middle" font-size="12" fill="#555">herd immunity at 80%</text>
+    </svg>
+    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Every model on one orbit of the
+    relabelling group <em>S(n)</em> yields the same permutation-invariant observable. So nature's true,
+    hopelessly heterogeneous model and the simple exchangeable model are <em>operationally equivalent</em> —
+    you compute on the easy one. (Diagram adapted from my epidemiology write-up, where the same picture
+    resolves the herd-immunity paradox.)</figcaption>
+  </figure>
 
   <h3>See it: a heterogeneous pool and its exchangeable twin</h3>
   <p>Three names with <em>different</em> default probabilities and a positive correlation. The left panel is
@@ -722,35 +769,42 @@ draw();
 /* diversity-score: copula loss dist (responds to rho) vs Moody's BET (inert) */
 (function(){
   const cv=document.getElementById("dscv"); if(!cv||typeof lossDist==="undefined") return;
-  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1, P_FIX=0.05, DIV=20, rhoBET=(N-DIV)/(DIV*(N-1));
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1, P_FIX=0.05, DIV=50, rhoBET=(N-DIV)/(DIV*(N-1)), XMAX=0.45;
   const logCD=j=>lf[DIV]-lf[j]-lf[DIV-j];
   function betDist(p){ const Q=new Float64Array(DIV+1), lp=Math.log(p), l1=Math.log(1-p); for(let j=0;j<=DIV;j++) Q[j]=Math.exp(logCD(j)+j*lp+(DIV-j)*l1); return Q; }
   function betEL(Q,A,D){ let e=0; for(let j=0;j<=DIV;j++){ const L=LGD*j/DIV; e+=Q[j]*Math.max(0,Math.min(1,(Math.min(L,D)-Math.min(L,A))/(D-A))); } return e; }
+  const Qfix=betDist(P_FIX), dB=(j)=>Qfix[j]/(LGD/DIV);
+  // FIXED y-scale, computed once: the inert curve must be visibly, absolutely still
+  let FY=0.02; { const P0=lossDist(0,P_FIX,33).P;
+    for(let k=1;k<=N;k++){const x=LGD*k/N; if(x>0.02&&x<=XMAX) FY=Math.max(FY,P0[k]/(LGD/N));}
+    for(let j=1;j<=DIV;j++){const x=LGD*j/DIV; if(x>0.02&&x<=XMAX) FY=Math.max(FY,dB(j));} FY*=1.08; }
   const dr=document.getElementById("drho"), drv=document.getElementById("drhoV"), meth=document.getElementById("dsmethod");
   function draw(){
     const rho=+dr.value; drv.textContent=rho.toFixed(2);
-    const P=lossDist(rho,P_FIX,33).P, Q=betDist(P_FIX);
+    const P=lossDist(rho,P_FIX,33).P;
     const cssW=cv.clientWidth||840,cssH=320; cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
-    const W=cssW,H=cssH,padL=20,padR=14,padT=16,padB=28,pw=W-padL-padR,ph=H-padT-padB, XMAX=0.45;
-    const dC=(k)=>P[k]/(LGD/N), dB=(j)=>Q[j]/(LGD/DIV);
-    let ymax=0.02; for(let k=1;k<=N;k++){ const x=LGD*k/N; if(x>0.02&&x<=XMAX) ymax=Math.max(ymax,dC(k)); }
-    for(let j=1;j<=DIV;j++){ const x=LGD*j/DIV; if(x>0.02&&x<=XMAX) ymax=Math.max(ymax,dB(j)); }
+    const W=cssW,H=cssH,padL=46,padR=14,padT=16,padB=28,pw=W-padL-padR,ph=H-padT-padB, ymax=FY;
+    const dC=(k)=>P[k]/(LGD/N);
     const X=x=>padL+(x/XMAX)*pw, Y=v=>padT+ph-(Math.min(v,ymax)/ymax)*ph;
     ctx.clearRect(0,0,W,H); ctx.font="11px sans-serif";
+    // fixed y gridlines + ticks
+    const yt=4; ctx.textAlign="right";
+    for(let i=0;i<=yt;i++){const v=ymax*i/yt,yy=Y(v); ctx.strokeStyle="#f1f1f4";ctx.beginPath();ctx.moveTo(padL,yy);ctx.lineTo(W-padR,yy);ctx.stroke(); ctx.fillStyle="#bbb";ctx.fillText(v.toFixed(0),padL-5,yy+3);}
     ctx.strokeStyle="#ddd";ctx.beginPath();ctx.moveTo(padL,padT+ph);ctx.lineTo(W-padR,padT+ph);ctx.stroke();
     ctx.fillStyle="#999";ctx.textAlign="center";for(let x=0;x<=XMAX+1e-9;x+=0.1)ctx.fillText((x*100).toFixed(0)+"%",X(x),H-9);
+    ctx.save();ctx.translate(13,padT+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign="center";ctx.fillStyle="#888";ctx.fillText("probability density of loss",0,0);ctx.restore();
     // copula filled area
     ctx.fillStyle="rgba(74,58,255,.18)";ctx.strokeStyle="#4a3aff";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(0),Y(0));
     for(let k=0;k<=N;k++){const x=LGD*k/N; if(x>XMAX)break; ctx.lineTo(X(x),Y(dC(k)));} ctx.lineTo(X(XMAX),Y(0));ctx.closePath();ctx.fill();ctx.stroke();
-    // BET line + dots
+    // BET line + dots (never moves)
     ctx.strokeStyle="#d62728";ctx.lineWidth=2;ctx.beginPath(); let st=false;
     for(let j=0;j<=DIV;j++){const x=LGD*j/DIV; if(x>XMAX)break; const px=X(x),py=Y(dB(j)); if(!st){ctx.moveTo(px,py);st=true;}else ctx.lineTo(px,py);} ctx.stroke();
     for(let j=0;j<=DIV;j++){const x=LGD*j/DIV; if(x>XMAX)break; ctx.fillStyle="#d62728";ctx.beginPath();ctx.arc(X(x),Y(dB(j)),2.5,0,7);ctx.fill();}
     ctx.textAlign="left";ctx.fillStyle="#4a3aff";ctx.fillText("■ Gaussian copula (moves with ρ)",W-260,padT+12);
-    ctx.fillStyle="#d62728";ctx.fillText("■ diversity score / BET (inert)",W-260,padT+28);
+    ctx.fillStyle="#d62728";ctx.fillText("■ diversity score / BET (welded shut)",W-260,padT+28);
     ctx.fillStyle="#888";ctx.textAlign="center";ctx.fillText("portfolio loss",padL+pw/2,padT+ph+24);
-    const senCop=trancheEL(P,0.07,1.0), senBET=betEL(Q,0.07,1.0);
-    meth.innerHTML=`Copula implied correlation: <b>${(rho*100).toFixed(0)}%</b> (you set it). Diversity-score implied correlation: <b>${(rhoBET*100).toFixed(1)}%</b> 🔒 — fixed by D=${DIV}, no dial. Senior [7–100%] expected loss — copula: <b>${(senCop*100).toFixed(2)}%</b>, diversity score: <b>${(senBET*100).toFixed(2)}%</b> (never changes).`;
+    const senCop=trancheEL(P,0.07,1.0), senBET=betEL(Qfix,0.07,1.0), bet=(rhoBET*100).toFixed(1);
+    meth.innerHTML=`You set the copula's correlation to <b>${(rho*100).toFixed(0)}%</b>. The diversity score's correlation? Still <b>${bet}%</b>. Still ${bet}%. It will always be ${bet}% — D=${DIV} industries decided that long ago and it is not taking questions. Senior [7–100%] expected loss — copula: <b>${(senCop*100).toFixed(2)}%</b> (slides from safe to ruined as you drag); diversity score: <b>${(senBET*100).toFixed(2)}%</b> (and it will sit there, serene, whatever the world does).`;
   }
   dr.addEventListener("input",draw); window.addEventListener("resize",draw); draw();
 })();
@@ -820,6 +874,7 @@ draw();
     saV.textContent=(pA*100).toFixed(0)+"%";sbV.textContent=(pB*100).toFixed(0)+"%";scV.textContent=(pC*100).toFixed(0)+"%";srhoV.textContent=rho.toFixed(2);
     const P=joint(pA,pB,pC,rho),agg=new Float64Array(4);for(let s=0;s<8;s++)agg[POP(s)]+=P[s];
     const Psym=new Float64Array(8);for(let s=0;s<8;s++)Psym[s]=agg[POP(s)]/C3[POP(s)];
+    const aggS=new Float64Array(4);for(let s=0;s<8;s++)aggS[POP(s)]+=Psym[s];  // exchangeable aggregate (== agg, exactly)
     const cssW=cv.clientWidth||840,cssH=300;cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,cssW,cssH);
     const gap=18,w3=(cssW-2*gap)/3;
@@ -831,10 +886,13 @@ draw();
         ctx.save();ctx.translate(x+bw/2,padT+ph+4);ctx.rotate(Math.PI/2);ctx.fillStyle="#999";ctx.textAlign="left";ctx.fillText(lbl(s),0,3);ctx.restore();});};
     panel(0,w3,"nature (heterogeneous)",bars8(P),ymax8);
     panel(w3+gap,w3,"symmetrized (exchangeable)",bars8(Psym),ymax8);
-    panel(2*(w3+gap),w3,"# defaults — IDENTICAL",(x0,w0,padT,ph,ym)=>{const bw=(w0-12)/4;
-      for(let k=0;k<4;k++){const x=x0+6+k*bw,h=agg[k]/ymaxA*ph;ctx.fillStyle=COLK[k];ctx.fillRect(x+bw*0.15,padT+ph-h,bw*0.7,h);
-        ctx.fillStyle="#777";ctx.font="10px sans-serif";ctx.textAlign="center";ctx.fillText(k,x+bw/2,padT+ph+16);}
-      ctx.fillStyle="#777";ctx.fillText("(both models)",x0+w0/2,padT+ph+30);},ymaxA);
+    panel(2*(w3+gap),w3,"# defaults — identical under both",(x0,w0,padT,ph,ym)=>{const bw=(w0-12)/4;
+      for(let k=0;k<4;k++){const cx=x0+6+k*bw, hh=agg[k]/ymaxA*ph, hs=aggS[k]/ymaxA*ph;
+        ctx.fillStyle="#4a3aff";ctx.fillRect(cx+bw*0.12,padT+ph-hh,bw*0.34,hh);          // nature
+        ctx.fillStyle="#d62728";ctx.fillRect(cx+bw*0.54,padT+ph-hs,bw*0.34,hs);          // exchangeable
+        ctx.fillStyle="#777";ctx.font="10px sans-serif";ctx.textAlign="center";ctx.fillText(k,cx+bw/2,padT+ph+16);}
+      ctx.font="9px sans-serif";ctx.textAlign="left";ctx.fillStyle="#4a3aff";ctx.fillText("■ nature",x0+8,padT+10);
+      ctx.fillStyle="#d62728";ctx.fillText("■ exchangeable",x0+58,padT+10);},ymaxA);
     const avg=(pA+pB+pC)/3, g2=agg[2]+agg[3];
     document.getElementById("symmethod").innerHTML=
       `heterogeneous marginals <b>${(pA*100).toFixed(0)}/${(pB*100).toFixed(0)}/${(pC*100).toFixed(0)}%</b> &rarr; exchangeable marginals <b>${(avg*100).toFixed(1)}%</b> each. `+
