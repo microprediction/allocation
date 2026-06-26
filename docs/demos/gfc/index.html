@@ -84,35 +84,36 @@
 
 <main>
   <h1>The Global Financial Crisis</h1>
-  <p class="subtitle">The true story of the role of quantitative methods in the financial crisis — told in
-  demonstrations, by someone who led the CDO modelling at Morgan Stanley.</p>
+  <p class="subtitle">The true story of the role of quantitative models, and of the Indispensable Markets
+  Hypothesis, in the financial crisis. Told in demonstrations, by someone who led the CDO modelling at
+  Morgan Stanley.</p>
 
   <div class="measures">
     <div class="m"><div class="sym">&#8473;</div><div class="nm">objective probability</div>
-      <div class="ds">the real-world measure — the frequency with which things <em>actually</em> happen. The newcomer thinks this is the whole story.</div></div>
+      <div class="ds">the real-world measure: the frequency with which things <em>actually</em> happen. The newcomer thinks this is the whole story.</div></div>
     <div class="m"><div class="sym">&#8474;</div><div class="nm">risk-neutral probability</div>
       <div class="ds">implied by market prices; discounted prices are martingales and derivatives are valued under it. The sophisticated worldview stops here.</div></div>
     <div class="m todo"><div class="sym">&#8477;&#8201;?</div><div class="nm">the measure that caused the financial crisis</div>
-      <div class="ds">…&nbsp;to be explained (Parts&nbsp;6 &amp; 8). The one almost nobody will tell you exists. Mnemonic: <em>R</em> for rating agencies — though the flaw is ubiquitous.</div></div>
+      <div class="ds">…&nbsp;to be explained (Parts&nbsp;6 &amp; 8). The one almost nobody will tell you exists. Mnemonic: <em>R</em> for rating agencies, though the flaw is ubiquitous.</div></div>
   </div>
   <p class="mcap">There are <em>three</em> probability measures in finance, not two. Understanding the
   <em>trichotomy</em> is the key to this whole story.</p>
 
   <p class="lead">The crisis has a popular telling: clever quants, dazzled by an elegant formula, let
   the maths blind them, and the tails they ignored blew up the world. This essay takes that story
-  apart in stages — with simulations you can run — and replaces it with what actually happened.
+  apart in stages, with simulations you can run, and replaces it with what actually happened.
   The arc: first <em>blame the marginal</em>, then <em>blame the dependence</em>,
   then the <em>truth</em>.</p>
 
   <p>The subtitle, I admit, begs an argument from authority. Please ignore it. It does not matter who I am.
-  Go through the arguments here slowly and carefully and either understand them or refute them yourself —
-  that, and not my résumé, is the whole point.</p>
+  Go through the arguments here slowly and carefully and either understand them or refute them yourself.
+  That, and not my résumé, is the whole point.</p>
   <details class="think">
   <summary>…yes, but if you insist on credentials</summary>
   <p>All that said: argument from authority is at least the lesser of two evils, the greater being argument
-  from <em>celebrity</em>. So, to cut to the chase — I am the quant from
+  from <em>celebrity</em>. So, to cut to the chase: I am the quant from
   <a href="https://www.youtube.com/watch?v=QpsI_Gvn7C8"><em>The Big Short</em></a>. Although, in fairness,
-  I got a <em>gold</em> in the Australian Mathematical Olympiad, not silver — so you <em>will</em> respect
+  I got a <em>gold</em> in the Australian Mathematical Olympiad, not silver. So you <em>will</em> respect
   my authoritah.</p>
   </details>
 
@@ -120,21 +121,21 @@
   <p>The loudest version (Taleb's bell-curve "Great Intellectual Fraud," amplified into "the formula
   that killed Wall Street") blames the <em>Normal distribution</em>. But the structured-credit
   machinery ran on a Gaussian <em>copula</em>, and the marginals were never a modelling choice at all:
-  each name's default probability was <em>pinned by its CDS spread</em> — the market-implied
+  each name's default probability was <em>pinned by its CDS spread</em>, the market-implied
   default probability. The one free knob was the <em>correlation</em>, and you could dial it
   as high as you liked. By Sklar's theorem the copula carries the dependence entirely separately from
   those CDS-fixed marginals, so the dramatic shape of a CDO² loss distribution comes from
-  <em>cranking the correlation</em> and the tranching nonlinearity — not from the bell curve. The
+  <em>cranking the correlation</em> and the tranching nonlinearity, not from the bell curve. The
   Normal marginal didn't cause it; the marginals were never Normal and were never the free parameter.</p>
   <details class="think">
   <summary>Want to know what I really think?</summary>
   <p>I hate spending space on this.</p>
   <p>It is worth saying plainly: this strand of the critique never warranted a real response from
   anyone who did credit analytics for a living. The bell-curve sermon conflated the marginal
-  distribution with the dependence structure the models actually turned on — handwaving from someone
+  distribution with the dependence structure the models actually turned on. It was handwaving from someone
   who, on the evidence, knew essentially nothing about how these instruments were built. I said so in a
   <a href="https://www.youtube.com/watch?v=A72cc8mM5gY">video mocking Nassim Taleb's ridiculous, misplaced
-  pomposity</a> that went micro-viral and that — to their credit — even
+  pomposity</a> that went micro-viral and that, to their credit, even
   <a href="https://www.blackswanreport.com/blog/2010/12/nassim-taleb-educates-a-quant/comment-page-1/">Taleb's
   own admirers enjoyed</a>. The price of admission was a place on Taleb's public
   <a href="https://www.fooledbyrandomness.com/smear.html">"list of smear artists,"</a> filed there as
@@ -142,26 +143,26 @@
   excellent company: the same list brands the great forecasting scholar Philip Tetlock guilty of
   <em>"mendacious, perfidious behavior."</em> One takes one's honours where one finds them.</p>
   <p>That last phrase was not an accident of temper. <em>The Black Swan</em> leaned throughout on autism
-  as an epithet — science as "an autistic enterprise," the recurring "Dr John" caricature of the
-  literal-minded fool — and I was among the very few at the time to call it for what it was: a
+  as an epithet: science as "an autistic enterprise," the recurring "Dr John" caricature of the
+  literal-minded fool. I was among the very few at the time to call it for what it was, a
   brazen attack on autistic people, dressed as iconoclasm. It went entirely unremarked by the
   <em>Harvard Business Review</em> and every other respectable outlet that lionised the book. Whatever
-  one concludes about copulas, that was a genuinely dark turn in public discourse — worth remembering
+  one concludes about copulas, that was a genuinely dark turn in public discourse, worth remembering
   whenever this particular author is wheeled out as the crisis's moral authority.</p>
   <p>To believe <em>The Black Swan</em> you have to believe, in essence, that everyone is an idiot. Many
   readers met the normal distribution for the first time in its pages and, a moment later, were somehow
   persuaded they had been handed a second vital fact the experts had overlooked. Life does not work that
   way. If you think something as <em>really fucking obvious</em> as "the normal distribution has thin
-  tails" had escaped the people who priced this paper for a living — and, as the demonstrations here
-  show, it wasn't even the relevant fact — then you have picked the wrong sucker at the poker table. And
+  tails" had escaped the people who priced this paper for a living (and, as the demonstrations here
+  show, it wasn't even the relevant fact), then you have picked the wrong sucker at the poker table. And
   if you cannot very quickly spot the real sucker, well, we know how that goes.</p>
   <p>You would also have to be blithely unaware of 1987. Black Monday could, by precisely the same logic,
-  have been pinned on Black–Scholes and its <em>constant</em> volatility — and the market's answer was
+  have been pinned on Black–Scholes and its <em>constant</em> volatility, and the market's answer was
   immediate and permanent: the volatility <em>smile</em>, by 2007 a twenty-year-old monument to the plain
   fact that practitioners already knew returns were not Gaussian and crashes were not rare. The "experts
   naïvely assumed thin tails" story is borderline plausible before October 1987; after it, it is simply
   false.</p>
-  <p>The readers of <em>The Black Swan</em> — politicians, journalists, dignitaries — <em>were</em> the
+  <p>The readers of <em>The Black Swan</em> (politicians, journalists, dignitaries) <em>were</em> the
   suckers, and a great many put their names in print endorsing a rambling, disorganised slander against
   autistic people. Perhaps one day I will collate that wall of shame and reproduce it here, and earn a
   place on a few more lists like Taleb's. (Who, incidentally, keeps a public list of the people he hates
@@ -725,7 +726,7 @@
   model rather than just the Gaussian copula — did Morgan Stanley race to weaponise the secret sauce? Did
   the traders with PhDs in statistics fall upon it? Here the <em>true</em> story — not the one
   <em>inferred</em> by outsiders from a comfortable distance — takes a more curious turn.</p>
-  <p><em>Backdrop.</em> By this point the pendulum had swung hard toward origination. Consider the economics: a bank could
+  <p><em>Backdrop.</em> By this point the pendulum had swung hard toward the desk and away from the risk and quant managers. Consider the economics: a bank could
   assemble a CDO, sell <em>n−1</em> slices of the pie for roughly the price of the whole pie, and keep the
   <em>n</em>-th slice almost for free. Maybe the free slice ends up worthless; maybe it doesn't. Either way
   the only quantity anyone is really optimising is <em>how fast you can originate the next one</em>. Take
