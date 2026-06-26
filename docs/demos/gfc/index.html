@@ -114,7 +114,7 @@
   my authoritah.</p>
   </details>
 
-  <h2><span class="part">Part 1 · the very confused version that is not worth our time</span><br>The Normal-distribution fallacy</h2>
+  <h2><span class="part">Part 1 · the very confused version that is not worth our time</span><br>The Normal-distribution fallacy: an opiate for the mathless</h2>
   <p>The loudest version (Taleb's bell-curve "Great Intellectual Fraud," amplified into "the formula
   that killed Wall Street") blames the <em>Normal distribution</em>. But the structured-credit
   machinery ran on a Gaussian <em>copula</em>, and the marginals were never a modelling choice at all:
@@ -716,7 +716,7 @@
   of positive correlation in defaults. (Then there is the Wigner quasiprobability distribution… for another
   day.)</p>
 
-  <h2><span class="part">Part 8 · how the trick was actually used</span><br>Back to the narrative in which Taleb is a genius and you are a minor one</h2>
+  <h2><span class="part">Part 8 · Back to our story</span><br>Back to the narrative in which Taleb is a genius and you are a minor one</h2>
   <p>Anyway, back to the narrative in which Taleb is a genius and convinces you that you, too, are a minor
   genius, because you can grasp so quickly why <em>I</em> am an idiot (whether or not I am also a
   <em>SUPER DUPER QUANTITATIVE</em>) because I cannot grasp subtle epistemological nuances, etc. You might
@@ -770,7 +770,7 @@
                  &#127796;     &#127796;
       +-----------------------------+
       |       AURORA FUNDING        |    owns ...... a pile of bonds
-      |         (Cayman) Ltd        |    employs ... nobody
+      |         (Cayman) Ltd        |    employs ... maybe some lawyers
       |   +---------------------+   |    does ...... nothing
       |   |    bonds    bonds   |   |
       |   +---------------------+   |
@@ -790,6 +790,37 @@
   That gap is the only reason the island, the trustee and the brass plate ever paid for themselves.</p>
   <p>Which is the cleanest statement of the whole thesis: the company that does nothing is worth building
   only because somebody, somewhere, is rating off a <em>model</em> instead of off the <em>price</em>.</p>
+
+  <p>You do not have to take my word for it. The accounting is an identity. The coupons coming in to the
+  vehicle are exactly the spread investors demand for holding risky names instead of risk-free bonds, so
+  they <em>imply</em> a default probability. Price every tranche coming out under that <em>same</em>
+  implied probability and the books balance to the cent: there is no perpetual-motion machine. A profit
+  appears out the other side only if the probabilities used on the way out are <em>different</em>, lower,
+  on the senior tranche the rating blesses. That gap is the whole of the rating-agency arbitrage. Watch:</p>
+
+  <div class="widget">
+    <div class="controls">
+      <label>collateral spread <input id="raSpread" type="range" min="0.005" max="0.06" step="0.0025" value="0.03"><span class="val" id="raSpreadV">3.0%</span></label>
+      <label>correlation ρ <input id="raRho" type="range" min="0" max="0.6" step="0.01" value="0.20"><span class="val" id="raRhoV">0.20</span></label>
+      <label>agency default prob (senior priced here) <input id="raAg" type="range" min="0.005" max="0.05" step="0.0025" value="0.01"><span class="val" id="raAgV">1.0%</span></label>
+    </div>
+    <table class="impl" id="raTable" style="font-size:.9rem"></table>
+    <div class="method" id="raMethod"></div>
+  </div>
+  <p class="muted">The collateral spread fixes the market-implied default probability (spread ÷ loss-given-default).
+  Each tranche's <em>fair</em> coupon is its expected loss under that probability, and those fair coupons sum
+  back to the pool spread exactly, money in equals money out, arranger profit zero. Now drag the
+  <em>agency default probability</em> below the implied one: that is the only thing the rating changes, and
+  the only place a profit can come from. Set it equal to the implied probability and the free lunch
+  vanishes.</p>
+
+  <p>In fairness, there is a more benevolent, if still mildly dubious, reading. Perhaps the senior buyers
+  were not fooled at all; perhaps they were knowingly paying for <em>diversification as a service</em>,
+  handing the arranger a fee to turn a messy pool into the one clean exposure they wanted. In a free
+  country that is entirely their right. But two things are also true: they did an enormous amount of it,
+  and the fee for this economic service was very large. So whichever reading you prefer, the cynical or the
+  charitable, any honest account of the crisis has to explain the same object: <em>how</em> the
+  perpetual-motion machine actually worked.</p>
 
   <p>And it was right around then that I wandered over to the desk of the man who would become my next
   manager, to ask what he needed. The timing, as it turned out, was auspicious. He was setting out on the
@@ -1094,6 +1125,48 @@ draw();
       : `Compound correlation: market EL ${(level*100).toFixed(1)}% has <b>${cr.length===1?"one solution":"NO solution"}</b> on the mezz curve. Base correlation still inverts uniquely (β monotone). Slide the price into the hump to see compound correlation go multivalued.`;
   }
   mkt.addEventListener("input",draw); pEl.addEventListener("input",draw); window.addEventListener("resize",draw); draw();
+})();
+</script>
+
+<script>
+/* ratings arbitrage: conservation under one measure (no free lunch) vs senior sold at the agency probability */
+(function(){
+  const tbl=document.getElementById("raTable"); if(!tbl||typeof lossDist==="undefined") return;
+  const sp=document.getElementById("raSpread"), spv=document.getElementById("raSpreadV"),
+        rh=document.getElementById("raRho"), rhv=document.getElementById("raRhoV"),
+        ag=document.getElementById("raAg"), agv=document.getElementById("raAgV"),
+        meth=document.getElementById("raMethod");
+  const TR=[["Equity",0,0.03],["Mezzanine",0.03,0.07],["Senior (AAA)",0.07,1.0]];
+  const pct=x=>(x*100).toFixed(2)+"%";
+  function draw(){
+    const spread=+sp.value, rho=+rh.value, pQ=Math.min(spread/LGD,0.6);
+    const pAg=Math.min(+ag.value, pQ);
+    spv.textContent=(spread*100).toFixed(2)+"%"; rhv.textContent=rho.toFixed(2); agv.textContent=(pAg*100).toFixed(2)+"%";
+    const PQ=lossDist(rho,pQ,33).P, PA=lossDist(rho,pAg,33).P;
+    let rows="<tr><th>tranche</th><th>width</th><th>fair coupon<br>(market ρ-prob)</th><th>sold coupon<br>(as priced)</th></tr>", poolOut=0;
+    TR.forEach(([nm,a,d])=>{
+      const w=d-a, elQ=trancheEL(PQ,a,d);
+      const sold = nm.startsWith("Senior") ? trancheEL(PA,a,d) : elQ;   // only the senior is sold at the agency prob
+      poolOut += w*sold;
+      rows+=`<tr><td>${nm} <span class="muted">[${(a*100).toFixed(0)}–${(d*100).toFixed(0)}%]</span></td>`+
+            `<td class="num">${(w*100).toFixed(0)}%</td><td class="num">${pct(elQ)}</td>`+
+            `<td class="num">${nm.startsWith("Senior")?"<b>"+pct(sold)+"</b>":pct(sold)}</td></tr>`;
+    });
+    tbl.innerHTML=rows;
+    const poolIn=LGD*pQ;                       // coupons in = pool spread (= sum of fair tranche coupons, by conservation)
+    const profit=poolIn-poolOut;               // arranger carry, in fraction of pool notional
+    const eps=profit<1e-5;
+    meth.innerHTML=
+      `Coupons <b>in</b> (pool spread) = <b>${pct(poolIn)}</b>, implying a market default probability of `+
+      `<b>${(pQ*100).toFixed(1)}%</b>. Funded at the fair (market-ρ) coupons, the tranche coupons sum back to `+
+      `<b>${pct(poolIn)}</b>: money in equals money out, arranger carry <b>0</b>. `+
+      (eps
+        ? `With the agency probability set equal to the implied one, that is exactly what happens — <b>no free lunch</b>.`
+        : `But the AAA senior is sold at the agency probability of <b>${(pAg*100).toFixed(1)}%</b>, a lower coupon, so coupons out fall to `+
+          `<b>${pct(poolOut)}</b> and the arranger pockets <b>${(profit*100).toFixed(2)}%</b> of pool notional from nowhere. `+
+          `That gap is the rating-agency arbitrage (or, charitably, the fee for diversification): it is precisely the senior tranche's mispricing.`);
+  }
+  [sp,rh,ag].forEach(e=>e.addEventListener("input",draw)); window.addEventListener("resize",draw); draw();
 })();
 </script>
 </body>
