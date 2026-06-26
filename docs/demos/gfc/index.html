@@ -170,7 +170,7 @@
   </details>
 
   <div class="stub">Interactive Sklar's-theorem demo (R³ → unit cube → default-time space → default
-  order) — forthcoming.</div>
+  order), forthcoming.</div>
 
   <h2><span class="part">Part 2 · the less confused red herring</span><br>Did Gaussian dependence hide the tail risk?</h2>
   <p>The slightly more plausible, but mostly ill-informed, story is the one a numerate
@@ -735,12 +735,12 @@
   a competitive advantage anyone is clamouring for. It is overhead.</p>
   <p>And it was right around then that I wandered over to the desk of the man who would become my next
   manager, to ask what he needed. The timing, as it turned out, was auspicious. He was setting out on the
-  most ambitious use I ever saw of the very arbitrage I have been describing — the gap between the rating
+  most ambitious use I ever saw of the very arbitrage I have been describing: the gap between the rating
   agencies' actuarial default probabilities and the risk-neutral probabilities the market was actually
   quoting.</p>
   <p>Guess what they did with this sneakiness.</p>
-  <div class="stub">The rest — what that desk did with the actuarial-vs-risk-neutral arbitrage, and how it
-  ended — continues here.</div>
+  <div class="stub">The rest (what that desk did with the actuarial-vs-risk-neutral arbitrage, and how it
+  ended) continues here.</div>
 </main>
 
 <footer>Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.</footer>
@@ -812,7 +812,7 @@ function draw(){
   // legend
   ctx.font="11px sans-serif"; ctx.textAlign="left";
   ctx.fillStyle="rgba(74,58,255,.9)"; ctx.fillText("■ loss distribution (quadrature avg)", W-250, padT+12);
-  ctx.fillStyle="#6b73b6"; ctx.fillText("— conditional at factor m = +2 / 0 / −2", W-250, padT+28);
+  ctx.fillStyle="#6b73b6"; ctx.fillText("· conditional at factor m = +2 / 0 / −2", W-250, padT+28);
   // tranches
   const rows=TR.map(([nm,A,D,col])=>{ const el=trancheEL(P,A,D), pct=(el*100);
     return `<tr><td>${nm} <span class="muted">[${(A*100).toFixed(0)}–${(D*100).toFixed(0)}%]</span></td>`+
@@ -820,7 +820,7 @@ function draw(){
   document.getElementById("tranches").innerHTML =
     `<tr><th>tranche</th><th>expected loss</th><th></th></tr>`+rows.join("");
   document.getElementById("method").innerHTML =
-    `Loss distribution = ∫ Binomial(${N}, p(m)) · φ(m) dm, computed with <b>${NQ}</b> quadrature nodes over the common factor — exact, &lt;1&nbsp;ms, no Monte&nbsp;Carlo. `+
+    `Loss distribution = ∫ Binomial(${N}, p(m)) · φ(m) dm, computed with <b>${NQ}</b> quadrature nodes over the common factor. Exact, &lt;1&nbsp;ms, no Monte&nbsp;Carlo. `+
     `Conditional default prob p(m)=Φ((Φ⁻¹(p)−√ρ·m)/√(1−ρ)).`;
 }
 const rho_=document.getElementById("rho"), p_=document.getElementById("p"), nq_=document.getElementById("nq");
@@ -893,7 +893,7 @@ draw();
     ctx.fillStyle="#d62728";ctx.fillText("■ rating-agency model (welded at ρ = 5%)",W-290,padT+28);
     ctx.fillStyle="#888";ctx.textAlign="center";ctx.fillText("portfolio loss",padL+pw/2,padT+ph+24);
     const senCop=trancheEL(P,0.07,1.0), senAg=trancheEL(Pag,0.07,1.0);
-    meth.innerHTML=`You set the copula's correlation to <b>${(rho*100).toFixed(0)}%</b>. The diversity score's correlation? Still <b>5%</b>. Still 5%. It will always be 5% — the industry count fixed it long ago and it is not taking questions. Senior [7–100%] expected loss — copula: <b>${(senCop*100).toFixed(2)}%</b> (slides from safe to ruined as you drag); rating-agency: <b>${(senAg*100).toFixed(2)}%</b> (and it will sit there, serene, whatever the world does).`;
+    meth.innerHTML=`You set the copula's correlation to <b>${(rho*100).toFixed(0)}%</b>. The diversity score's correlation? Still <b>5%</b>. Still 5%. It will always be 5%; the industry count fixed it long ago and it is not taking questions. Senior [7–100%] expected loss, copula: <b>${(senCop*100).toFixed(2)}%</b> (slides from safe to ruined as you drag); rating-agency: <b>${(senAg*100).toFixed(2)}%</b> (and it will sit there, serene, whatever the world does).`;
   }
   dr.addEventListener("input",draw); window.addEventListener("resize",draw); draw();
 })();
@@ -925,7 +925,7 @@ draw();
     const ir=impRho(k,price,p);
     ctx.strokeStyle="#d62728";ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(padL,Y(price));ctx.lineTo(W-padR,Y(price));ctx.stroke();ctx.beginPath();ctx.moveTo(X(ir),padT);ctx.lineTo(X(ir),Y(price));ctx.stroke();ctx.setLineDash([]);
     ctx.fillStyle="#d62728";ctx.beginPath();ctx.arc(X(ir),Y(price),4,0,7);ctx.fill();ctx.textAlign="center";ctx.fillText("implied ρ = "+(ir*100).toFixed(0)+"%",X(ir),Y(price)-8);
-    meth.innerHTML=`Pays if <b>${k}+ of 5</b> default · per-name prob ${(p*100).toFixed(0)}% · market price <b>${(price*100).toFixed(1)}%</b> ⇒ implied correlation <b>${(ir*100).toFixed(0)}%</b>. At the agencies' actuarial ρ≈3%, the same contract is worth only <b>${(pGE(k,0.03,p)*100).toFixed(2)}%</b> — they marked joint-default risk at a fraction of where the market traded it.`;
+    meth.innerHTML=`Pays if <b>${k}+ of 5</b> default · per-name prob ${(p*100).toFixed(0)}% · market price <b>${(price*100).toFixed(1)}%</b> ⇒ implied correlation <b>${(ir*100).toFixed(0)}%</b>. At the agencies' actuarial ρ≈3%, the same contract is worth only <b>${(pGE(k,0.03,p)*100).toFixed(2)}%</b>; they marked joint-default risk at a fraction of where the market traded it.`;
   }
   document.querySelectorAll(".kb").forEach(b=>b.addEventListener("click",()=>{ k=+b.dataset.k; document.querySelectorAll(".kb").forEach(x=>{x.style.background="";x.style.color="";}); b.style.background="var(--accent)";b.style.color="#fff"; draw(); }));
   pEl.addEventListener("input",draw); prEl.addEventListener("input",draw); window.addEventListener("resize",draw);
@@ -975,7 +975,7 @@ draw();
         ctx.save();ctx.translate(x+bw/2,padT+ph+4);ctx.rotate(Math.PI/2);ctx.fillStyle="#999";ctx.textAlign="left";ctx.fillText(lbl(s),0,3);ctx.restore();});};
     panel(0,w3,"nature (heterogeneous)",bars8(P),ymax8);
     panel(w3+gap,w3,"symmetrized (exchangeable)",bars8(Psym),ymax8);
-    panel(2*(w3+gap),w3,"# defaults — identical under both",(x0,w0,padT,ph,ym)=>{const bw=(w0-12)/4;
+    panel(2*(w3+gap),w3,"# defaults · identical under both",(x0,w0,padT,ph,ym)=>{const bw=(w0-12)/4;
       for(let k=0;k<4;k++){const cx=x0+6+k*bw, hh=agg[k]/ymaxA*ph, hs=aggS[k]/ymaxA*ph;
         ctx.fillStyle="#4a3aff";ctx.fillRect(cx+bw*0.12,padT+ph-hh,bw*0.34,hh);          // nature
         ctx.fillStyle="#d62728";ctx.fillRect(cx+bw*0.54,padT+ph-hs,bw*0.34,hs);          // exchangeable
@@ -985,7 +985,7 @@ draw();
     const avg=(pA+pB+pC)/3, g2=agg[2]+agg[3];
     document.getElementById("symmethod").innerHTML=
       `heterogeneous marginals <b>${(pA*100).toFixed(0)}/${(pB*100).toFixed(0)}/${(pC*100).toFixed(0)}%</b> &rarr; exchangeable marginals <b>${(avg*100).toFixed(1)}%</b> each. `+
-      `A tranche paying on <b>2+ of 3</b> defaults is worth <b>${(g2*100).toFixed(2)}%</b> under <em>both</em> models — identical, exactly.`;
+      `A tranche paying on <b>2+ of 3</b> defaults is worth <b>${(g2*100).toFixed(2)}%</b> under <em>both</em> models: identical, exactly.`;
   }
   [sa,sb,sc,srho].forEach(e=>e.addEventListener("input",draw));window.addEventListener("resize",draw);draw();
 })();
@@ -1017,14 +1017,14 @@ draw();
     function line(A,rs,ys,col,wd){ A.s=A.s; ctx.strokeStyle=col;ctx.lineWidth=wd;ctx.beginPath();
       for(let i=0;i<rs.length;i++){const px=A.X(rs[i]),py=A.Y(ys[i]); i?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.stroke(); }
     // LEFT: compound correlation, mezz hump
-    panel(0,w2,"compound correlation — ill-posed"); const L=axes(0);
+    panel(0,w2,"compound correlation · ill-posed"); const L=axes(0);
     line(L,rs,mez,"#4a3aff",2.5);
     ctx.strokeStyle="#d62728";ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(L.padL,L.Y(level));ctx.lineTo(L.padL+L.pw,L.Y(level));ctx.stroke();ctx.setLineDash([]);
     const cr=crossings(rs,mez,level);
     cr.forEach(r=>{ctx.fillStyle="#d62728";ctx.beginPath();ctx.arc(L.X(r),L.Y(level),4,0,7);ctx.fill();ctx.fillStyle="#a33";ctx.textAlign="center";ctx.fillText((r*100).toFixed(0)+"%",L.X(r),L.Y(level)-8);});
     ctx.fillStyle="#4a3aff";ctx.font="11px sans-serif";ctx.textAlign="left";ctx.fillText("3–7% mezzanine EL",L.padL+6,padT+12);
     // RIGHT: base correlation, monotone
-    panel(w2+gap,w2,"base correlation — unique (but skewed)"); const R=axes(w2+gap);
+    panel(w2+gap,w2,"base correlation · unique (but skewed)"); const R=axes(w2+gap);
     line(R,rs,b3,"#2ca02c",2.2); line(R,rs,b7,"#e08e0b",2.2);
     ctx.strokeStyle="#d62728";ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(R.padL,R.Y(level));ctx.lineTo(R.padL+R.pw,R.Y(level));ctx.stroke();ctx.setLineDash([]);
     const c3=crossings(rs,b3,level), c7=crossings(rs,b7,level);
@@ -1032,7 +1032,7 @@ draw();
     ctx.font="11px sans-serif";ctx.textAlign="left";ctx.fillStyle="#2ca02c";ctx.fillText("[0–3%] base",R.padL+6,padT+12);ctx.fillStyle="#e08e0b";ctx.fillText("[0–7%] base",R.padL+6,padT+26);
     const b3r=c3[0], b7r=c7[0];
     document.getElementById("bcmethod").innerHTML = cr.length>=2
-      ? `Compound correlation: market EL ${(level*100).toFixed(1)}% ⇒ <b>${cr.map(r=>(r*100).toFixed(0)+"%").join(" and ")}</b> — <em>two</em> answers, no way to choose. Base correlation: β([0–3%]) = <b>${b3r!=null?(b3r*100).toFixed(0)+"%":"—"}</b>, β([0–7%]) = <b>${b7r!=null?(b7r*100).toFixed(0)+"%":"—"}</b> — each unique${(b3r!=null&&b7r!=null)?`, and the gap (skew = ${((b7r-b3r)*100).toFixed(0)}pp) is the artifact a true single-ρ model can't make.`:"."}`
+      ? `Compound correlation: market EL ${(level*100).toFixed(1)}% ⇒ <b>${cr.map(r=>(r*100).toFixed(0)+"%").join(" and ")}</b>, <em>two</em> answers, no way to choose. Base correlation: β([0–3%]) = <b>${b3r!=null?(b3r*100).toFixed(0)+"%":"n/a"}</b>, β([0–7%]) = <b>${b7r!=null?(b7r*100).toFixed(0)+"%":"n/a"}</b>, each unique${(b3r!=null&&b7r!=null)?`, and the gap (skew = ${((b7r-b3r)*100).toFixed(0)}pp) is the artifact a true single-ρ model can't make.`:"."}`
       : `Compound correlation: market EL ${(level*100).toFixed(1)}% has <b>${cr.length===1?"one solution":"NO solution"}</b> on the mezz curve. Base correlation still inverts uniquely (β monotone). Slide the price into the hump to see compound correlation go multivalued.`;
   }
   mkt.addEventListener("input",draw); pEl.addEventListener("input",draw); window.addEventListener("resize",draw); draw();
