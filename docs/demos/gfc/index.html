@@ -241,6 +241,46 @@
   rather than properties of the world. I was not pricing by replication; I was marking to a convention
   and hoping the unhedgeable residual stayed small. On a desk, everyone knew this too.</p>
 
+  <h3>Base correlation: the kludge that became a market standard</h3>
+  <p>If you still suspect the practitioners were <em>seduced by the elegance</em> of all this, let me
+  introduce the single most damning piece of evidence to the contrary — the thing the market actually
+  quoted. I will be honest: base correlation made me want to puke.</p>
+  <p>The natural idea is <em>compound</em> (or <em>implied</em>) correlation: take a tranche's market price
+  and back out the single Gaussian-copula correlation that reproduces it, exactly as you read implied
+  volatility out of an option. It does not work. A <em>mezzanine</em> tranche's expected loss is
+  <em>not monotone</em> in correlation — it rises, then falls — so a given market price can correspond to
+  <em>two</em> correlations, or to <em>none at all</em>. The most important parameter in the model is not
+  even a well-defined function of the price. Drag the market price below and watch the line cut the
+  mezzanine curve twice.</p>
+  <p>So J.P.&nbsp;Morgan published a fix (McGinty, Beinstein, Ahluwalia &amp; Watts, <em>Introducing Base
+  Correlations</em>, 2004), and it became the market quoting convention almost overnight. The trick:
+  never quote the tranche <em>[a, d]</em> directly. Decompose it into two <em>base</em> tranches off zero —
+  <em>[0, d]</em> minus <em>[0, a]</em> — because a base (equity-like) tranche's loss <em>is</em> monotone
+  in correlation, so each inverts to a <em>unique</em> base correlation. Bootstrap those upward across
+  detachment points and you have a tidy, quotable number for every tranche.</p>
+  <p>Look at what that actually is. It is a <em>change of coordinates</em> chosen for no reason other than
+  to make a broken model emit a single number. The base correlations you back out are <em>not equal</em>
+  across detachments — they form a rising <em>skew</em> — which, if the single-correlation Gaussian copula
+  were true, could not happen: one model, one correlation. The skew is the model screaming that it is
+  wrong, and base correlation's contribution was to write the scream down neatly and call it a quote. That
+  is the opposite of being seduced by elegance. It is a profession holding its nose and agreeing on a
+  common lie so that trades can clear. Everyone knew. We quoted it anyway.</p>
+
+  <div class="widget">
+    <div class="controls">
+      <label>market price (mezz EL) <input id="bcmkt" type="range" min="0.05" max="0.30" step="0.005" value="0.16"><span class="val" id="bcmktV">16%</span></label>
+      <label>per-name default prob <input id="bcp" type="range" min="0.02" max="0.12" step="0.01" value="0.05"><span class="val" id="bcpV">5%</span></label>
+    </div>
+    <canvas id="bccv" width="840" height="320"></canvas>
+    <div class="method" id="bcmethod"></div>
+  </div>
+  <p class="muted">Left — <em>compound correlation</em>: expected loss of the 3–7% mezzanine vs ρ is a
+  <em>hump</em>, so your market-price line crosses it twice (or not at all). Which one is "the
+  correlation"? There is no answer. Right — <em>base correlation</em>: the [0–3%] and [0–7%] base tranches
+  are each monotone, so any level inverts to a single β — but the two βs differ, and that gap is the base-
+  correlation <em>skew</em> a true one-correlation model could never produce. The kludge is well-posed and
+  dishonest at the same time.</p>
+
   <h2><span class="part">Part 5 · the quants knew</span><br>You don't start a company to fix something you think is great</h2>
   <p>The last myth to fall is the one about the people. The story <em>needs</em> the quants to be naive
   — dazzled, overconfident, blind to the cracks — because a catastrophe caused by a beautiful mistake
@@ -705,6 +745,54 @@ draw();
       `A tranche paying on <b>2+ of 3</b> defaults is worth <b>${(g2*100).toFixed(2)}%</b> under <em>both</em> models — identical, exactly.`;
   }
   [sa,sb,sc,srho].forEach(e=>e.addEventListener("input",draw));window.addEventListener("resize",draw);draw();
+})();
+</script>
+
+<script>
+/* base correlation: compound corr is multivalued (mezz hump) vs base corr always unique */
+(function(){
+  const cv=document.getElementById("bccv"); if(!cv||typeof lossDist==="undefined") return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1, RMAX=0.9, NG=60;
+  const mkt=document.getElementById("bcmkt"), mktV=document.getElementById("bcmktV"), pEl=document.getElementById("bcp"), pV=document.getElementById("bcpV");
+  function curves(p){ const rs=[],mez=[],b3=[],b7=[]; for(let i=0;i<=NG;i++){ const r=RMAX*i/NG, P=lossDist(Math.min(r,0.985),p,33).P;
+    rs.push(r); mez.push(trancheEL(P,0.03,0.07)); b3.push(trancheEL(P,0,0.03)); b7.push(trancheEL(P,0,0.07)); } return {rs,mez,b3,b7}; }
+  function crossings(rs,ys,level){ const out=[]; for(let i=1;i<rs.length;i++){ const a=ys[i-1]-level,b=ys[i]-level;
+    if(a===0){out.push(rs[i-1]);} else if(a*b<0){ out.push(rs[i-1]+(rs[i]-rs[i-1])*(-a)/(b-a)); } } return out; }
+  function panel(x0,w0,title){ ctx.fillStyle="#444";ctx.font="bold 12px sans-serif";ctx.textAlign="center";ctx.fillText(title,x0+w0/2,16); }
+  function draw(){
+    const level=+mkt.value, p=+pEl.value; mktV.textContent=(level*100).toFixed(1)+"%"; pV.textContent=(p*100).toFixed(0)+"%";
+    const {rs,mez,b3,b7}=curves(p);
+    const cssW=cv.clientWidth||840,cssH=320;cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+    const gap=26, w2=(cssW-gap)/2, padT=28, padB=30, ph=cssH-padT-padB;
+    let ymax=0; for(const a of [mez,b3,b7]) for(const v of a) ymax=Math.max(ymax,v); ymax=Math.max(ymax,level)*1.1;
+    function axes(x0){ const padL=x0+44, pw=x0+w2-14-padL;
+      ctx.strokeStyle="#ddd";ctx.beginPath();ctx.moveTo(padL,padT+ph);ctx.lineTo(padL+pw,padT+ph);ctx.stroke();
+      ctx.fillStyle="#999";ctx.font="10px sans-serif";ctx.textAlign="center";for(let r=0;r<=RMAX+1e-9;r+=0.2)ctx.fillText((r*100).toFixed(0)+"%",padL+(r/RMAX)*pw,cssH-12);
+      ctx.fillText("correlation ρ",padL+pw/2,cssH-1);
+      return {padL,pw,X:r=>padL+(r/RMAX)*pw,Y:v=>padT+ph-(Math.min(v,ymax)/ymax)*ph}; }
+    function line(A,rs,ys,col,wd){ A.s=A.s; ctx.strokeStyle=col;ctx.lineWidth=wd;ctx.beginPath();
+      for(let i=0;i<rs.length;i++){const px=A.X(rs[i]),py=A.Y(ys[i]); i?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.stroke(); }
+    // LEFT: compound correlation, mezz hump
+    panel(0,w2,"compound correlation — ill-posed"); const L=axes(0);
+    line(L,rs,mez,"#4a3aff",2.5);
+    ctx.strokeStyle="#d62728";ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(L.padL,L.Y(level));ctx.lineTo(L.padL+L.pw,L.Y(level));ctx.stroke();ctx.setLineDash([]);
+    const cr=crossings(rs,mez,level);
+    cr.forEach(r=>{ctx.fillStyle="#d62728";ctx.beginPath();ctx.arc(L.X(r),L.Y(level),4,0,7);ctx.fill();ctx.fillStyle="#a33";ctx.textAlign="center";ctx.fillText((r*100).toFixed(0)+"%",L.X(r),L.Y(level)-8);});
+    ctx.fillStyle="#4a3aff";ctx.font="11px sans-serif";ctx.textAlign="left";ctx.fillText("3–7% mezzanine EL",L.padL+6,padT+12);
+    // RIGHT: base correlation, monotone
+    panel(w2+gap,w2,"base correlation — unique (but skewed)"); const R=axes(w2+gap);
+    line(R,rs,b3,"#2ca02c",2.2); line(R,rs,b7,"#e08e0b",2.2);
+    ctx.strokeStyle="#d62728";ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(R.padL,R.Y(level));ctx.lineTo(R.padL+R.pw,R.Y(level));ctx.stroke();ctx.setLineDash([]);
+    const c3=crossings(rs,b3,level), c7=crossings(rs,b7,level);
+    [["#2ca02c",c3],["#e08e0b",c7]].forEach(([col,cc])=>cc.slice(0,1).forEach(r=>{ctx.fillStyle=col;ctx.beginPath();ctx.arc(R.X(r),R.Y(level),4,0,7);ctx.fill();}));
+    ctx.font="11px sans-serif";ctx.textAlign="left";ctx.fillStyle="#2ca02c";ctx.fillText("[0–3%] base",R.padL+6,padT+12);ctx.fillStyle="#e08e0b";ctx.fillText("[0–7%] base",R.padL+6,padT+26);
+    const b3r=c3[0], b7r=c7[0];
+    document.getElementById("bcmethod").innerHTML = cr.length>=2
+      ? `Compound correlation: market EL ${(level*100).toFixed(1)}% ⇒ <b>${cr.map(r=>(r*100).toFixed(0)+"%").join(" and ")}</b> — <em>two</em> answers, no way to choose. Base correlation: β([0–3%]) = <b>${b3r!=null?(b3r*100).toFixed(0)+"%":"—"}</b>, β([0–7%]) = <b>${b7r!=null?(b7r*100).toFixed(0)+"%":"—"}</b> — each unique${(b3r!=null&&b7r!=null)?`, and the gap (skew = ${((b7r-b3r)*100).toFixed(0)}pp) is the artifact a true single-ρ model can't make.`:"."}`
+      : `Compound correlation: market EL ${(level*100).toFixed(1)}% has <b>${cr.length===1?"one solution":"NO solution"}</b> on the mezz curve. Base correlation still inverts uniquely (β monotone). Slide the price into the hump to see compound correlation go multivalued.`;
+  }
+  mkt.addEventListener("input",draw); pEl.addEventListener("input",draw); window.addEventListener("resize",draw); draw();
 })();
 </script>
 </body>
