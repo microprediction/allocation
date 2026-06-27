@@ -137,16 +137,14 @@
       <div class="ds">The core of Jiang's answer, and the one you were never taught. Think <em>R</em> for rating agencies; <em>R</em> for &ldquo;Arrrrgh, I lost my firm ten billion&rdquo;; but mostly <em>R</em> because if you only do statistics (say, in the R language) and never check the market prices, you'll lose your shirt.</div></div>
   </div>
   <p class="mcap">Keep this nearby. Two of these three measures are taught in every quant programme on earth.
-  The third &mdash; <em>R</em>, Jiang's measure &mdash; is the entire ballgame, and almost nobody names it.</p>
+  The third, <em>R</em>, Jiang's measure, is the entire ballgame, and almost nobody names it.</p>
 
   <h2><span class="part">Exhibit A</span><br>The sophisticated theory</h2>
   <p>I decided to lead with the cleverest theory rather than the loudest, partly to flatter him and partly
   because it comes with the best demo. The sophisticated story goes like this: the models used a
-  <em>Gaussian copula</em>, and a Gaussian copula has a real, provable property &mdash; <em>zero tail
-  dependence</em>. Precisely: for any correlation below one, the coefficient of tail dependence is zero, so the
+  <em>Gaussian copula</em>, and a Gaussian copula has a real, provable property, <em>zero tail dependence</em>. Precisely: for any correlation below one, the coefficient of tail dependence is zero, so the
   probability that one name is in extremis <em>given</em> that another is vanishes in the limit. It can still
-  produce plenty of joint defaults at finite thresholds &mdash; crank the correlation and the whole pool can
-  go &mdash; but it cannot keep them coupled <em>asymptotically</em>, in the deepest part of the tail. That
+  produce plenty of joint defaults at finite thresholds (crank the correlation and the whole pool can go), but it cannot keep them coupled <em>asymptotically</em>, in the deepest part of the tail. That
   asymptotic gap, a hidden contagion invisible to the covariance, then gets nominated as the culprit. I told
   Jiang I found the argument genuinely interesting. He said he did too, which is why he once built a whole
   demonstration of it.
@@ -163,9 +161,10 @@
   useful elsewhere &mdash; useful enough that I built a portfolio method on it. But the crisis did not turn on
   a subtle higher-order property a covariance can't see. The failure was <em>first-order</em>, and crude. The
   marginals were wrong by about a factor of two; the correlation, by more than a factor of two.</p>
-  <p><strong>Interviewer:</strong> Wait &mdash; whose correlation? Are you saying <em>you</em> got it wrong?</p>
-  <p><strong>Jiang:</strong> I came <em>second</em> in a national competition, and I do speak English. I can
-  manage a one-factor copula. Not <em>my</em> correlation. The rating agencies', taken off stale actuarial
+  <p><strong>Interviewer:</strong> Wait, whose correlation? Are you saying <em>you</em> got it wrong?</p>
+  <p><strong>Jiang:</strong> I came <em>second</em> in a national competition, and I do speak English. I know
+  the foundations of finance from first principles &mdash; and, for that matter, the foundations of functional
+  analysis, which is where this stuff really leans. Not <em>my</em> correlation. The rating agencies', taken off stale actuarial
   tables, and the entire buy-side that leaned on those ratings without ever glancing at the price two screens
   over &mdash; a herd of <em>wokeless pokes</em>. When your inputs are off by <em>multiples</em>, whether your
   copula has exactly the right asymptotic tail is an academic question. You mispriced the thing long before
@@ -182,32 +181,34 @@
   probability was <em>pinned by its CDS spread</em>, the price the market was already quoting. The one free
   knob was the correlation, and by Sklar's theorem the copula carries the dependence entirely separately from
   those CDS-fixed marginals. Blaming the bell curve is blaming the one part of the model nobody chose.</p>
-  <p>Ryan Gosling, who played the man selling these things, knows more about CDOs than Nassim Taleb does, by
-  virtue of having read the script.</p>
-  <p><strong>Interviewer:</strong> But didn't the quants naively assume thin tails &mdash; Gaussian returns,
-  crashes rare?</p>
-  <p><strong>Jiang:</strong> Anyone who priced this for a living knew the tails were fat; 1987 settled it.
-  Black Monday could, by the identical logic, have been pinned on Black&ndash;Scholes and its
-  <em>constant</em> volatility, and the market's answer was immediate and permanent &mdash; the volatility
-  <em>smile</em>, a twenty-year-old monument by 2007 to the plain fact that practitioners knew returns weren't
-  Gaussian and crashes weren't rare. To believe the thin-tails story you have to believe everyone who priced
-  this paper was an idiot. And it was not even the relevant fact: the marginals were never the free
-  parameter.</p>
+  <p>Ryan Gosling, the one who points across the floor at Jiang and says <em>that's my quant</em>, knows more about CDOs than Nassim Taleb does, by virtue of having read the script.</p>
+  <p><strong>Interviewer:</strong> But didn't the quants naively assume thin tails: Gaussian returns, crashes rare?</p>
+  <p><strong>Jiang:</strong> And there you have already lost the thread. The normal distribution is
+  <em>utterly irrelevant</em> to the Gaussian copula that priced a CDO. The copula <em>is</em> the
+  dependence; the marginals were the CDS spreads, handed to us by the market. But I can see you want me to
+  proceed as though I were the clown who slapped a single univariate normal in place of an actual risk
+  calculation, because that is the only version a massive pool of unconsidering humans &mdash; the ones whose
+  egos Taleb is in the business of stroking &mdash; could ever get their heads around. Fine. <em>Even if that were the case</em>, which
+  it was not, the story still collapses. Anyone who priced this for a living knew the tails were fat, and 1987
+  settled it twenty years before any of this. Black Monday could, by the identical logic, have been pinned on
+  Black&ndash;Scholes and its <em>constant</em> volatility; the market's answer was immediate and permanent,
+  the volatility <em>smile</em>, a standing monument by 2007 to the plain fact that practitioners knew returns
+  weren't Gaussian and crashes weren't rare. To believe otherwise you have to believe every desk that priced
+  this paper was staffed by idiots.</p>
   <p><strong>Interviewer:</strong> And the man himself? What do you make of him?</p>
-  <p><strong>Jiang:</strong> You have to be remarkably incurious to write a whole book about the longshot
+  <p><strong>Jiang:</strong> Let me put it this way. You have to be remarkably incurious to write a whole book about the longshot
   effect without realising it is <em>called</em> the longshot effect. And then to get the sign backwards on
   top of it &mdash; a century of racetrack data says punters reliably <em>over</em>-bet the longshots, not
   under.</p>
-  <p><strong>Interviewer:</strong> Then why is the most-read thing ever written about the crisis built on
-  exactly this idea &mdash; David Li, the Gaussian copula, Felix Salmon's &ldquo;The Formula That Killed
+  <p><strong>Interviewer:</strong> Then why is the most-read thing ever written about the crisis built on exactly this idea: David Li, the Gaussian copula, Felix Salmon's &ldquo;The Formula That Killed
   Wall Street&rdquo;? If the formula story is so wrong, why did it get written at all?</p>
   <p><strong>Jiang:</strong> Because it is a wonderful story, and a wonderful story does not have to be true,
   it has to be clean. One lone genius, one beautiful equation, hubris, collapse &mdash; you can teach it in a
-  sentence. The truth needs a company that does nothing, three measures, and a factor-of-two error in two
-  separate places, and nobody ever bought a magazine for that. Salmon, to his credit, actually interviewed
-  me. I told him roughly what I have told you. He decided my answers did not fit the story and left them out.
-  No editor alive spikes &ldquo;the formula that killed Wall Street&rdquo; to run &ldquo;the agencies used a
-  slightly stale correlation.&rdquo;</p>
+  sentence. Salmon, to his credit, actually interviewed me. I told him roughly what I have told you. He decided my answers did not fit the story and left them out.
+  No editor alive spikes &ldquo;the formula that killed Wall Street&rdquo; to run &ldquo;the combined actions
+  of the buy side and the agencies amounted to a measure-theoretic mistake that is ubiquitous in prediction
+  generally, is not taught in schools, and is likely to be particularly catastrophic in combinatorial
+  betting.&rdquo;</p>
 
   <details class="think">
   <summary>A confession from the translator</summary>
@@ -227,10 +228,22 @@
   every outlet that lionised the book.</p>
   </details>
 
-  <p>I suspect the reason Jiang calls Taleb a <em>drooping clucking front</em> is not the man's mathematics, which in his early derivatives books was
+  <p>I suspect the reason Jiang calls Taleb a &mdash; how should I say this &mdash; <em>drooping clucking front</em> is not the man's mathematics, which in his early derivatives books was
   genuinely good, but the spectacle of watching the worst mis-explanation in financial history calcify into
-  received wisdom while the actual mechanism went unnamed. Jiang does not forgive a missed factor of two. He
-  certainly does not forgive a missed factor of two that gets a book deal.</p>
+  received wisdom while the actual mechanism went unnamed.</p>
+
+  <figure style="margin:18px 0">
+    <a href="https://www.youtube.com/watch?v=Pxr_FzpPM2Q" target="_blank" rel="noopener"
+       style="display:block;position:relative">
+      <img src="https://img.youtube.com/vi/Pxr_FzpPM2Q/maxresdefault.jpg" alt="The video in question"
+           style="width:100%;display:block;border:1px solid var(--border);border-radius:10px">
+      <span aria-hidden="true" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <span style="background:rgba(0,0,0,.65);color:#fff;border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">&#9658;</span>
+      </span>
+    </a>
+    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">The video in question.
+    <a href="https://www.youtube.com/watch?v=Pxr_FzpPM2Q" target="_blank" rel="noopener">Watch on YouTube.</a></figcaption>
+  </figure>
 
   <h2><span class="part">The Hollywood one</span><br>Was it a failure of behaviour?</h2>
   <p><strong>Interviewer:</strong> The movie reached for behavioural economics. Selena Gomez at a blackjack
@@ -248,13 +261,12 @@
   something like nine billion dollars on a single book. That is not a man drunk on irrational exuberance about
   the credit market. When there are clear <em>structural</em> reasons for a dislocation, hunting for
   behavioural inefficiencies is a distraction. Ask the structure what it was paying people to do.</p>
-  <p>And here, at last, he leaned forward. We had cleared the underbrush &mdash; the elegant tail story, the
-  bell-curve sermon, the psychology &mdash; and there was clean ground to stand on. I asked the only question
+  <p>And here, at last, he leaned forward. We had cleared the underbrush (the elegant tail story, the bell-curve sermon, the psychology) and there was clean ground to stand on. I asked the only question
   that mattered.</p>
 
   <h2><span class="part">The pivot</span><br>So what actually happened?</h2>
-  <p><strong>Jiang:</strong> Somebody built a company that does nothing, and got paid for it. Let me show you
-  the company.</p>
+  <p><strong>Jiang:</strong> Okay. Let's take a really novel approach and actually consider what happened.
+  Somebody built a company that does nothing, and got paid for it. Let me show you the company.</p>
 
     <pre style="overflow-x:auto;background:#fdfdfb;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:.78rem;line-height:1.35;color:#555">           &#9728;   GRAND CAYMAN   &#9728;
                  &#127796;     &#127796;
@@ -274,13 +286,14 @@
   <em>collateralized debt obligation</em>, a CDO. The company is just the vehicle.</p>
   <p><strong>Interviewer:</strong> Every official account calls this instrument complex. The Inquiry
   Commission gave it a chapter titled &ldquo;The CDO Machine.&rdquo;</p>
-  <p><strong>Jiang:</strong> A CDO is the <em>least</em> complex company on the planet. It is a box that buys
-  bonds and pays them out in order of seniority. The only idea in it is the oldest idea in finance,
+  <p><strong>Jiang:</strong> A CDO is not even a company; it is a note. The <em>company</em> behind it, the
+  vehicle that issues that note, is the least complex company on the planet: a box that buys bonds and pays
+  them out in order of seniority. The only idea in it is the oldest idea in finance,
   <em>subordination</em> &mdash; who gets paid first. A bodega is more complex. A car wash is vastly more
   complex; a car wash has <em>employees</em>, and weather, and a float. The single thing a structured-finance
   vehicle does &mdash; the <em>only</em> thing &mdash; is raise debt and invest its spare cash, which is what
   every company that has ever issued a bond also does. Calling it complex is a dodge. It is how you avoid admitting that the one number that mattered was simply wrong.</p>
-  <p>So if it does nothing, where does the money come from? Not the assets &mdash; on the assets alone the
+  <p>So if it does nothing, where does the money come from? Not the assets; on the assets alone the
   thing is worth less than its inputs; you have added a lawyer, a trustee and a brass plate and subtracted
   nothing risky. It was always the ratings. The empty company is a <em>ratings-transformation machine</em>:
   pour in a pool of BBB collateral, apply subordination, and the agencies' model hands most of the stack back
@@ -539,8 +552,7 @@
   Research, cross-checked against the Commission's own biographies.)</p>
   </details>
   <p>So the official inquiry into the most quantitative disaster in financial history was run, start to finish,
-  by people who had to <em>subpoena and interview the practitioners</em> &mdash; people, that is, like Jiang
-  &mdash; to find out how the machine worked at all.</p>
+  by people who had to <em>subpoena and interview the practitioners</em>, people like Jiang, to find out how the machine worked at all.</p>
   <p><strong>Jiang:</strong> A plane crashes and you ban the lawyers and summon the engineers. Our financial
   system crashed and we convened ten politicians, lawyers, economists and executives, not one of whom had
   ever priced a tranche, and titled the chapter &ldquo;The CDO Machine.&rdquo; Then we let Ben Bernanke tell audiences the mortgages
@@ -548,8 +560,7 @@
   Rudd compare it to a house on fire that it would be a good idea to put out. <em>Bloody brilliant, mate.</em>
   A green room of instant experts on structured finance, not one of whom had ever quoted a correlation.
   Of course they reached for the word <em>complex.</em> Complex is what you call a company that does nothing
-  when you have decided, in advance, not to look inside the box. It was a hearing, not an inquiry, and it succeeded, because the one number that actually mattered &mdash; the correlation the market
-  was already quoting &mdash; was never going to be found by a panel with no one on it who had ever quoted it.</p>
+  when you have decided, in advance, not to look inside the box. It was a hearing, not an inquiry, and it succeeded, because the one number that actually mattered, the correlation the market was already quoting, was never going to be found by a panel with no one on it who had ever quoted it.</p>
   <p>I told him this seemed to be where the whole thing had been heading. He said it was where it had been
   heading for twenty years, and that I should say so plainly, so I am: <em>we did not investigate the
   financial crisis. We held hearings about it.</em></p>
@@ -679,7 +690,7 @@
   between the rating agencies' actuarial probabilities and the prices the market was quoting. The empty
   company on its island was about to be run at scale.</p>
   <div class="stub">The rest &mdash; what that desk did with the actuarial-versus-risk-neutral arbitrage, and
-  how it ended &mdash; Jiang has agreed to tell, the next time we can get him to sit still.</div>
+  how it ended, Jiang has agreed to tell, the next time we can get him to sit still.</div>
   <p class="muted">Jiang got second in that competition, by the way. He asked me to mention it. Twice.</p>
 </main>
 
