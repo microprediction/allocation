@@ -95,7 +95,7 @@
 
 <main>
   <h1>We Asked the Chinese Quant From <em>The Big Short</em> What Caused the Credit Crisis</h1>
-  <p class="subtitle">He got second, not first. He speaks English, and he has notes. Because it is about mucking rhyme someone did.</p>
+  <p class="subtitle">&hellip;because it's about mucking rhyme someone did.</p>
 
   <p class="lead">You remember him. Ryan Gosling's character points across the trading floor and says
   <em>that's my quant</em>, then, with a straight face, &ldquo;his name is Yang, he won a national math
@@ -103,10 +103,10 @@
   camera: <em>&ldquo;Actually, my name's Jiang, and I do speak English. Jared likes to say I don't because
   he thinks it makes me seem more authentic. And I got second in that competition.&rdquo;</em></p>
 
-  <figure style="margin:14px 0;max-width:520px">
+  <figure style="margin:18px 0">
     <a href="https://www.youtube.com/watch?v=FoYC_8cutb0" target="_blank" rel="noopener"
        style="display:block;position:relative">
-      <img src="https://img.youtube.com/vi/FoYC_8cutb0/hqdefault.jpg" alt="Jared Vennett introduces his quant in The Big Short"
+      <img src="https://img.youtube.com/vi/FoYC_8cutb0/maxresdefault.jpg" alt="Jared Vennett introduces his quant in The Big Short"
            style="width:100%;display:block;border:1px solid var(--border);border-radius:10px">
       <span aria-hidden="true" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
         <span style="background:rgba(0,0,0,.65);color:#fff;border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">&#9658;</span>
@@ -120,8 +120,13 @@
   to start with the popular theories. What follows is that conversation. Where his answers were too compressed
   to be of use to a general reader &mdash; and they usually were &mdash; I have stopped the tape and built a
   small interactive demonstration so you can see what he means. Think of me as the translator. Jiang thinks of
-  me as the translator too, which is the only thing we agree on.</p>
+  me as overhead.</p>
 
+
+  <p>By the way: we did finally squeeze an answer out of Jiang, and because it is actually a very good one, I
+  have tried to structure what follows so that the diversions on the road to it &mdash; the bad theories, the
+  detours, his various grievances &mdash; are optional. The answer itself comes down to the three boxes
+  below.</p>
 
     <div class="measures">
     <div class="m"><div class="sym">&#8473;</div><div class="nm">objective probability</div>
@@ -129,93 +134,102 @@
     <div class="m"><div class="sym">&#8474;</div><div class="nm">risk-neutral probability</div>
       <div class="ds">implied by market prices; discounted prices are martingales and derivatives are valued under it. The sophisticated worldview stops here.</div></div>
     <div class="m todo"><div class="sym">&#8477;&#8201;?</div><div class="nm">the measure that caused the financial crisis</div>
-      <div class="ds">…&nbsp;the gap this whole essay is about (developed in Parts&nbsp;6 &amp; 8). The one you were never taught. Mnemonic: <em>R</em> for rating agencies, though the flaw is ubiquitous.</div></div>
+      <div class="ds">The core of Jiang's answer, and the one you were never taught. Think <em>R</em> for rating agencies; <em>R</em> for &ldquo;Arrrrgh, I lost my firm ten billion&rdquo;; but mostly <em>R</em> because if you only do statistics (say, in the R language) and never check the market prices, you'll lose your shirt.</div></div>
   </div>
   <p class="mcap">Keep this nearby. Two of these three measures are taught in every quant programme on earth.
   The third &mdash; <em>R</em>, Jiang's measure &mdash; is the entire ballgame, and almost nobody names it.</p>
 
-  <h2 class="lead-h">Exhibit A: the sophisticated one</h2>
+  <h2><span class="part">Exhibit A</span><br>The sophisticated theory</h2>
   <p>I decided to lead with the cleverest theory rather than the loudest, partly to flatter him and partly
   because it comes with the best demo. The sophisticated story goes like this: the models used a
-  <em>Gaussian copula</em>, and a Gaussian copula has a real, provable defect &mdash; <em>zero tail
-  dependence</em>. Joint extremes vanish in the limit for any correlation below one. Fit it to every pairwise
-  default probability and every marginal and it <em>still</em> cannot make a whole sector go down together.
-  Hidden contagion, invisible to the covariance, then gets nominated as the culprit. I told Jiang I found this
-  argument genuinely interesting. He said he did too, which is why he once built a whole demonstration of it.
+  <em>Gaussian copula</em>, and a Gaussian copula has a real, provable property &mdash; <em>zero tail
+  dependence</em>. Precisely: for any correlation below one, the coefficient of tail dependence is zero, so the
+  probability that one name is in extremis <em>given</em> that another is vanishes in the limit. It can still
+  produce plenty of joint defaults at finite thresholds &mdash; crank the correlation and the whole pool can
+  go &mdash; but it cannot keep them coupled <em>asymptotically</em>, in the deepest part of the tail. That
+  asymptotic gap, a hidden contagion invisible to the covariance, then gets nominated as the culprit. I told
+  Jiang I found the argument genuinely interesting. He said he did too, which is why he once built a whole
+  demonstration of it.
   Throw shocks, or hit <em>Fast&nbsp;+1000</em>, and watch the joint-default tail pull away from the Gaussian
   copula fitted to those very same correlations.</p>
 
     <figure style="margin:18px 0">
     <iframe src="../bowling/index.html#embed" title="Bowling for contagion, interactive default-contagion demo" loading="lazy" style="width:100%;height:720px;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>
-    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Live, in this page (the
-    <a href="../bowling/index.html">Bowling for contagion</a> demo). Throw shocks, or hit <em>Fast +1000</em>:
-    the correlation matrix settles, yet the joint-default tail pulls steadily away from the Gaussian copula
-    fitted to those very same pairwise correlations. All true, and, as I argue next, not the cause.</figcaption>
+    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Throw shocks, or hit <em>Fast +1000</em>: the correlation matrix settles, yet the joint-default tail keeps pulling away from the Gaussian copula fitted to those very same correlations.</figcaption>
   </figure>
 
   <p><strong>Interviewer:</strong> So tail dependence. That's the answer?</p>
-  <p><strong>Jiang:</strong> No. It's the prettiest wrong answer. You build a beautiful thing and people
-  assume the beautiful thing is the point. The crisis did not turn on a subtle higher-order property a
-  covariance can't see. The failure was <em>first-order</em>, and crude. The marginals were wrong by about a
-  factor of two; the correlation was wrong by more than a factor of two. When your inputs are off by
-  <em>multiples</em>, asking whether your copula has exactly the right asymptotic tail is a <em>cupid plucking
-  runt</em> of a question. You mispriced the thing long before any tail subtlety could matter.</p>
-  <p>I asked him to keep that thought; we would need the factor-of-two later, and a demonstration to go with
-  it. He told me to stop narrating and ask the next dumb question.</p>
+  <p><strong>Jiang:</strong> No. It is the prettiest wrong answer. The fact itself is real, and genuinely
+  useful elsewhere &mdash; useful enough that I built a portfolio method on it. But the crisis did not turn on
+  a subtle higher-order property a covariance can't see. The failure was <em>first-order</em>, and crude. The
+  marginals were wrong by about a factor of two; the correlation, by more than a factor of two.</p>
+  <p><strong>Interviewer:</strong> Wait &mdash; whose correlation? Are you saying <em>you</em> got it wrong?</p>
+  <p><strong>Jiang:</strong> I came <em>second</em> in a national competition, and I do speak English. I can
+  manage a one-factor copula. Not <em>my</em> correlation. The rating agencies', taken off stale actuarial
+  tables, and the entire buy-side that leaned on those ratings without ever glancing at the price two screens
+  over &mdash; a herd of <em>wokeless pokes</em>. When your inputs are off by <em>multiples</em>, whether your
+  copula has exactly the right asymptotic tail is an academic question. You mispriced the thing long before
+  any tail subtlety could matter.</p>
+  <p>I asked him to hold that factor-of-two; we would need it later, with a demonstration. He told me to stop
+  narrating and ask the next dumb question.</p>
 
   <h2><span class="part">The loud one</span><br>&ldquo;The formula that killed Wall Street&rdquo;</h2>
-  <p><strong>Interviewer:</strong> Fine. The famous one. Taleb, the bell curve, the Gaussian formula that
+  <p><strong>Interviewer:</strong> The famous one, then. Taleb, the bell curve, the Gaussian formula that
   killed Wall Street.</p>
-  <p><strong>Jiang:</strong> That one isn't sophisticated, it's the opposite, and it has done more damage to
-  public understanding than the crisis itself. The machinery ran on a Gaussian <em>copula</em>, not a Normal
+  <p><strong>Jiang:</strong> That one isn't sophisticated, it is the opposite, and it has done more damage to
+  public understanding than the crisis did. The machinery ran on a Gaussian <em>copula</em>, not a Normal
   <em>distribution of returns</em>. The marginals were never a modelling choice: each name's default
-  probability was <em>pinned by its CDS spread</em>, the price the market was quoting. The one free knob was
-  the correlation. By Sklar's theorem the copula carries the dependence entirely separately from those
-  CDS-fixed marginals. Blaming the bell curve is blaming the one part of the model nobody chose. It is a
-  <em>lucid trucking stunt</em> performed by someone who, on the evidence, never built one of these.</p>
-  <p>I will confess that translating this part was a pleasure, because there is a clean way to put it that
-  Jiang declined to use and I will not: <em>Ryan Gosling knows more about CDOs than Nassim Taleb does, by
-  virtue of having read the script.</em> When I offered Jiang that line he almost smiled, which for Jiang is a
-  standing ovation.</p>
-  <p><strong>Interviewer:</strong> And the man himself? What do you actually make of him?</p>
-  <p><strong>Jiang:</strong> You have to be a <em>slick thread</em> to write a whole book about the longshot
-  effect without realising it is <em>called</em> the longshot effect. And you have to be really
-  <em>bricking dim</em> to get the sign wrong on top of it &mdash; a century of racetrack data says punters
-  reliably <em>over</em>-bet the longshots, not under.</p>
+  probability was <em>pinned by its CDS spread</em>, the price the market was already quoting. The one free
+  knob was the correlation, and by Sklar's theorem the copula carries the dependence entirely separately from
+  those CDS-fixed marginals. Blaming the bell curve is blaming the one part of the model nobody chose.</p>
+  <p>Ryan Gosling, who played the man selling these things, knows more about CDOs than Nassim Taleb does, by
+  virtue of having read the script.</p>
+  <p><strong>Interviewer:</strong> But didn't the quants naively assume thin tails &mdash; Gaussian returns,
+  crashes rare?</p>
+  <p><strong>Jiang:</strong> Anyone who priced this for a living knew the tails were fat; 1987 settled it.
+  Black Monday could, by the identical logic, have been pinned on Black&ndash;Scholes and its
+  <em>constant</em> volatility, and the market's answer was immediate and permanent &mdash; the volatility
+  <em>smile</em>, a twenty-year-old monument by 2007 to the plain fact that practitioners knew returns weren't
+  Gaussian and crashes weren't rare. To believe the thin-tails story you have to believe everyone who priced
+  this paper was an idiot. And it was not even the relevant fact: the marginals were never the free
+  parameter.</p>
+  <p><strong>Interviewer:</strong> And the man himself? What do you make of him?</p>
+  <p><strong>Jiang:</strong> You have to be remarkably incurious to write a whole book about the longshot
+  effect without realising it is <em>called</em> the longshot effect. And then to get the sign backwards on
+  top of it &mdash; a century of racetrack data says punters reliably <em>over</em>-bet the longshots, not
+  under.</p>
+  <p><strong>Interviewer:</strong> Then why is the most-read thing ever written about the crisis built on
+  exactly this idea &mdash; David Li, the Gaussian copula, Felix Salmon's &ldquo;The Formula That Killed
+  Wall Street&rdquo;? If the formula story is so wrong, why did it get written at all?</p>
+  <p><strong>Jiang:</strong> Because it is a wonderful story, and a wonderful story does not have to be true,
+  it has to be clean. One lone genius, one beautiful equation, hubris, collapse &mdash; you can teach it in a
+  sentence. The truth needs a company that does nothing, three measures, and a factor-of-two error in two
+  separate places, and nobody ever bought a magazine for that. Salmon, to his credit, actually interviewed
+  me. I told him roughly what I have told you. He decided my answers did not fit the story and left them out.
+  No editor alive spikes &ldquo;the formula that killed Wall Street&rdquo; to run &ldquo;the agencies used a
+  slightly stale correlation.&rdquo;</p>
 
   <details class="think">
-  <summary>Off the record, Jiang on the bell-curve sermon</summary>
-  <p>I hate spending breath on this. It never warranted a real response from anyone who did credit
-  analytics for a living. The sermon conflated the marginal distribution with the dependence structure the
-  models actually turned on. I said so at the time, in a
-  <a href="https://www.youtube.com/watch?v=A72cc8mM5gY">video mocking the man's misplaced pomposity</a> that
-  went micro-viral and that even
+  <summary>A confession from the translator</summary>
+  <p>I am not a neutral party here, and you should know it. I have history with this man. Years ago I made a
+  <a href="https://www.youtube.com/watch?v=A72cc8mM5gY">video mocking his misplaced pomposity</a> that went
+  micro-viral and that even
   <a href="https://www.blackswanreport.com/blog/2010/12/nassim-taleb-educates-a-quant/comment-page-1/">his own
-  admirers enjoyed</a>. The price of admission was a place on his public
-  <a href="https://www.fooledbyrandomness.com/smear.html">&ldquo;list of smear artists,&rdquo;</a> filed
-  there as <em>&ldquo;some type of failed quant/mathematician with savantic attributes.&rdquo;</em> Excellent
-  company, mind you: the same list brands the forecasting scholar Philip Tetlock guilty of <em>&ldquo;mendacious,
-  perfidious behavior.&rdquo;</em> One takes one's honours where one finds them.</p>
-  <p>And the autism thing was not an accident of temper. <em>The Black Swan</em> leaned throughout on autism
-  as an epithet &mdash; science as &ldquo;an autistic enterprise,&rdquo; the recurring &ldquo;Dr John&rdquo;
-  caricature of the literal-minded fool. I was among the very few who called it for what it was: a brazen
+  admirers enjoyed</a>; it bought me a permanent place on his public
+  <a href="https://www.fooledbyrandomness.com/smear.html">&ldquo;list of smear artists,&rdquo;</a> filed there
+  as <em>&ldquo;some type of failed quant/mathematician with savantic attributes.&rdquo;</em> Good company,
+  mind you: the same list has the forecasting scholar Philip Tetlock down for <em>&ldquo;mendacious, perfidious
+  behavior.&rdquo;</em> One takes one's honours where one finds them.</p>
+  <p>That last entry is not only temper. <em>The Black Swan</em> leaned throughout on autism as an epithet
+  &mdash; science as &ldquo;an autistic enterprise,&rdquo; the recurring &ldquo;Dr John&rdquo; caricature of
+  the literal-minded fool &mdash; and I was among the very few at the time to call it what it was: a brazen
   attack on autistic people dressed as iconoclasm, unremarked by the <em>Harvard Business Review</em> and
-  every other outlet that lionised the book.</p>
-  <p>To believe it you have to believe everyone is an idiot. Many readers met the normal distribution for the
-  first time in those pages and, a moment later, were persuaded they had been handed a vital fact the experts
-  had missed. If you think something as <em>rooting sucking brunt</em>-obvious as &ldquo;the normal
-  distribution has thin tails&rdquo; had escaped the people who priced this paper for a living &mdash; and, as
-  the demonstrations here show, it wasn't even the relevant fact &mdash; then you have picked the wrong sucker
-  at the poker table. You would also have to be blithely unaware of 1987: Black Monday could, by the identical
-  logic, have been pinned on Black&ndash;Scholes and its <em>constant</em> volatility, and the market's answer
-  was immediate and permanent, the volatility <em>smile</em>, a twenty-year-old monument by 2007 to the plain
-  fact that practitioners knew returns weren't Gaussian and crashes weren't rare.</p>
+  every outlet that lionised the book.</p>
   </details>
 
-  <p>The narrator's editorial: I suspect the reason Jiang refers to Taleb, throughout, as a
-  <em>drooping clucking front</em> is not the man's mathematics, which in his early derivatives books was
+  <p>I suspect the reason Jiang calls Taleb a <em>drooping clucking front</em> is not the man's mathematics, which in his early derivatives books was
   genuinely good, but the spectacle of watching the worst mis-explanation in financial history calcify into
-  received wisdom &mdash; an <em>acid stain on the brass</em>, he calls it &mdash; while the actual mechanism went unnamed. Jiang does not forgive a missed factor of two. He
+  received wisdom while the actual mechanism went unnamed. Jiang does not forgive a missed factor of two. He
   certainly does not forgive a missed factor of two that gets a book deal.</p>
 
   <h2><span class="part">The Hollywood one</span><br>Was it a failure of behaviour?</h2>
@@ -227,7 +241,7 @@
   economics and hindsight bias share a border that is mostly unguarded. Things go up and then come down,
   because they must &mdash; prices are roughly martingales and coming back down is what a martingale does
   &mdash; and that alone manufactures endless opportunity for someone to sell you a verbal put option against
-  the crash that was always going to arrive. It is a <em>putrid ducking punt</em>, dressed up as insight.</p>
+  the crash that was always going to arrive. It is a parlour trick dressed up as insight.</p>
   <p><strong>Interviewer:</strong> So no role for greed at all?</p>
   <p><strong>Jiang:</strong> Account for one fact first. Howie Hubler was <em>short</em> the junior tranches
   of mortgage-backed securities. He had the bearish position, the supposedly clever one, and he still lost
@@ -238,7 +252,7 @@
   bell-curve sermon, the psychology &mdash; and there was clean ground to stand on. I asked the only question
   that mattered.</p>
 
-  <h2 class="lead-h">&ldquo;So what actually happened?&rdquo;</h2>
+  <h2><span class="part">The pivot</span><br>So what actually happened?</h2>
   <p><strong>Jiang:</strong> Somebody built a company that does nothing, and got paid for it. Let me show you
   the company.</p>
 
@@ -265,8 +279,7 @@
   <em>subordination</em> &mdash; who gets paid first. A bodega is more complex. A car wash is vastly more
   complex; a car wash has <em>employees</em>, and weather, and a float. The single thing a structured-finance
   vehicle does &mdash; the <em>only</em> thing &mdash; is raise debt and invest its spare cash, which is what
-  every company that has ever issued a bond also does. Calling it complex is a <em>snooping bucking grunt</em>
-  of a dodge. It is how you avoid admitting that the one number that mattered was simply wrong.</p>
+  every company that has ever issued a bond also does. Calling it complex is a dodge. It is how you avoid admitting that the one number that mattered was simply wrong.</p>
   <p>So if it does nothing, where does the money come from? Not the assets &mdash; on the assets alone the
   thing is worth less than its inputs; you have added a lawyer, a trustee and a brass plate and subtracted
   nothing risky. It was always the ratings. The empty company is a <em>ratings-transformation machine</em>:
@@ -366,7 +379,7 @@
   coherent model attaches an intensity to the <em>name</em>; the copula attaches it to the <em>basket</em>,
   and the baskets contradict each other. &ldquo;That inconsistency,&rdquo; Jiang says, &ldquo;not the bell
   curve, is the genuinely damning property, and it is invisible until you ask the static picture to live
-  through time. A <em>looping mucking hunt</em> for tail dependence misses it entirely.&rdquo;</p>
+  through time. Chasing tail dependence misses it entirely.&rdquo;</p>
 
   <h3>Base correlation: the kludge that became a market standard</h3>
   <p>If you still suspect practitioners were seduced by elegance, look at what the market actually quoted. The
@@ -435,8 +448,7 @@
   non-model&rdquo; meant in practice: a model that cannot be wrong about correlation because it is not
   permitted to have an opinion that changes.</p>
   <p><strong>Jiang:</strong> Getting a number wrong <em>out loud</em>, where it can be stressed and re-marked,
-  is a venial sin. Refusing to let the number exist at all is a <em>stupid shucking blunt</em> of a decision
-  dressed as prudence. When correlation finally marched toward one in 2008, the diversity score had no channel
+  is a venial sin. Refusing to let the number exist at all is recklessness dressed as prudence. When correlation finally marched toward one in 2008, the diversity score had no channel
   to say so, so the ratings didn't degrade gracefully; they fell off a cliff of mass downgrades.</p>
 
   <h3>In the land of the blind</h3>
@@ -478,7 +490,7 @@
   imagine the self-inflicted wound of rating a half-trillion-dollar market off historical tables while the
   implied number sat, ignored, on the next screen.</p>
 
-  <h2 class="lead-h">The investigation that wasn't</h2>
+  <h2><span class="part">The post-mortem</span><br>The investigation that wasn't</h2>
   <p>This is the part where I, the translator, stopped needing to translate, because Jiang's contempt requires
   no rendering at all. I had asked, mildly, why the public explanation went so wrong. He answered with a
   question of his own.</p>
@@ -497,8 +509,7 @@
   live television and showed the whole theory of the disaster in thirty seconds. <em>That</em> is what a
   serious post-mortem looks like: domain experts, hands on the wreckage, lawyers shown the door.</p>
   <p><strong>Jiang:</strong> Now ask who showed up for ours.</p>
-  <p><strong>Jiang:</strong> Now ask who showed up for ours. I'd love to know how many of those <em>drum
-  ducks</em> had ever priced a tranche.</p>
+  <p><strong>Jiang:</strong> Now ask who showed up for ours. I'd love to know how many of them had ever priced a tranche.</p>
   <p>Fair question. I didn't trust my own memory, so I had Gemini build the roster and score it.</p>
   <details class="think">
   <summary>Authorship of the Financial Crisis Inquiry Commission</summary>
@@ -535,11 +546,9 @@
   ever priced a tranche, and titled the chapter &ldquo;The CDO Machine.&rdquo; Then we let Ben Bernanke tell audiences the mortgages
   had been &ldquo;packaged into securities that proved complex, opaque, and unwieldy,&rdquo; and we let Kevin
   Rudd compare it to a house on fire that it would be a good idea to put out. <em>Bloody brilliant, mate.</em>
-  A green room of <em>postal trucking tankers</em>, every one suddenly an expert on structured finance, and
-  not a single <em>glum rubber plucker</em> among them who had ever quoted a correlation.
+  A green room of instant experts on structured finance, not one of whom had ever quoted a correlation.
   Of course they reached for the word <em>complex.</em> Complex is what you call a company that does nothing
-  when you have decided, in advance, not to look inside the box. It is a <em>mooting chucking shunt</em> of an
-  inquiry, and it succeeded, because the one number that actually mattered &mdash; the correlation the market
+  when you have decided, in advance, not to look inside the box. It was a hearing, not an inquiry, and it succeeded, because the one number that actually mattered &mdash; the correlation the market
   was already quoting &mdash; was never going to be found by a panel with no one on it who had ever quoted it.</p>
   <p>I told him this seemed to be where the whole thing had been heading. He said it was where it had been
   heading for twenty years, and that I should say so plainly, so I am: <em>we did not investigate the
