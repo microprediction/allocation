@@ -127,12 +127,12 @@
 
 <script>
 // ---- company universe: each sector is a tidy ring of names, well separated ----
-const SECTORS = [   // deliberately uneven sizes: bigger sectors default in bigger herds
-  {name:"Tech",     color:"#7c6cff", names:["AAPL","MSFT","NVDA","GOOGL","META","AMD","CRM"]},
-  {name:"Banks",    color:"#33d17a", names:["JPM","GS","BAC","MS","C"]},
-  {name:"Energy",   color:"#f0a830", names:["XOM","CVX","SLB"]},
-  {name:"Health",   color:"#ff7a7a", names:["UNH","JNJ"]},
-  {name:"Consumer", color:"#24c2ad", names:["WMT","KO","PG","MCD","NKE","HD"]},
+const SECTORS = [   // 2006 names; several of these did not see 2009. uneven sizes: bigger sectors default in bigger herds
+  {name:"Wall St",   color:"#7c6cff", names:["Lehman","Bear","Merrill","Citi","GS","MS","JPM"]},
+  {name:"Mortgage",  color:"#33d17a", names:["Fannie","Freddie","WaMu","IndyMac","C'wide"]},
+  {name:"Insurers",  color:"#f0a830", names:["AIG","MBIA","Ambac"]},
+  {name:"Autos",     color:"#ff7a7a", names:["GM","GMAC"]},
+  {name:"Consumer",  color:"#24c2ad", names:["Walmart","Target","Coke","P&G","McD's","HD"]},
 ];
 const W=560, H=500, CX=W/2, CY=H/2, RBIG=244, D=58, ROWH=58*0.866, BR=19, PR=21, BARRIER=105;
 const MB=11, MP=1, EBP=0.4, EPP=0.5, PF=0.95, BF=0.985;   // unpacked rack; high barrier + gentle physics => a strike defaults a VARIABLE stripe, not all
@@ -142,7 +142,7 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a
 // ONE connected TRIANGULAR rack (real bowling): all names packed apex-up, spacing D so they
 // nearly touch -> a hit near the apex cascades down through the widening rows: a devastating
 // strike. Sectors fill contiguous bands of the triangle.
-const HEAD="Banks";   // the head-pin cluster sits at the apex
+const HEAD="Wall St";   // the head-pin cluster sits at the apex
 const ORDER=[...SECTORS].sort((a,b)=>(a.name===HEAD?-1:b.name===HEAD?1:0));
 const FLAT=[]; ORDER.forEach(s=>s.names.forEach(nm=>FLAT.push({nm,s})));
 const TOT=FLAT.length;
@@ -274,13 +274,13 @@ function refreshStats(){
   for(let i=0;i<n;i++){ tiltArr[i]=tilt[i]/mt; Rad[i]=14+15*(p[i]/maxp); }
   if(statsView) drawState();
   // (iii) joint-hit probabilities: market vs the Gaussian copula those (i)+(ii) imply
-  const ks=Array.from({length:15},(_,i)=>i+2);   // 2..16, the whole monotone curve
+  const ks=Array.from({length:9},(_,i)=>i+2);    // 2..10 pins down
   const emp=ks.map(k=>{ let e=0; for(let t=k;t<=n;t++) e+=histo[t]; return e/N; });
   const cop = N>=25 ? copulaTail(C,a,ks,6000) : ks.map(_=>NaN);
   const rows = ks.map((k,j)=>{ const r = cop[j]>0 ? (emp[j]/cop[j]).toFixed(1)+"×" : "—";
-    return `<tr><td>≥ ${k}</td><td>${(emp[j]*100).toFixed(1)}%</td><td>${isNaN(cop[j])?"…":(cop[j]*100).toFixed(1)+"%"}</td><td class="r">${isNaN(cop[j])?"":r}</td></tr>`; });
+    return `<tr><td>≥ ${k} pins down</td><td>${(emp[j]*100).toFixed(1)}%</td><td>${isNaN(cop[j])?"…":(cop[j]*100).toFixed(1)+"%"}</td><td class="r">${isNaN(cop[j])?"":r}</td></tr>`; });
   document.getElementById("tail").innerHTML =
-    `<table class="tail"><tr><th>same shock</th><th>market</th><th>copula</th><th>ratio</th></tr>${rows.join("")}</table>`+
+    `<table class="tail"><tr><th>same shock</th><th>bowling</th><th>copula</th><th>ratio</th></tr>${rows.join("")}</table>`+
     `<div style="margin-top:6px">avg hit prob ${(p.reduce((a,b)=>a+b,0)/n*100).toFixed(0)}%/firm. Ratio &gt; 1 deep in the tail = contagion the copula can't represent.</div>`;
 }
 

@@ -32,6 +32,12 @@
     .controls{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
     .controls label{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:8px}
     .controls input[type=range]{accent-color:var(--accent);vertical-align:middle}
+    .qrtab{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px 16px;align-items:center;margin-bottom:10px;width:100%;max-width:560px}
+    .qrtab .hh{font-weight:600;font-size:.82rem;color:var(--muted);text-align:center}
+    .qrtab .rl{font-weight:600;font-size:.9rem;color:var(--ink)}
+    .qrtab .cell{display:flex;align-items:center;gap:8px}
+    .qrtab .cell input[type=range]{flex:1;accent-color:var(--accent);min-width:70px}
+    .qrtab .cell .val{font-size:.82rem;color:var(--accent);min-width:46px;text-align:right}
     .val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent)}
     button.snap{font:inherit;font-size:.82rem;color:var(--accent);background:#fff;border:1px solid var(--accent);
       border-radius:6px;padding:4px 10px;cursor:pointer} button.snap:hover{background:var(--accent);color:#fff}
@@ -66,6 +72,12 @@
     .measures .m .ds{font-size:.86rem;color:var(--muted);line-height:1.45}
     .measures .m.todo{border:2px dashed var(--accent);background:#faf9ff}
     .measures .m.todo .sym,.measures .m.todo .nm{color:var(--accent)}
+    .callout{border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:20px 0;background:var(--panel)}
+    .callout .ct{font-weight:700;font-size:.95rem;margin-bottom:5px}
+    .callout p{margin:0}
+    .callout.cmd{border:2px solid var(--accent);background:#faf9ff;text-align:center}
+    .callout.cmd .ct{color:var(--accent)}
+    .callout.cmd p{font-size:1.15rem;font-weight:600}
     .mcap{text-align:center;font-size:.92rem;color:var(--muted);margin:0 0 14px}
     .points{border-left:3px solid var(--accent);background:#faf9ff;border-radius:0 8px 8px 0;padding:6px 18px;margin:18px 0}
     .points p{margin:.7em 0} .points .h{font-weight:700;color:var(--accent)}
@@ -95,14 +107,14 @@
 
 <main>
   <h1>We Asked the Chinese Quant From <em>The Big Short</em> What Caused the Credit Crisis</h1>
-  <p class="subtitle">&hellip;because it's about time we had a QUANTITATIVE perspective.</p>
+  <p class="subtitle">&hellip;because nobody else did.</p>
 
   <p class="lead">You remember him. Standing in the office, questioned about his numbers, Ryan Gosling's
   character nods at his quant: <em>&ldquo;He's my quant. My QUANTITATIVE!&rdquo;</em> Then, with a straight face, <em>&ldquo;His name is
   Yang, he won a national math competition in China, he doesn't even speak English.&rdquo;</em> Cut to the
-  quant, who looks directly into the camera: <em>&ldquo;Actually, my name's Jiang, and I do speak English.
-  Jared likes to say I don't because he thinks it makes me seem more authentic. And I got second in that
-  national competition.&rdquo;</em></p>
+  quant, who looks directly into the camera: <em>&ldquo;Actually, my name's Jiang. Jared likes to say I don't
+  speak English because he thinks it makes me seem more authentic. And I got second in that national
+  competition.&rdquo;</em></p>
 
   <figure style="margin:18px 0">
     <a href="https://www.youtube.com/watch?v=FoYC_8cutb0" target="_blank" rel="noopener"
@@ -125,7 +137,7 @@
 
   <p>By the way: we did finally squeeze an answer out of Jiang, and because it is actually a very good one, I
   have tried to structure what follows so that the diversions on the road to it &mdash; the bad theories, the
-  detours, his various grievances &mdash; are optional. The answer itself comes down to the three boxes
+  detours, his various grievances &mdash; are in part optional. The answer itself comes down to the three boxes
   below.</p>
 
     <div class="measures">
@@ -143,16 +155,64 @@
   <p>Before the popular theories, a question Jiang put to me near the start. I had asked, mildly, why the
   public explanation went so wrong. He answered with a question of his own.</p>
   <p><strong>Jiang:</strong> When a plane falls out of the sky, who shows up?</p>
-  <p>The answer, it turns out, is instructive. When a plane crashes, the National Transportation Safety Board
-  dispatches a <em>go team</em> of specialists to the wreckage within hours, and it runs the investigation
+  <p>The answer is more instructive than I suspected. When a plane crashes, the National Transportation Safety
+  Board dispatches a <em>go team</em> of specialists to the wreckage within hours, and it runs the investigation
   under what it calls the <em>party system</em>. The rule could not be plainer:
   <em>participation is strictly limited to parties that can provide direct technical expertise</em> &mdash; the
-  engineers who built the aircraft, the people who maintained it, the ones who flew it. Lawyers and insurance
-  investigators are <em>prohibited by law</em> from taking part. Read
-  that again. In the most consequential accident investigations in the world, attorneys are <em>barred</em>,
-  because their job is advocacy and the investigation's job is truth.</p>
-  <p>Hold that standard in mind; we will come back to who showed up for <em>this</em> one. First, the
-  explanations everyone reached for instead.</p>
+  engineers who built the aircraft, the people who maintained it, the ones who flew it. Read that again:
+  <em>direct technical expertise</em>, not the lawyers, and not anyone else who merely happens to have an
+  opinion. Lawyers and insurance investigators are <em>prohibited by law</em> from taking part, because their
+  job is advocacy and the investigation's job is truth.</p>
+  <p>Jiang mused aloud about how many of them had ever priced a single tranche of a CDO. It seemed worth
+  checking, so I had Gemini build the roster and score it.</p>
+  <details class="think">
+  <summary>Authorship of the Financial Crisis Inquiry Commission</summary>
+  <table class="authtbl">
+    <thead><tr><th>Author &mdash; role and occupation</th><th class="q">QUANTY?</th><th class="q">Worked in<br>structured finance?</th></tr></thead>
+    <tbody>
+      <tr><td>Phil Angelides &mdash; chairman; California politician, ex-state treasurer</td><td class="q mid">doubtful</td><td class="q no">no</td></tr>
+      <tr><td>Bill Thomas &mdash; vice-chair; retired congressman</td><td class="q no">no</td><td class="q no">no</td></tr>
+      <tr><td>Brooksley Born &mdash; derivatives lawyer, ex-CFTC chair</td><td class="q mid">doubtful</td><td class="q mid">no, regulated it</td></tr>
+      <tr><td>Byron Georgiou &mdash; plaintiffs' securities lawyer</td><td class="q no">no</td><td class="q mid">no, sued it</td></tr>
+      <tr><td>Bob Graham &mdash; former senator and governor</td><td class="q no">no</td><td class="q no">no</td></tr>
+      <tr><td>Keith Hennessey &mdash; White House economic-policy adviser</td><td class="q mid">doubtful</td><td class="q no">no</td></tr>
+      <tr><td>Douglas Holtz-Eakin &mdash; public-finance economist (tax and fiscal policy), ex-CBO director; co-wrote the dissent calling it &ldquo;a mistake&rdquo; to blame CDOs</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
+      <tr><td>Heather Murren &mdash; equity-research analyst (consumer stocks), left Wall St in 2002</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
+      <tr><td>John W. Thompson &mdash; antivirus-software CEO</td><td class="q no">no</td><td class="q no">no</td></tr>
+      <tr><td>Peter Wallison &mdash; lawyer, think-tank fellow</td><td class="q no">no</td><td class="q no">no</td></tr>
+      <tr class="staff"><td>Wendy Edelberg &mdash; executive director; PhD macroeconomist (Fed)</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
+      <tr class="staff"><td>Greg Feldberg &mdash; research director; Fed bank-supervision analyst</td><td class="q mid">maybe</td><td class="q mid">no, supervised it</td></tr>
+      <tr class="staff"><td>Chris Seefer &mdash; investigations director; SEC fraud attorney</td><td class="q no">no</td><td class="q mid">no, investigated it</td></tr>
+      <tr class="staff"><td>Gary Cohen &mdash; general counsel</td><td class="q no">no</td><td class="q no">no</td></tr>
+    </tbody>
+  </table>
+  <p class="muted" style="font-size:.85rem">Ten commissioners, four staff authors. Ever built, priced, traded
+  or rated a CDO: zero. The lone derivatives expert, Born, was a lawyer who had tried to <em>regulate</em> this
+  market years earlier and been crushed for it by Greenspan, Rubin and Summers &mdash; proven right, ignored,
+  and still the closest thing on the panel to someone who knew the instrument. (Roster compiled by Gemini Deep
+  Research, cross-checked against the Commission's own biographies.)</p>
+  </details>
+  <p>The inquiry in <em>The Big Short</em> was, if anything, better arranged and more informative. Yet as Steve
+  Carell, playing Mark Baum, travelled the country interviewing everyone he thought mattered &mdash; the
+  mortgage brokers, the CDO arranger, the strippers buying six houses apiece &mdash; it never once dawned on him
+  to speak a word to Jiang, or even to get his name right.</p>
+
+  <details class="think">
+  <summary>How Jiang really feels</summary>
+  <p><strong>Jiang:</strong> I didn't realise, until you told me, that they ban the lawyers outright. I had
+  assumed they simply summoned the engineers, of course. Our financial system crashed and we convened ten
+  politicians, lawyers, economists and executives, not one of whom had ever priced a tranche, and titled the
+  chapter &ldquo;The CDO Machine.&rdquo; Then we let Ben Bernanke tell audiences the mortgages had been
+  &ldquo;packaged into securities that proved complex, opaque, and unwieldy.&rdquo;</p>
+  <p>(<em>Translator's aside:</em> I also seem to remember Kevin Rudd turning up in Washington to explain that
+  the economy was like a house on fire, and that the thing to do with a house on fire is to put it out. Then,
+  one assumes, the same thing.)</p>
+  <p><strong>Jiang:</strong> A green room of instant experts on structured finance, not one of whom had ever
+  quoted a correlation. Of course they reached for the word <em>complex.</em> Complex is what you call a company
+  that does nothing when you have decided, in advance, not to look inside the box.</p>
+  <p>I asked whether that was too harsh. He said it was the plainest way to put it, and that I should put
+  it plainly, so I will: <em>we never asked Jiang, not even in the movie.</em></p>
+  </details>
 
   <h2><span class="part">The Hollywood theory</span><br>Behavioural economics</h2>
   <p><strong>Me:</strong> The movie reached for behavioural economics. Selena Gomez and Richard
@@ -170,27 +230,52 @@
     <figcaption class="muted" style="font-size:.85rem;margin-top:6px"><em>The Big Short</em> explaining a
     synthetic CDO, in full. <a href="https://www.youtube.com/watch?v=Pxr_FzpPM2Q" target="_blank" rel="noopener">Watch on YouTube.</a></figcaption>
   </figure>
-  <p><strong>Jiang:</strong> The hot-hand fallacy is the belief that a streak will <em>continue</em> for no
-  reason. If a bucket has a hole, the water keeps running out. Believing
-  it will keep running out is not a fallacy; it is noticing the hole. To call that a hot-hand error you must be
-  determined not to see the bucket, or the hole, or that the thing draining away is <em>water through a hole in
-  a bucket.</em> So the Nobel behaviourist reaches for his pet bias, everyone nods, and nobody has to learn the
-  structure. That is the <em>Behavioural God of the Gaps</em>. I would classify it as an <em>opiate for the
-  mathless,</em> to misquote Marx.</p>
-  <p><strong>Me:</strong> And of course it was a celebrity who supplied it, a man who plainly did not get his
-  own joke, dealing dubious theories across a casino table on national release. Still, a Nobel laureate
-  explaining it on screen is not nothing.</p>
+  <p><strong>Jiang:</strong> The hot-hand fallacy is the belief, for no good reason, that a streak will
+  <em>continue</em>. If a bucket has a hole, the water keeps running out. Believing
+  it will keep running out is not a fallacy; it is noticing the hole.</p>
+  <p>To call that a hot-hand error you must be determined not to see the bucket, or the hole. So the Nobel behaviourist reaches for his pet
+  bias, everyone nods, and nobody has to learn the structure. That is the <em>Behavioural God of the Gaps</em>.
+  I would classify it as an <em>opiate for the mathless,</em> to mangle Marx.</p>
+
+  <details class="think">
+  <summary>The hot hand is the whole essay in miniature</summary>
+  <p>Worth dwelling on, because it <em>is</em> this essay in miniature. The behaviourists' flagship example, the
+  &ldquo;hot hand fallacy,&rdquo; was pronounced from a great height: a 1985 study found no streak effect in
+  shooting data and declared the belief a cognitive illusion. It had quietly assumed that a player's shot
+  difficulty does not change when he is hot. Anyone on the court knew otherwise. Get hot, and the defence swarms
+  you, and the next one goes up from further out with a hand in your face.</p>
+  <p>Measure that, and the fallacy evaporates.
+  <a href="https://www.sloansportsconference.com/research-papers/the-hot-hand-a-new-approach-to-an-old-fallacy">Bocskocsky,
+  Ezekowitz and Stein (2014)</a> pushed 83,000 NBA shots through SportVU optical tracking, controlled for shot
+  difficulty and defender distance, and recovered a real hot-hand effect of one to two points; hot players
+  simply take harder shots.
+  <a href="https://www.econometricsociety.org/publications/econometrica/2018/11/01/surprised-hot-hand-fallacy-truth-law-small-numbers">Miller
+  and Sanjurjo (2018)</a> then found a selection bias baked into the original analysis itself; correct it, and
+  the canonical result reverses. The hot hand, they conclude, is not a myth.</p>
+  <p>The players knew. The crowd knew. It took the academy thirty years and a camera rig to concede the obvious.
+  Swap the basketball for a tranche and you have the rest of this page.</p>
+  </details>
+
+  <details class="think">
+  <summary>How Jiang really feels</summary>
   <p><strong>Jiang:</strong> Picture the equivalent. Feynman turns up to the Challenger inquiry and announces
   the culprit was a <em>hot-hand fallacy</em>: NASA had a run of successful launches and naively extrapolated.
   Not a word about the O-ring, the cold, the rubber that would not spring back. That is the calibre of what we
   got, daft, vacuous chaff thrown in the air after the crisis, and it took longer to settle than the ash over
   Pompeii.</p>
-  <p><strong>Me:</strong> So you're replacing the hot-hand theory with the hot-air theory?</p>
-  <p><strong>Jiang:</strong> Mine has the decency to point at the hole. Theirs points at a gambler who was
-  never at the table.</p>
-  <p><strong>Me:</strong> Okay, but was Selena Gomez more helpful than Richard Thaler here?</p>
+  </details>
+  <p><strong>Me:</strong> Was Selena Gomez more helpful than Richard Thaler here?</p>
   <p><strong>Jiang:</strong> Marginally. She literally says <em>this is how a CDO works,</em> then proceeds to
-  &hellip; absolutely not do that. She describes nothing beyond side bets. The scene explained the word <em>derivative</em> and came nowhere near the mechanism.</p>
+  &hellip; absolutely not tell us. She describes nothing beyond side bets. The scene explained the word
+  <em>derivative.</em></p>
+  <p><strong>Me:</strong> Be fair. What she conveys is that this was not a regular bubble like the tulip craze,
+  but a special kind, a <em>derivative</em> tulip craze. Surely that helps an audience.</p>
+  <p><strong>Jiang:</strong> It is not a worthless reminder. But the original tulip craze was <em>itself</em> a
+  derivative craze; the action there moved into forwards and options on the bulbs, exactly as it did here. So
+  &ldquo;derivative tulip craze&rdquo; tells you nothing specific about <em>this</em> crisis. It just swings you
+  back to the standard behavioural story: irrational bubbles arrive, and then everyone goes back to sleep.</p>
+  <details class="think">
+  <summary>I kept pressing him</summary>
   <p><strong>Me:</strong> So no role for the hot hand, for chasing returns?</p>
   <p><strong>Jiang:</strong> <em>(Mildly exasperated.)</em> Look, of course there are people and institutions
   who should have known better, who should have known they were on too good a run. That was true of Bernie
@@ -198,14 +283,24 @@
   background radiation, the usual mild inefficiencies in economics that contribute to everything but explain
   almost nothing?</p>
   <p>Honestly, I see where he is coming from. Behavioural economics and hindsight bias share a border that is
-  mostly unguarded: things go up and then come down because they must, prices are roughly martingales and
-  coming back down is what a martingale does, and that alone manufactures endless opportunity to sell you a
-  verbal put option against the crash that was always going to arrive. A parlour trick dressed up as insight.</p>
+  mostly unguarded. Prices are, to first approximation, martingales: no drift you can lean on, and a deep
+  drawdown sitting somewhere on almost every future path. So &ldquo;the crash was always coming&rdquo; is true
+  of every market at every moment. That makes it free to say after the fact, and free to dress as a behavioural
+  insight, a verbal put option that always pays. A parlour trick dressed up as insight.</p>
   <p>And consider who these buyers were: credit investors. They knew perfectly well they were paid excess yield
   in exchange for risk; that bargain is thousands of years old. So the appetite for yield is not the puzzle. The
   puzzle is the widespread <em>miscalibration</em>, and only the actual mechanics explain that.</p>
+  <p><strong>Jiang:</strong> Since you have decided to talk out loud about martingales, let me finish the
+  thought. Market prices are continuous to a first approximation, so every roughly efficient market is, up to a
+  time change, just Brownian motion. You could change the speed at which you run the tape through the projector,
+  play financial history fast or slow, and the behaviourists and the bell-curve haters would sit there arguing
+  about nothing the whole time. It is a theorem. A fucking theorem.</p>
+  </details>
 
   <h2><span class="part">The sophisticated theory</span><br>Hidden tail dependence</h2>
+  <p>I knew I would lose Jiang if I rattled off all the stupidest theories before reaching one he could get his
+  teeth into, so I headed straight for the &ldquo;academic&rdquo; explanation. This does, I admit, take us
+  slightly ahead of ourselves on the underlying mathematics, but I think you'll get the joke.</p>
   <p>The sophisticated story goes like this: the models used a <em>Gaussian copula</em>, and a Gaussian copula
   has a real, provable property, <em>zero tail dependence</em>. Precisely: for any correlation below one, the
   coefficient of tail dependence is zero, so the probability that one name is in extremis <em>given</em> that
@@ -213,7 +308,7 @@
   <p>It can still produce plenty of joint defaults at finite thresholds (crank the correlation and the whole
   pool can go), but it cannot keep them coupled <em>asymptotically</em>, in the deepest part of the tail. That
   asymptotic gap, a hidden contagion invisible to the covariance, then gets nominated as the culprit.</p>
-  <p>I told Jiang I found the argument genuinely interesting. He said he did too, which is why he once built a
+  <p>I told Jiang I found the argument genuinely interesting. He said he did too, which is why he had me build a
   whole demonstration of it. Throw shocks, or hit <em>Fast&nbsp;+1000</em>, and watch the joint-default tail
   pull away from the Gaussian copula fitted to those very same correlations.</p>
 
@@ -228,7 +323,7 @@
   a subtle higher-order property a covariance can't see. The failure was <em>first-order</em>, and crude. The
   marginals were wrong by about a factor of two; the correlation, by more than a factor of two.</p>
   <p><strong>Me:</strong> Wait, whose correlation? Are you saying <em>you</em> got it wrong?</p>
-  <p><strong>Jiang:</strong> I came <em>second</em> in a national competition, and I do speak English. I know
+  <p><strong>Jiang:</strong> I came <em>second</em> in a national competition, remember. I know
   the foundations of finance from first principles &mdash; and, for that matter, the foundations of functional
   analysis, which is where this stuff really leans. Not <em>my</em> correlation. The rating agencies', taken off stale actuarial
   tables, and the entire buy-side that leaned on those ratings without ever glancing at the price two screens
@@ -241,7 +336,7 @@
   <h2><span class="part">The loud theory</span><br>Taleb and the bell curve</h2>
 
     <figure style="margin:18px 0">
-    <svg viewBox="0 0 720 300" style="width:100%;height:auto;max-width:600px;display:block;margin:0 auto;background:#faf8f4;border:1px solid var(--border);border-radius:10px" role="img" aria-label="A cheesy bell curve being contemplated by a pompous laurel-crowned philosopher bust who has crossed it out in favour of the Black Swan">
+    <svg viewBox="0 0 720 300" style="width:100%;height:auto;display:block;margin:0 auto;background:#faf8f4;border:1px solid var(--border);border-radius:10px" role="img" aria-label="A cheesy bell curve being contemplated by a pompous laurel-crowned philosopher bust who has crossed it out in favour of the Black Swan">
       <line x1="20" y1="250" x2="700" y2="250" stroke="#d8cdba" stroke-width="1.5"/>
       <path d="M40,250 C 150,250 188,88 250,88 C 312,88 350,250 460,250 Z" fill="#ece7f7" stroke="#8a7fb8" stroke-width="2"/>
       <text x="64" y="242" font-family="Georgia,serif" font-style="italic" font-size="12" fill="#b39bb3">fat tails?</text>
@@ -271,22 +366,25 @@
   </figure>
 
   <p><strong>Me:</strong> Taleb, then. The bell curve, the fat tails, the normal distribution.</p>
-  <p><strong>Jiang:</strong> That one isn't sophisticated, it is the opposite, and it has done more damage to
-  public understanding than the crisis did. The machinery ran on a Gaussian <em>copula</em>, not a Normal
-  <em>distribution of returns</em>. The marginals were never a modelling choice: each name's default
+  <p><strong>Jiang:</strong> That one isn't sophisticated, it is the opposite, and it has muddled public
+  understanding of the crisis more than any other story told about it. The machinery ran on a Gaussian <em>copula</em>, not a Normal
+  <em>distribution of returns</em>. The marginals (stat-speak for the probability of default of each individual
+  asset in the portfolio) were never a modelling choice: each name's default
   probability was <em>pinned by its CDS spread</em>, the price the market was already quoting. The one free
   knob was the correlation, and by Sklar's theorem the copula carries the dependence entirely separately from
   those CDS-fixed marginals. Blaming the bell curve is blaming the one part of the model nobody chose.</p>
+
   <details class="think">
   <summary>What I think Jiang really thinks</summary>
   <p>Ryan Gosling knows more about CDOs than Nassim Taleb does, by virtue of having read the script.</p>
   </details>
+
   <p><strong>Me:</strong> But didn't the quants naively assume thin tails: Gaussian returns, crashes rare?</p>
   <p><strong>Jiang:</strong> And there it is, completely ignoring my previous answer. Clearly I was not blunt
   enough, so I will say it again, slowly. Modelling the losses on a CDO with a Gaussian <em>copula</em> has, for
   all intents and purposes, absolutely nothing to do with the normal <em>distribution.</em> They share the word
-  <em>Gaussian</em> and nothing else that matters, rather like a guinea pig, which is neither from Guinea nor a
-  pig.</p>
+  <em>Gaussian</em> and nothing else that matters, the way a <em>hot dog</em> shares a word with a <em>dog.</em>
+  And while we are clarifying things at this level: a guinea pig is neither a pig nor from New Guinea.</p>
   <p>The copula <em>is</em> the dependence; the marginals were the CDS spreads, handed to us by the market. But
   I can see you want me to proceed as though I were the clown who slapped a single univariate normal in place of
   an actual risk calculation, because that is the only version a massive pool of unconsidering humans &mdash;
@@ -302,12 +400,16 @@
   <p><strong>Jiang:</strong> Let me put it this way. You have to be remarkably incurious to write a whole book about the longshot
   effect without realising it is <em>called</em> the longshot effect. And then to get the sign backwards on
   top of it &mdash; a century of racetrack data says punters reliably <em>over</em>-bet the longshots, not
-  under.</p>
+  under. You no longer even need the racetrack: the prediction markets publish their
+  <a href="https://manifold.markets/calibration">calibration</a> live, and it points the same way, small
+  probabilities <em>over</em>-priced, never under.</p>
 
   <details class="think">
   <summary>A confession from the translator</summary>
-  <p>I am not a neutral party here, and you should know it. I have history with this man. Years ago I made a
-  <a href="https://www.youtube.com/watch?v=A72cc8mM5gY">video mocking his misplaced pomposity</a> that went
+  <p>Jiang is being a little harsh, perhaps, though there is a small price for selling books that accuse an
+  entire profession of being idiots, and Taleb should probably have a thicker skin. I know this because, years
+  ago, I made a <a href="https://www.youtube.com/watch?v=A72cc8mM5gY">video</a> with sentiments quite similar to
+  Jiang's, that went
   micro-viral and that even
   <a href="https://www.blackswanreport.com/blog/2010/12/nassim-taleb-educates-a-quant/comment-page-1/">his own
   admirers enjoyed</a>; it bought me a permanent place on his public
@@ -320,12 +422,11 @@
   the literal-minded fool &mdash; and I was among the very few at the time to call it what it was: a brazen
   attack on autistic people dressed as iconoclasm, unremarked by the <em>Harvard Business Review</em> and
   every outlet that lionised the book.</p>
-  </details>
-
   <p>What Jiang actually calls Taleb is unprintable; the politest I can manage is <em>drooping clucking
   front.</em> The contempt is not about the man's mathematics, which in his early derivatives books was
   genuinely good. It is the spectacle of the worst mis-explanation in financial history calcifying into received
-  wisdom while the actual mechanism went unnamed.</p>
+  wisdom while the actual mechanism went undiagnosed.</p>
+  </details>
 
   <h2><span class="part">The famous theory</span><br>David Li and the formula that killed Wall Street</h2>
 
@@ -357,7 +458,7 @@
   <em>Significance</em>, the <em>Royal Statistical Society's</em> own magazine, under the line
   &ldquo;<a href="https://rss.onlinelibrary.wiley.com/doi/full/10.1111/j.1740-9713.2012.00538.x">a formula in
   statistics, misunderstood and misused, has devastated the global economy.</a>&rdquo;</p>
-  <p><strong>Jiang:</strong> The Royal Statistical Society. The body that owns the word printed the claim that a
+  <p><strong>Jiang:</strong> The Royal Statistical Society? That's frigging unbelievable. The body that owns the word printed the claim that a
   statistical <em>formula</em> devastated the economy, and ran this beside it: that Li &ldquo;took a notoriously
   tough nut, determining correlation, and cracked it wide open with a simple and elegant formula.&rdquo; That is
   manifestly false in every clause. He did not <em>determine</em> correlation; a copula does not determine
@@ -373,12 +474,12 @@
 
   <h3>The model, up close: conditioning, convolution, quadrature</h3>
   <div class="points">
-  <p><span class="h">Nobody brute-forced it.</span> No desk priced a CDO by Monte Carlo over a copula.
+  <p><span class="h">Nobody did it Li's dumb way.</span> No desk priced a CDO by Monte Carlo over a copula, at least not for most purposes.
   &ldquo;I devised, implemented and deployed the fast semi-analytic version,&rdquo; Jiang says, &ldquo;and the
   same happened independently at other banks at the same time, because the method is forced by the problem. I
   shipped it as an Excel add-in compiled from MATLAB. Try getting <em>that</em> to work across sixty
   installations of Office and you will understand why there was never a version 1.1.&rdquo;</p>
-  <p><span class="h">And it is mechanical.</span> Pricing a CDO in the one-factor model is routine
+  <p><span class="h">And it is busywork.</span> Pricing a CDO in the one-factor model is routine
   <em>conditioning, convolution and quadrature</em>. Condition on the common factor and the names go
   independent; convolve their conditional default indicators into a loss distribution; integrate over the
   factor with a handful of nodes. Exact, instant, no mystique. Run it:</p>
@@ -406,8 +507,7 @@
   <p><strong>Me:</strong> Salmon's piece made a subtler charge than &ldquo;the formula did it.&rdquo; It blamed
   the formula's <em>beauty</em>. Li had, in those pages, cracked correlation wide open with something &ldquo;simple
   and elegant,&rdquo; and the moral became that a generation of quants fell in love with that elegance and
-  stopped checking. The decade ran with it, all the way to a small literature on the quants'
-  <a href="https://arxiv.org/abs/1003.2688">physics envy</a>. Seduced by the formula.</p>
+  stopped checking. Seduced by the formula.</p>
   <p><strong>Jiang:</strong> That one I take personally, because it gets the aesthetics backwards. The object
   was <em>ugly</em>. A mathematician finds a CDO model about as elegant as a tax form. Nobody fell in love with
   it; we held our noses and used it. The seduction story needs a beautiful thing at the centre, and there
@@ -416,24 +516,65 @@
   ones who trusted it blindly, and they were not. The builders could see exactly where it broke. The people who
   leaned on it without checking had never opened it.</p>
 
-  <p>And here, at last, he leaned forward. We had cleared the underbrush (the elegant tail story, the
-  bell-curve sermon, the psychology, the seduction of the formula) and there was clean ground to stand on. I
-  asked the only question that mattered.</p>
-
   <h2><span class="part">The pivot</span><br>So what actually happened?</h2>
-  <p><strong>Jiang:</strong> Okay. Let's take a really novel approach and actually consider what happened.
-  Somebody built a company that does nothing, and got paid for it. Let me show you the company.</p>
+  <p>Okay. Let's take a really novel approach and actually consider what happened. I asked Jiang why he pushed
+  back so hard on the notion that CDOs are complicated.</p>
+  <p><strong>Jiang:</strong> Somebody built a company that does nothing, and got paid for it. Let me show you the company.</p>
 
-    <pre style="overflow-x:auto;background:#fdfdfb;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:.78rem;line-height:1.35;color:#555">           &#9728;   GRAND CAYMAN   &#9728;
-                 &#127796;     &#127796;
-      +-----------------------------+
-      |       AURORA FUNDING        |    owns ...... a pile of bonds
-      |         (Cayman) Ltd        |    employs ... maybe some lawyers
-      |   +---------------------+   |    does ...... nothing
-      |   |    bonds    bonds   |   |
-      |   +---------------------+   |
-      +-----------------------------+
-        coupons in  -&gt;  tranche payments out</pre>
+    <svg viewBox="0 0 800 330" style="width:100%;height:auto;background:#fdfdfb;border:1px solid var(--border);border-radius:8px;display:block;margin:16px 0" role="img" aria-label="An orphan Cayman company, Hammock Funding (Cayman) Ltd: it owns a pile of bonds, employs maybe some lawyers, and does nothing; coupons flow in, tranche payments flow out">
+      <defs><marker id="cymflow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#999"/></marker></defs>
+      <!-- sun -->
+      <g stroke="#e8b53a" stroke-width="2.4" stroke-linecap="round">
+        <line x1="66" y1="28" x2="66" y2="16"/><line x1="66" y1="84" x2="66" y2="96"/>
+        <line x1="38" y1="56" x2="26" y2="56"/><line x1="94" y1="56" x2="106" y2="56"/>
+        <line x1="46" y1="36" x2="38" y2="28"/><line x1="86" y1="76" x2="94" y2="84"/>
+        <line x1="86" y1="36" x2="94" y2="28"/><line x1="46" y1="76" x2="38" y2="84"/>
+      </g>
+      <circle cx="66" cy="56" r="16" fill="#f4c542"/>
+      <text x="250" y="34" text-anchor="middle" font-family="Georgia,serif" font-size="17" letter-spacing="1.5" fill="#6b6b78">GRAND CAYMAN</text>
+      <!-- island -->
+      <ellipse cx="250" cy="266" rx="205" ry="26" fill="#efe4c8" stroke="#e2d4ad" stroke-width="1"/>
+      <!-- palms -->
+      <g transform="translate(118,260)">
+        <path d="M0,0 q6,-32 -3,-60" fill="none" stroke="#a9794a" stroke-width="4.5" stroke-linecap="round"/>
+        <g fill="none" stroke="#5fa463" stroke-width="3.5" stroke-linecap="round">
+          <path d="M-3,-60 q-26,-8 -40,5"/><path d="M-3,-60 q26,-10 42,3"/>
+          <path d="M-3,-60 q-16,-22 -26,-34"/><path d="M-3,-60 q16,-22 26,-32"/><path d="M-3,-60 q-2,-24 -2,-38"/>
+        </g>
+        <circle cx="-8" cy="-56" r="3" fill="#8a5a2c"/><circle cx="3" cy="-55" r="3" fill="#8a5a2c"/>
+      </g>
+      <g transform="translate(398,260) scale(-1,1)">
+        <path d="M0,0 q6,-32 -3,-60" fill="none" stroke="#a9794a" stroke-width="4.5" stroke-linecap="round"/>
+        <g fill="none" stroke="#5fa463" stroke-width="3.5" stroke-linecap="round">
+          <path d="M-3,-60 q-26,-8 -40,5"/><path d="M-3,-60 q26,-10 42,3"/>
+          <path d="M-3,-60 q-16,-22 -26,-34"/><path d="M-3,-60 q16,-22 26,-32"/><path d="M-3,-60 q-2,-24 -2,-38"/>
+        </g>
+        <circle cx="-8" cy="-56" r="3" fill="#8a5a2c"/><circle cx="3" cy="-55" r="3" fill="#8a5a2c"/>
+      </g>
+      <!-- company box -->
+      <rect x="140" y="92" width="220" height="152" rx="7" fill="#fff" stroke="#7a7a86" stroke-width="1.6"/>
+      <text x="250" y="120" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="700" fill="#333">HAMMOCK FUNDING</text>
+      <text x="250" y="138" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#888">(Cayman) Ltd</text>
+      <!-- a pile of bonds -->
+      <g font-family="Georgia,serif" font-size="11" fill="#4a3aff" text-anchor="middle">
+        <rect x="183" y="162" width="44" height="56" rx="3" fill="#fff" stroke="#9a8fe0"/><text x="205" y="194">bond</text>
+        <rect x="228" y="162" width="44" height="56" rx="3" fill="#fff" stroke="#9a8fe0"/><text x="250" y="194">bond</text>
+        <rect x="273" y="162" width="44" height="56" rx="3" fill="#fff" stroke="#9a8fe0"/><text x="295" y="194">bond</text>
+      </g>
+      <!-- annotations -->
+      <g font-family="system-ui,sans-serif" font-size="14.5" fill="#555">
+        <text x="452" y="150">owns <tspan fill="#bbb">&#183;&#183;&#183;&#183;&#183;</tspan> a pile of bonds</text>
+        <text x="452" y="180">employs <tspan fill="#bbb">&#183;&#183;</tspan> maybe some lawyers</text>
+        <text x="452" y="210">does <tspan fill="#bbb">&#183;&#183;&#183;&#183;&#183;</tspan> <tspan font-weight="700" fill="#222">nothing</tspan></text>
+      </g>
+      <!-- money flow -->
+      <g font-family="system-ui,sans-serif" font-size="12.5" fill="#777">
+        <line x1="44" y1="308" x2="138" y2="308" stroke="#999" stroke-width="1.6" marker-end="url(#cymflow)"/>
+        <text x="46" y="300">coupons in</text>
+        <line x1="362" y1="308" x2="468" y2="308" stroke="#999" stroke-width="1.6" marker-end="url(#cymflow)"/>
+        <text x="364" y="300">tranche payments out</text>
+      </g>
+    </svg>
 
   <p>An orphan entity on an island: bankruptcy-remote, no staff, no premises, no business. It buys a pile of
   bonds, collects the coupons, and passes the cash to investors in slices, or <em>tranches</em>, in strict
@@ -442,11 +583,10 @@
   <em>collateralized debt obligation</em>, a CDO. The company is just the vehicle.</p>
   <p><strong>Me:</strong> Every official account calls this instrument complex. The Inquiry
   Commission gave it a chapter titled &ldquo;The CDO Machine.&rdquo;</p>
-  <p><strong>Jiang:</strong> A CDO is not even a company; it is a note. The <em>company</em> behind it, the
-  vehicle that issues that note, is the least complex company on the planet: a box that buys bonds and pays
-  them out in order of seniority. The only idea in it is the oldest idea in finance,
-  <em>subordination</em> &mdash; who gets paid first. A bodega is more complex. A car wash is vastly more
-  complex; a car wash has <em>employees</em>, and weather, and a float. The single thing a structured-finance
+  <p><strong>Jiang:</strong> The vehicle that issues a CDO is the least complex company on the planet: a box
+  that buys bonds and pays them out in order of seniority. The only idea in it is the oldest idea in finance,
+  <em>subordination</em> &mdash; who gets paid first. A bodega is more complex. A car wash is more complex; a
+  car wash has <em>employees</em>, and weather, and a float. The single thing a structured-finance
   vehicle does &mdash; the <em>only</em> thing &mdash; is raise debt and invest its spare cash, which is what
   every company that has ever issued a bond also does. Calling it complex is a dodge.</p>
   <p>So if it does nothing, where does the money come from? Not the assets; on the assets alone the
@@ -466,36 +606,63 @@
         <span style="background:rgba(0,0,0,.65);color:#fff;border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">&#9658;</span>
       </span>
     </a>
-    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Even <em>The Big Short</em> stumbles onto
-    it: the CDO manager explaining that he assumes &ldquo;no risk for this product&rdquo; himself. Contrary to
-    nearly all the commentary, the thing is not complex. <a href="https://www.youtube.com/watch?v=A25EUhZGBws" target="_blank" rel="noopener">Watch on YouTube.</a></figcaption>
+    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Steve Carell hones in.
+    <a href="https://www.youtube.com/watch?v=A25EUhZGBws" target="_blank" rel="noopener">Watch on YouTube.</a></figcaption>
   </figure>
 
   <p>Watch the lunch appear and disappear:</p>
 
     <div class="widget">
-    <div class="controls">
-      <label>collateral spread <input id="raSpread" type="range" min="0.005" max="0.06" step="0.0025" value="0.03"><span class="val" id="raSpreadV">3.0%</span></label>
-      <label>correlation ρ <input id="raRho" type="range" min="0" max="0.6" step="0.01" value="0.20"><span class="val" id="raRhoV">0.20</span></label>
-      <label>agency default prob (senior priced here) <input id="raAg" type="range" min="0.005" max="0.10" step="0.0025" value="0.01"><span class="val" id="raAgV">1.0%</span></label>
-      <button type="button" id="raSame" class="snap">use the same probability (no free lunch)</button>
+    <div class="controls" style="display:block">
+      <div class="qrtab">
+        <div></div><div class="hh">Market (Q)</div><div class="hh">Ratings (R)</div>
+        <div class="rl">default probability</div>
+        <div class="cell"><input id="raPQ" type="range" min="0.005" max="0.10" step="0.0025" value="0.05"><span class="val" id="raPQV">5.0%</span></div>
+        <div class="cell"><input id="raPR" type="range" min="0.005" max="0.10" step="0.0025" value="0.01"><span class="val" id="raPRV">1.0%</span></div>
+        <div class="rl">correlation &rho;</div>
+        <div class="cell"><input id="raRhoQ" type="range" min="0" max="0.6" step="0.01" value="0.20"><span class="val" id="raRhoQV">0.20</span></div>
+        <div class="cell"><input id="raRhoR" type="range" min="0" max="0.6" step="0.01" value="0.05"><span class="val" id="raRhoRV">0.05</span></div>
+      </div>
+      <button type="button" id="raSame" class="snap">make Ratings = Market (no free lunch)</button>
     </div>
     <canvas id="raCanvas" width="780" height="360"></canvas>
     <div class="method" id="raMethod"></div>
   </div>
-  <p class="muted">The collateral spread fixes the market-implied default probability. Each tranche's fair
-  coupon is its expected loss under that probability, and those fair coupons sum back to the pool spread
-  exactly &mdash; money in equals money out, arranger profit zero. Now drag the <em>agency default
-  probability</em> below the implied one: that is the only thing the rating changes, and the only place a
-  profit can hide. Set it equal and the free lunch vanishes.</p>
+  <p class="muted">The <em>Market (Q)</em> column sets the default probability and correlation the market is
+  quoting; each tranche's fair coupon is its expected loss under those, and the fair coupons sum back to the
+  pool spread exactly &mdash; money in equals money out, arranger profit zero. Now move the <em>Ratings (R)</em>
+  column away from the market's: those are the numbers the agency uses to price the AAA senior, and the only
+  place a profit can hide. Set the two columns equal and the free lunch vanishes.</p>
 
   <p>Two numbers are in play here and they disagree. The market quotes one default probability, with real money
   behind it; the rating agency uses another, an actuarial estimate from a table. The entire perpetual-motion
   machine is the wedge between them, and the crisis is the story of an industry betting half a trillion dollars
-  that the table was right and the market was wrong. Why that gap is not merely a bad estimate but a different
-  <em>kind</em> of mistake, one with a name, is the thing I finally got Jiang to spell out. We will get there.</p>
+  and expecting reasonable compensation, in the form of a risk premium, in return.</p>
+
+  <p>Why that gap is not merely a bad estimate but a different <em>kind</em> of mistake, one with a name, is the
+  thing I finally got Jiang to spell out. We will get there.</p>
+
+  <details class="think">
+  <summary>Jiang doesn't think everyone is stupid</summary>
+  <p>One thing that emerged from talking to Jiang is that his seething contempt was aimed largely at the
+  blowhards outside his industry, not at the rating agencies themselves. He plainly wanted a theory that did
+  not, unlike the instincts of the Thalers and Talebs of the world, require that vast swathes of employees at
+  the funds, the agencies and the sell side be idiots. On the contrary: they were manifestly better schooled in
+  statistics than the people brought to the crash site.</p>
+  </details>
+
+  <details class="think">
+  <summary>Aside on capitalism</summary>
+  <p>There is nothing wrong, and a great deal right, with paying people to bear risk. That is what a credit
+  market is for, and the risk premium is its wage. Buying a risky bond and expecting to be paid for the risk is
+  not a delusion; it is the system working as designed. The failure was never the appetite for risk. It was the
+  <em>price</em> put on it, a number computed with the market switched off.</p>
+  </details>
 
   <h2><span class="part">The model was ugly, not beautiful</span><br>Sklar on time, and the hazards that jump</h2>
+  <p>We will get to that. But first I needed to press Jiang on the claimed mathematical elegance, because the
+  theory that the models ran amok pretty much requires that the people who built or used them were blind to
+  their flaws.</p>
   <p><strong>Jiang:</strong> Here is the ugliness, concretely. The construction takes Sklar's theorem &mdash;
   the distributional transform, a near-triviality &mdash; and staples it onto default <em>times</em>. Which immediately begs the question the static picture cannot answer:
   what happens after time zero? The only honest move is to condition on what you've learned &mdash; who has
@@ -558,19 +725,14 @@
   monotone, so any level inverts to a single &beta; &mdash; but the two &beta;s differ, and that gap is the
   base-correlation skew a one-correlation model could never produce. Well-posed and dishonest at once.</p>
 
-  <h2><span class="part">What actually happened</span><br>Wrong inputs, on purpose and by habit</h2>
-  <p>&ldquo;Ignored&rdquo; is too strong, Jiang says; the warnings landed and changed nothing, because nothing
-  in the incentive structure rewarded acting on them. The carry was good, the capital rules did not charge for
-  the systematic tail, and a flaw everyone could see was a flaw nobody was paid to fix. Banks run in cycles,
-  power swinging between desks and risk groups, and you can guess which way the pendulum pointed in 2004 and
-  2005. When the people who can see the flaw report to the people paid not to, the flaw is safe.</p>
+  <h2><span class="part">Non-models are better</span><br>The dumbest theory, with the dumbest demo</h2>
   <p><strong>Me:</strong> There is a tempting moral in all of this: that we would have been better off
   with no models at all. Drop the copulas, drop the mathematics, trust seasoned judgement.</p>
   <p><strong>Jiang:</strong> That is the agencies' own defence, and it is precisely how they blew up. They will
-  tell you they never touched these fancy copulas; they used something simpler and sturdier, a
-  <em>non-model</em>. Moody's flagship took a pool of correlated names, replaced it with <em>D independent</em>
-  identical ones, the famous <em>diversity score</em>, and read the loss off a binomial. No correlation input
-  anywhere. It sounds prudent. It is the opposite of robust, and the dial shows you why.</p>
+  tell you they never touched these fancy copulas; they reached for something they called sturdier, a
+  <em>non-model</em>, the <em>Binomial Expansion Technique</em>: read the loss off a binomial, with no
+  correlation input at all. It sounds prudent. It is the opposite of robust.</p>
+  <p>So I put it on a dial.</p>
 
     <div class="widget">
     <div class="controls">
@@ -587,20 +749,22 @@
   non-model&rdquo; meant in practice: a model that cannot be wrong about correlation because it is not
   permitted to have an opinion that changes.</p>
   <p><strong>Me:</strong> So &ldquo;no model&rdquo; was not the safe choice.</p>
-  <p><strong>Jiang:</strong> &ldquo;No model&rdquo; <em>is</em> a model. It is the one that welds correlation to
-  a constant and throws away the dial, so that when the world moves your number cannot. That is not the absence
-  of an assumption, it is the most reckless assumption available, with the evidence of it designed out of view.
-  Doing away with models does not save you here. Using the market to feed them does.</p>
+  <p><strong>Jiang:</strong> &ldquo;No model&rdquo; <em>is</em> a model. Everything is a model: a mental model, a
+  bad mathematical model dressed up as a non-model, whatever you like. This one is the third kind, and a
+  spectacularly stupid one. It welds correlation to a constant and throws away the dial, so that when the world
+  moves your number cannot. That is not the absence of an assumption; it is the single most reckless assumption
+  on the menu, with the evidence of it designed out of view. Doing away with models does not save you. Feeding
+  them the market does.</p>
   <p><strong>Jiang:</strong> Getting a number wrong <em>out loud</em>, where it can be stressed and re-marked,
-  is a venial sin. Refusing to let the number exist at all is recklessness dressed as prudence. When
-  correlation finally marched toward one in 2008, the diversity score would have had no channel to say so.
+  is a venial sin. Refusing to let the number exist at all is recklessness dressed as prudence. A model that
+  cannot hold an opinion about correlation cannot be wrong about it, and cannot be corrected either.
   Fortunately the agencies were adopting actual models by then. They just got the inputs badly wrong, and that
   is their fault, not the model's. The reason they got it wrong is more interesting than it looks. Whether you
   have the patience to follow me all the way to it I genuinely cannot tell yet, but I am willing to find out.</p>
 
   <h3>In the land of the blind</h3>
-  <p>And the subtler failure, the one that survives even when an agency <em>did</em> reach for a copula: they
-  fed it the wrong correlation, taken from <em>historical, actuarial</em> studies, and the numbers were
+  <p>And so our discussion turned to a subtler failure, the one that survives even when an agency <em>did</em>
+  reach for a copula: they fed it the wrong correlation, taken from <em>historical, actuarial</em> studies, and the numbers were
   strikingly low &mdash; S&amp;P's evaluator assumed <em>0%</em> across industries before late 2005; Moody's
   roughly <em>3%</em>. Two screens away, the inter-dealer market in CDO tranches was quoting prices that
   <em>implied</em> a far higher number. Implied correlation is the figure you must put into the model to
@@ -629,59 +793,6 @@
 
   <p><strong>Jiang:</strong> Ignoring a live market price in favour of a stale historical estimate is close to
   the cardinal sin. It deserves a name, and it has one, but you have not earned it yet.</p>
-
-  <h2><span class="part">The post-mortem</span><br>The investigation that wasn't</h2>
-  <p>Remember the question Jiang opened with, about who shows up when a plane falls out of the sky: the
-  engineers who built it, the people who flew it, the lawyers barred by law. Hold that standard up against
-  what we actually convened.</p>
-
-  <p><strong>Jiang:</strong> Now ask who showed up for ours. I'd love to know how many of them had ever priced a tranche.</p>
-  <p>Fair question. I didn't trust my own memory, so I had Gemini build the roster and score it.</p>
-  <details class="think">
-  <summary>Authorship of the Financial Crisis Inquiry Commission</summary>
-  <table class="authtbl">
-    <thead><tr><th>Author &mdash; role and occupation</th><th class="q">QUANTY?</th><th class="q">Worked in<br>structured finance?</th></tr></thead>
-    <tbody>
-      <tr><td>Phil Angelides &mdash; chairman; California politician, ex-state treasurer</td><td class="q mid">doubtful</td><td class="q no">no</td></tr>
-      <tr><td>Bill Thomas &mdash; vice-chair; retired congressman</td><td class="q no">no</td><td class="q no">no</td></tr>
-      <tr><td>Brooksley Born &mdash; derivatives lawyer, ex-CFTC chair</td><td class="q mid">doubtful</td><td class="q mid">no, regulated it</td></tr>
-      <tr><td>Byron Georgiou &mdash; plaintiffs' securities lawyer</td><td class="q no">no</td><td class="q mid">no, sued it</td></tr>
-      <tr><td>Bob Graham &mdash; former senator and governor</td><td class="q no">no</td><td class="q no">no</td></tr>
-      <tr><td>Keith Hennessey &mdash; White House economic-policy adviser</td><td class="q mid">doubtful</td><td class="q no">no</td></tr>
-      <tr><td>Douglas Holtz-Eakin &mdash; public-finance economist (tax and fiscal policy), ex-CBO director; co-wrote the dissent calling it &ldquo;a mistake&rdquo; to blame CDOs</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
-      <tr><td>Heather Murren &mdash; equity-research analyst (consumer stocks), left Wall St in 2002</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
-      <tr><td>John W. Thompson &mdash; antivirus-software CEO</td><td class="q no">no</td><td class="q no">no</td></tr>
-      <tr><td>Peter Wallison &mdash; lawyer, think-tank fellow</td><td class="q no">no</td><td class="q no">no</td></tr>
-      <tr class="staff"><td>Wendy Edelberg &mdash; executive director; PhD macroeconomist (Fed)</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
-      <tr class="staff"><td>Greg Feldberg &mdash; research director; Fed bank-supervision analyst</td><td class="q mid">maybe</td><td class="q mid">no, supervised it</td></tr>
-      <tr class="staff"><td>Chris Seefer &mdash; investigations director; SEC fraud attorney</td><td class="q no">no</td><td class="q mid">no, investigated it</td></tr>
-      <tr class="staff"><td>Gary Cohen &mdash; general counsel</td><td class="q no">no</td><td class="q no">no</td></tr>
-    </tbody>
-  </table>
-  <p class="muted" style="font-size:.85rem">Ten commissioners, four staff authors. Ever built, priced, traded
-  or rated a CDO: zero. The lone derivatives expert, Born, was a lawyer who had tried to <em>regulate</em> this
-  market years earlier and been crushed for it by Greenspan, Rubin and Summers &mdash; proven right, ignored,
-  and still the closest thing on the panel to someone who knew the instrument. (Roster compiled by Gemini Deep
-  Research, cross-checked against the Commission's own biographies.)</p>
-  </details>
-  <p>So the official inquiry into the most quantitative disaster in financial history was run, start to finish,
-  by people who had to <em>subpoena and interview the practitioners</em>, people like Jiang, to find out how the machine worked at all.</p>
-  <p><strong>Jiang:</strong> A plane crashes and you ban the lawyers and summon the engineers. Our financial
-  system crashed and we convened ten politicians, lawyers, economists and executives, not one of whom had
-  ever priced a tranche, and titled the chapter &ldquo;The CDO Machine.&rdquo; Then we let Ben Bernanke tell audiences the mortgages
-  had been &ldquo;packaged into securities that proved complex, opaque, and unwieldy,&rdquo; and we let Kevin
-  Rudd compare it to a house on fire that it would be a good idea to put out. <em>Bloody brilliant, mate.</em></p>
-  <p><strong>Jiang:</strong> A green room of instant experts on structured finance, not one of whom had ever quoted a correlation.
-  Of course they reached for the word <em>complex.</em> Complex is what you call a company that does nothing
-  when you have decided, in advance, not to look inside the box. It was a hearing, not an inquiry, and it succeeded, because the one number that actually mattered, the correlation the market was already quoting, was never going to be found by a panel with no one on it who had ever quoted it.</p>
-  <p>I told him this seemed to be where the whole thing had been heading. He said it was where it had been
-  heading for twenty years, and that I should say so plainly, so I am: <em>we did not investigate the
-  financial crisis. We held hearings about it.</em></p>
-
-  <details class="think">
-  <summary>Off the record</summary>
-  <p><strong>Jiang:</strong> Why in the living fuck didn't anyone ask me, some time in the last two decades?</p>
-  </details>
 
   <h2><span class="part">The clean answer</span><br>P, Q, and the measure that should never have been called P</h2>
   <p>This is the answer I promised at the very top: the good one, the one Jiang says was worth the detours. He
@@ -779,8 +890,8 @@
   <p><strong>Jiang:</strong> He does, and this time it earns its keep. The <em>Indispensable Markets
   Hypothesis</em>: wherever a well-established market exists, anyone who refuses its prices as inputs will
   under-perform out of sample. The market need not be efficient. It is indispensable regardless. Read his
-  <a href="https://mitpress.mit.edu/9780262047326/microprediction/">book</a> and his writing on it; he has the
-  contests and the data, and the market keeps winning even against people who were handed its own numbers.</p>
+  <a href="https://mitpress.mit.edu/9780262047326/microprediction/">book</a>: the market keeps winning even
+  against people who were handed its own numbers.</p>
   <p><strong>Jiang:</strong> There is a sharper way to name what goes wrong when <em>R</em> walks into that
   optimizer. It is a <em>type error.</em> Financial theory defines operations on two measures, <em>P</em> and
   <em>Q</em>, and on no others. There is no financially justified thing to <em>do</em> with an <em>R</em>
@@ -823,37 +934,53 @@
   seasoned buyer would shade it toward what the market implied, add a grain of salt, and land near <em>P</em>.
   That is the correct move, folding the market back into <em>R</em> to recover <em>P</em>, exactly what I have
   been preaching. The trouble is <em>where</em> the salt goes. A CDO multiplies, and salt does not distribute
-  across a product. To get <em>P&times;P</em> you need <em>(R&thinsp;+&thinsp;salt)&times;(R&thinsp;+&thinsp;salt)</em>,
-  the correction folded into every name <em>before</em> they are multiplied. What investors were handed was
-  <em>R&times;R</em>, already compounded into one AAA stamp, with a single grain sprinkled on the answer.
-  <em>R&times;R</em> plus a pinch is nowhere near <em>P&times;P</em>. The error was baked in long before the
-  salt arrived.</p>
+  across a product.</p>
+  <p><strong>Me:</strong> Let me read this grain-of-salt theory back to you. To get <em>P&times;P</em> you need
+  <em>(R&thinsp;+&thinsp;salt)&times;(R&thinsp;+&thinsp;salt)</em>, the correction folded into every name
+  <em>before</em> they are multiplied. What investors were handed was <em>R&times;R</em>, already compounded
+  into one AAA stamp, with a single grain sprinkled on the answer. <em>R&times;R</em> plus a pinch is nowhere
+  near <em>P&times;P</em>. The error was baked in long before the salt arrived.</p>
   <p><strong>Jiang:</strong> And that is the whole shape of the thing. It is why the ratings could be roughly
   fine for decades and then fail in about six years. On single bonds the grain of salt was enough; <em>R</em>
-  plus a pinch sat close enough to <em>P</em> that nobody was hurt and the system looked calibrated. Nothing
-  about the ratings themselves got worse around the turn of the century. What changed is that the business
-  turned to <em>multiplying</em> them, tranche on tranche, CDO on CDO, and a gap that had been harmless for a
-  generation was suddenly raised to a power. The misalignment did not grow. The exponent did.</p>
+  plus a pinch sat close enough to <em>P</em> that nobody was hurt and the system looked calibrated. The ratings
+  did slip somewhat around the turn of the century, as the agencies' business exploded into structured credit;
+  but a slipping rating is a venial sin. The decisive change was that the business turned to
+  <em>multiplying</em> them, tranche on tranche, CDO on CDO, and a gap that had been survivable for a generation
+  was suddenly raised to a power. The misalignment grew a little. The exponent grew enormously.</p>
 
   <p>I asked whether that was the sentence he had spent twenty years waiting to see written down. He said it
   was, and that I should set it in the plainest type the page allowed.</p>
-  <p>A word on why the name matters. A behaviour that is not named at a resolution fine enough to be useful does
-  not stop. This is why &ldquo;good&rdquo; and &ldquo;bad&rdquo; modelling is a poor thing to teach, the way
-  &ldquo;drive safely&rdquo; teaches nothing, whereas &ldquo;drunk driving&rdquo; picks out one specific,
-  tempting, common habit you can learn to catch in yourself. Modelling under the <em>R</em>-measure is the drunk
-  driving of quantitative work: instinctive, tempting, very nearly universal. Now that it has a name, we can
-  begin to stamp it out. We have a long way to go.</p>
+  <p>A word on why the name matters. A behaviour you cannot name precisely, you cannot stamp out. Telling people
+  to do &ldquo;good&rdquo; modelling and avoid &ldquo;bad&rdquo; modelling is as useless as telling them to
+  &ldquo;drive safely&rdquo;; it picks out nothing they can catch themselves doing. &ldquo;Drunk driving&rdquo;
+  works as a rule because it names one specific, tempting, common act. Modelling under <em>R</em> is the drunk
+  driving of quantitative work, and now that it has a name we can begin to stamp it out. We have a long way to
+  go.</p>
 
-  <h2><span class="part">A note from the translator</span><br>Whose voice this has been, and how little was learned</h2>
+  <div class="callout">
+  <div class="ct"><em>R</em>-probability</div>
+  <p>An estimate of an objective probability that <em>deliberately ignores the relevant market price.</em> Not
+  a true <em>P</em> (which would use all available information, the market included), and not <em>Q</em> (the
+  market's own), but a third thing: statistics with the market switched off. Rating agencies manufacture it by
+  the ton; so, left to its defaults, does most of machine learning.</p>
+  </div>
+
+  <div class="callout cmd">
+  <div class="ct">Jiang's commandment</div>
+  <p>Never use <em>R</em>-probabilities. Ever.</p>
+  </div>
+
+  <h2><span class="part">A note from the translator</span><br>Whose voice this has been</h2>
   <p>My resemblance to Jiang is mildly uncanny, at least as judged by the three or four things <em>The Big
   Short</em> troubles to tell us about him.</p>
   <p>I did not know Jiang at the time. I have no idea whether he ran a mildly secretive research group building
   computational methods for pricing entire universes of CDOs at once, through time. Perhaps I competed against
-  him in the Asian Pacific Mathematics Olympiad. What I can safely assume is that he found some or all of the
+  him in the Asian Pacific Mathematics Olympiad and lost badly. What I can safely assume is that he found some or all of the
   same tricks I did, probably around the same time, and certainly before the academics did. And he would,
   undoubtedly, have used optimizers to choose the CDO's assets too.</p>
-  <p>The only thing I am completely certain of: nobody really asked Jiang what his opinion was.</p>
-  <p>And if you want proof that none of it has been learned, look at the M6, a year-long forecasting contest
+  <p>The only thing I am completely certain of: nobody really asked Jiang what his opinion was, not even Ryan Gosling.</p>
+  <p>And if you want proof that the lesson, build <em>P</em> from <em>Q</em> and <em>R</em>, has not been
+  learned, look at the M6, a year-long forecasting contest
   run only a few years ago, real prize money, hundreds of entrants out of the machine-learning and
   data-science world. They were asked, in effect, for <em>P</em>: honest probabilities for stock returns.
   Almost to a person they produced <em>R</em>, fitting models to history and never once consulting the market.
@@ -883,31 +1010,35 @@
       </tbody>
     </table>
     <figcaption class="muted" style="font-size:.85rem;margin-top:6px">M6 final standings, top of the board. The
-    row marked <em>microprediction</em> did no modelling whatsoever; it read the options market. On forecast
-    skill (the tight left column) it sat among the very best, ahead of nearly the whole data-science field. The
-    wild &ldquo;decisions&rdquo; column on the right, where a lucky few post huge numbers, is the part none of
-    them could repeat the next year.</figcaption>
+    highlighted row, <em>microprediction</em>, did no modelling at all; it simply read the options market. On
+    forecast <em>skill</em> (the tight left column, where luck cannot help you) it finished near the very top of
+    some two hundred teams. The handful that edged ahead overall did it on the wild &ldquo;decisions&rdquo;
+    column on the right, where a lucky few post enormous numbers that none of them could repeat the next year.
+    To beat a passive read of the market, in short, you had to be lucky.</figcaption>
   </figure>
 
-  <p>There is an irony I cannot leave out. The paper I wrote about this was rejected by the same people who run
-  the competition. They were embarrassed, I think, and in being embarrassed they missed the one finding worth
-  keeping, which I spell out in the paper and the article both: the mistake those two hundred teams had just
-  made, modelling under <em>R</em> while the market quoted <em>Q</em> two screens away, is <em>exactly</em> the
-  mistake the rating agencies made in structured finance. Or, to be kinder about it, the same mistake made by
-  the combined actions of the agencies and the buy side. The M6 was the credit crisis re-run as a clean,
-  controlled experiment, and the field flunked it the same way, and then declined to notice.</p>
+  <p>I wrote the finding up, and the paper was rejected by the very people who run the competition. Embarrassed,
+  I suspect, and so they missed the part worth keeping. The mistake those two hundred teams had just made,
+  modelling under <em>R</em> while a market quoted <em>Q</em> two screens away, is <em>exactly</em> the mistake
+  the rating agencies made in structured finance; or, to be precise about it, the mistake the agencies and the
+  buy side made between them. The M6 was the credit crisis re-run as a clean, controlled experiment. The field
+  made the same error, and then declined to notice it had.</p>
   <p>Two decades after the crisis, the lesson, that you build <em>P</em> out of <em>Q</em> and <em>R</em> and
   never out of <em>R</em> alone, is exactly as unlearned as it was in 2007. That is the bad news.</p>
 
+  <details class="think">
+  <summary>And why nobody fixed it at the time</summary>
+  <p>The warnings, back then, landed and changed nothing, because nothing in the incentive structure rewarded
+  acting on them. The carry was good, the capital rules did not charge for the systematic tail, and a flaw
+  everyone could see was a flaw nobody was paid to fix. Banks run in cycles, power swinging between desks and
+  risk groups, and you can guess which way the pendulum pointed in 2004 and 2005. When the people who can see
+  the flaw report to the people paid not to, the flaw is safe.</p>
+  </details>
+
   <h2><span class="part">The good news</span><br>Mathematics has a sneaky way of being useful everywhere</h2>
-  <p>Let me dispel one last thing on his behalf. He is not pining to rebuild the CDO machine. By the end the
-  pendulum had swung entirely to the desk: assemble a CDO, sell <em>n&minus;1</em> slices for roughly the price
-  of the whole pie, keep the <em>n</em>-th almost for free, and optimise one thing only, how fast you can
-  originate the next. Take the money and run. The empty company on its island was run at scale, the money was
-  taken, and an exact method for tracing a CDO through time was overhead. The elegant part was swept to the
-  floor as useless.</p>
-  <p>It was not useless. It was early, and mathematics has a sneaky habit of turning up useful somewhere else
-  entirely. Indulge me while I tell it, in my own voice now.</p>
+  <p>The elegant mathematics underneath the CDO was swept to the floor at the time as useless. It was not
+  useless. It was early, and mathematics has a sneaky habit of turning up useful somewhere else entirely.
+  Indulge me while I tell it, in my own voice now.</p>
   <p>The work I keep wanting to recreate rested on two ideas: the <em>symmetries</em> of a CDO, and
   <em>de Finetti</em>-style decompositions of the joint default distribution. The companies in a CDO are
   plainly not exchangeable &mdash; Ford is not GMAC is not a Florida homebuilder &mdash; but the CDO's
@@ -1023,7 +1154,8 @@
   cousin of the CDO analytics from 2000. The same decomposition that looked, back then, like a mere
   computational trick turns out to run surprisingly deep.</p>
 
-  <h2><span class="part">The quants knew</span><br>You don't start a company to fix something you think is great</h2>
+  <details class="think">
+  <summary>For the record: the quants knew (you don't start a company to fix something you think is great)</summary>
   <p><strong>Me:</strong> The tidy morality tale needs the quants to be naive. Dazzled, blind to the
   cracks.</p>
   <p><strong>Jiang:</strong> None of those flaws were hidden from the desk. They were obvious to anyone who
@@ -1033,6 +1165,7 @@
   company whose entire reason for existing was to fix the credit models. That is not the act of someone
   seduced by an elegant copula. It is the act of someone who had seen exactly where it broke and could not
   get anyone to care while the carry was good.</p>
+  </details>
 
   <p>So that is the answer, and the man who finally gave it. A company that does nothing, a measure that should
   never have been called <em>P</em>, and an error raised to a power, told by the quant everyone called Yang.</p>
@@ -1159,11 +1292,10 @@ draw();
 /* diversity-score: copula loss dist (moves with rho) vs the rating-agency model frozen at rho=5% */
 (function(){
   const cv=document.getElementById("dscv"); if(!cv||typeof lossDist==="undefined") return;
-  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1, P_FIX=0.05, RHO_AG=0.05, XMAX=0.45;
-  const Pag=lossDist(RHO_AG,P_FIX,33).P, dAg=(k)=>Pag[k]/(LGD/N);   // agency model: same engine, frozen at 5%
-  // FIXED y-scale, computed once off the agency curve itself, so the inert 5% hump fills the
-  // frame and reads as the tight, low-correlation shape it is (not a suppressed broad bump)
-  let FY=0.02; for(let k=1;k<=N;k++){const x=LGD*k/N; if(x>0.02&&x<=XMAX) FY=Math.max(FY,dAg(k));} FY*=1.15;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1, P_FIX=0.05, RHO_AG=0.05, P_AG=0.02, XMAX=0.45;
+  const Pag=lossDist(RHO_AG,P_AG,33).P, dAg=(k)=>Pag[k]/(LGD/N);   // agency: fixed low correlation AND the rating's lower default probability
+  // HARD-FIXED y-scale: a constant, so the axis and the agency curve never move as you drag rho
+  const FY=50;
   const dr=document.getElementById("drho"), drv=document.getElementById("drhoV"), meth=document.getElementById("dsmethod");
   function draw(){
     const rho=+dr.value; drv.textContent=rho.toFixed(2);
@@ -1174,19 +1306,19 @@ draw();
     const X=x=>padL+(x/XMAX)*pw, Y=v=>padT+ph-(Math.min(v,ymax)/ymax)*ph;
     ctx.clearRect(0,0,W,H); ctx.font="11px sans-serif";
     // fixed y gridlines + ticks
-    const yt=4; ctx.textAlign="right";
+    const yt=5; ctx.textAlign="right";
     for(let i=0;i<=yt;i++){const v=ymax*i/yt,yy=Y(v); ctx.strokeStyle="#f1f1f4";ctx.beginPath();ctx.moveTo(padL,yy);ctx.lineTo(W-padR,yy);ctx.stroke(); ctx.fillStyle="#bbb";ctx.fillText(v.toFixed(0),padL-5,yy+3);}
     ctx.strokeStyle="#ddd";ctx.beginPath();ctx.moveTo(padL,padT+ph);ctx.lineTo(W-padR,padT+ph);ctx.stroke();
     ctx.fillStyle="#999";ctx.textAlign="center";for(let x=0;x<=XMAX+1e-9;x+=0.1)ctx.fillText((x*100).toFixed(0)+"%",X(x),H-9);
     ctx.save();ctx.translate(13,padT+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign="center";ctx.fillStyle="#888";ctx.fillText("probability density of loss",0,0);ctx.restore();
-    // copula filled area (moves with rho)
-    ctx.fillStyle="rgba(74,58,255,.18)";ctx.strokeStyle="#4a3aff";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(0),Y(0));
-    for(let k=0;k<=N;k++){const x=LGD*k/N; if(x>XMAX)break; ctx.lineTo(X(x),Y(dC(k)));} ctx.lineTo(X(XMAX),Y(0));ctx.closePath();ctx.fill();ctx.stroke();
-    // rating-agency curve, frozen at rho=5% (never moves)
-    ctx.strokeStyle="#d62728";ctx.lineWidth=2;ctx.beginPath(); let st=false;
-    for(let k=0;k<=N;k++){const x=LGD*k/N; if(x>XMAX)break; const px=X(x),py=Y(dAg(k)); if(!st){ctx.moveTo(px,py);st=true;}else ctx.lineTo(px,py);} ctx.stroke();
-    ctx.textAlign="left";ctx.fillStyle="#4a3aff";ctx.fillText("■ Gaussian copula (moves with ρ)",W-290,padT+12);
-    ctx.fillStyle="#d62728";ctx.fillText("■ rating-agency model (welded at ρ = 5%)",W-290,padT+28);
+    // rating-agency curve (FIXED): a solid anchored mountain that never moves as you drag
+    ctx.fillStyle="rgba(214,40,40,.12)";ctx.strokeStyle="#d62728";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(0),Y(0));
+    for(let k=0;k<=N;k++){const x=LGD*k/N; if(x>XMAX)break; ctx.lineTo(X(x),Y(dAg(k)));} ctx.lineTo(X(XMAX),Y(0));ctx.closePath();ctx.fill();ctx.stroke();
+    // copula curve (moves with rho): a line sweeping over the fixed agency mountain
+    ctx.strokeStyle="#4a3aff";ctx.lineWidth=2.4;ctx.beginPath(); let st=false;
+    for(let k=0;k<=N;k++){const x=LGD*k/N; if(x>XMAX)break; const px=X(x),py=Y(dC(k)); if(!st){ctx.moveTo(px,py);st=true;}else ctx.lineTo(px,py);} ctx.stroke();
+    ctx.textAlign="left";ctx.fillStyle="#d62728";ctx.fillText("■ rating-agency model (fixed)",W-290,padT+12);
+    ctx.fillStyle="#4a3aff";ctx.fillText("■ Gaussian copula (moves with ρ)",W-290,padT+28);
     ctx.fillStyle="#888";ctx.textAlign="center";ctx.fillText("portfolio loss",padL+pw/2,padT+ph+24);
     const senCop=trancheEL(P,0.07,1.0), senAg=trancheEL(Pag,0.07,1.0);
     meth.innerHTML=`You set the copula's correlation to <b>${(rho*100).toFixed(0)}%</b>. The diversity score's correlation? Still <b>5%</b>. Still 5%. It will always be 5%; the industry count fixed it long ago and it is not taking questions. Senior [7–100%] expected loss, copula: <b>${(senCop*100).toFixed(2)}%</b> (slides from safe to ruined as you drag); rating-agency: <b>${(senAg*100).toFixed(2)}%</b> (and it will sit there, serene, whatever the world does).`;
@@ -1340,9 +1472,10 @@ draw();
 (function(){
   const cv=document.getElementById("raCanvas"); if(!cv||typeof lossDist==="undefined") return;
   const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1;
-  const sp=document.getElementById("raSpread"), spv=document.getElementById("raSpreadV"),
-        rh=document.getElementById("raRho"), rhv=document.getElementById("raRhoV"),
-        ag=document.getElementById("raAg"), agv=document.getElementById("raAgV"),
+  const pq=document.getElementById("raPQ"), pqv=document.getElementById("raPQV"),
+        pr=document.getElementById("raPR"), prv=document.getElementById("raPRV"),
+        rq=document.getElementById("raRhoQ"), rqv=document.getElementById("raRhoQV"),
+        rr=document.getElementById("raRhoR"), rrv=document.getElementById("raRhoRV"),
         meth=document.getElementById("raMethod");
   const TR=[["Equity","0–3%",0,0.03,"#d62728"],["Mezzanine","3–7%",0.03,0.07,"#f0a830"],["Senior (AAA)","7–100%",0.07,1.0,"#2ca02c"]];
   const pct=x=>(x*100).toFixed(2)+"%";
@@ -1355,15 +1488,16 @@ draw();
     ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath(); }
   let lockSame=false;
   function draw(){
-    const spread=+sp.value, rho=+rh.value, pQ=Math.min(spread/LGD,0.6);
-    if(lockSame) ag.value=Math.min(pQ,+ag.max);          // keep the thumb on the implied prob
-    const pAg=lockSame?pQ:Math.min(+ag.value,pQ);
-    spv.textContent=(spread*100).toFixed(2)+"%"; rhv.textContent=rho.toFixed(2); agv.textContent=(pAg*100).toFixed(2)+"%";
-    const PQ=lossDist(rho,pQ,33).P, PA=lossDist(rho,pAg,33).P;
+    const pQ=+pq.value, rhoQ=+rq.value;
+    if(lockSame){ pr.value=pQ; rr.value=rhoQ; }          // Ratings snapped onto Market
+    const pAg=+pr.value, rhoR=+rr.value;
+    pqv.textContent=(pQ*100).toFixed(1)+"%"; prv.textContent=(pAg*100).toFixed(1)+"%";
+    rqv.textContent=rhoQ.toFixed(2); rrv.textContent=rhoR.toFixed(2);
+    const PQ=lossDist(rhoQ,pQ,33).P, PA=lossDist(rhoR,pAg,33).P;
     const poolIn=LGD*pQ; let poolOut=0;
     const rowsData=TR.map(([nm,wl,a,d,col])=>{ const w=d-a, fair=trancheEL(PQ,a,d),
       sold=nm.startsWith("Senior")?trancheEL(PA,a,d):fair; poolOut+=w*sold; return {nm,wl,w,fair,sold,col}; });
-    const profit=poolIn-poolOut, eps=profit<1e-5;
+    const profit=poolIn-poolOut, eps=Math.abs(profit)<1e-5;
 
     const W=cv.clientWidth||780, H=360; cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,W,H); ctx.textBaseline="middle"; ctx.font="12px sans-serif";
@@ -1379,7 +1513,7 @@ draw();
     ctx.font="20px sans-serif"; ctx.textAlign="center"; ctx.fillText("☀",cx+68,cy-bh/2-14); ctx.fillText("🌴",cx-76,cy-bh/2+6);
     // the SPV box
     ctx.fillStyle="#171526"; rrect(cx-bw/2,cy-bh/2,bw,bh,10); ctx.fill();
-    ctx.fillStyle="#fff"; ctx.font="bold 12px sans-serif"; ctx.fillText("AURORA FUNDING",cx,cy-bh/2+18);
+    ctx.fillStyle="#fff"; ctx.font="bold 12px sans-serif"; ctx.fillText("HAMMOCK FUNDING",cx,cy-bh/2+18);
     ctx.font="11px sans-serif"; ctx.fillStyle="#b9b6d6"; ctx.fillText("(Cayman) Ltd · the SPV",cx,cy-bh/2+34);
     ctx.fillText("owns bonds,",cx,cy+6); ctx.fillText("does nothing",cx,cy+22);
     // arrow pool -> SPV (coupons in)
@@ -1404,29 +1538,32 @@ draw();
         ctx.font="11px sans-serif"; ctx.fillStyle="#999"; ctx.fillText("fair "+pct(r.fair),tx+12,y+h-14);
         ctx.fillStyle=eps?"#1e8449":"#d62728"; ctx.font="bold 11px sans-serif"; ctx.fillText("sold "+pct(r.sold),tx+82,y+h-14);
       } else {
-        ctx.fillStyle="#333"; ctx.font="bold 11px sans-serif"; ctx.fillText(r.nm,tx+12,ymid);
-        ctx.textAlign="right"; ctx.font="10px sans-serif"; ctx.fillStyle="#888";
-        ctx.fillText(r.wl+" · coupon "+pct(r.fair),tx+tbw-12,ymid); ctx.textAlign="left";
+        ctx.fillStyle="#333"; ctx.font="bold 11px sans-serif"; ctx.textAlign="left"; ctx.fillText(r.nm,tx+12,ymid-7);
+        ctx.font="10px sans-serif"; ctx.fillStyle="#888"; ctx.fillText(r.wl+" · coupon "+pct(r.fair),tx+12,ymid+7);
       }
     });
     // profit callout
-    ctx.textAlign="center"; ctx.font="bold 13px sans-serif"; ctx.fillStyle=eps?"#1e8449":"#d62728";
-    ctx.fillText(eps?"arranger keeps 0 — no free lunch":("arranger keeps "+(profit*100).toFixed(2)+"% of pool, from nowhere"), cx, H-14);
+    ctx.textAlign="center"; ctx.font="bold 12px sans-serif"; ctx.fillStyle=eps?"#1e8449":"#d62728";
+    const callout = eps ? "arranger keeps 0 — no free lunch"
+      : (profit>0 ? "arranger keeps "+(profit*100).toFixed(2)+"% of pool, because different probabilities are applied to inflowing and outgoing cashflows"
+                  : "arranger loses "+(-profit*100).toFixed(2)+"% — the Ratings inputs are harsher than the market");
+    ctx.fillText(callout, W/2, H-14);
 
     meth.innerHTML=
-      `Coupons <b>in</b> (pool spread) = <b>${pct(poolIn)}</b>, implying a market default probability of `+
-      `<b>${(pQ*100).toFixed(1)}%</b>. Funded at the fair (market-ρ) coupons, the tranche coupons sum back to `+
-      `<b>${pct(poolIn)}</b>: money in equals money out, arranger carry <b>0</b>. `+
+      `Coupons <b>in</b> = the pool spread = <b>${pct(poolIn)}</b>, a market default probability of `+
+      `<b>${(pQ*100).toFixed(1)}%</b> at correlation <b>${rhoQ.toFixed(2)}</b>. Fund every tranche at those fair `+
+      `(<em>Q</em>) coupons and they sum back to <b>${pct(poolIn)}</b>: money in equals money out, arranger carry <b>0</b>. `+
       (eps
-        ? `With the agency probability set equal to the implied one, that is exactly what happens: <b>no free lunch</b>.`
-        : `But the AAA senior is sold at the agency probability of <b>${(pAg*100).toFixed(1)}%</b>, a lower coupon, so coupons out fall to `+
-          `<b>${pct(poolOut)}</b> and the arranger pockets <b>${(profit*100).toFixed(2)}%</b> of pool notional from nowhere. `+
-          `That gap is the rating-agency arbitrage (or, charitably, the fee for diversification): it is precisely the senior tranche's mispricing.`);
+        ? `With the Ratings column set equal to the Market column, that is exactly what happens: <b>no free lunch</b>.`
+        : (profit>0
+            ? `But the AAA senior is priced under the Ratings inputs (<b>${(pAg*100).toFixed(1)}%</b>, &rho; <b>${rhoR.toFixed(2)}</b>), a lower coupon, so coupons out fall to `+
+              `<b>${pct(poolOut)}</b> and the arranger keeps <b>${(profit*100).toFixed(2)}%</b> of pool notional, created purely by applying different probabilities to the cash coming in and the cash going out. That gap is the rating-agency arbitrage.`
+            : `Here the Ratings inputs are harsher than the market, so the senior costs more than it is worth and the arranger <b>loses ${(-profit*100).toFixed(2)}%</b>.`));
   }
-  sp.addEventListener("input",draw); rh.addEventListener("input",draw);
-  ag.addEventListener("input",()=>{lockSame=false;draw();});           // moving the dial unlocks
+  [pq,rq].forEach(e=>e.addEventListener("input",draw));
+  [pr,rr].forEach(e=>e.addEventListener("input",()=>{lockSame=false;draw();}));   // moving a Ratings dial unlocks
   const same=document.getElementById("raSame");
-  if(same) same.addEventListener("click",()=>{lockSame=true;draw();}); // snap agency prob onto the implied one
+  if(same) same.addEventListener("click",()=>{lockSame=true;draw();});            // snap Ratings onto Market
   window.addEventListener("resize",draw); draw();
 })();
 </script>
