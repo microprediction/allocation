@@ -38,7 +38,7 @@
     .qrtab .cell{display:flex;align-items:center;gap:8px}
     .qrtab .cell input[type=range]{flex:1;accent-color:var(--accent);min-width:70px}
     .qrtab .cell .val{font-size:.82rem;color:var(--accent);min-width:46px;text-align:right}
-    .val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent)}
+    .val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent);display:inline-block;min-width:3.4em;text-align:left}
     button.snap{font:inherit;font-size:.82rem;color:var(--accent);background:#fff;border:1px solid var(--accent);
       border-radius:6px;padding:4px 10px;cursor:pointer} button.snap:hover{background:var(--accent);color:#fff}
     button.rhob,button.kb{padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text);font-weight:600;cursor:pointer;font-size:.9rem}
@@ -125,7 +125,7 @@
         <span style="background:rgba(0,0,0,.65);color:#fff;border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">&#9658;</span>
       </span>
     </a>
-    <figcaption class="muted" style="font-size:.85rem;margin-top:6px"><a href="https://www.youtube.com/watch?v=FoYC_8cutb0" target="_blank" rel="noopener">&ldquo;That's my quant&hellip; my QUANTITATIVE&rdquo;</a> &mdash; the 30-second scene, <em>The Big Short</em> (2015).</figcaption>
+    <figcaption class="muted" style="font-size:.85rem;margin-top:6px"><a href="https://www.youtube.com/watch?v=FoYC_8cutb0" target="_blank" rel="noopener">&ldquo;That's my quant&hellip; my QUANTITATIVE&rdquo;</a>: the 30-second scene, <em>The Big Short</em> (2015).</figcaption>
   </figure>
 
   <p>So: second, not first; speaks English; called Yang by a man who never asked. We tracked Jiang down. He
@@ -136,8 +136,8 @@
   me as overhead.</p>
 
   <p>By the way: we did finally squeeze an answer out of Jiang, and because it is actually a very good one, I
-  have tried to structure what follows so that the diversions on the road to it &mdash; the bad theories, the
-  detours, his various grievances &mdash; are in part optional. The answer itself comes down to the three boxes
+  have tried to structure what follows so that the diversions on the road to it (the bad theories, the
+  detours, his various grievances) are in part optional. The answer itself comes down to the three boxes
   below.</p>
 
     <div class="measures">
@@ -149,7 +149,7 @@
       <div class="ds">The core of Jiang's answer, and the one you were never taught. Think <em>R</em> for rating agencies; <em>R</em> for &ldquo;Arrrrgh, I lost my firm ten billion&rdquo;; but mostly <em>R</em> because if you only do statistics (say, in the R language) and never check the market prices, you'll lose your shirt.</div></div>
   </div>
   <p class="mcap">Keep this nearby. Two of these three measures are taught in every quant programme on earth.
-  The third, <em>R</em>, is the one that did the damage, and no course so much as names it.</p>
+  The third, <em>R</em>, is the one that did the damage, and no class in financial mathematics so much as names it.</p>
 
   <h2><span class="part">First, a standard</span><br>Who shows up when a plane falls out of the sky?</h2>
   <p>Before the popular theories, a question Jiang put to me near the start. I had asked, mildly, why the
@@ -158,44 +158,41 @@
   <p>The answer is more instructive than I suspected. When a plane crashes, the National Transportation Safety
   Board dispatches a <em>go team</em> of specialists to the wreckage within hours, and it runs the investigation
   under what it calls the <em>party system</em>. The rule could not be plainer:
-  <em>participation is strictly limited to parties that can provide direct technical expertise</em> &mdash; the
+  <em>participation is strictly limited to parties that can provide direct technical expertise</em>: the
   engineers who built the aircraft, the people who maintained it, the ones who flew it. Read that again:
   <em>direct technical expertise</em>, not the lawyers, and not anyone else who merely happens to have an
   opinion. Lawyers and insurance investigators are <em>prohibited by law</em> from taking part, because their
   job is advocacy and the investigation's job is truth.</p>
-  <p>Jiang mused aloud about how many of them had ever priced a single tranche of a CDO. It seemed worth
+  <p>Jiang mused aloud about how many of those called to investigate the CDO collapse had ever priced a single tranche of a CDO. It seemed worth
   checking, so I had Gemini build the roster and score it.</p>
   <details class="think">
   <summary>Authorship of the Financial Crisis Inquiry Commission</summary>
   <table class="authtbl">
-    <thead><tr><th>Author &mdash; role and occupation</th><th class="q">QUANTY?</th><th class="q">Worked in<br>structured finance?</th></tr></thead>
+    <thead><tr><th>Author: role and occupation</th><th class="q">QUANTY?</th><th class="q">Worked in<br>structured finance?</th></tr></thead>
     <tbody>
-      <tr><td>Phil Angelides &mdash; chairman; California politician, ex-state treasurer</td><td class="q mid">doubtful</td><td class="q no">no</td></tr>
-      <tr><td>Bill Thomas &mdash; vice-chair; retired congressman</td><td class="q no">no</td><td class="q no">no</td></tr>
-      <tr><td>Brooksley Born &mdash; derivatives lawyer, ex-CFTC chair</td><td class="q mid">doubtful</td><td class="q mid">no, regulated it</td></tr>
-      <tr><td>Byron Georgiou &mdash; plaintiffs' securities lawyer</td><td class="q no">no</td><td class="q mid">no, sued it</td></tr>
-      <tr><td>Bob Graham &mdash; former senator and governor</td><td class="q no">no</td><td class="q no">no</td></tr>
-      <tr><td>Keith Hennessey &mdash; White House economic-policy adviser</td><td class="q mid">doubtful</td><td class="q no">no</td></tr>
-      <tr><td>Douglas Holtz-Eakin &mdash; public-finance economist (tax and fiscal policy), ex-CBO director; co-wrote the dissent calling it &ldquo;a mistake&rdquo; to blame CDOs</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
-      <tr><td>Heather Murren &mdash; equity-research analyst (consumer stocks), left Wall St in 2002</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
-      <tr><td>John W. Thompson &mdash; antivirus-software CEO</td><td class="q no">no</td><td class="q no">no</td></tr>
-      <tr><td>Peter Wallison &mdash; lawyer, think-tank fellow</td><td class="q no">no</td><td class="q no">no</td></tr>
-      <tr class="staff"><td>Wendy Edelberg &mdash; executive director; PhD macroeconomist (Fed)</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
-      <tr class="staff"><td>Greg Feldberg &mdash; research director; Fed bank-supervision analyst</td><td class="q mid">maybe</td><td class="q mid">no, supervised it</td></tr>
-      <tr class="staff"><td>Chris Seefer &mdash; investigations director; SEC fraud attorney</td><td class="q no">no</td><td class="q mid">no, investigated it</td></tr>
-      <tr class="staff"><td>Gary Cohen &mdash; general counsel</td><td class="q no">no</td><td class="q no">no</td></tr>
+      <tr><td>Phil Angelides: chairman; California politician, ex-state treasurer</td><td class="q mid">doubtful</td><td class="q no">no</td></tr>
+      <tr><td>Bill Thomas: vice-chair; retired congressman</td><td class="q no">no</td><td class="q no">no</td></tr>
+      <tr><td>Brooksley Born: derivatives lawyer, ex-CFTC chair</td><td class="q mid">doubtful</td><td class="q mid">no, regulated it</td></tr>
+      <tr><td>Byron Georgiou: plaintiffs' securities lawyer</td><td class="q no">no</td><td class="q mid">no, sued it</td></tr>
+      <tr><td>Bob Graham: former senator and governor</td><td class="q no">no</td><td class="q no">no</td></tr>
+      <tr><td>Keith Hennessey: White House economic-policy adviser</td><td class="q mid">doubtful</td><td class="q no">no</td></tr>
+      <tr><td>Douglas Holtz-Eakin: public-finance economist (tax and fiscal policy), ex-CBO director; co-wrote the dissent calling it &ldquo;a mistake&rdquo; to blame CDOs</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
+      <tr><td>Heather Murren: equity-research analyst (consumer stocks), left Wall St in 2002</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
+      <tr><td>John W. Thompson: antivirus-software CEO</td><td class="q no">no</td><td class="q no">no</td></tr>
+      <tr><td>Peter Wallison: lawyer, think-tank fellow</td><td class="q no">no</td><td class="q no">no</td></tr>
+      <tr class="staff"><td>Wendy Edelberg: executive director; PhD macroeconomist (Fed)</td><td class="q mid">maybe</td><td class="q no">no</td></tr>
+      <tr class="staff"><td>Greg Feldberg: research director; Fed bank-supervision analyst</td><td class="q mid">maybe</td><td class="q mid">no, supervised it</td></tr>
+      <tr class="staff"><td>Chris Seefer: investigations director; SEC fraud attorney</td><td class="q no">no</td><td class="q mid">no, investigated it</td></tr>
+      <tr class="staff"><td>Gary Cohen: general counsel</td><td class="q no">no</td><td class="q no">no</td></tr>
     </tbody>
   </table>
   <p class="muted" style="font-size:.85rem">Ten commissioners, four staff authors. Ever built, priced, traded
   or rated a CDO: zero. The lone derivatives expert, Born, was a lawyer who had tried to <em>regulate</em> this
-  market years earlier and been crushed for it by Greenspan, Rubin and Summers &mdash; proven right, ignored,
+  market years earlier and been crushed for it by Greenspan, Rubin and Summers: proven right, ignored,
   and still the closest thing on the panel to someone who knew the instrument. (Roster compiled by Gemini Deep
   Research, cross-checked against the Commission's own biographies.)</p>
   </details>
-  <p>The inquiry in <em>The Big Short</em> was, if anything, better arranged and more informative. Yet as Steve
-  Carell, playing Mark Baum, travelled the country interviewing everyone he thought mattered &mdash; the
-  mortgage brokers, the CDO arranger, the strippers buying six houses apiece &mdash; it never once dawned on him
-  to speak a word to Jiang, or even to get his name right.</p>
+  <p>The inquiry in <em>The Big Short</em> was, if anything, better arranged and more informative.</p>
 
   <details class="think">
   <summary>How Jiang really feels</summary>
@@ -205,17 +202,17 @@
   chapter &ldquo;The CDO Machine.&rdquo; Then we let Ben Bernanke tell audiences the mortgages had been
   &ldquo;packaged into securities that proved complex, opaque, and unwieldy.&rdquo;</p>
   <p>(<em>Translator's aside:</em> I also seem to remember Kevin Rudd turning up in Washington to explain that
-  the economy was like a house on fire, and that the thing to do with a house on fire is to put it out. Then,
-  one assumes, the same thing.)</p>
+  the economy was like a house on fire, and that the thing to do with a house on fire is to put it out. Bloody
+  brilliant, mate!)</p>
+  <p><strong>Translator:</strong> So you begrudge them the word <em>complex.</em></p>
   <p><strong>Jiang:</strong> A green room of instant experts on structured finance, not one of whom had ever
   quoted a correlation. Of course they reached for the word <em>complex.</em> Complex is what you call a company
-  that does nothing when you have decided, in advance, not to look inside the box.</p>
-  <p>I asked whether that was too harsh. He said it was the plainest way to put it, and that I should put
-  it plainly, so I will: <em>we never asked Jiang, not even in the movie.</em></p>
+  that does nothing when you have decided, in advance, not to look inside the box.<br>
+  <span class="muted">(We'll get back to the box soon.)</span></p>
   </details>
 
   <h2><span class="part">The Hollywood theory</span><br>Behavioural economics</h2>
-  <p><strong>Me:</strong> The movie reached for behavioural economics. Selena Gomez and Richard
+  <p><strong>Translator:</strong> The movie reached for behavioural economics. Selena Gomez and Richard
   Thaler at a blackjack table, the hot hand, &ldquo;back-betting.&rdquo; Greed, herding, irrational exuberance.</p>
 
   <figure style="margin:18px 0">
@@ -230,16 +227,16 @@
     <figcaption class="muted" style="font-size:.85rem;margin-top:6px"><em>The Big Short</em> explaining a
     synthetic CDO, in full. <a href="https://www.youtube.com/watch?v=Pxr_FzpPM2Q" target="_blank" rel="noopener">Watch on YouTube.</a></figcaption>
   </figure>
-  <p><strong>Jiang:</strong> The hot-hand fallacy is the belief, for no good reason, that a streak will
-  <em>continue</em>. If a bucket has a hole, the water keeps running out. Believing
+  <p><strong>Jiang:</strong> The hot-hand fallacy is the belief, <em>for no good reason</em>, that a streak will
+  continue. If a bucket has a hole, the water keeps running out. Believing
   it will keep running out is not a fallacy; it is noticing the hole.</p>
   <p>To call that a hot-hand error you must be determined not to see the bucket, or the hole. So the Nobel behaviourist reaches for his pet
   bias, everyone nods, and nobody has to learn the structure. That is the <em>Behavioural God of the Gaps</em>.
   I would classify it as an <em>opiate for the mathless,</em> to mangle Marx.</p>
 
   <details class="think">
-  <summary>The hot hand is the whole essay in miniature</summary>
-  <p>Worth dwelling on, because it <em>is</em> this essay in miniature. The behaviourists' flagship example, the
+  <summary>Why Jiang might not be overly impressed by Thaler's metaphor</summary>
+  <p>The behaviourists' flagship example, the
   &ldquo;hot hand fallacy,&rdquo; was pronounced from a great height: a 1985 study found no streak effect in
   shooting data and declared the belief a cognitive illusion. It had quietly assumed that a player's shot
   difficulty does not change when he is hot. Anyone on the court knew otherwise. Get hot, and the defence swarms
@@ -253,7 +250,7 @@
   and Sanjurjo (2018)</a> then found a selection bias baked into the original analysis itself; correct it, and
   the canonical result reverses. The hot hand, they conclude, is not a myth.</p>
   <p>The players knew. The crowd knew. It took the academy thirty years and a camera rig to concede the obvious.
-  Swap the basketball for a tranche and you have the rest of this page.</p>
+  Economists need to be a little closer to the action sometimes.</p>
   </details>
 
   <details class="think">
@@ -264,11 +261,11 @@
   got, daft, vacuous chaff thrown in the air after the crisis, and it took longer to settle than the ash over
   Pompeii.</p>
   </details>
-  <p><strong>Me:</strong> Was Selena Gomez more helpful than Richard Thaler here?</p>
+  <p><strong>Translator:</strong> Was Selena Gomez more helpful than Richard Thaler here?</p>
   <p><strong>Jiang:</strong> Marginally. She literally says <em>this is how a CDO works,</em> then proceeds to
   &hellip; absolutely not tell us. She describes nothing beyond side bets. The scene explained the word
   <em>derivative.</em></p>
-  <p><strong>Me:</strong> Be fair. What she conveys is that this was not a regular bubble like the tulip craze,
+  <p><strong>Translator:</strong> Be fair. What she conveys is that this was not a regular bubble like the tulip craze,
   but a special kind, a <em>derivative</em> tulip craze. Surely that helps an audience.</p>
   <p><strong>Jiang:</strong> It is not a worthless reminder. But the original tulip craze was <em>itself</em> a
   derivative craze; the action there moved into forwards and options on the bulbs, exactly as it did here. So
@@ -276,7 +273,7 @@
   back to the standard behavioural story: irrational bubbles arrive, and then everyone goes back to sleep.</p>
   <details class="think">
   <summary>I kept pressing him</summary>
-  <p><strong>Me:</strong> So no role for the hot hand, for chasing returns?</p>
+  <p><strong>Translator:</strong> So no role for the hot hand, for chasing returns?</p>
   <p><strong>Jiang:</strong> <em>(Mildly exasperated.)</em> Look, of course there are people and institutions
   who should have known better, who should have known they were on too good a run. That was true of Bernie
   Madoff's investors too. But would you accept &ldquo;hot hand&rdquo; as the <em>explanation</em> there? Or as
@@ -294,13 +291,14 @@
   thought. Market prices are continuous to a first approximation, so every roughly efficient market is, up to a
   time change, just Brownian motion. You could change the speed at which you run the tape through the projector,
   play financial history fast or slow, and the behaviourists and the bell-curve haters would sit there arguing
-  about nothing the whole time. It is a theorem. A fucking theorem.</p>
+  about nothing the whole time. It is a theorem.</p>
   </details>
 
   <h2><span class="part">The sophisticated theory</span><br>Hidden tail dependence</h2>
   <p>I knew I would lose Jiang if I rattled off all the stupidest theories before reaching one he could get his
   teeth into, so I headed straight for the &ldquo;academic&rdquo; explanation. This does, I admit, take us
-  slightly ahead of ourselves on the underlying mathematics, but I think you'll get the joke.</p>
+  slightly ahead of ourselves on the underlying mathematics, but I think you'll get the joke because my demo is
+  just so awesome.</p>
   <p>The sophisticated story goes like this: the models used a <em>Gaussian copula</em>, and a Gaussian copula
   has a real, provable property, <em>zero tail dependence</em>. Precisely: for any correlation below one, the
   coefficient of tail dependence is zero, so the probability that one name is in extremis <em>given</em> that
@@ -317,14 +315,14 @@
     <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Throw shocks, or hit <em>Fast +1000</em>: the correlation matrix settles, yet the joint-default tail keeps pulling away from the Gaussian copula fitted to those very same correlations.</figcaption>
   </figure>
 
-  <p><strong>Me:</strong> So tail dependence. That's the answer?</p>
+  <p><strong>Translator:</strong> So tail dependence. That's the answer?</p>
   <p><strong>Jiang:</strong> No. It is the prettiest wrong answer. The fact itself is real, and genuinely
-  useful elsewhere &mdash; useful enough that I built a portfolio method on it. But the crisis did not turn on
+  useful elsewhere, useful enough that I built a portfolio method on it. But the crisis did not turn on
   a subtle higher-order property a covariance can't see. The failure was <em>first-order</em>, and crude. The
   marginals were wrong by about a factor of two; the correlation, by more than a factor of two.</p>
-  <p><strong>Me:</strong> Wait, whose correlation? Are you saying <em>you</em> got it wrong?</p>
-  <p><strong>Jiang:</strong> I came <em>second</em> in a national competition, remember. I know
-  the foundations of finance from first principles &mdash; and, for that matter, the foundations of functional
+  <p><strong>Translator:</strong> Wait, whose correlation? Are you saying <em>you</em> got it wrong?</p>
+  <p><strong>Jiang:</strong> I came <em>second</em> in a national competition, remember. IN CHINA. I know
+  the foundations of finance from first principles, and, for that matter, the foundations of functional
   analysis, which is where this stuff really leans. Not <em>my</em> correlation. The rating agencies', taken off stale actuarial
   tables, and the entire buy-side that leaned on those ratings without ever glancing at the price two screens
   over. When your inputs are off by <em>multiples</em>, whether your
@@ -332,101 +330,6 @@
   any tail subtlety could matter.</p>
   <p>I asked him to hold that factor-of-two; we would need it later, with a demonstration. He told me to stop
   narrating and ask the next dumb question.</p>
-
-  <h2><span class="part">The loud theory</span><br>Taleb and the bell curve</h2>
-
-    <figure style="margin:18px 0">
-    <svg viewBox="0 0 720 300" style="width:100%;height:auto;display:block;margin:0 auto;background:#faf8f4;border:1px solid var(--border);border-radius:10px" role="img" aria-label="A cheesy bell curve being contemplated by a pompous laurel-crowned philosopher bust who has crossed it out in favour of the Black Swan">
-      <line x1="20" y1="250" x2="700" y2="250" stroke="#d8cdba" stroke-width="1.5"/>
-      <path d="M40,250 C 150,250 188,88 250,88 C 312,88 350,250 460,250 Z" fill="#ece7f7" stroke="#8a7fb8" stroke-width="2"/>
-      <text x="64" y="242" font-family="Georgia,serif" font-style="italic" font-size="12" fill="#b39bb3">fat tails?</text>
-      <text x="398" y="242" font-family="Georgia,serif" font-style="italic" font-size="12" fill="#b39bb3">fat tails?</text>
-      <rect x="548" y="156" width="66" height="94" fill="#e7e0d2" stroke="#b9ad93"/>
-      <line x1="562" y1="156" x2="562" y2="250" stroke="#cfc4ac"/><line x1="581" y1="156" x2="581" y2="250" stroke="#cfc4ac"/><line x1="600" y1="156" x2="600" y2="250" stroke="#cfc4ac"/>
-      <rect x="540" y="148" width="82" height="12" fill="#d8cfb8" stroke="#b9ad93"/>
-      <g transform="translate(581,112)">
-        <path d="M-32,44 Q0,12 32,44 Z" fill="#9a8f77"/>
-        <circle cx="0" cy="0" r="26" fill="#c3b596"/>
-        <path d="M-16,-4 q7,5 14,0" fill="none" stroke="#5b513c" stroke-width="2" stroke-linecap="round"/>
-        <path d="M2,-4 q7,5 14,0" fill="none" stroke="#5b513c" stroke-width="2" stroke-linecap="round"/>
-        <path d="M-2,-1 q5,8 -4,9" fill="none" stroke="#9a8f77" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M-8,15 q8,-4 16,0" fill="none" stroke="#7a6f56" stroke-width="2" stroke-linecap="round"/>
-        <path d="M-25,-7 A26,26 0 0 1 0,-28" fill="none" stroke="#6f9c5e" stroke-width="3"/>
-        <path d="M0,-28 A26,26 0 0 1 25,-7" fill="none" stroke="#6f9c5e" stroke-width="3"/>
-        <circle cx="-15" cy="-22" r="2.5" fill="#6f9c5e"/><circle cx="15" cy="-22" r="2.5" fill="#6f9c5e"/><circle cx="0" cy="-31" r="2.5" fill="#6f9c5e"/>
-      </g>
-      <circle cx="545" cy="92" r="4" fill="#fff" stroke="#cbbfb0"/>
-      <circle cx="528" cy="78" r="6" fill="#fff" stroke="#cbbfb0"/>
-      <ellipse cx="470" cy="58" rx="62" ry="34" fill="#fff" stroke="#cbbfb0"/>
-      <path d="M438,66 C 452,66 456,42 470,42 C 484,42 488,66 502,66" fill="none" stroke="#8a7fb8" stroke-width="2"/>
-      <line x1="436" y1="40" x2="504" y2="70" stroke="#d62728" stroke-width="2.5"/>
-      <text x="470" y="82" text-anchor="middle" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#666">Black Swan&trade;</text>
-    </svg>
-    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Fig. 1. The bell curve, contemplated at length by a Very Serious Person, and found wanting.</figcaption>
-  </figure>
-
-  <p><strong>Me:</strong> Taleb, then. The bell curve, the fat tails, the normal distribution.</p>
-  <p><strong>Jiang:</strong> That one isn't sophisticated, it is the opposite, and it has muddled public
-  understanding of the crisis more than any other story told about it. The machinery ran on a Gaussian <em>copula</em>, not a Normal
-  <em>distribution of returns</em>. The marginals (stat-speak for the probability of default of each individual
-  asset in the portfolio) were never a modelling choice: each name's default
-  probability was <em>pinned by its CDS spread</em>, the price the market was already quoting. The one free
-  knob was the correlation, and by Sklar's theorem the copula carries the dependence entirely separately from
-  those CDS-fixed marginals. Blaming the bell curve is blaming the one part of the model nobody chose.</p>
-
-  <details class="think">
-  <summary>What I think Jiang really thinks</summary>
-  <p>Ryan Gosling knows more about CDOs than Nassim Taleb does, by virtue of having read the script.</p>
-  </details>
-
-  <p><strong>Me:</strong> But didn't the quants naively assume thin tails: Gaussian returns, crashes rare?</p>
-  <p><strong>Jiang:</strong> And there it is, completely ignoring my previous answer. Clearly I was not blunt
-  enough, so I will say it again, slowly. Modelling the losses on a CDO with a Gaussian <em>copula</em> has, for
-  all intents and purposes, absolutely nothing to do with the normal <em>distribution.</em> They share the word
-  <em>Gaussian</em> and nothing else that matters, the way a <em>hot dog</em> shares a word with a <em>dog.</em>
-  And while we are clarifying things at this level: a guinea pig is neither a pig nor from New Guinea.</p>
-  <p>The copula <em>is</em> the dependence; the marginals were the CDS spreads, handed to us by the market. But
-  I can see you want me to proceed as though I were the clown who slapped a single univariate normal in place of
-  an actual risk calculation, because that is the only version a massive pool of unconsidering humans &mdash;
-  the ones whose egos Taleb is in the business of stroking &mdash; could ever get their heads around.</p>
-  <p>Fine. <em>Even if that were the case</em>, which it was not, the story still collapses. Anyone who priced
-  this for a living knew the tails were fat, and 1987 settled it twenty years before any of this.</p>
-  <p>Black Monday could, by the identical logic, have been pinned on Black&ndash;Scholes and its
-  <em>constant</em> volatility; the market's answer was immediate and permanent, the volatility <em>smile</em>,
-  a standing monument by 2007 to the plain fact that practitioners knew returns weren't Gaussian and crashes
-  weren't rare. To believe otherwise you have to believe every desk that priced this paper was staffed by
-  idiots.</p>
-  <p><strong>Me:</strong> But Taleb was prescient, you have to admit. Isn't it true that people underestimate small probabilities?</p>
-  <p><strong>Jiang:</strong> Let me put it this way. You have to be remarkably incurious to write a whole book about the longshot
-  effect without realising it is <em>called</em> the longshot effect. And then to get the sign backwards on
-  top of it &mdash; a century of racetrack data says punters reliably <em>over</em>-bet the longshots, not
-  under. You no longer even need the racetrack: the prediction markets publish their
-  <a href="https://manifold.markets/calibration">calibration</a> live, and it points the same way, small
-  probabilities <em>over</em>-priced, never under.</p>
-
-  <details class="think">
-  <summary>A confession from the translator</summary>
-  <p>Jiang is being a little harsh, perhaps, though there is a small price for selling books that accuse an
-  entire profession of being idiots, and Taleb should probably have a thicker skin. I know this because, years
-  ago, I made a <a href="https://www.youtube.com/watch?v=A72cc8mM5gY">video</a> with sentiments quite similar to
-  Jiang's, that went
-  micro-viral and that even
-  <a href="https://www.blackswanreport.com/blog/2010/12/nassim-taleb-educates-a-quant/comment-page-1/">his own
-  admirers enjoyed</a>; it bought me a permanent place on his public
-  <a href="https://www.fooledbyrandomness.com/smear.html">&ldquo;list of smear artists,&rdquo;</a> filed there
-  as <em>&ldquo;some type of failed quant/mathematician with savantic attributes.&rdquo;</em> (Good company,
-  mind you: the same list has the forecasting scholar Philip Tetlock down for <em>&ldquo;mendacious, perfidious
-  behavior.&rdquo;</em> One takes one's honours where one finds them.)</p>
-  <p>That last entry is not only temper. <em>The Black Swan</em> leaned throughout on autism as an epithet
-  &mdash; science as &ldquo;an autistic enterprise,&rdquo; the recurring &ldquo;Dr John&rdquo; caricature of
-  the literal-minded fool &mdash; and I was among the very few at the time to call it what it was: a brazen
-  attack on autistic people dressed as iconoclasm, unremarked by the <em>Harvard Business Review</em> and
-  every outlet that lionised the book.</p>
-  <p>What Jiang actually calls Taleb is unprintable; the politest I can manage is <em>drooping clucking
-  front.</em> The contempt is not about the man's mathematics, which in his early derivatives books was
-  genuinely good. It is the spectacle of the worst mis-explanation in financial history calcifying into received
-  wisdom while the actual mechanism went undiagnosed.</p>
-  </details>
 
   <h2><span class="part">The famous theory</span><br>David Li and the formula that killed Wall Street</h2>
 
@@ -444,17 +347,19 @@
 
   <p>So we move on, having accepted that the Gaussian copula is not the normal distribution. I did have to
   press Jiang further on this model, given the infamous article by Felix Salmon.</p>
-  <p><strong>Me:</strong> Then why is the most-read thing ever written about the crisis built on exactly this idea: David Li, the Gaussian copula, Felix Salmon's &ldquo;The Formula That Killed
+  <p><strong>Translator:</strong> Then why is the most-read thing ever written about the crisis built on exactly this idea: David Li, the Gaussian copula, Felix Salmon's &ldquo;The Formula That Killed
   Wall Street&rdquo;? If the formula story is so wrong, why did it get written at all?</p>
   <p><strong>Jiang:</strong> Because it is a wonderful story, and a wonderful story does not have to be true,
-  it has to be clean. One lone genius, one beautiful equation, hubris, collapse &mdash; you can teach it in a
+  it has to be clean. One lone genius, one beautiful equation, hubris, collapse: you can teach it in a
   sentence. Salmon, to his credit, actually interviewed me. I told him roughly what I have told you. He decided my answers did not fit the story and left them out.
   No editor alive spikes &ldquo;the formula that killed Wall Street&rdquo; to run &ldquo;the combined actions
   of the buy side and the agencies amounted to a measure-theoretic mistake that is ubiquitous in prediction
   generally, is not taught in schools, and is likely to be particularly catastrophic in combinatorial
   betting.&rdquo;</p>
 
-  <p><strong>Me:</strong> It was not only <em>Wired.</em> The same formula story ran in
+  <details class="think">
+  <summary>And then I riled him up &hellip;</summary>
+  <p><strong>Translator:</strong> It was not only <em>Wired.</em> The same formula story ran in
   <em>Significance</em>, the <em>Royal Statistical Society's</em> own magazine, under the line
   &ldquo;<a href="https://rss.onlinelibrary.wiley.com/doi/full/10.1111/j.1740-9713.2012.00538.x">a formula in
   statistics, misunderstood and misused, has devastated the global economy.</a>&rdquo;</p>
@@ -467,12 +372,13 @@
   itself is Sklar, 1959. And the correlation that was wrong in 2008 was not <em>his</em>, it was the number the
   agencies fed in. A statistics magazine, of all of them, should know the difference between a formula and the
   data you push through it.</p>
-
+  <p><strong>Translator:</strong> You keep saying they never read it. Prove it.</p>
   <p><strong>Jiang:</strong> Here is what nobody who blames the formula will actually do: look at it. To
   say a formula killed Wall Street, or the dumber claim that the <em>normal distribution</em> did, you first
   have to understand the thing well enough to indict it. Almost no one did. So here is the model.</p>
+  </details>
 
-  <h3>The model, up close: conditioning, convolution, quadrature</h3>
+  <h3>The day to day usage of the Normal Copula</h3>
   <div class="points">
   <p><span class="h">Nobody did it Li's dumb way.</span> No desk priced a CDO by Monte Carlo over a copula, at least not for most purposes.
   &ldquo;I devised, implemented and deployed the fast semi-analytic version,&rdquo; Jiang says, &ldquo;and the
@@ -497,14 +403,14 @@
   </div>
   <p class="muted">Drag &rho;: the loss distribution swings from a tight binomial (defaults roughly
   independent) to an <em>all-or-nothing</em> bimodal shape (mostly no defaults, punctuated by the whole pool
-  going). The thin curves are the conditional loss distributions at three values of the common factor; the
+  going). The thin curves are the conditional loss distributions across a fan of common-factor values; the
   bold bars are their quadrature average. Drop the node count and watch how few points it takes to converge.
   That is the entire &ldquo;fast model.&rdquo; The senior tranche, riskless-looking at low &rho;, becomes a
-  catastrophe bond as &rho; rises &mdash; structural fragility driven entirely by <em>correlation</em>, with
+  catastrophe bond as &rho; rises: structural fragility driven entirely by <em>correlation</em>, with
   the marginal <code>p</code> (the CDS-implied default probability) held fixed.</p>
 
   <h2><span class="part">The seduction theory</span><br>Quants seduced by an elegant formula</h2>
-  <p><strong>Me:</strong> Salmon's piece made a subtler charge than &ldquo;the formula did it.&rdquo; It blamed
+  <p><strong>Translator:</strong> Salmon's piece made a subtler charge than &ldquo;the formula did it.&rdquo; It blamed
   the formula's <em>beauty</em>. Li had, in those pages, cracked correlation wide open with something &ldquo;simple
   and elegant,&rdquo; and the moral became that a generation of quants fell in love with that elegance and
   stopped checking. Seduced by the formula.</p>
@@ -515,6 +421,71 @@
   <p>It also has the direction of every arrow wrong. It needs the people who built the model to be the same
   ones who trusted it blindly, and they were not. The builders could see exactly where it broke. The people who
   leaned on it without checking had never opened it.</p>
+
+  <p><strong>Translator:</strong> Show me the ugliness, then.</p>
+  <p><strong>Jiang:</strong> Here is the ugliness, concretely. The construction staples Sklar's theorem
+  (the distributional transform, a near-triviality) onto default <em>times</em>, and then, when you ask the one
+  question that matters, what happens after time zero, it declines to answer and leaves you an awkward choice.
+  Condition on what you have learned, who has defaulted and who survives. Assume no further information flows
+  between the names and you reach a paradox; assume some does, and you reach one just as fast. Either way the
+  model breaks in two places at once: you leave your own model class, and the survivors' implied hazards
+  <em>jump</em>. Watch a five-name basket.</p>
+
+    <div class="widget">
+    <div class="controls">
+      <span style="color:var(--muted);font-size:.9rem">correlation ρ:</span>
+      <button class="rhob" data-i="0">0.3</button>
+      <button class="rhob" data-i="1">0.5</button>
+      <button class="rhob" data-i="2">0.7</button>
+    </div>
+    <canvas id="hz" width="820" height="320"></canvas>
+    <p class="muted" style="font-size:.9rem;margin-top:6px">Each line is a surviving name's hazard rate
+    as a multiple of its standalone (CDS-implied) rate; the line ends when that name defaults (grey
+    verticals). Between defaults the multiplier drifts <em>below 1</em> (surviving together is read as
+    good news); then, the instant any name defaults, every survivor's hazard <em>jumps
+    discontinuously upward</em> (at ρ=0.7, by 3–4× on a single default). No real credit reprices
+    like that. This isn't a calibration nuisance; it is the model telling you it has no dynamics.</p>
+  </div>
+
+  <h3>The same name, two baskets, two hazards</h3>
+  <p>Now here is where it gets really ugly. The conditioning is <em>basket-specific</em>. A survivor's implied hazard depends on the default pattern
+  of the <em>other</em> names in its basket. In 2006 a name like Ford or GMAC sat inside <em>dozens</em> of
+  CDOs at once, and each basket handed it a <em>different default process</em>. Ask CDO&nbsp;A and CDO&nbsp;B
+  how likely that name is to default tomorrow and they disagree, because each conditions on its own peers. A
+  coherent model attaches an intensity to the <em>name</em>; the copula attaches it to the <em>basket</em>,
+  and the baskets contradict each other. &ldquo;That inconsistency,&rdquo; Jiang says, &ldquo;not the bell
+  curve, is the genuinely damning property, and it is invisible until you ask the static picture to live
+  through time. Chasing tail dependence misses it entirely.&rdquo;</p>
+
+  <h3>Base correlation: the kludge that became a market standard</h3>
+  <p>If you still suspect practitioners were seduced by elegance, look at what the market actually quoted. The
+  natural idea, <em>compound correlation</em>, reads a single Gaussian-copula correlation out of a tranche
+  price the way you read implied vol out of an option. It doesn't work: a mezzanine tranche's expected loss is
+  <em>not monotone</em> in correlation, so a given price corresponds to two correlations or none. So J.P.&nbsp;Morgan
+  published a fix (<em>base correlation</em>) and it became the quoting convention overnight.</p>
+  <details class="think">
+  <summary>Off the record, Jiang on base correlation</summary>
+  <p>Base correlation made me want to puke. Look at what it is: a <em>change of coordinates</em> chosen for no
+  reason except to make a broken model emit a single number. The base correlations you back out are not equal
+  across detachments; they form a rising <em>skew</em>, which a true single-correlation Gaussian copula could
+  not produce: one model, one correlation. The skew is the model <em>screaming that it is wrong</em>,
+  and base correlation's contribution was to write the scream down neatly and call it a quote. That is the
+  opposite of being seduced by elegance. It is a profession holding its nose and agreeing on a common lie so
+  that trades can clear. Everyone knew. We quoted it anyway.</p>
+  </details>
+
+    <div class="widget">
+    <div class="controls">
+      <label>market price (mezz EL) <input id="bcmkt" type="range" min="0.05" max="0.30" step="0.005" value="0.16"><span class="val" id="bcmktV">16%</span></label>
+      <label>per-name default prob <input id="bcp" type="range" min="0.02" max="0.12" step="0.01" value="0.05"><span class="val" id="bcpV">5%</span></label>
+    </div>
+    <canvas id="bccv" width="840" height="320"></canvas>
+    <div class="method" id="bcmethod"></div>
+  </div>
+  <p class="muted">Left, <em>compound correlation</em>: the mezzanine's expected loss vs &rho; is a hump, so a
+  market-price line crosses it twice (or never). Right, <em>base correlation</em>: the base tranches are each
+  monotone, so any level inverts to a single &beta;, but the two &beta;s differ, and that gap is the
+  base-correlation skew a one-correlation model could never produce. Well-posed and dishonest at once.</p>
 
   <h2><span class="part">The pivot</span><br>So what actually happened?</h2>
   <p>Okay. Let's take a really novel approach and actually consider what happened. I asked Jiang why he pushed
@@ -578,24 +549,30 @@
 
   <p>An orphan entity on an island: bankruptcy-remote, no staff, no premises, no business. It buys a pile of
   bonds, collects the coupons, and passes the cash to investors in slices, or <em>tranches</em>, in strict
-  order of seniority &mdash; the top slice is made whole before the next sees a cent, and losses eat the
+  order of seniority: the top slice is made whole before the next sees a cent, and losses eat the
   bottom slice first. What gets sold are the notes it issues, each a claim on those cashflows: a
   <em>collateralized debt obligation</em>, a CDO. The company is just the vehicle.</p>
-  <p><strong>Me:</strong> Every official account calls this instrument complex. The Inquiry
+  <p><strong>Translator:</strong> Every official account calls this instrument complex. The Inquiry
   Commission gave it a chapter titled &ldquo;The CDO Machine.&rdquo;</p>
   <p><strong>Jiang:</strong> The vehicle that issues a CDO is the least complex company on the planet: a box
   that buys bonds and pays them out in order of seniority. The only idea in it is the oldest idea in finance,
-  <em>subordination</em> &mdash; who gets paid first. A bodega is more complex. A car wash is more complex; a
+  <em>subordination</em>: who gets paid first. A bodega is more complex. A car wash is more complex; a
   car wash has <em>employees</em>, and weather, and a float. The single thing a structured-finance
-  vehicle does &mdash; the <em>only</em> thing &mdash; is raise debt and invest its spare cash, which is what
+  vehicle does, the <em>only</em> thing, is raise debt and invest its spare cash, which is what
   every company that has ever issued a bond also does. Calling it complex is a dodge.</p>
   <p>So if it does nothing, where does the money come from? Not the assets; on the assets alone the
   thing is worth less than its inputs; you have added a lawyer, a trustee and a brass plate and subtracted
-  nothing risky. It was always the ratings. The empty company is a <em>ratings-transformation machine</em>:
-  pour in a pool of BBB collateral, apply subordination, and the agencies' model hands most of the stack back
-  stamped AAA. The value created out of nothing is precisely the gap between the <em>market-implied</em>
-  default probabilities of what went in and the <em>rating-implied</em> default probabilities of what came
-  out.</p>
+  nothing risky.</p>
+  <p>And not the subordination, whatever you have been told. Tranching is honest arithmetic. A senior claim
+  genuinely is safer than the pool and a junior one genuinely riskier; price every slice off the
+  <em>same</em> default probabilities and the pieces sum back to the whole. You cannot manufacture value by
+  cutting, so long as you cut with one consistent set of numbers. There is nothing wrong with subordination,
+  and anyone who tells you the slicing itself was the trick has missed it.</p>
+  <p>The money came from the ratings. The agencies valued the senior slices using
+  <em>rating-implied</em> default probabilities far below what the market implied for the very same names. The
+  value created out of nothing is precisely that gap: between the <em>market-implied</em> default
+  probabilities of what went in and the <em>rating-implied</em> ones of what came out. Subordination was the
+  legitimate part. The inputs were the con.</p>
 
   <figure style="margin:18px 0">
     <a href="https://www.youtube.com/watch?v=A25EUhZGBws" target="_blank" rel="noopener"
@@ -630,7 +607,7 @@
   </div>
   <p class="muted">The <em>Market (Q)</em> column sets the default probability and correlation the market is
   quoting; each tranche's fair coupon is its expected loss under those, and the fair coupons sum back to the
-  pool spread exactly &mdash; money in equals money out, arranger profit zero. Now move the <em>Ratings (R)</em>
+  pool spread exactly: money in equals money out, arranger profit zero. Now move the <em>Ratings (R)</em>
   column away from the market's: those are the numbers the agency uses to price the AAA senior, and the only
   place a profit can hide. Set the two columns equal and the free lunch vanishes.</p>
 
@@ -651,88 +628,153 @@
   statistics than the people brought to the crash site.</p>
   </details>
 
-  <details class="think">
-  <summary>Aside on capitalism</summary>
-  <p>There is nothing wrong, and a great deal right, with paying people to bear risk. That is what a credit
-  market is for, and the risk premium is its wage. Buying a risky bond and expecting to be paid for the risk is
-  not a delusion; it is the system working as designed. The failure was never the appetite for risk. It was the
-  <em>price</em> put on it, a number computed with the market switched off.</p>
-  </details>
-
-  <h2><span class="part">The model was ugly, not beautiful</span><br>Sklar on time, and the hazards that jump</h2>
-  <p>We will get to that. But first I needed to press Jiang on the claimed mathematical elegance, because the
-  theory that the models ran amok pretty much requires that the people who built or used them were blind to
-  their flaws.</p>
-  <p><strong>Jiang:</strong> Here is the ugliness, concretely. The construction takes Sklar's theorem &mdash;
-  the distributional transform, a near-triviality &mdash; and staples it onto default <em>times</em>. Which immediately begs the question the static picture cannot answer:
-  what happens after time zero? The only honest move is to condition on what you've learned &mdash; who has
-  defaulted, who survives &mdash; and the moment you do, two things break. You leave your own model class, and
-  the implied hazards of the survivors <em>jump</em>. Watch a five-name basket.</p>
+  <h2><span class="part">An interlude</span><br>What a copula actually is</h2>
+  <p>We had thrown the word <em>copula</em> around for pages, so before the last theory I stopped and built the
+  picture nobody seems to want to draw.</p>
+  <p>When we say we are using a Gaussian copula, what we really mean is that we are using a multivariate normal
+  random variable as a <em>device</em> to generate samples of something else that is <em>not</em> multivariate
+  normal. Pick a correlation and follow one cloud of points through three frames.</p>
 
     <div class="widget">
     <div class="controls">
-      <span style="color:var(--muted);font-size:.9rem">correlation ρ:</span>
-      <button class="rhob" data-i="0">0.3</button>
-      <button class="rhob" data-i="1">0.5</button>
-      <button class="rhob" data-i="2">0.7</button>
+      <label>correlation ρ <input type="range" id="cpr" min="-0.95" max="0.95" step="0.01" value="0.6"><span class="val" id="cprV">0.60</span></label>
+      <button class="rhob" id="cpresim">re-simulate</button>
     </div>
-    <canvas id="hz" width="820" height="320"></canvas>
-    <p class="muted" style="font-size:.9rem;margin-top:6px">Each line is a surviving name's hazard rate
-    as a multiple of its standalone (CDS-implied) rate; the line ends when that name defaults (grey
-    verticals). Between defaults the multiplier drifts <em>below 1</em> (surviving together is read as
-    good news); then, the instant any name defaults, every survivor's hazard <em>jumps
-    discontinuously upward</em> (at ρ=0.7, by 3–4× on a single default). No real credit reprices
-    like that. This isn't a calibration nuisance; it is the model telling you it has no dynamics.</p>
+    <canvas id="cpcv" width="840" height="300"></canvas>
+    <div class="method" id="cpmethod"></div>
   </div>
+  <p class="muted">Left: thousands of draws from a <em>bivariate normal</em> at the correlation you chose. This
+  is the only frame where anything Gaussian appears.</p>
+  <p class="muted">Middle: push each coordinate through its own normal CDF and every point lands in the unit
+  square, with perfectly flat marginals. All that survives is the <em>dependence</em>. <em>That distribution on
+  the square is the copula.</em> (Pedantically, the copula is the joint CDF of those uniform coordinates; the
+  cloud you see is its density.)</p>
+  <p class="muted">Right: send each coordinate through an exponential instead, and you get two <em>default
+  times</em>. The marginals are exponential now, nothing normal about them; only the correlation pattern carried
+  across. A copula is the dependence divorced from either marginal, which is why the thing you end up
+  simulating can have no connection at all to the normal distribution you started from.</p>
 
-  <h3>The same name, two baskets, two hazards</h3>
-  <p>The conditioning is <em>basket-specific</em>. A survivor's implied hazard depends on the default pattern
-  of the <em>other</em> names in its basket. In 2006 a name like Ford or GMAC sat inside <em>dozens</em> of
-  CDOs at once, and each basket handed it a <em>different default process</em>. Ask CDO&nbsp;A and CDO&nbsp;B
-  how likely that name is to default tomorrow and they disagree, because each conditions on its own peers. A
-  coherent model attaches an intensity to the <em>name</em>; the copula attaches it to the <em>basket</em>,
-  and the baskets contradict each other. &ldquo;That inconsistency,&rdquo; Jiang says, &ldquo;not the bell
-  curve, is the genuinely damning property, and it is invisible until you ask the static picture to live
-  through time. Chasing tail dependence misses it entirely.&rdquo;</p>
+  <p><strong>Translator:</strong> That's beautiful.</p>
+  <p><strong>Jiang:</strong> No, it isn't. Not here. It is a pretty object applied to a very unnatural thing,
+  default <em>times</em>, for exactly the reason we went through before: the picture is static and a default
+  time is not. The square sits still; the moment one name defaults the whole thing reprices and the survivors'
+  hazards jump. Elegant at time zero, immediately inelegant and deeply problematic one second later.</p>
 
-  <h3>Base correlation: the kludge that became a market standard</h3>
-  <p>If you still suspect practitioners were seduced by elegance, look at what the market actually quoted. The
-  natural idea, <em>compound correlation</em>, reads a single Gaussian-copula correlation out of a tranche
-  price the way you read implied vol out of an option. It doesn't work: a mezzanine tranche's expected loss is
-  <em>not monotone</em> in correlation, so a given price corresponds to two correlations or none. So J.P.&nbsp;Morgan
-  published a fix &mdash; <em>base correlation</em> &mdash; and it became the quoting convention overnight.</p>
+  <h2><span class="part">The loud theory</span><br>Taleb and the bell curve</h2>
+
+    <figure style="margin:18px 0">
+    <svg viewBox="0 0 720 300" style="width:100%;height:auto;display:block;margin:0 auto;background:#faf8f4;border:1px solid var(--border);border-radius:10px" role="img" aria-label="A cheesy bell curve being contemplated by a pompous laurel-crowned philosopher bust who has crossed it out in favour of the Black Swan">
+      <line x1="20" y1="250" x2="700" y2="250" stroke="#d8cdba" stroke-width="1.5"/>
+      <path d="M40,250 C 150,250 188,88 250,88 C 312,88 350,250 460,250 Z" fill="#ece7f7" stroke="#8a7fb8" stroke-width="2"/>
+      <text x="64" y="242" font-family="Georgia,serif" font-style="italic" font-size="12" fill="#b39bb3">fat tails?</text>
+      <text x="398" y="242" font-family="Georgia,serif" font-style="italic" font-size="12" fill="#b39bb3">fat tails?</text>
+      <rect x="548" y="156" width="66" height="94" fill="#e7e0d2" stroke="#b9ad93"/>
+      <line x1="562" y1="156" x2="562" y2="250" stroke="#cfc4ac"/><line x1="581" y1="156" x2="581" y2="250" stroke="#cfc4ac"/><line x1="600" y1="156" x2="600" y2="250" stroke="#cfc4ac"/>
+      <rect x="540" y="148" width="82" height="12" fill="#d8cfb8" stroke="#b9ad93"/>
+      <g transform="translate(581,112)">
+        <path d="M-32,44 Q0,12 32,44 Z" fill="#9a8f77"/>
+        <circle cx="0" cy="0" r="26" fill="#c3b596"/>
+        <path d="M-16,-4 q7,5 14,0" fill="none" stroke="#5b513c" stroke-width="2" stroke-linecap="round"/>
+        <path d="M2,-4 q7,5 14,0" fill="none" stroke="#5b513c" stroke-width="2" stroke-linecap="round"/>
+        <path d="M-2,-1 q5,8 -4,9" fill="none" stroke="#9a8f77" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M-8,15 q8,-4 16,0" fill="none" stroke="#7a6f56" stroke-width="2" stroke-linecap="round"/>
+        <path d="M-25,-7 A26,26 0 0 1 0,-28" fill="none" stroke="#6f9c5e" stroke-width="3"/>
+        <path d="M0,-28 A26,26 0 0 1 25,-7" fill="none" stroke="#6f9c5e" stroke-width="3"/>
+        <circle cx="-15" cy="-22" r="2.5" fill="#6f9c5e"/><circle cx="15" cy="-22" r="2.5" fill="#6f9c5e"/><circle cx="0" cy="-31" r="2.5" fill="#6f9c5e"/>
+      </g>
+      <circle cx="545" cy="92" r="4" fill="#fff" stroke="#cbbfb0"/>
+      <circle cx="528" cy="78" r="6" fill="#fff" stroke="#cbbfb0"/>
+      <ellipse cx="470" cy="58" rx="62" ry="34" fill="#fff" stroke="#cbbfb0"/>
+      <path d="M438,66 C 452,66 456,42 470,42 C 484,42 488,66 502,66" fill="none" stroke="#8a7fb8" stroke-width="2"/>
+      <line x1="436" y1="40" x2="504" y2="70" stroke="#d62728" stroke-width="2.5"/>
+      <text x="470" y="82" text-anchor="middle" font-family="Georgia,serif" font-size="12" font-style="italic" fill="#666">Black Swan&trade;</text>
+    </svg>
+    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Fig. 1. The bell curve, contemplated at length by a Very Serious Person, and found wanting.</figcaption>
+  </figure>
+
+  <p><strong>Translator:</strong> Which is the perfect cue for Taleb. The bell curve, the fat tails, the normal
+  distribution.</p>
+  <p><strong>Jiang:</strong> That one isn't sophisticated, it is the opposite, and it has muddled public
+  understanding of the crisis more than any other story told about it. You just watched the whole confusion
+  in three frames: the normal distribution appears once, on the far left, as scaffolding, while the thing we
+  actually modelled, the default times, is the picture on the right, and it is nothing like a bell curve.</p>
+  <p><strong>Translator:</strong> So the bell curve was never even the thing you were modelling?</p>
+  <p><strong>Jiang:</strong> The machinery ran on a Gaussian <em>copula</em>, not a normal distribution of
+  anything except the useful fictions in the left panel. The default times are roughly
+  <em>exponentially</em> distributed; the number of defaults is roughly <em>binomially</em> distributed.
+  Nothing is Gaussian. The marginals (stat-speak for the probability of default of each individual
+  asset in the portfolio; they set the shape of that rightmost panel) were never a modelling choice:
+  each name's default
+  probability was <em>pinned by its CDS spread</em>, the price the market was already quoting. The one free
+  knob was the correlation, and by Sklar's theorem the copula carries the dependence entirely separately from
+  those CDS-fixed marginals.</p>
+
   <details class="think">
-  <summary>Off the record, Jiang on base correlation</summary>
-  <p>Base correlation made me want to puke. Look at what it is: a <em>change of coordinates</em> chosen for no
-  reason except to make a broken model emit a single number. The base correlations you back out are not equal
-  across detachments; they form a rising <em>skew</em>, which a true single-correlation Gaussian copula could
-  not produce &mdash; one model, one correlation. The skew is the model <em>screaming that it is wrong</em>,
-  and base correlation's contribution was to write the scream down neatly and call it a quote. That is the
-  opposite of being seduced by elegance. It is a profession holding its nose and agreeing on a common lie so
-  that trades can clear. Everyone knew. We quoted it anyway.</p>
+  <summary>What I think Jiang really thinks</summary>
+  <p>Ryan Gosling knows more about CDOs than Nassim Taleb does, by virtue of having read the script.</p>
   </details>
 
-    <div class="widget">
-    <div class="controls">
-      <label>market price (mezz EL) <input id="bcmkt" type="range" min="0.05" max="0.30" step="0.005" value="0.16"><span class="val" id="bcmktV">16%</span></label>
-      <label>per-name default prob <input id="bcp" type="range" min="0.02" max="0.12" step="0.01" value="0.05"><span class="val" id="bcpV">5%</span></label>
-    </div>
-    <canvas id="bccv" width="840" height="320"></canvas>
-    <div class="method" id="bcmethod"></div>
-  </div>
-  <p class="muted">Left, <em>compound correlation</em>: the mezzanine's expected loss vs &rho; is a hump, so a
-  market-price line crosses it twice (or never). Right, <em>base correlation</em>: the base tranches are each
-  monotone, so any level inverts to a single &beta; &mdash; but the two &beta;s differ, and that gap is the
-  base-correlation skew a one-correlation model could never produce. Well-posed and dishonest at once.</p>
+  <p><strong>Translator:</strong> But didn't the quants naively assume thin tails: Gaussian returns, crashes rare?</p>
+  <p><strong>Jiang:</strong> And there it is, completely ignoring my previous answer. Clearly I was not blunt
+  enough, so I will say it again, slowly, and you can check it against the picture: to make the conflation we
+  could reasonably call Talebian, you have to be staring at the leftmost frame and indicting the rightmost. Modelling the losses on a CDO with a Gaussian <em>copula</em>
+  has, for all intents and purposes, absolutely nothing to do with the normal <em>distribution.</em> They share the word
+  <em>Gaussian</em> and nothing else that matters, the way a <em>hot dog</em> shares a word with a <em>dog.</em>
+  And while we are clarifying things at this level: a guinea pig is neither a pig nor from New Guinea.</p>
+  <p>The copula <em>is</em> the dependence; the marginals were the CDS spreads, handed to us by the market. But
+  I can see you want me to proceed as though I were the clown who slapped a single univariate normal in place of
+  an actual risk calculation, because that is the only version a massive pool of unconsidering humans (the
+  ones whose egos Taleb is in the business of stroking) could ever get their heads around.</p>
+  <p><strong>Translator:</strong> Grant him the clown version for a moment. Does he win then?</p>
+  <p><strong>Jiang:</strong> Fine. <em>Even if that were the case</em>, which it was not, the story still collapses. Anyone who priced
+  this for a living knew the tails were fat, and 1987 settled it twenty years before any of this.</p>
+  <p>Black Monday could, by the identical logic, have been pinned on Black&ndash;Scholes and its
+  <em>constant</em> volatility; the market's answer was immediate and permanent, the volatility <em>smile</em>,
+  a standing monument by 2007 to the plain fact that practitioners knew returns weren't Gaussian and crashes
+  weren't rare. To believe otherwise you have to believe every desk that priced this paper was staffed by
+  idiots.</p>
+  <p><strong>Translator:</strong> But Taleb was prescient, you have to admit. Isn't it true that people underestimate small probabilities?</p>
+  <p><strong>Jiang:</strong> Let me put it this way. You have to be remarkably incurious to write a whole book about the longshot
+  effect without realising it is <em>called</em> the longshot effect. And then to get the sign backwards on
+  top of it: a century of racetrack data says punters reliably <em>over</em>-bet the longshots, not
+  under. You no longer even need the racetrack: the prediction markets publish their
+  <a href="https://manifold.markets/calibration">calibration</a> live, and it points the same way, small
+  probabilities <em>over</em>-priced, never under.</p>
 
-  <h2><span class="part">Non-models are better</span><br>The dumbest theory, with the dumbest demo</h2>
-  <p><strong>Me:</strong> There is a tempting moral in all of this: that we would have been better off
+  <details class="think">
+  <summary>A confession from the translator</summary>
+  <p>Jiang is being a little harsh, perhaps, though there is a small price for selling books that accuse an
+  entire profession of being idiots, and Taleb should probably have a thicker skin. I know this because, years
+  ago, I made a <a href="https://www.youtube.com/watch?v=A72cc8mM5gY">video</a> with sentiments quite similar to
+  Jiang's, that went
+  micro-viral and that even
+  <a href="https://www.blackswanreport.com/blog/2010/12/nassim-taleb-educates-a-quant/comment-page-1/">his own
+  admirers enjoyed</a>; it bought me a permanent place on his public
+  <a href="https://www.fooledbyrandomness.com/smear.html">&ldquo;list of smear artists,&rdquo;</a> filed there
+  as <em>&ldquo;some type of failed quant/mathematician with savantic attributes.&rdquo;</em> (Good company,
+  mind you: the same list has the forecasting scholar Philip Tetlock down for <em>&ldquo;mendacious, perfidious
+  behavior.&rdquo;</em> One takes one's honours where one finds them.)</p>
+  <p>That last entry is not only temper. <em>The Black Swan</em> leaned throughout on autism as an epithet
+ (science as &ldquo;an autistic enterprise,&rdquo; the recurring &ldquo;Dr John&rdquo; caricature of
+  the literal-minded fool) and I was among the very few at the time to call it what it was: a brazen
+  attack on autistic people dressed as iconoclasm, unremarked by the <em>Harvard Business Review</em> and
+  every outlet that lionised the book.</p>
+  <p>What Jiang actually calls Taleb is unprintable; the politest I can manage is <em>drooping clucking
+  front.</em> The contempt is not about the man's mathematics, which in his early derivatives books was
+  genuinely good. It is the spectacle of the worst mis-explanation in financial history calcifying into received
+  wisdom while the actual mechanism went undiagnosed.</p>
+  </details>
+
+  <h2><span class="part">Non-models are better</span><br>The second dumbest theory, with the dumbest demo</h2>
+  <p>There is a tempting moral in all of this: that we would have been better off
   with no models at all. Drop the copulas, drop the mathematics, trust seasoned judgement.</p>
-  <p><strong>Jiang:</strong> That is the agencies' own defence, and it is precisely how they blew up. They will
-  tell you they never touched these fancy copulas; they reached for something they called sturdier, a
-  <em>non-model</em>, the <em>Binomial Expansion Technique</em>: read the loss off a binomial, with no
-  correlation input at all. It sounds prudent. It is the opposite of robust.</p>
-  <p>So I put it on a dial.</p>
+  <p><strong>Jiang:</strong> Well sure, why not have a heuristic that estimates the diversification benefit from
+  nothing but the number of assets? That is roughly what Moody's did. Its <em>Binomial Expansion Technique</em>
+  collapses the pool to a <em>diversity score</em>, an effective number of independent credits, and reads the
+  loss off a binomial. But that is still a model, and it still has a correlation assumption inside it. The
+  assumption is simply <em>frozen</em>: fixed the moment the industries are counted, and unable to move when the
+  world does.</p>
+  <p>So I put it on a dial that you can't move.</p>
 
     <div class="widget">
     <div class="controls">
@@ -748,13 +790,13 @@
   instant the pool's industries were counted, and there is no dial to turn. That is what &ldquo;robust
   non-model&rdquo; meant in practice: a model that cannot be wrong about correlation because it is not
   permitted to have an opinion that changes.</p>
-  <p><strong>Me:</strong> So &ldquo;no model&rdquo; was not the safe choice.</p>
+  <p><strong>Translator:</strong> So &ldquo;no model&rdquo; was not the safe choice.</p>
   <p><strong>Jiang:</strong> &ldquo;No model&rdquo; <em>is</em> a model. Everything is a model: a mental model, a
-  bad mathematical model dressed up as a non-model, whatever you like. This one is the third kind, and a
+  bad mathematical model dressed up as a non-model. This one is the third kind, and a
   spectacularly stupid one. It welds correlation to a constant and throws away the dial, so that when the world
   moves your number cannot. That is not the absence of an assumption; it is the single most reckless assumption
-  on the menu, with the evidence of it designed out of view. Doing away with models does not save you. Feeding
-  them the market does.</p>
+  on the menu, with the evidence of it designed out of view.</p>
+  <p><strong>Translator:</strong> Doing away with models does not save you. Feeding them the market prices does.</p>
   <p><strong>Jiang:</strong> Getting a number wrong <em>out loud</em>, where it can be stressed and re-marked,
   is a venial sin. Refusing to let the number exist at all is recklessness dressed as prudence. A model that
   cannot hold an opinion about correlation cannot be wrong about it, and cannot be corrected either.
@@ -762,13 +804,21 @@
   is their fault, not the model's. The reason they got it wrong is more interesting than it looks. Whether you
   have the patience to follow me all the way to it I genuinely cannot tell yet, but I am willing to find out.</p>
 
+  <p><strong>Translator:</strong> And it was not only CDOs. The collateralized mortgage obligations had their own
+  version of the non-model.</p>
+  <p><strong>Jiang:</strong> The same dodge, one floor down. Pricing a CMO honestly means running the
+  prepayment and default paths thousands, really millions, of times. Most desks were too lazy to do that and
+  not clever enough to find the shortcut, so they ran <em>scenario analysis</em> instead: a handful of named
+  cases: base, up, down, stress. Monte Carlo with six paths, and the six picked by the same people who
+  wanted the answer to come out fine. Another non-model in the costume of prudence.</p>
+
   <h3>In the land of the blind</h3>
   <p>And so our discussion turned to a subtler failure, the one that survives even when an agency <em>did</em>
   reach for a copula: they fed it the wrong correlation, taken from <em>historical, actuarial</em> studies, and the numbers were
-  strikingly low &mdash; S&amp;P's evaluator assumed <em>0%</em> across industries before late 2005; Moody's
+  strikingly low: S&amp;P's evaluator assumed <em>0%</em> across industries before late 2005; Moody's
   roughly <em>3%</em>. Two screens away, the inter-dealer market in CDO tranches was quoting prices that
   <em>implied</em> a far higher number. Implied correlation is the figure you must put into the model to
-  reproduce a traded price, exactly as implied volatility is read out of option prices &mdash; the market's
+  reproduce a traded price, exactly as implied volatility is read out of option prices: the market's
   own view of joint-default risk, priced by people with money at stake. Back it out of a simple contract that
   pays if <em>k</em> or more of a five-name basket default, and see how far above 5% it sat.</p>
 
@@ -788,22 +838,79 @@
   copula, marginals fixed by CDS). Drag the <em>market price</em>: where it meets the curve is the implied
   correlation. The dashed line is the agencies' actuarial number (&asymp;5%). Read off how little they charged
   for joint default, and how much further right the market's number sat. Switch contracts (2+/3+/4+) and it
-  shifts &mdash; the correlation <em>smile</em>, inconsistent like the options smile, and exactly as
+  shifts: the correlation <em>smile</em>, inconsistent like the options smile, and exactly as
   indispensable.</p>
 
   <p><strong>Jiang:</strong> Ignoring a live market price in favour of a stale historical estimate is close to
-  the cardinal sin. It deserves a name, and it has one, but you have not earned it yet.</p>
+  the cardinal sin. It deserves a name.</p>
+
+  <h2><span class="part">A two-state warm-up</span><br>Why a price is Q, not P</h2>
+  <p>Before he named it, Jiang made me work the smallest example in all of finance, because it settles the one
+  question that matters: are you ever allowed to price with your own probabilities? One step, one stock, two
+  outcomes.</p>
+  <p><strong>Translator:</strong> A share is 100. Next step it is either <em>u</em>&middot;100 or <em>d</em>&middot;100,
+  and a call struck at 100 pays the upside. I reckon the two moves are equally likely, so the call is worth its
+  average payoff. Fair?</p>
+  <p><strong>Jiang:</strong> No. Your fifty-fifty is irrelevant. The price is fixed by the one probability that
+  makes a hedge break even, and it does not care what you believe. Quote your own number instead and you are
+  just paying me to take the other side. Here.</p>
+
+    <div class="widget">
+    <div class="controls">
+      <label>up factor u <input id="bnu" type="range" min="1.02" max="1.6" step="0.01" value="1.2"><span class="val" id="bnuV">1.20</span></label>
+      <label>down factor d <input id="bnd" type="range" min="0.5" max="0.98" step="0.01" value="0.9"><span class="val" id="bndV">0.90</span></label>
+      <label>your P(up) <input id="bnp" type="range" min="0.05" max="0.95" step="0.01" value="0.5"><span class="val" id="bnpV">0.50</span></label>
+    </div>
+    <canvas id="bncv" width="840" height="300"></canvas>
+    <div class="method" id="bnmethod"></div>
+  </div>
+  <p class="muted">Your intuition prices the call at its expected payoff under your own <em>P</em>. No-arbitrage
+  prices it under <em>Q</em>, the only probability that makes the replicating hedge break even. And
+  <em>Q</em> is read straight off <em>u</em> and <em>d</em>, never off your beliefs. The gap between the two is
+  not a difference of opinion; it is cash the counterparty lifts from you, risk-free, the instant you trade at
+  your number. Slide your P(up): the honest-looking price wanders all over, the no-arbitrage price never
+  budges.</p>
+  <h3>The same theorem, marginally less abstract: a taquería</h3>
+  <p>Forget options for a second. A taquería sells far more dishes than it stocks ingredients, and every dish
+  is just a bundle of ingredients. The one twist that makes it finance: here you may <em>short</em> a dish, sell
+  a dish to the restaurant.</p>
+  <p>Three dishes overlap exactly. A Super Burrito is, ingredient for ingredient, a Quesadilla plus a Bean Taco.
+  So its price is not yours to choose. Set it to anything but the sum and the kitchen writes you an order that
+  prints money.</p>
+
+    <div class="widget">
+    <div class="controls">
+      <label>your Super Burrito price <input id="mxp" type="range" min="2.50" max="4.00" step="0.05" value="3.25"><span class="val" id="mxpV">$3.25</span></label>
+    </div>
+    <div id="mxmenu" style="margin:6px 0"></div>
+    <div class="method" id="mxorder"></div>
+  </div>
+  <p class="muted">The Quesadilla ($2.00) and the Bean Taco ($1.25) are priced honestly, at ingredient cost. The
+  Super Burrito holds exactly their combined ingredients, so the only arbitrage-free price is $3.25. Move the
+  slider and the ticket fills in: buy the cheap side, short the dear side, hand the kitchen identical
+  ingredients either way, keep the difference. That is the representation theorem (if a thing can be
+  bought and sold, its price <em>must</em> be the cost of replicating it) and it is the whole reason a
+  market price is not optional.</p>
+  <p>That's why we have two measures in finance, not just one.<br>&hellip; except Jiang thinks that to model
+  behaviour you really need three.</p>
 
   <h2><span class="part">The clean answer</span><br>P, Q, and the measure that should never have been called P</h2>
   <p>This is the answer I promised at the very top: the good one, the one Jiang says was worth the detours. He
   made me stop writing and listen.</p>
   <p><strong>Jiang:</strong> School hands you two probability measures. <em>P</em>, the physical measure, your
   honest best estimate of what will actually happen. <em>Q</em>, the
-  <a href="https://en.wikipedia.org/wiki/Risk-neutral_measure">risk-neutral measure</a>, under which discounted
-  prices are martingales. Harrison and Kreps wrote it down in 1979 and Harrison and Pliska finished the job in
-  1981, though really de Finetti had laid it down in the 1920s: <em>Q</em> exists exactly when there is no arbitrage. You learn to move between the two and you go to
+  <a href="https://en.wikipedia.org/wiki/Risk-neutral_measure">risk-neutral measure</a>, the very one the
+  sliders just forced on you, the only probability under which the hedge breaks even and nobody can arbitrage
+  your price. Harrison and Kreps wrote it down in 1979 and Harrison and Pliska finished the job in
+  1981, though really de Finetti had laid it down in the 1920s: <em>Q</em> exists exactly when there is no arbitrage. You learn to move between <em>P</em> and <em>Q</em> and you go to
   work believing that is the whole kit.</p>
-  <p><strong>Me:</strong> It isn't?</p>
+  <p><strong>Translator:</strong> It isn't?</p>
+  <p><strong>Jiang:</strong> It ought to be. But there is a thing people do when they are supposed to be
+  producing a <em>P</em> and don't, because they have decided that <em>Q</em> and <em>P</em> don't mix. It needs
+  a name.</p>
+  <p><strong>Translator:</strong> What do you mean? The definitions are clear enough. <em>P</em> is the best guess you
+  can make at the real probability; <em>Q</em> is what the market prices imply. So <em>P</em> is your statistics
+  homework, no?</p>
   <p><strong>Jiang:</strong> Read the definition of <em>P</em> again. Your <em>best</em> estimate of objective
   probability. <em>Best.</em> Now answer me: is the price the market is quoting two screens over, with real
   money behind it, <em>information</em>? Obviously. It is some of the best information you will ever be handed.
@@ -874,9 +981,9 @@
   activity <em>is,</em> so he does not belabour it. With CDOs it was not even an approximation: the assets were
   chosen by literal mathematical optimization, genetic algorithms and the like, packing in the maximum risk
   subject to the rating agencies' model constraints. There was a company whose whole purpose was to help banks
-  run exactly that optimization. It was called <em>CodeFarm.</em> So much for the behaviourists who insist
+  run exactly that optimization. It was called <em>CodeFarm.</em> (So much for the behaviourists who insist
   optimization is a poor first approximation to economic activity. Here the economic activity, to the last
-  basis point, <em>was</em> a literal optimization.</p>
+  basis point, <em>was</em> a literal optimization.)</p>
 
   <p><strong>Jiang:</strong> Picture a bookmaker who never once glances at the prices his competitors are
   posting. Or a market maker who throws a bid and an offer onto the screen without looking at where the thing
@@ -886,12 +993,12 @@
   something more particular by it, so mind the word, but the direction is exactly right. Every professional
   gambler who lasts does this out loud: the market line is an input to their line, never an embarrassment to be
   ignored. <em>All</em> of them. The ones who don't aren't gamblers, they are the reason the rest get paid.</p>
-  <p><strong>Me:</strong> The translator has a name for the law underneath this.</p>
-  <p><strong>Jiang:</strong> He does, and this time it earns its keep. The <em>Indispensable Markets
-  Hypothesis</em>: wherever a well-established market exists, anyone who refuses its prices as inputs will
-  under-perform out of sample. The market need not be efficient. It is indispensable regardless. Read his
-  <a href="https://mitpress.mit.edu/9780262047326/microprediction/">book</a>: the market keeps winning even
+  <p><strong>Translator:</strong> You're saying the prices are indispensable ingredients in <em>P</em>?</p>
+  <p><strong>Jiang:</strong> Exactly. And it deserves a name: the <em>Indispensable Markets Hypothesis</em>.
+  Wherever a well-established market exists, anyone who refuses its prices as inputs will under-perform out of
+  sample. The market need not be efficient. It is indispensable regardless. The market keeps winning even
   against people who were handed its own numbers.</p>
+  <p><strong>Translator:</strong> Fine, but a bad input is just a bad input. Where is the crime?</p>
   <p><strong>Jiang:</strong> There is a sharper way to name what goes wrong when <em>R</em> walks into that
   optimizer. It is a <em>type error.</em> Financial theory defines operations on two measures, <em>P</em> and
   <em>Q</em>, and on no others. There is no financially justified thing to <em>do</em> with an <em>R</em>
@@ -901,7 +1008,8 @@
   ago, as the crisis that
   <a href="https://medium.com/geekculture/the-global-financial-crisis-should-have-been-caught-by-the-compiler-an-insiders-perspective-9229967e7f45">should
   have been caught by the compiler.</a></p>
-  <p><strong>Jiang:</strong> Then it gets worse, because a CDO never uses the number once. Multiply <em>R</em>
+  <p><strong>Translator:</strong> Then it gets worse, because a CDO never uses the number once.</p>
+  <p><strong>Jiang:</strong> Exactly. Multiply <em>R</em>
   probabilities together, through a binomial, through a tranche, through a CDO-<em>squared</em> nested eleven
   levels deep, and the error does not sit still at the size you made it. The agencies were using a correlation
   of three to five percent while the inter-dealer market implied twenty to thirty. Push a gap that size through
@@ -928,14 +1036,14 @@
   same tranches with the same wrong number, so each layer multiplies the error. &ldquo;Raised to a
   power,&rdquo; made literal.</p>
 
-  <p><strong>Me:</strong> But investors knew the ratings ran optimistic. Didn't they take them with a
+  <p><strong>Translator:</strong> But investors knew the ratings ran optimistic. Didn't they take them with a
   grain of salt?</p>
   <p><strong>Jiang:</strong> They did, and on a single bond it even worked. A rating is an <em>R</em> number; a
   seasoned buyer would shade it toward what the market implied, add a grain of salt, and land near <em>P</em>.
   That is the correct move, folding the market back into <em>R</em> to recover <em>P</em>, exactly what I have
   been preaching. The trouble is <em>where</em> the salt goes. A CDO multiplies, and salt does not distribute
   across a product.</p>
-  <p><strong>Me:</strong> Let me read this grain-of-salt theory back to you. To get <em>P&times;P</em> you need
+  <p><strong>Translator:</strong> Let me read this grain-of-salt theory back to you. To get <em>P&times;P</em> you need
   <em>(R&thinsp;+&thinsp;salt)&times;(R&thinsp;+&thinsp;salt)</em>, the correction folded into every name
   <em>before</em> they are multiplied. What investors were handed was <em>R&times;R</em>, already compounded
   into one AAA stamp, with a single grain sprinkled on the answer. <em>R&times;R</em> plus a pinch is nowhere
@@ -948,8 +1056,8 @@
   <em>multiplying</em> them, tranche on tranche, CDO on CDO, and a gap that had been survivable for a generation
   was suddenly raised to a power. The misalignment grew a little. The exponent grew enormously.</p>
 
-  <p>I asked whether that was the sentence he had spent twenty years waiting to see written down. He said it
-  was, and that I should set it in the plainest type the page allowed.</p>
+  <p><strong>Translator:</strong> This is probably sound advice. But why should following it require us to coin a
+  brand-new label?</p>
   <p>A word on why the name matters. A behaviour you cannot name precisely, you cannot stamp out. Telling people
   to do &ldquo;good&rdquo; modelling and avoid &ldquo;bad&rdquo; modelling is as useless as telling them to
   &ldquo;drive safely&rdquo;; it picks out nothing they can catch themselves doing. &ldquo;Drunk driving&rdquo;
@@ -959,10 +1067,10 @@
 
   <div class="callout">
   <div class="ct"><em>R</em>-probability</div>
-  <p>An estimate of an objective probability that <em>deliberately ignores the relevant market price.</em> Not
+  <p>An estimate of an objective probability that <em>deliberately ignores relevant market prices.</em> Not
   a true <em>P</em> (which would use all available information, the market included), and not <em>Q</em> (the
   market's own), but a third thing: statistics with the market switched off. Rating agencies manufacture it by
-  the ton; so, left to its defaults, does most of machine learning.</p>
+  the ton; so does most of machine learning, which learns from history and never consults a price.</p>
   </div>
 
   <div class="callout cmd">
@@ -970,23 +1078,53 @@
   <p>Never use <em>R</em>-probabilities. Ever.</p>
   </div>
 
-  <h2><span class="part">A note from the translator</span><br>Whose voice this has been</h2>
-  <p>My resemblance to Jiang is mildly uncanny, at least as judged by the three or four things <em>The Big
-  Short</em> troubles to tell us about him.</p>
-  <p>I did not know Jiang at the time. I have no idea whether he ran a mildly secretive research group building
-  computational methods for pricing entire universes of CDOs at once, through time. Perhaps I competed against
-  him in the Asian Pacific Mathematics Olympiad and lost badly. What I can safely assume is that he found some or all of the
-  same tricks I did, probably around the same time, and certainly before the academics did. And he would,
-  undoubtedly, have used optimizers to choose the CDO's assets too.</p>
-  <p>The only thing I am completely certain of: nobody really asked Jiang what his opinion was, not even Ryan Gosling.</p>
-  <p>And if you want proof that the lesson, build <em>P</em> from <em>Q</em> and <em>R</em>, has not been
-  learned, look at the M6, a year-long forecasting contest
-  run only a few years ago, real prize money, hundreds of entrants out of the machine-learning and
-  data-science world. They were asked, in effect, for <em>P</em>: honest probabilities for stock returns.
+  <h2><span class="part">Why I think Jiang is right</span><br>It is just horse-racing, run too few times to learn</h2>
+  <p>Here is why none of this surprised me. The whole episode is horse-racing, played out with so few
+  realizations that nobody was forced to learn what the professional punting community learned generations
+  ago.</p>
+  <p>The pros know two things in their bones. First, the win market does not hold all the information; there is
+  money in the <em>exotic</em> pools (quinellas, exactas, trifectas) bet by people who price
+  joint outcomes for a living. Second, you use the prices, current and historical, or you are fleeced.</p>
+  <p>A <em>quinella</em> is a bet on two named horses, A and B, to finish first and second in either order
+, a joint event, exactly like two names defaulting together. Here is the mistake in racing form: the
+  agency decides A and B are each, say, <em>twice less likely</em> to win than they really are, and tells
+  investors it is safe to lay the A/B quinella at the resulting odds.</p>
+  <p>But a quinella is a <em>product</em> of two horses. Halve each one and you have quartered the quinella. A
+  trifecta cubes the error; a superfecta takes the fourth power. A small lie per horse, raised to the power of
+  the number of legs: that is <em>R&times;R</em> with an exponent, and it is the whole of 2008 told at
+  the track.</p>
+
+    <div class="widget">
+    <div class="controls">
+      <label>agency makes each horse <input id="exk" type="range" min="1" max="3" step="0.05" value="2"><span class="val" id="exkV">2.0× less likely</span></label>
+      <label>grain of salt on the ticket <input id="exs" type="range" min="1" max="3" step="0.05" value="1"><span class="val" id="exsV">÷1.0</span></label>
+    </div>
+    <canvas id="excv" width="840" height="300"></canvas>
+    <div class="method" id="exmethod"></div>
+  </div>
+  <p class="muted">Each bar is how far the agency's price sits from the truth, bet by bet. One wrong number per
+  horse barely dents the win market; multiplied into a quinella it is squared, into a trifecta cubed. Now add
+  the grain of salt: shade everything by a single factor and you can make <em>one</em> column fair (set
+  the salt to match the per-horse error and the Win bar drops to 1) but the exotics stay wrong, because
+  the correction had to go into each horse <em>before</em> they were multiplied, not onto the ticket after. That
+  is why a grain of salt held the single-name ratings together for decades and did nothing once the business
+  turned to multiplying them.</p>
+  <p class="muted">And there is a second stupidity sitting right next to the first. It would be idiotic for
+  serious racegoers to outsource the pricing of their own trifectas to some agency, and then act wounded when
+  the agency gets it wrong. What were they paying it for? Yet that is exactly what the buy side did: it handed
+  the pricing of joint defaults to the rating agencies and then professed shock when the numbers turned out
+  rotten.</p>
+
+  <p>That is the first reason I trust him.</p>
+
+  <h2><span class="part">Lessons from the M6 competition</span><br>The forecasting community still doesn't get it</h2>
+  <p>The second reason is more recent, and it is an experimental finding I directly provoked by hijacking a
+  year-long forecasting contest. If you want proof the lesson has not been learned, look at the M6,
+  run only a few years ago, $300,000 in prize money, some two hundred teams from around the world out of
+  machine learning and data science. They were asked, in effect, for <em>P</em>: honest probabilities for stock returns.
   Almost to a person they produced <em>R</em>, fitting models to history and never once consulting the market.
-  I entered a deliberately lazy benchmark that did nothing but read the
-  <a href="https://medium.com/geekculture/the-options-market-beat-94-of-participants-in-the-m6-financial-forecasting-contest-fa4f47f57d33">options
-  market</a>. Not even a real <em>P</em>, mind you, pretty much raw <em>Q</em>. It climbed steadily up the field
+  I entered a deliberately lazy benchmark that did nothing but read the options market
+  (<a href="https://medium.com/geekculture/the-options-market-beat-94-of-participants-in-the-m6-financial-forecasting-contest-fa4f47f57d33">article</a>). Not even a real <em>P</em>, mind you, pretty much raw <em>Q</em>. It climbed steadily up the field
   all year and finished in the top few percent, beating the <em>R</em>-measure modelling of nearly all of some
   two hundred teams, effortlessly.</p>
 
@@ -996,7 +1134,7 @@
         <tr style="text-align:left;border-bottom:2px solid var(--border);color:#555">
           <th style="padding:6px 8px">#</th><th style="padding:6px 8px">Team</th>
           <th style="padding:6px 8px;text-align:right">Forecast&nbsp;skill<br>(RPS, lower is better)</th>
-          <th style="padding:6px 8px;text-align:right">&ldquo;Decisions&rdquo;<br>(IR)</th>
+          <th style="padding:6px 8px;text-align:right">&ldquo;Decisions&rdquo;<br>(information ratio)</th>
         </tr>
       </thead>
       <tbody>
@@ -1006,15 +1144,15 @@
         <tr style="border-bottom:1px solid #eee"><td style="padding:5px 8px">4</td><td style="padding:5px 8px">Innovation Team (Mathco)</td><td style="padding:5px 8px;text-align:right">0.15922</td><td style="padding:5px 8px;text-align:right">3.01</td></tr>
         <tr style="border-bottom:1px solid #eee"><td style="padding:5px 8px">5</td><td style="padding:5px 8px">Rogal Dorn</td><td style="padding:5px 8px;text-align:right">0.15968</td><td style="padding:5px 8px;text-align:right">6.59</td></tr>
         <tr style="border-bottom:1px solid #eee"><td style="padding:5px 8px">6</td><td style="padding:5px 8px">QuantM6.ai</td><td style="padding:5px 8px;text-align:right">0.15979</td><td style="padding:5px 8px;text-align:right">4.97</td></tr>
-        <tr style="background:#eef9f1;border-bottom:1px solid #d9efe0;font-weight:600"><td style="padding:5px 8px">7</td><td style="padding:5px 8px">microprediction <span style="font-weight:400;color:#1e8449">&mdash; just the options market</span></td><td style="padding:5px 8px;text-align:right">0.15850</td><td style="padding:5px 8px;text-align:right">0.76</td></tr>
+        <tr style="background:#eef9f1;border-bottom:1px solid #d9efe0;font-weight:600"><td style="padding:5px 8px">7</td><td style="padding:5px 8px">microprediction <span style="font-weight:400;color:#1e8449">(just the options market)</span></td><td style="padding:5px 8px;text-align:right">0.15850</td><td style="padding:5px 8px;text-align:right">0.76</td></tr>
+        <tr style="color:#aaa"><td style="padding:5px 8px">&#8942;</td><td style="padding:5px 8px">&hellip; and roughly 193 more, ~200 teams in all</td><td style="padding:5px 8px;text-align:right">&#8942;</td><td style="padding:5px 8px;text-align:right">&#8942;</td></tr>
       </tbody>
     </table>
-    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">M6 final standings, top of the board. The
-    highlighted row, <em>microprediction</em>, did no modelling at all; it simply read the options market. On
-    forecast <em>skill</em> (the tight left column, where luck cannot help you) it finished near the very top of
-    some two hundred teams. The handful that edged ahead overall did it on the wild &ldquo;decisions&rdquo;
-    column on the right, where a lucky few post enormous numbers that none of them could repeat the next year.
-    To beat a passive read of the market, in short, you had to be lucky.</figcaption>
+    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">The very top of a field of about two
+    hundred teams. The highlighted row, <em>microprediction</em>, did no modelling at all; it just read the
+    options market. Now look at the information-ratio column. The only teams that finished <em>above</em> the benchmark posted
+    ratios of 3, 4, 7, even 13. Numbers like that are not skill; they are what a few lucky bets look like, and
+    nobody repeats them the next year. The benchmark's was a sober 0.76.</figcaption>
   </figure>
 
   <p>I wrote the finding up, and the paper was rejected by the very people who run the competition. Embarrassed,
@@ -1022,93 +1160,160 @@
   modelling under <em>R</em> while a market quoted <em>Q</em> two screens away, is <em>exactly</em> the mistake
   the rating agencies made in structured finance; or, to be precise about it, the mistake the agencies and the
   buy side made between them. The M6 was the credit crisis re-run as a clean, controlled experiment. The field
-  made the same error, and then declined to notice it had.</p>
+  made the same error, and the organisers did not get the joke even afterwards, which tells you how thoroughly
+  entrenched the forecasting community is in the <em>R</em>-measure.</p>
   <p>Two decades after the crisis, the lesson, that you build <em>P</em> out of <em>Q</em> and <em>R</em> and
   never out of <em>R</em> alone, is exactly as unlearned as it was in 2007. That is the bad news.</p>
 
+  <h2><span class="part">One flaw in the story</span><br>Then why did the sell side lose too?</h2>
+  <p><strong>Translator:</strong> There is a hole in your account. If the mistake belonged to the buy side and the
+  agencies, both pricing under <em>R</em>, why did the sell side, the desks that built these things, lose
+  billions of their own?</p>
+  <p><strong>Jiang:</strong> A fair question, and the honest answer does my side no favours. Some of those
+  traders were openly skeptical of housing and lost enormous sums anyway. Part of it is dull: when the music
+  stopped they were holding inventory nobody would buy at any price they had marked.</p>
+
   <details class="think">
-  <summary>And why nobody fixed it at the time</summary>
-  <p>The warnings, back then, landed and changed nothing, because nothing in the incentive structure rewarded
-  acting on them. The carry was good, the capital rules did not charge for the systematic tail, and a flaw
-  everyone could see was a flaw nobody was paid to fix. Banks run in cycles, power swinging between desks and
-  risk groups, and you can guess which way the pendulum pointed in 2004 and 2005. When the people who can see
-  the flaw report to the people paid not to, the flaw is safe.</p>
+  <summary>The scene, from <em>Margin Call</em></summary>
+  <figure style="margin:14px 0">
+    <a href="https://www.youtube.com/watch?v=UOYi4NzxlhE" target="_blank" rel="noopener" style="display:block;position:relative">
+      <img src="margin-call.png" alt="John Tuld in Margin Call: &lsquo;holding the biggest bag of odorous excrement ever assembled in the history of capitalism&rsquo;" loading="lazy" style="width:100%;display:block;border:1px solid var(--border);border-radius:10px">
+      <span aria-hidden="true" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <span style="background:rgba(0,0,0,.65);color:#fff;border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">&#9658;</span>
+      </span>
+    </a>
+    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">&ldquo;The music is about to stop, and we're
+    going to be left holding the biggest bag of odorous excrement ever assembled in the history of
+    capitalism.&rdquo; John Tuld, <a href="https://www.youtube.com/watch?v=UOYi4NzxlhE">Margin Call</a> (2011).</figcaption>
+  </figure>
+  <p>The plan in that room is not to value the bag. It is to be first out the door.</p>
   </details>
 
-  <h2><span class="part">The good news</span><br>Mathematics has a sneaky way of being useful everywhere</h2>
-  <p>The elegant mathematics underneath the CDO was swept to the floor at the time as useless. It was not
-  useless. It was early, and mathematics has a sneaky habit of turning up useful somewhere else entirely.
-  Indulge me while I tell it, in my own voice now.</p>
-  <p>The work I keep wanting to recreate rested on two ideas: the <em>symmetries</em> of a CDO, and
-  <em>de Finetti</em>-style decompositions of the joint default distribution. The companies in a CDO are
-  plainly not exchangeable &mdash; Ford is not GMAC is not a Florida homebuilder &mdash; but the CDO's
-  cashflows <em>are</em>. The waterfall pays out of <em>aggregate</em> losses; it never names a company. So
-  for the sole purpose of pricing, there is <em>always</em> a purely exchangeable default model that
-  reproduces the same cashflow distribution. The heterogeneity that felt essential is, for pricing, something
-  you can symmetrize away losing nothing. And once defaults are exchangeable, de Finetti's theorem applies:
-  the law is a mixture of conditionally-independent ones. The diversity score was a crude, frozen shadow of
-  exactly this decomposition, collapsed into a single number instead of an exact, dynamic one.</p>
+  <p><strong>Jiang:</strong> But part of it is sharper, and it is mine. First you have to drop the cartoon we
+  have been drawing all this time. A real CDO is not a tidy loss distribution over a number of defaults. It is a
+  company with a rulebook: a waterfall of coupon dates, fees, triggers and coverage tests, hundreds of lines of
+  mundane plumbing you must grind through just to value it a single time.</p>
+  <p><strong>Translator:</strong> Tedious, but a computer eats tedium for breakfast.</p>
+  <p><strong>Jiang:</strong> It would, if tedium were all. On top of the plumbing sits genuine path dependency.
+  The reserve fund you are about to see fills from spread and drains against losses, so the very same total of
+  defaults is worth different money depending on <em>when</em> they land. There is no closed form; you have to
+  walk every scenario forward through the whole machine. Now ask whether the Greeks, the hedge ratios, were ever
+  really computed. To get them you revalue that entire company under thousands of scenarios. The standard tool
+  was <a href="https://www.intex.com/main/solutions_cashflow.php">Intex</a>, whose library modelled the actual
+  cashflow waterfall of nearly every deal in the market, and a single deal, scenario by scenario, took seconds a
+  path. A proper Monte Carlo was out of the question on any routine risk run, so the hedges were stale, or
+  coarse, or frankly fictional.</p>
+  <p><strong>Translator:</strong> Nobody could compute them, then. Bad luck all round.</p>
+  <p><strong>Jiang:</strong> Here is the part that still makes me want to put my head through a wall. There was
+  a way to make it instant. My own bank, the one that would go on to lose the better part of ten billion dollars
+  on a single super-senior trade, had this exact method in hand in 2005 and tossed it to the kerb as a
+  curiosity. Let me show you what they threw away.</p>
 
-    <div class="eqn">
-    <span class="term"><span class="lbl">nature's true model</span><span class="expr">𝔼<sub>φ*</sub>[ i(t=3) ]</span></span>
-    <span class="eq">=</span>
-    <span class="term"><span class="lbl">nature's symmetrized model</span><span class="expr">𝔼<sub>ψ=Uφ*</sub>[ i(t=3) ]</span></span>
-    <span class="eq">=</span>
-    <span class="term"><span class="lbl">any model in the same orbit</span><span class="expr">𝔼<sub>φ∈O(φ*)</sub>[ i(t=3) ]</span></span>
-  </div>
-  <p class="muted">Care only about an aggregate &mdash; the number of defaults in a pool, the number of
-  infections after three days &mdash; and that quantity is a symmetric function of who-is-who, so it cannot
-  tell nature's true (heterogeneous) model apart from its symmetrized twin, nor from any model on the same
-  orbit under relabelling.</p>
-
-    <figure style="margin:20px 0">
-    <svg viewBox="0 0 720 350" style="width:100%;height:auto;background:#fff;border:1px solid var(--border);border-radius:8px" role="img" aria-label="Orbits of the symmetric group: nature's true model and the exchangeable model lie on the same orbit and are operationally equivalent">
-      <!-- orbit ellipses -->
-      <g transform="rotate(-7 360 175)">
-        <ellipse cx="360" cy="160" rx="300" ry="74" fill="none" stroke="#6b6580" stroke-width="1.4"/>
-        <ellipse cx="360" cy="205" rx="300" ry="74" fill="none" stroke="#bbb" stroke-width="1" stroke-dasharray="3 5"/>
-        <ellipse cx="360" cy="250" rx="300" ry="74" fill="none" stroke="#cfcfcf" stroke-width="1" stroke-dasharray="3 5"/>
-      </g>
-      <text x="360" y="232" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="15" fill="#8a849c">Orbits of the symmetric group S(n)</text>
-      <!-- dots along the top orbit (same orbit = same observable) -->
-      <g fill="#7c6cff" stroke="#fff" stroke-width="2">
-        <circle cx="78"  cy="150" r="14"/>
-        <circle cx="210" cy="103" r="14"/>
-        <circle cx="360" cy="92"  r="14"/>
-        <circle cx="510" cy="103" r="14"/>
-        <circle cx="640" cy="150" r="15"/>
-      </g>
-      <!-- exchangeable model: the chosen representative, ticked -->
-      <text x="664" y="148" font-size="22" fill="#1e8449">&#10003;</text>
-      <!-- convexity-adjustment arrow -->
-      <path d="M612 196 q24 -22 26 -40" fill="none" stroke="#2471a3" stroke-width="1.6" marker-end="url(#ar)"/>
-      <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#2471a3"/></marker></defs>
-      <text x="556" y="214" font-size="12" fill="#2471a3" font-style="italic">convexity adjustment</text>
-      <!-- labels -->
-      <text x="60" y="128" text-anchor="middle" font-size="13" fill="#333">Nature's true model</text>
-      <text x="640" y="290" text-anchor="middle" font-size="13" fill="#333">Exchangeable model</text>
-      <text x="512" y="60" text-anchor="middle" font-size="11.5" fill="#555">Simple model, far from nature's real</text>
-      <text x="512" y="74" text-anchor="middle" font-size="11.5" fill="#555">model, but operationally equivalent</text>
-      <!-- complicated, poor-prediction model (off-orbit), X'd out -->
-      <circle cx="120" cy="300" r="13" fill="#7c6cff" stroke="#fff" stroke-width="2"/>
-      <g stroke="#d62728" stroke-width="3.5"><line x1="106" y1="286" x2="134" y2="314"/><line x1="134" y1="286" x2="106" y2="314"/></g>
-      <text x="120" y="332" text-anchor="middle" font-size="12" fill="#333">complicated model, poor predictions</text>
-      <!-- herd-immunity point on an inner orbit -->
-      <circle cx="430" cy="298" r="11" fill="#9a8cff" stroke="#fff" stroke-width="2"/>
-      <text x="430" y="330" text-anchor="middle" font-size="12" fill="#555">herd immunity at 80%</text>
+    <svg viewBox="0 0 840 300" style="width:100%;height:auto;background:#fdfdfb;border:1px solid var(--border);border-radius:8px;display:block;margin:16px 0" role="img" aria-label="A path-dependent note: coupons from the pool flow to investors, but a slice of every coupon (excess spread) is diverted into a reserve tank; defaults drain the tank first, and only when the tank is empty do losses write down the note, so the outcome depends on the whole path of defaults over time.">
+      <defs>
+        <marker id="rvg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8a8a94"/></marker>
+        <marker id="rvr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c0392b"/></marker>
+      </defs>
+      <text x="420" y="26" text-anchor="middle" font-family="Georgia,serif" font-size="15" letter-spacing="1" fill="#6b6b78">A PATH&ndash;DEPENDENT NOTE</text>
+      <!-- pool -->
+      <rect x="24" y="70" width="132" height="58" rx="9" fill="#f4f5ff" stroke="#9aa0c8" stroke-width="1.4"/>
+      <text x="90" y="94" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="#333">the pool</text>
+      <text x="90" y="112" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10.5" fill="#777">corporate / MBS bonds</text>
+      <!-- investors -->
+      <rect x="686" y="70" width="130" height="58" rx="9" fill="#eafaf1" stroke="#1e8449" stroke-width="1.6"/>
+      <text x="751" y="94" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="#1e7a43">investors</text>
+      <text x="751" y="112" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10.5" fill="#5a8a6c">the note</text>
+      <!-- coupon flow -->
+      <line x1="156" y1="99" x2="430" y2="99" stroke="#8a8a94" stroke-width="2" marker-end="url(#rvg)"/>
+      <line x1="452" y1="99" x2="684" y2="99" stroke="#8a8a94" stroke-width="2" marker-end="url(#rvg)"/>
+      <text x="300" y="90" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#777">coupons</text>
+      <text x="568" y="90" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#777">coupons</text>
+      <!-- branch: excess spread down into the tank -->
+      <line x1="441" y1="105" x2="441" y2="150" stroke="#8a8a94" stroke-width="2" marker-end="url(#rvg)"/>
+      <text x="452" y="132" font-family="system-ui,sans-serif" font-size="10.5" fill="#777">excess spread</text>
+      <!-- reserve tank (cylinder) -->
+      <rect x="366" y="152" width="150" height="86" fill="#eef0ff" stroke="#4a3aff" stroke-width="1.6"/>
+      <ellipse cx="441" cy="238" rx="75" ry="12" fill="#eef0ff" stroke="#4a3aff" stroke-width="1.6"/>
+      <path d="M366 196 a75 12 0 0 0 150 0 v42 a75 12 0 0 1 -150 0 z" fill="rgba(74,58,255,.26)"/>
+      <ellipse cx="441" cy="196" rx="75" ry="12" fill="rgba(74,58,255,.4)"/>
+      <ellipse cx="441" cy="152" rx="75" ry="12" fill="#eef0ff" stroke="#4a3aff" stroke-width="1.6"/>
+      <text x="441" y="176" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="#4a3aff">RESERVE</text>
+      <text x="441" y="262" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10.5" fill="#777">fills from spread each period</text>
+      <!-- losses drain the tank first -->
+      <line x1="212" y1="205" x2="364" y2="205" stroke="#c0392b" stroke-width="2" marker-end="url(#rvr)"/>
+      <text x="212" y="196" font-family="system-ui,sans-serif" font-size="11" fill="#c0392b">defaults &rarr; losses</text>
+      <text x="288" y="222" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#999">absorbed by the tank first</text>
+      <!-- overflow writes down the note -->
+      <path d="M518 178 C 610 150 660 140 720 128" fill="none" stroke="#c0392b" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#rvr)"/>
+      <text x="628" y="150" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10.5" fill="#c0392b">overflow writes down the note</text>
     </svg>
-    <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Every model on one orbit of the
-    relabelling group <em>S(n)</em> yields the same permutation-invariant observable. So nature's true,
-    hopelessly heterogeneous model and the simple exchangeable model are <em>operationally equivalent</em>;
-    you compute on the easy one. (Diagram adapted from my epidemiology write-up, where the same picture
-    resolves the herd-immunity paradox.)</figcaption>
-  </figure>
+
+  <h3>The slow way: Monte Carlo, one path at a time</h3>
+  <p>To value the note you run the pool forward, period by period, defaults landing, the reserve filling and
+  draining, and you do it thousands of times. Each path is one trip through the Intex waterfall, about a second.
+  Press <em>Run</em> and watch, at roughly a path a second, how long it takes merely to steady the estimate.</p>
+
+    <div class="widget">
+    <div class="controls">
+      <button class="rhob" id="mcrun">Run</button>
+      <button class="rhob" id="mcreset">Reset</button>
+    </div>
+    <canvas id="mccv" width="840" height="300"></canvas>
+    <div class="method" id="mcmethod"></div>
+  </div>
+  <p class="muted">The green line is the answer we are trying to reach. After a full minute of compute the
+  estimate is still worth a point or two of noise, and to shrink it tenfold you need a hundred times the paths.
+  Now imagine re-running all of it every time a single price moves, on every position, all day. That is why the
+  Greeks were fiction.</p>
+
+  <h3>The instant way: decompose once, reweight forever</h3>
+  <p>Now the trick, and it is not the small thing it looks like. If you open the JavaScript for this page you
+  will see the price really is computed instantly. It is a lookup of sorts, but a strange one: a single
+  precomputed curve that stands in for an <em>entire space</em> of models at once. Every correlation between the
+  names, and, once you add the symmetry that comes next, every possible collection of default-time
+  distributions for them too. Move the sliders and the number the Monte Carlo was crawling toward appears at
+  once, and keeps appearing however you push the model around.</p>
+  <p>How can one fixed curve possibly cover all of that? Play with it first, then I will tell you why it is even
+  allowed.</p>
+
+    <div class="widget">
+    <div class="controls">
+      <label>correlation ρ <input id="dcr" type="range" min="0" max="0.9" step="0.01" value="0.35"><span class="val" id="dcrV">0.35</span></label>
+      <label>average default rate <input id="dcp" type="range" min="0.005" max="0.08" step="0.005" value="0.03"><span class="val" id="dcpV">3.0%</span></label>
+    </div>
+    <canvas id="dccv" width="840" height="320"></canvas>
+    <div class="method" id="dcmethod"></div>
+  </div>
+  <p class="muted">The blue curve is the note's value under every possible independent default rate, computed
+  once. The red dots are the independent models the current copula decomposes into; move either slider and they
+  fan out along the fixed curve while the price, their weighted average, updates instantly. No scenario is ever
+  simulated again. That is the whole difference between a desk that can hedge and one that cannot.</p>
+  <p>So here is the promised answer. The reason a correlated pool is exactly a weighted blend of independent
+  ones, the reason the whole trick is even allowed, is a symmetry.</p>
+
+  <p>The companies in a CDO are not interchangeable (Ford is not GMAC is not a
+  Florida homebuilder) but the thing a CDO actually pays out on, the <em>number</em> of defaults, does
+  not care who is who. So for pricing you can replace the real, heterogeneous pool with a perfectly
+  <em>exchangeable</em> one that produces the identical distribution of losses; and once the names are
+  exchangeable, de Finetti's theorem says the law is just a mixture of conditionally-independent ones. (The
+  diversity score was a crude, frozen shadow of exactly this.)</p>
+  <p>Here is the move in one line. You symmetrize the joint law by averaging it over every relabelling of the
+  names, the orbit of the symmetric group <em>S<sub>n</sub></em>. The number of defaults
+  <em>k</em>&thinsp;=&thinsp;&Sigma;&thinsp;<em>x<sub>i</sub></em> does not change when you permute the names, so
+  its distribution is carried across the symmetrization untouched. That is the transference of symmetry the demo
+  shows: the joint law is replaced, the thing a CDO pays on is not.</p>
+
+  <div class="eqn">
+    <div class="term"><div class="expr">S[P](x) = (1/n!)&thinsp;&Sigma;<sub>&pi;&thinsp;&isin;&thinsp;S<sub>n</sub></sub>&thinsp;P(&pi;&middot;x)</div><div class="lbl">symmetrize: average over every relabelling</div></div>
+    <div class="eq">&rArr;</div>
+    <div class="term"><div class="expr">Law<sub>P</sub>(&Sigma;&thinsp;x<sub>i</sub>) = Law<sub>S[P]</sub>(&Sigma;&thinsp;x<sub>i</sub>)</div><div class="lbl">the count is permutation-invariant, so its law transfers</div></div>
+  </div>
 
   <h3>See it: a heterogeneous pool and its exchangeable twin</h3>
   <p>Three names with <em>different</em> default probabilities and a positive correlation. The left panel is
   nature's heterogeneous joint distribution; the middle is its symmetrization (the average over the six
   relabellings), <em>perfectly exchangeable</em>. They are visibly different distributions. Yet the right
-  panel &mdash; the distribution of the <em>number</em> of defaults, all a CDO waterfall ever sees &mdash; is
+  panel (the distribution of the <em>number</em> of defaults, all a CDO waterfall ever sees) is
   <strong style="font-weight:inherit"><em>bit-for-bit identical</em></strong> under both. Drag the sliders;
   the two aggregates move in lockstep.</p>
 
@@ -1127,52 +1332,38 @@
   &ldquo;pretend the names are identical,&rdquo; but &ldquo;replace them with the exact exchangeable law that
   prices identically, then decompose <em>that</em>.&rdquo;</p>
 
-  <details class="think">
-  <summary>For the practitioner: stochastic recovery</summary>
-  <p>One wrinkle for anyone who actually priced these. Recovery on a defaulted bond is
-  not a constant; it is random, and correlated with the very factor that drives the defaults. So the honest
-  exchangeable decomposition has to carry a <em>stochastic recovery</em> rate, not a flat number, or it quietly
-  understates the senior tranche all over again.</p>
-  <p class="muted">The careful version:
-  <a href="https://finmathblog.blogspot.com/2013/07/valuing-csos-under-exchangeable.html">valuing CSOs under an
-  exchangeable assumption</a>.</p>
-  </details>
+  <p>And here is the happy ending. This very same move turned out, years later, to solve a problem in
+  epidemiology, of all things. The engine under my
+  <a href="https://www.linkedin.com/pulse/fundamental-theorem-epidemiology-peter-cotton-phd/">&ldquo;Fundamental
+  Theorem of Epidemiology&rdquo;</a> and my
+  <a href="https://arxiv.org/abs/2006.07341">resolution of the herd-immunity paradox</a> during COVID was this
+  exact exchangeable decomposition.</p>
+  <p>The connections keep multiplying, lately into
+  <a href="https://conformalprediction.net/papers/">conformal prediction</a>, a univariate cousin of the CDO
+  analytics from 2000. What looked, back then, like a mere computational trick runs surprisingly deep.</p>
 
+  <details class="think">
+  <summary>A connoisseur's aside: negative probability</summary>
   <blockquote>&ldquo;Negative energies and probabilities should not be considered as nonsense. They are
   well-defined concepts mathematically, like a negative of money.&rdquo; (P. A. M. Dirac, 1942)</blockquote>
-  <p>A connoisseur's aside. The finite decomposition can need a <em>signed</em>
-  mixing measure, so you may have to dip into negative probability, which, pace Dirac, is perfectly
-  respectable. But here is the quiet gift of <em>this</em> problem: when defaults are <em>positively</em>
-  correlated, as credit defaults overwhelmingly are, the decomposition stays inside the genuine, non-negative
-  simplex. That is the benefit of positive correlation. I noticed the identical move solves a problem
-  in epidemiology too, and wrote up a
-  <a href="https://www.linkedin.com/pulse/fundamental-theorem-epidemiology-peter-cotton-phd/">&ldquo;Fundamental
-  Theorem of Epidemiology&rdquo;</a> and a clean
-  <a href="https://arxiv.org/abs/2006.07341">resolution of the herd-immunity paradox</a> during COVID. The
-  topic, I am convinced, is deep, and the connections keep multiplying, lately into
-  <a href="https://conformalprediction.net/papers/">conformal prediction</a>, which is a univariate
-  cousin of the CDO analytics from 2000. The same decomposition that looked, back then, like a mere
-  computational trick turns out to run surprisingly deep.</p>
-
-  <details class="think">
-  <summary>For the record: the quants knew (you don't start a company to fix something you think is great)</summary>
-  <p><strong>Me:</strong> The tidy morality tale needs the quants to be naive. Dazzled, blind to the
-  cracks.</p>
-  <p><strong>Jiang:</strong> None of those flaws were hidden from the desk. They were obvious to anyone who
-  pushed the model past time zero, and its moving parts could not have been simpler. The dispositive evidence
-  is the simplest kind: <em>you do not start a company to fix something you believe is already great.</em> At
-  the end of 2006, with the issuance machine running flat out and the warnings going nowhere, I founded a
-  company whose entire reason for existing was to fix the credit models. That is not the act of someone
-  seduced by an elegant copula. It is the act of someone who had seen exactly where it broke and could not
-  get anyone to care while the carry was good.</p>
+  <p>The finite decomposition can need a <em>signed</em> mixing measure, so you may have to dip into negative
+  probability, which, pace Dirac, is perfectly respectable. But here is the quiet gift of <em>this</em>
+  problem: when defaults are <em>positively</em> correlated, as credit defaults overwhelmingly are, the
+  decomposition stays inside the genuine, non-negative simplex. That is the benefit of positive correlation.</p>
   </details>
 
-  <p>So that is the answer, and the man who finally gave it. A company that does nothing, a measure that should
-  never have been called <em>P</em>, and an error raised to a power, told by the quant everyone called Yang.</p>
-  <p class="muted">Jiang got second in that competition, by the way. He asked me to mention it. Twice.</p>
+  <p>Which brings us back to where we began. Jiang might have understood exactly how to compute deltas for
+  arbitrarily complex financial products and companies before the crisis. He probably wrote it up in 2005 for
+  his superiors, and they probably tossed it in the trash.</p>
+  <p>He could have helped diagnose the aftermath too, and that is the most telling part of the entire film.
+  Steve Carell travels the country talking to as many people as he can, asking them probing questions. But when
+  given the opportunity, he does not even ask Jiang his name, and there is no expectation, from the director or
+  the audience, that asking Jiang what he thought might be a fruitful exercise.</p>
+  <p>Nobody asked Jiang.</p>
+
 </main>
 
-<footer>Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.</footer>
+<footer>Part of <a href="../../index.html">allocation</a>: online portfolio construction. MIT © Peter Cotton.</footer>
 
 <script>
 // ---- normal CDF / inverse ----
@@ -1222,26 +1413,31 @@ function draw(){
   const W=cssW,H=cssH, padL=40,padR=12,padT=14,padB=28, plotW=W-padL-padR, plotH=H-padT-padB;
   const KMAX=N; const bw=plotW/(KMAX+1);
   let pmax=0; for(let k=0;k<=N;k++) pmax=Math.max(pmax,P[k]);
-  // conditional curves at m = +2, 0, -2 (factor sweeps the conditional distribution)
-  const conds=[[2,"#9aa0c8"],[0,"#6b73b6"],[-2,"#c0392b"]];
-  let cmax=pmax; for(const [m] of conds){ const c=condPMF(m,rho,a,sr,sc); for(let k=0;k<=N;k++) cmax=Math.max(cmax,c[k]); }
-  const yS=plotH/(cmax*1.08), x=k=>padL+k*bw+bw/2, y=v=>padT+plotH-v*yS;
+  // a fan of conditional binomials across the factor: red = bad economy (low m), blue = good (high m)
+  const fanM=[]; const FANS=Math.max(5,Math.min(NQ,15));
+  for(let j=0;j<FANS;j++){ fanM.push(-2.4+4.8*j/(FANS-1)); }
+  const condCol=(m,al)=>{ const t=Math.max(0,Math.min(1,(m+2.5)/5));
+    return `rgba(${Math.round(192*(1-t)+74*t)},${Math.round(57*(1-t)+90*t)},${Math.round(43*(1-t)+200*t)},${al})`; };
+  // scale the y-axis to the loss distribution, not to the tall good-economy spike at k=0
+  const yS=plotH/(pmax*1.3), x=k=>padL+k*bw+bw/2, y=v=>padT+plotH-v*yS;
   ctx.clearRect(0,0,W,H);
   // axes
   ctx.strokeStyle="#ccc"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padL,padT+plotH); ctx.lineTo(W-padR,padT+plotH); ctx.stroke();
   ctx.fillStyle="#888"; ctx.font="11px sans-serif"; ctx.textAlign="center";
   for(let k=0;k<=N;k+=10){ ctx.fillText(k, x(k), H-10); }
   ctx.textAlign="left"; ctx.fillText("number of defaults (pool of "+N+")", padL, padT+10);
-  // unconditional bars
-  for(let k=0;k<=N;k++){ if(P[k]<1e-5) continue; ctx.fillStyle="rgba(74,58,255,.75)"; ctx.fillRect(x(k)-bw*0.4,y(P[k]),bw*0.8,plotT_(P[k],y,plotH,padT)); }
-  function plotT_(v,y,plotH,padT){ return (padT+plotH)-y(v); }
-  // conditional curves (thin lines)
-  for(const [m,col] of conds){ const c=condPMF(m,rho,a,sr,sc); ctx.strokeStyle=col; ctx.lineWidth=1.4; ctx.beginPath();
+  // clip to the plot so the tall good-economy spike at k=0 stays inside the frame
+  ctx.save(); ctx.beginPath(); ctx.rect(padL,padT,plotW,plotH); ctx.clip();
+  // the fan of conditionals being averaged
+  for(const m of fanM){ const c=condPMF(m,rho,a,sr,sc); ctx.strokeStyle=condCol(m,0.45); ctx.lineWidth=1.1; ctx.beginPath();
     let started=false; for(let k=0;k<=N;k++){ if(c[k]<1e-6 && !started) continue; const px=x(k),py=y(c[k]); if(!started){ctx.moveTo(px,py);started=true;} else ctx.lineTo(px,py);} ctx.stroke(); }
+  // the unconditional loss distribution, bold on top
+  for(let k=0;k<=N;k++){ if(P[k]<1e-5) continue; ctx.fillStyle="rgba(74,58,255,.8)"; ctx.fillRect(x(k)-bw*0.4,y(P[k]),bw*0.8,(padT+plotH)-y(P[k])); }
+  ctx.restore();
   // legend
   ctx.font="11px sans-serif"; ctx.textAlign="left";
-  ctx.fillStyle="rgba(74,58,255,.9)"; ctx.fillText("■ loss distribution (quadrature avg)", W-250, padT+12);
-  ctx.fillStyle="#6b73b6"; ctx.fillText("· conditional at factor m = +2 / 0 / −2", W-250, padT+28);
+  ctx.fillStyle="rgba(74,58,255,.9)"; ctx.fillText("■ loss distribution (φ-weighted average)", W-330, padT+12);
+  ctx.fillStyle="#8a4a78"; ctx.fillText("— conditional binomials: red bad → blue good economy", W-330, padT+28);
   // tranches
   const rows=TR.map(([nm,A,D,col])=>{ const el=trancheEL(P,A,D), pct=(el*100);
     return `<tr><td>${nm} <span class="muted">[${(A*100).toFixed(0)}–${(D*100).toFixed(0)}%]</span></td>`+
@@ -1369,7 +1565,7 @@ draw();
   const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1;
   const COLK=["#9aa0b4","#4a3aff","#e08e0b","#c0392b"], C3=[1,3,3,1];
   const ORDER=[0,1,2,4,3,5,6,7], BITS=s=>[s&1,(s>>1)&1,(s>>2)&1], POP=s=>(s&1)+((s>>1)&1)+((s>>2)&1);
-  const lbl=s=>{const b=BITS(s);return (b[0]?"A":"·")+(b[1]?"B":"·")+(b[2]?"C":"·");};
+  const lbl=s=>{const b=BITS(s);const d=["A","B","C"].filter((_,i)=>b[i]);return d.length?d.join("+")+" default":"none default";};
   const sa=document.getElementById("sa"),sb=document.getElementById("sb"),sc=document.getElementById("sc"),srho=document.getElementById("srho");
   const saV=document.getElementById("saV"),sbV=document.getElementById("sbV"),scV=document.getElementById("scV"),srhoV=document.getElementById("srhoV");
   function cp(pi,m,sr,sc2){let v=sr<1e-9?pi:Phi((phiInv(pi)-sr*m)/sc2);return Math.min(Math.max(v,1e-12),1-1e-12);}
@@ -1416,6 +1612,301 @@ draw();
       `A tranche paying on <b>2+ of 3</b> defaults is worth <b>${(g2*100).toFixed(2)}%</b> under <em>both</em> models: identical, exactly.`;
   }
   [sa,sb,sc,srho].forEach(e=>e.addEventListener("input",draw));window.addEventListener("resize",draw);draw();
+})();
+</script>
+
+<script>
+/* copula: one bivariate-normal cloud, shown as (i) the plane, (ii) the unit square = the copula, (iii) two default times */
+(function(){
+  const cv=document.getElementById("cpcv"); if(!cv||typeof Phi==="undefined") return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1, N=4000, LAM=0.1, TMAX=40;
+  const pr=document.getElementById("cpr"), prV=document.getElementById("cprV"), resim=document.getElementById("cpresim");
+  const z1=new Float64Array(N), z2=new Float64Array(N);
+  function gauss(){ let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random();
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+  function gen(){ for(let i=0;i<N;i++){ z1[i]=gauss(); z2[i]=gauss(); } }
+  gen();
+  function draw(){
+    const rho=Math.max(-0.999,Math.min(0.999,+pr.value)); prV.textContent=rho.toFixed(2);
+    const cssW=cv.clientWidth||840,cssH=300;cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+    const gap=20,w3=(cssW-2*gap)/3,padT=34,padB=24,ph=cssH-padT-padB,sq=Math.min(w3-16,ph);
+    const ox=[0,w3+gap,2*(w3+gap)], b=Math.sqrt(1-rho*rho);
+    function box(x0,title,sub){
+      ctx.fillStyle="#444";ctx.font="bold 12px sans-serif";ctx.textAlign="center";ctx.fillText(title,x0+8+sq/2,16);
+      ctx.fillStyle="#999";ctx.font="10px sans-serif";ctx.fillText(sub,x0+8+sq/2,28);
+      ctx.strokeStyle="#e3e3e3";ctx.lineWidth=1;ctx.strokeRect(x0+8,padT,sq,sq); }
+    function mapper(x0,lo,hi){ const span=hi-lo; return {X:x=>x0+8+((x-lo)/span)*sq, Y:y=>padT+sq-((y-lo)/span)*sq}; }
+    box(ox[0],"the plane","bivariate normal");
+    box(ox[1],"the unit square","← this is the copula");
+    box(ox[2],"two default times","years");
+    const M1=mapper(ox[0],-3.5,3.5), M2=mapper(ox[1],0,1), M3=mapper(ox[2],0,TMAX);
+    ctx.fillStyle="rgba(74,58,255,0.16)";
+    for(let i=0;i<N;i++){
+      const x=z1[i], y=rho*z1[i]+b*z2[i], u=Phi(x), v=Phi(y);
+      const ta=-Math.log(1-u)/LAM, tb=-Math.log(1-v)/LAM;
+      ctx.fillRect(M1.X(x)-0.7,M1.Y(y)-0.7,1.4,1.4);
+      ctx.fillRect(M2.X(u)-0.7,M2.Y(v)-0.7,1.4,1.4);
+      if(ta<=TMAX&&tb<=TMAX) ctx.fillRect(M3.X(ta)-0.7,M3.Y(tb)-0.7,1.4,1.4);
+    }
+    document.getElementById("cpmethod").innerHTML=
+      `The same <b>${N.toLocaleString()}</b> points in all three frames. Plane &rarr; square: <b>u=Φ(x)</b>, the normal CDF, flattens each marginal to uniform and leaves only the dependence: <b>that square is the Gaussian copula</b> (technically the copula is the joint distribution function of those uniform coordinates, the thing we are sampling). Square &rarr; times: <b>τ=−ln(1−u)/λ</b>, an exponential default time (λ=${LAM}, mean ${(1/LAM)}y). The right-hand marginals are exponential, not normal.`;
+  }
+  pr.addEventListener("input",draw); resim.addEventListener("click",()=>{gen();draw();}); window.addEventListener("resize",draw); draw();
+})();
+</script>
+
+<script>
+/* one-period binomial: a price lives under Q, not P; quoting your own P just funds the counterparty's risk-free arb */
+(function(){
+  const cv=document.getElementById("bncv"); if(!cv) return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1, S0=100, K=100;
+  const U=document.getElementById("bnu"),D=document.getElementById("bnd"),Pp=document.getElementById("bnp");
+  const UV=document.getElementById("bnuV"),DV=document.getElementById("bndV"),PV=document.getElementById("bnpV");
+  function box(cx,cy,w,h,fill,stroke){ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=1.6;
+    ctx.beginPath();if(ctx.roundRect){ctx.roundRect(cx-w/2,cy-h/2,w,h,9);}else{ctx.rect(cx-w/2,cy-h/2,w,h);}ctx.fill();ctx.stroke();}
+  function draw(){
+    const u=+U.value,d=+D.value,p=+Pp.value;
+    UV.textContent=u.toFixed(2);DV.textContent=d.toFixed(2);PV.textContent=p.toFixed(2);
+    const Sup=S0*u,Sdn=S0*d,payUp=Math.max(Sup-K,0),payDn=Math.max(Sdn-K,0);
+    const q=(1-d)/(u-d);
+    const pPrice=p*payUp+(1-p)*payDn, qPrice=q*payUp+(1-q)*payDn;
+    const delta=(payUp-payDn)/(Sup-Sdn), bond=payDn-delta*Sdn, skim=Math.abs(pPrice-qPrice);
+    const cssW=cv.clientWidth||840,cssH=300;cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+    // ---- tree ----
+    const xS=110,xN=300,yM=150,yU=80,yD=222;
+    ctx.strokeStyle="#cfcfe0";ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(xS+62,yM-12);ctx.lineTo(xN-78,yU+12);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(xS+62,yM+12);ctx.lineTo(xN-78,yD-12);ctx.stroke();
+    ctx.font="11px sans-serif";ctx.textAlign="right";
+    ctx.fillStyle="#999";ctx.fillText("you: p = "+p.toFixed(2),214,100);
+    ctx.fillStyle="#4a3aff";ctx.fillText("Q: q = "+q.toFixed(2),214,114);
+    ctx.fillStyle="#999";ctx.fillText("1−p = "+(1-p).toFixed(2),214,190);
+    ctx.fillStyle="#4a3aff";ctx.fillText("1−q = "+(1-q).toFixed(2),214,204);
+    box(xS,yM,118,46,"#f4f5ff","#9aa0c8");
+    ctx.fillStyle="#444";ctx.font="bold 14px sans-serif";ctx.fillText("S = 100",xS,yM-1);
+    ctx.font="10px sans-serif";ctx.fillStyle="#999";ctx.fillText("today",xS,yM+15);
+    box(xN,yU,150,50,"#eafaf1","#1e8449");
+    ctx.fillStyle="#1e7a43";ctx.font="bold 13px sans-serif";ctx.fillText("up · S = "+Sup.toFixed(0),xN,yU-3);
+    ctx.font="11px sans-serif";ctx.fillText("call pays "+payUp.toFixed(0),xN,yU+14);
+    box(xN,yD,150,50,"#fdecea","#c0392b");
+    ctx.fillStyle="#b23030";ctx.font="bold 13px sans-serif";ctx.fillText("down · S = "+Sdn.toFixed(0),xN,yD-3);
+    ctx.font="11px sans-serif";ctx.fillText("call pays "+payDn.toFixed(0),xN,yD+14);
+    // ---- ledger ----
+    const lx=438, lw=cssW-lx-18, barW=Math.min(280,lw), maxP=Math.max(pPrice,qPrice,1e-6);
+    ctx.textAlign="left";ctx.fillStyle="#444";ctx.font="bold 13px sans-serif";ctx.fillText("what is the call worth?",lx,44);
+    function row(y,label,val,col){ ctx.fillStyle="#666";ctx.font="12px sans-serif";ctx.fillText(label,lx,y-6);
+      ctx.fillStyle=col;ctx.fillRect(lx,y,(val/maxP)*barW,15);
+      ctx.fillStyle="#333";ctx.font="bold 12px sans-serif";ctx.fillText("$"+val.toFixed(2),lx+(val/maxP)*barW+6,y+13);}
+    row(76,"your price · under your P",pPrice,"#9aa0c8");
+    row(124,"no-arbitrage price · under Q",qPrice,"#1e8449");
+    ctx.fillStyle="#c0392b";ctx.font="bold 15px sans-serif";ctx.fillText("risk-free skim to the other side:  $"+skim.toFixed(2),lx,192);
+    ctx.fillStyle="#999";ctx.font="11px sans-serif";ctx.fillText("locked in the moment you trade at your number",lx,210);
+    ctx.fillText("slide your P(up): grey bar moves, green bar does not",lx,230);
+    const bondStr = bond>=0 ? "$"+bond.toFixed(2)+" in cash" : "a $"+Math.abs(bond).toFixed(2)+" loan";
+    document.getElementById("bnmethod").innerHTML=
+      `Replicate the call with <b>Δ = ${delta.toFixed(3)}</b> shares and ${bondStr}. In the up state that is worth $${(delta*Sup+bond).toFixed(2)}, in the down state $${(delta*Sdn+bond).toFixed(2)}: the call's payoff exactly, both times. The hedge costs <b>$${qPrice.toFixed(2)}</b> today whatever you believe, so that is the only defensible price. Trade at your <b>$${pPrice.toFixed(2)}</b> instead and the other desk banks <b>$${skim.toFixed(2)}</b> risk-free. Your <em>P</em> never entered the price; only <em>Q</em> did.`;
+  }
+  [U,D,Pp].forEach(e=>e.addEventListener("input",draw));window.addEventListener("resize",draw);draw();
+})();
+</script>
+
+<script>
+/* taquería: dishes are bundles of ingredients; if you can short, the price functional must be linear (representation theorem) */
+(function(){
+  const sl=document.getElementById("mxp"); if(!sl) return;
+  const slV=document.getElementById("mxpV"), menu=document.getElementById("mxmenu"), order=document.getElementById("mxorder");
+  const ING={tortilla:0.50, beans:0.75, cheese:1.00};
+  const ques=2*ING.tortilla+ING.cheese;       // 2.00
+  const taco=ING.tortilla+ING.beans;           // 1.25
+  const fair=ques+taco;                         // 3.25  (= 3 tortilla + cheese + beans)
+  function draw(){
+    const sup=+sl.value; slV.textContent="$"+sup.toFixed(2);
+    menu.innerHTML=
+      `<table style="width:100%;border-collapse:collapse;font-size:.86rem">
+        <tr style="border-bottom:1px solid var(--border);color:#666"><th style="text-align:left;padding:4px 6px">dish</th><th style="text-align:left;padding:4px 6px">ingredients</th><th style="text-align:right;padding:4px 6px">price</th></tr>
+        <tr><td style="padding:4px 6px">Quesadilla</td><td style="padding:4px 6px;color:#666">2 tortilla + cheese</td><td style="text-align:right;padding:4px 6px">$${ques.toFixed(2)}</td></tr>
+        <tr><td style="padding:4px 6px">Bean Taco</td><td style="padding:4px 6px;color:#666">tortilla + beans</td><td style="text-align:right;padding:4px 6px">$${taco.toFixed(2)}</td></tr>
+        <tr style="border-top:1px solid var(--border)"><td style="padding:4px 6px"><b>Super Burrito</b></td><td style="padding:4px 6px;color:#666">3 tortilla + cheese + beans <span style="color:#999">(= Quesadilla + Bean Taco)</span></td><td style="text-align:right;padding:4px 6px"><b>$${sup.toFixed(2)}</b></td></tr>
+      </table>`;
+    const gap=sup-fair;
+    if(Math.abs(gap)<0.001){
+      order.innerHTML=`<div style="font-family:ui-monospace,monospace;font-size:.86rem">Super Burrito at <b>$${sup.toFixed(2)}</b> = Quesadilla + Bean Taco. Nothing to arbitrage; the price is forced.</div>`;
+      return;
+    }
+    const profit=Math.abs(gap).toFixed(2);
+    const L = gap>0
+      ? [["SELL","Super Burrito","+",sup],["BUY","Quesadilla","−",ques],["BUY","Bean Taco","−",taco]]
+      : [["BUY","Super Burrito","−",sup],["SELL","Quesadilla","+",ques],["SELL","Bean Taco","+",taco]];
+    const rows=L.map(([s,n,sg,v])=>`<tr><td style="padding:1px 6px"><b>${s}</b></td><td style="padding:1px 6px">1 ${n}</td><td style="padding:1px 6px;text-align:right;color:${sg==='+'?'#1e8449':'#c0392b'}">${sg}$${v.toFixed(2)}</td></tr>`).join("");
+    order.innerHTML=
+      `<div style="font-family:ui-monospace,monospace;font-size:.86rem">
+        <div style="color:#888;letter-spacing:.1em">— TAKEOUT TICKET —</div>
+        <table style="border-collapse:collapse;margin:4px 0">${rows}</table>
+        <div style="color:#888">identical ingredients delivered either way</div>
+        <div style="font-weight:700;color:#1e8449;margin-top:3px">free money: $${profit}</div>
+      </div>`;
+  }
+  sl.addEventListener("input",draw); draw();
+})();
+</script>
+
+<script>
+/* exotic ladder: a per-horse pricing error raised to the power of the number of legs; one grain of salt can't fix all */
+(function(){
+  const cv=document.getElementById("excv"); if(!cv) return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1;
+  const K=document.getElementById("exk"),KV=document.getElementById("exkV"),Sl=document.getElementById("exs"),SV=document.getElementById("exsV");
+  const meth=document.getElementById("exmethod");
+  const bets=[["Win",1],["Quinella",2],["Trifecta",3],["Superfecta",4]];
+  function draw(){
+    const k=+K.value, s=+Sl.value;
+    KV.textContent=k.toFixed(1)+"× less likely"; SV.textContent="÷"+s.toFixed(1);
+    const mult=bets.map(([n,L])=>Math.pow(k,L)/s);
+    const cssW=cv.clientWidth||840,cssH=300;cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+    const padL=48,padR=18,padT=22,padB=46,pw=cssW-padL-padR,ph=cssH-padT-padB;
+    const ymax=Math.max(4,Math.max.apply(null,mult)*1.14), Y=v=>padT+ph-(Math.min(v,ymax)/ymax)*ph;
+    ctx.fillStyle="#999";ctx.font="10px sans-serif";ctx.textAlign="right";
+    for(let g=1;g<=ymax;g*=2){ const y=Y(g); ctx.strokeStyle="#f1f1f4";ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(cssW-padR,y);ctx.stroke(); ctx.fillStyle="#bbb";ctx.fillText(g+"×",padL-6,y+3); }
+    ctx.strokeStyle="#ddd";ctx.beginPath();ctx.moveTo(padL,padT+ph);ctx.lineTo(cssW-padR,padT+ph);ctx.stroke();
+    // fair line
+    const yf=Y(1); ctx.strokeStyle="#1e8449";ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(padL,yf);ctx.lineTo(cssW-padR,yf);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle="#1e8449";ctx.textAlign="left";ctx.font="10px sans-serif";ctx.fillText("fair (×1)",padL+4,yf-4);
+    const bw=pw/bets.length;
+    bets.forEach(([n,L],i)=>{ const m=mult[i], x=padL+i*bw+bw*0.22, w=bw*0.56, y=Y(m), fair=Math.abs(m-1)<0.07;
+      ctx.fillStyle=fair?"#1e8449":(m>1?"#c0392b":"#d98a00"); ctx.fillRect(x,y,w,padT+ph-y);
+      ctx.fillStyle="#333";ctx.font="bold 13px sans-serif";ctx.textAlign="center";ctx.fillText(m.toFixed(1)+"×",x+w/2,y-6);
+      ctx.fillStyle="#555";ctx.font="12px sans-serif";ctx.fillText(n,x+w/2,padT+ph+17);
+      ctx.fillStyle="#aaa";ctx.font="10px sans-serif";ctx.fillText(L+(L>1?" legs":" leg"),x+w/2,padT+ph+31); });
+    const qT=0.045, m2=mult[1], qA=qT/m2, oT=(1-qT)/qT, oA=(1-qA)/qA;
+    meth.innerHTML=
+      `Each horse priced <b>${k.toFixed(1)}×</b> too safe makes the A/B quinella <b>${mult[1].toFixed(1)}×</b> too safe, the trifecta <b>${mult[2].toFixed(1)}×</b>. A quinella that should pay about <b>${oT.toFixed(0)}/1</b> gets laid at <b>${oA.toFixed(0)}/1</b>: the layer banks a sliver of yield and pays out ${mult[1].toFixed(1)}× as often as the premium assumed. <em>R&times;R</em>, raised to a power.`;
+  }
+  K.addEventListener("input",draw);Sl.addEventListener("input",draw);window.addEventListener("resize",draw);draw();
+})();
+</script>
+
+<script>
+/* decomposition trick: cache a path-dependent structure's value under every IID model once, then reprice any correlation instantly by reweighting (de Finetti) */
+(function(){
+  const cv=document.getElementById("dccv"); if(!cv||typeof Phi==="undefined") return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1;
+  const R=document.getElementById("dcr"),RV=document.getElementById("dcrV"),Pp=document.getElementById("dcp"),PV=document.getElementById("dcpV");
+  const N=50,T=8,LGD=0.6,ES=0.02,CAPR=6,CPN=0.055,V=1/1.04,P0=N,DMAX=0.30,G=30,M=700;
+  function pathNPV(d){
+    let alive=N,reserve=0,prin=P0,npv=0,disc=1;
+    for(let t=0;t<T;t++){
+      disc*=V; reserve+=ES*alive; if(reserve>CAPR)reserve=CAPR;
+      let k=0; for(let i=0;i<alive;i++) if(Math.random()<d) k++;
+      const loss=k*LGD;
+      if(reserve>=loss){reserve-=loss;} else {prin-=(loss-reserve); reserve=0; if(prin<0)prin=0;}
+      alive-=k; npv+=disc*CPN*prin;
+    }
+    return npv+disc*prin;
+  }
+  const npvGrid=[]; let buildMs=1;
+  (function build(){
+    const t0=(typeof performance!=="undefined"&&performance.now)?performance.now():0;
+    for(let g=0;g<=G;g++){ const d=DMAX*g/G; let s=0; for(let m=0;m<M;m++) s+=pathNPV(d); npvGrid.push(s/M/P0*100); }
+    const t1=(typeof performance!=="undefined"&&performance.now)?performance.now():0;
+    buildMs=Math.max(1,Math.round(t1-t0));
+  })();
+  function cacheAt(d){ if(d<=0)return npvGrid[0]; if(d>=DMAX)return npvGrid[G];
+    const x=d/DMAX*G, i=Math.floor(x), f=x-i; return npvGrid[i]*(1-f)+npvGrid[i+1]*f; }
+  const K=25, MS=[]; for(let j=0;j<K;j++) MS.push(-3.6+7.2*j/(K-1));
+  function draw(){
+    const rho=+R.value, pbar=+Pp.value; RV.textContent=rho.toFixed(2); PV.textContent=(pbar*100).toFixed(1)+"%";
+    const a=phiInv(pbar), sr=Math.sqrt(rho), sc=Math.sqrt(1-rho);
+    const dk=[],wk=[]; let ws=0;
+    for(const m of MS){ const d=rho<1e-6?pbar:Phi((a-sr*m)/sc); dk.push(Math.min(DMAX,Math.max(0,d))); const w=Math.exp(-m*m/2); wk.push(w); ws+=w; }
+    let price=0; for(let j=0;j<K;j++) price+=wk[j]/ws*cacheAt(dk[j]);
+    const cssW=cv.clientWidth||840,cssH=320;cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+    const padL=52,padR=16,padT=22,padB=42,pw=cssW-padL-padR,ph=cssH-padT-padB;
+    let ymin=Math.min.apply(null,npvGrid), ymax=Math.max.apply(null,npvGrid); const pd=(ymax-ymin)*0.08||1; ymin-=pd; ymax+=pd;
+    const X=d=>padL+(d/DMAX)*pw, Y=v=>padT+ph-((v-ymin)/(ymax-ymin))*ph;
+    ctx.strokeStyle="#ddd";ctx.beginPath();ctx.moveTo(padL,padT+ph);ctx.lineTo(cssW-padR,padT+ph);ctx.stroke();
+    ctx.fillStyle="#999";ctx.font="10px sans-serif";ctx.textAlign="center";
+    for(let d=0;d<=DMAX+1e-9;d+=0.05) ctx.fillText((d*100).toFixed(0)+"%",X(d),cssH-14);
+    ctx.fillText("conditional per-period default rate",padL+pw/2,cssH-2);
+    ctx.textAlign="right"; for(let g=0;g<=4;g++){const v=ymin+(ymax-ymin)*g/4; ctx.fillText(v.toFixed(0),padL-6,Y(v)+3);}
+    ctx.save();ctx.translate(14,padT+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign="center";ctx.fillStyle="#888";ctx.fillText("note value (% of par)",0,0);ctx.restore();
+    ctx.strokeStyle="#4a3aff";ctx.lineWidth=2.4;ctx.beginPath();
+    for(let g=0;g<=G;g++){const px=X(DMAX*g/G),py=Y(npvGrid[g]); g?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.stroke();
+    for(let j=0;j<K;j++){ const rr=2+8*Math.sqrt(wk[j]/ws); ctx.fillStyle="rgba(214,40,40,.6)";
+      ctx.beginPath();ctx.arc(X(dk[j]),Y(cacheAt(dk[j])),rr,0,6.2832);ctx.fill(); }
+    const yp=Y(price); ctx.strokeStyle="#1e8449";ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(padL,yp);ctx.lineTo(cssW-padR,yp);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle="#1e8449";ctx.textAlign="left";ctx.font="bold 12px sans-serif";ctx.fillText("price = "+price.toFixed(1)+"% of par",padL+6,yp-5);
+    ctx.font="11px sans-serif";
+    ctx.fillStyle="#4a3aff";ctx.fillText("cached value curve (computed once)",cssW-padR-236,padT+8);
+    ctx.fillStyle="#c0392b";ctx.fillText("independent models being blended",cssW-padR-236,padT+24);
+    document.getElementById("dcmethod").innerHTML=
+      `Cache: <b>${G+1}</b> scenarios &times; <b>${M}</b> paths, built once in <b>${buildMs} ms</b>. Each slider move reprices by <b>${K}</b> table lookups, well under a millisecond, however you move &rho; or the average rate. Re-running Monte Carlo from scratch on every drag would cost that ${buildMs} ms again, every time. Price now: <b>${price.toFixed(1)}%</b> of par.`;
+  }
+  R.addEventListener("input",draw);Pp.addEventListener("input",draw);window.addEventListener("resize",draw);draw();
+})();
+</script>
+
+<script>
+/* the slow way: correlated Monte Carlo, one path at a time, crawling toward the answer the decomposition already knows */
+(function(){
+  const cv=document.getElementById("mccv"); if(!cv||typeof Phi==="undefined") return;
+  const ctx=cv.getContext("2d"), dpr=window.devicePixelRatio||1;
+  const runBtn=document.getElementById("mcrun"), resetBtn=document.getElementById("mcreset"), meth=document.getElementById("mcmethod");
+  const N=50,T=8,LGD=0.6,ES=0.02,CAPR=6,CPN=0.055,V=1/1.04,P0=N;
+  const RHO=0.35, PBAR=0.03, A=phiInv(PBAR), SR=Math.sqrt(RHO), SC=Math.sqrt(1-RHO), MAXN=600;
+  function gauss(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  function pathNPV(d){
+    let alive=N,reserve=0,prin=P0,npv=0,disc=1;
+    for(let t=0;t<T;t++){ disc*=V; reserve+=ES*alive; if(reserve>CAPR)reserve=CAPR;
+      let k=0; for(let i=0;i<alive;i++) if(Math.random()<d) k++; const loss=k*LGD;
+      if(reserve>=loss){reserve-=loss;} else {prin-=(loss-reserve); reserve=0; if(prin<0)prin=0;}
+      alive-=k; npv+=disc*CPN*prin; }
+    return npv+disc*prin;
+  }
+  function onePath(){ const m=gauss(); const d=Math.min(0.999,Math.max(0,Phi((A-SR*m)/SC))); return pathNPV(d)/P0*100; }
+  // target (the true value the crawl approaches) via a big silent MC once
+  let target=0; { let s=0; for(let i=0;i<40000;i++) s+=onePath(); target=s/40000; }
+  let n=0,sum=0,sq=0,hist=[],timer=null;
+  function fmtClock(sec){ const m=Math.floor(sec/60), s=sec%60; return m+"m "+(s<10?"0":"")+s+"s"; }
+  function draw(){
+    const cssW=cv.clientWidth||840,cssH=300;cv.width=cssW*dpr;cv.height=cssH*dpr;cv.style.height=cssH+"px";ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+    const padL=52,padR=16,padT=18,padB=40,pw=cssW-padL-padR,ph=cssH-padT-padB;
+    const ymin=target-9, ymax=target+9;
+    const X=i=>padL+(i/MAXN)*pw, Y=v=>padT+ph-((v-ymin)/(ymax-ymin))*ph;
+    ctx.strokeStyle="#ddd";ctx.beginPath();ctx.moveTo(padL,padT+ph);ctx.lineTo(cssW-padR,padT+ph);ctx.stroke();
+    ctx.fillStyle="#999";ctx.font="10px sans-serif";ctx.textAlign="center";
+    for(let p=0;p<=MAXN;p+=100) ctx.fillText(p,X(p),cssH-14);
+    ctx.fillText("paths simulated  (≈ seconds of Intex compute)",padL+pw/2,cssH-2);
+    ctx.textAlign="right"; for(let g=0;g<=4;g++){const v=ymin+(ymax-ymin)*g/4; ctx.fillText(v.toFixed(0),padL-6,Y(v)+3);}
+    ctx.save();ctx.translate(14,padT+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign="center";ctx.fillStyle="#888";ctx.fillText("estimate (% of par)",0,0);ctx.restore();
+    // target
+    const yt=Y(target); ctx.strokeStyle="#1e8449";ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(padL,yt);ctx.lineTo(cssW-padR,yt);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle="#1e8449";ctx.textAlign="left";ctx.font="11px sans-serif";ctx.fillText("the answer (decomposition knows it instantly): "+target.toFixed(1)+"%",padL+6,yt-5);
+    // CI band + estimate
+    if(hist.length>1){
+      ctx.fillStyle="rgba(74,58,255,.12)";ctx.beginPath();
+      for(let i=0;i<hist.length;i++){const h=hist[i];ctx.lineTo(X(h.n),Y(h.mean+h.se*1.96));}
+      for(let i=hist.length-1;i>=0;i--){const h=hist[i];ctx.lineTo(X(h.n),Y(h.mean-h.se*1.96));} ctx.closePath();ctx.fill();
+      ctx.strokeStyle="#4a3aff";ctx.lineWidth=2;ctx.beginPath();
+      for(let i=0;i<hist.length;i++){const h=hist[i];const px=X(h.n),py=Y(h.mean); i?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.stroke();
+    }
+    const mean=n>0?sum/n:target, se=n>1?Math.sqrt(Math.max(0,(sq-sum*sum/n)/(n-1)/n)):0;
+    meth.innerHTML= n===0
+      ? `Press <b>Run</b>. Each path is one full waterfall valuation, about a second on the vended engine.`
+      : `Paths: <b>${n}</b> &nbsp;·&nbsp; compute at 1&thinsp;s/path: <b>${fmtClock(n)}</b> &nbsp;·&nbsp; estimate <b>${mean.toFixed(1)}%</b> &plusmn; <b>${(se*1.96).toFixed(1)}</b> &nbsp;·&nbsp; still <b>${(Math.abs(mean-target)).toFixed(1)}</b> off the answer${n>=MAXN?" &nbsp;— and it would keep crawling for another hour to tighten.":""}`;
+  }
+  function step(){ if(n>=MAXN){stop();return;} const x=onePath(); n++; sum+=x; sq+=x*x;
+    const mean=sum/n, se=n>1?Math.sqrt(Math.max(0,(sq-sum*sum/n)/(n-1)/n)):0; hist.push({n,mean,se}); draw(); }
+  function run(){ if(timer)return; runBtn.textContent="Pause"; timer=setInterval(step,230); }
+  function stop(){ if(timer){clearInterval(timer);timer=null;} runBtn.textContent="Run"; }
+  function reset(){ stop(); n=0;sum=0;sq=0;hist=[]; draw(); }
+  runBtn.addEventListener("click",()=>{ if(timer)stop(); else if(n<MAXN)run(); });
+  resetBtn.addEventListener("click",reset);
+  window.addEventListener("resize",draw); draw();
 })();
 </script>
 
@@ -1544,9 +2035,9 @@ draw();
     });
     // profit callout
     ctx.textAlign="center"; ctx.font="bold 12px sans-serif"; ctx.fillStyle=eps?"#1e8449":"#d62728";
-    const callout = eps ? "arranger keeps 0 — no free lunch"
+    const callout = eps ? "arranger keeps 0: no free lunch"
       : (profit>0 ? "arranger keeps "+(profit*100).toFixed(2)+"% of pool, because different probabilities are applied to inflowing and outgoing cashflows"
-                  : "arranger loses "+(-profit*100).toFixed(2)+"% — the Ratings inputs are harsher than the market");
+                  : "arranger loses "+(-profit*100).toFixed(2)+"%: the Ratings inputs are harsher than the market");
     ctx.fillText(callout, W/2, H-14);
 
     meth.innerHTML=
@@ -1604,7 +2095,7 @@ draw();
       ctx.fillStyle= on?"#555":"#bbb"; ctx.fillText(labs[k-1], x+bw/2, padT+ph+20);
     }
     ctx.fillStyle="#888";ctx.textAlign="left";ctx.fillText("understatement of senior-tranche loss (log scale)",padL,padT-9);
-    meth.innerHTML=`Senior <b>[7–100%]</b> expected loss — market truth <b>${(elT*100).toFixed(2)}%</b>, agency <em>R</em> <b>${(elA*100).toFixed(3)}%</b>. One CDO understates by <b>${fmt(f)}×</b>; nested ${depth} deep, the same wrong number compounds to <b>${fmt(Math.pow(f,depth))}×</b>.`;
+    meth.innerHTML=`Senior <b>[7–100%]</b> expected loss: market truth <b>${(elT*100).toFixed(2)}%</b>, agency <em>R</em> <b>${(elA*100).toFixed(3)}%</b>. One CDO understates by <b>${fmt(f)}×</b>; nested ${depth} deep, the same wrong number compounds to <b>${fmt(Math.pow(f,depth))}×</b>.`;
   }
   [T,A,Nn].forEach(e=>e.addEventListener("input",draw)); window.addEventListener("resize",draw); draw();
 })();
