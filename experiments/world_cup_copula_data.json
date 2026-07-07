@@ -1,0 +1,110 @@
+{
+ "winner": {
+  "Egypt": 0.0035,
+  "Norway": 0.0575,
+  "Morocco": 0.0285,
+  "Colombia": 0.0335,
+  "Switzerland": 0.0095,
+  "England": 0.1495,
+  "Belgium": 0.0235,
+  "Argentina": 0.1775,
+  "France": 0.3375,
+  "Spain": 0.1905
+ },
+ "advance": {
+  "Spain": 0.745,
+  "Belgium": 0.265,
+  "Norway": 0.365,
+  "England": 0.645,
+  "Morocco": 0.225,
+  "France": 0.775,
+  "Switzerland": 0.395,
+  "Colombia": 0.615,
+  "Egypt": 0.14500000000000002,
+  "Argentina": 0.855
+ },
+ "final": {
+  "Switzerland": 0.035,
+  "Norway": 0.14500000000000002,
+  "Morocco": 0.08499999999999999,
+  "France": 0.525,
+  "Spain": 0.345,
+  "England": 0.345,
+  "Egypt": 0.015,
+  "Colombia": 0.10500000000000001,
+  "Belgium": 0.065,
+  "Argentina": 0.365
+ },
+ "semi": {
+  "Switzerland": 0.10500000000000001,
+  "Norway": 0.365,
+  "Morocco": 0.215,
+  "France": 0.775,
+  "Spain": 0.745,
+  "England": 0.645,
+  "Egypt": 0.035,
+  "Colombia": 0.245,
+  "Belgium": 0.265,
+  "Argentina": 0.645
+ },
+ "games": {
+  "26JUL10ESPBEL": {
+   "ESP": "Spain",
+   "BEL": "Belgium"
+  },
+  "26JUL11NORENG": {
+   "NOR": "Norway",
+   "ENG": "England"
+  },
+  "26JUL09FRAMAR": {
+   "MAR": "Morocco",
+   "FRA": "France"
+  },
+  "26JUL07SUICOL": {
+   "SUI": "Switzerland",
+   "COL": "Colombia"
+  },
+  "26JUL07ARGEGY": {
+   "EGY": "Egypt",
+   "ARG": "Argentina"
+  }
+ },
+ "codes": {
+  "ESP": "Spain",
+  "BEL": "Belgium",
+  "NOR": "Norway",
+  "ENG": "England",
+  "MAR": "Morocco",
+  "FRA": "France",
+  "SUI": "Switzerland",
+  "COL": "Colombia",
+  "EGY": "Egypt",
+  "ARG": "Argentina"
+ },
+ "final_matchup": {
+  "Morocco|Switzerland": 0.0025,
+  "Morocco|Norway": 0.012,
+  "Morocco|England": 0.0265,
+  "Morocco|Egypt": 0.0025,
+  "Morocco|Colombia": 0.0085,
+  "Morocco|Argentina": 0.0295,
+  "France|Switzerland": 0.0125,
+  "France|Norway": 0.10450000000000001,
+  "France|England": 0.1835,
+  "France|Egypt": 0.006999999999999999,
+  "France|Colombia": 0.0555,
+  "France|Argentina": 0.218,
+  "Spain|Switzerland": 0.008,
+  "Spain|Norway": 0.058499999999999996,
+  "Spain|England": 0.1155,
+  "Spain|Egypt": 0.0035,
+  "Spain|Colombia": 0.035,
+  "Spain|Argentina": 0.14550000000000002,
+  "Belgium|Switzerland": 0.002,
+  "Belgium|Norway": 0.0155,
+  "Belgium|England": 0.020499999999999997,
+  "Belgium|Egypt": 0.0015,
+  "Belgium|Colombia": 0.005,
+  "Belgium|Argentina": 0.023
+ }
+}

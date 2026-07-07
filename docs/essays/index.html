@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Demos — allocation</title>
-  <meta name="description" content="Interactive, in-browser demos: implied correlation on the World Cup, tail-sensitive Black-Litterman on the Dow, and a bowling-alley generative model of default contagion.">
+  <title>Essays — allocation</title>
+  <meta name="description" content="Long-form essays: the R-measure and the role of implied correlation in the Global Financial Crisis, told through interactive simulation.">
   <style>
     :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
       --accent:#4a3aff;--border:#e2e2e2;--ink:#1f1d3d;}
@@ -48,31 +48,16 @@
 </header>
 
 <main>
-  <h1>Demos</h1>
-  <p class="subtitle">Interactive, in-browser — they run on the page, no install.</p>
+  <h1>Essays</h1>
+  <p class="subtitle">Long-form, told through interactive simulation.</p>
 
-  <a class="card" href="world-cup/index.html">
-    <span class="tag">Implied correlation · live Kalshi markets</span>
-    <h2>Tetrachoric correlation: World Cup edition</h2>
-    <p>Spin a cloud of bivariate-normal draws until the "both reach the final" corner matches the
-    market, and you have backed out an implied correlation — the same idea that sat under 2008. Then
-    rank every pair of teams by how much their runs to the final co-move.</p>
-  </a>
-
-  <a class="card" href="tail-black-litterman/index.html">
-    <span class="tag">Portfolio overlay · real Dow data</span>
-    <h2>Tail-sensitive Black–Litterman</h2>
-    <p>Drag the tail-view confidence φ and watch a crash-proofing overlay shade the Dow names that
-    crash together more than their correlation implies — reverse optimization with a view on
-    dependence, not returns.</p>
-  </a>
-
-  <a class="card" href="bowling/index.html">
-    <span class="tag">Credit · default contagion</span>
-    <h2>Bowling Alone: Do Copula Models Washout?</h2>
-    <p>Companies are pins in a bowling rack; a shock cascades whole sectors into joint default. The
-    correlation matrix settles, yet the joint-default tail blows past the Gaussian copula that
-    matches every pairwise probability and marginal — the 2008 lesson, live.</p>
+  <a class="card" href="gfc/index.html">
+    <span class="tag">The 2008 crisis · told from the inside</span>
+    <h2>Opiate for the Mathless: the R-measure and the Global Financial Crisis</h2>
+    <p>By someone who led the CDO modelling. Three measures of probability, not two; why a CDO is the
+    simplest company on earth, not a "complex" one; and how the one input that actually mattered —
+    a price on <em>joint</em> defaults, i.e. implied correlation — is what was mispriced. With an
+    interactive quadrature CDO pricer and a spin-the-cloud picture of implied correlation.</p>
   </a>
 </main>
 

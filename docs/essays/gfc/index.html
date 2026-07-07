@@ -98,6 +98,7 @@
       <a href="../../index.html#estimators">Estimators</a>
       <a href="../../papers/index.html">Papers</a>
       <a href="../../demos/index.html">Demos</a>
+      <a href="../../essays/index.html">Essays</a>
       <a href="../../maps/tail-black-litterman.html">Map</a>
       <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
       <a href="https://github.com/microprediction/allocation">GitHub</a>
@@ -311,7 +312,7 @@
   pull away from the Gaussian copula fitted to those very same correlations.</p>
 
     <figure style="margin:18px 0">
-    <iframe src="../bowling/index.html#embed" title="Bowling for contagion, interactive default-contagion demo" loading="lazy" style="width:100%;height:720px;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>
+    <iframe src="../../demos/bowling/index.html#embed" title="Bowling for contagion, interactive default-contagion demo" loading="lazy" style="width:100%;height:720px;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>
     <figcaption class="muted" style="font-size:.85rem;margin-top:6px">Throw shocks, or hit <em>Fast +1000</em>: the correlation matrix settles, yet the joint-default tail keeps pulling away from the Gaussian copula fitted to those very same correlations.</figcaption>
   </figure>
 
@@ -654,7 +655,81 @@
   across. A copula is the dependence divorced from either marginal, which is why the thing you end up
   simulating can have no connection at all to the normal distribution you started from.</p>
 
-  <p><strong>Translator:</strong> That's beautiful.</p>
+  <p>Put it in motion. Two names sit on that same square; each defaults if it lands past a barrier fixed by
+  its default probability &mdash; the <em>marginal</em>, which never moves. <em>Both</em> defaulting is the corner
+  where both do, and that corner’s mass is very nearly all a senior CDO tranche ever cares about. Now spin the
+  dependence &mdash; drag the cloud &mdash; and watch the corner fill while the barriers stay put. Each shaded band is a horizon &mdash; 2 to 10 years &mdash; and the corner deepens the longer you wait. The tilt you have
+  to dial in to reproduce a traded price is the <em>implied correlation</em>: the one number the copula consumes,
+  and the one the agencies fed in stale.</p>
+  <div class="widget">
+    <div class="controls">
+      <label>correlation &rho; <input type="range" id="jdRho" min="-0.4" max="0.9" step="0.01" value="0.25"><span class="val" id="jdRhoV">0.25</span></label>
+      <label>each name&rsquo;s 5-yr default <input type="range" id="jdPd" min="0.02" max="0.25" step="0.005" value="0.06"><span class="val" id="jdPdV">6%</span></label>
+    </div>
+    <div style="display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;margin-top:6px">
+      <canvas id="jdPlane" width="360" height="360" style="max-width:360px;border:1px solid var(--border);border-radius:8px;cursor:ew-resize;touch-action:none"></canvas>
+      <div id="jdInfo" style="flex:1;min-width:240px;font-size:.95rem"></div>
+    </div>
+  </div>
+  <script>(function(){
+    const SQRT2=Math.SQRT2;
+    function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+      const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+    const Phi=x=>0.5*(1+erf(x/SQRT2));
+    function PhiInv(p){if(p<=0)return -6;if(p>=1)return 6;
+      const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],
+      b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+      c=[-.007784894002430293,-.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+      d=[.007784695709041462,.3224671290700398,2.445134137142996,3.754408661907416],pl=.02425,ph=1-pl;let q,r;
+      if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+      if(p<=ph){q=p-.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+      q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    const GLx=[-.1252334085,.1252334085,-.367831499,.367831499,-.5873179543,.5873179543,-.7699026742,.7699026742,-.9041172564,.9041172564,-.9815606342,.9815606342];
+    const GLw=[.2491470458,.2491470458,.2334925365,.2334925365,.2031674267,.2031674267,.1600783285,.1600783285,.106939326,.106939326,.0471753364,.0471753364];
+    function bvnUpper(a,b,r){const base=(1-Phi(a))*(1-Phi(b));if(Math.abs(r)<1e-9)return base;let s=0,hl=r/2;
+      for(let i=0;i<GLx.length;i++){const t=hl+hl*GLx[i];s+=GLw[i]/(2*Math.PI*Math.sqrt(1-t*t))*Math.exp(-(a*a-2*t*a*b+b*b)/(2*(1-t*t)));}return base+hl*s;}
+    const bvnLower=(a,b,r)=>bvnUpper(-a,-b,r);
+    const N=1500,z1=new Float64Array(N),z2=new Float64Array(N);
+    (function(){let a=1337;const rng=()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+      let sp=null;const rn=()=>{if(sp!=null){const s=sp;sp=null;return s;}let u,v,s;do{u=rng()*2-1;v=rng()*2-1;s=u*u+v*v;}while(s>=1||s===0);const m=Math.sqrt(-2*Math.log(s)/s);sp=v*m;return u*m;};
+      for(let i=0;i<N;i++){z1[i]=rn();z2[i]=rn();}})();
+    const cv=document.getElementById("jdPlane"),info=document.getElementById("jdInfo");
+    let rho=0.25,pd5=0.06;
+    const MATS=[{T:2,c:"#7a1408"},{T:4,c:"#b23018"},{T:6,c:"#d9542a"},{T:8,c:"#e08a2c"},{T:10,c:"#e6b23a"}];
+    function bars(){const la=-Math.log(1-pd5)/5;return MATS.map(m=>{const pd=1-Math.exp(-la*m.T);return {T:m.T,c:m.c,pd,d:PhiInv(pd)};});}
+    function draw(B){const g=cv.getContext&&cv.getContext("2d");if(!g)return;const W=cv.width,H=cv.height,L=3.4;
+      const X=v=>(v+L)/(2*L)*W,Y=v=>H-(v+L)/(2*L)*H;
+      g.clearRect(0,0,W,H);
+      for(let k=B.length-1;k>=0;k--){const d=B[k].d;g.globalAlpha=.12;g.fillStyle=B[k].c;g.fillRect(0,Y(d),X(d),H-Y(d));}  // nested corners, 10y lightest at back
+      g.globalAlpha=1;
+      for(const b of B){g.strokeStyle=b.c;g.globalAlpha=.5;g.lineWidth=1;g.beginPath();g.moveTo(X(b.d),Y(b.d));g.lineTo(X(b.d),0);g.moveTo(X(b.d),Y(b.d));g.lineTo(0,Y(b.d));g.stroke();}
+      g.globalAlpha=1;
+      const s=Math.sqrt(Math.max(1-rho*rho,0));
+      for(let i=0;i<N;i++){const x=z1[i],y=rho*z1[i]+s*z2[i];let col="#c9c9d2",al=.26,r=1.3;
+        for(const b of B){if(x<b.d&&y<b.d){col=b.c;al=.85;r=2.0;break;}}   // smallest horizon band it falls in
+        g.globalAlpha=al;g.fillStyle=col;g.beginPath();g.arc(X(x),Y(y),r,0,7);g.fill();}
+      g.globalAlpha=1;g.fillStyle="#5a5a5a";g.font="11px -apple-system,system-ui,sans-serif";
+      g.fillText("\u2190 A defaults",6,H-8);g.save();g.translate(12,16);g.rotate(Math.PI/2);g.fillText("\u2190 B defaults",0,0);g.restore();
+      g.fillText("both default",6,H-24);}
+    function update(){document.getElementById("jdRhoV").textContent=(rho>=0?"+":"")+rho.toFixed(2);
+      document.getElementById("jdPdV").textContent=(pd5*100).toFixed(1)+"%";
+      const B=bars();draw(B);
+      const rows=B.map(b=>`<b style="color:${b.c}">${(bvnLower(b.d,b.d,rho)*100).toFixed(2)}%</b> &mdash; both within ${b.T} years`).join("<br>");
+      const ind2=(B[0].pd*B[0].pd*100).toFixed(2), ind10=(B[4].pd*B[4].pd*100).toFixed(2);
+      info.innerHTML=`<p style="margin:.2em 0;line-height:1.65;font-size:.95rem">${rows}</p>
+        <p class="muted" style="font-size:.86rem">Chance <b>both</b> names default within each horizon. Independent (&rho;&nbsp;=&nbsp;0) the 2- and 10-year numbers would be only ${ind2}% and ${ind10}%; the gap is what correlation buys, and it widens the longer you wait.</p>
+        <p style="font-size:.92rem">A senior tranche only loses money when names default <em>together</em> &mdash; its whole value is a bet on this corner. The desk does not measure &rho;; it reads it off tranche prices. That backed-out number is the implied correlation, and it is the input that was wrong in 2008.</p>`;}
+    document.getElementById("jdRho").addEventListener("input",e=>{rho=parseFloat(e.target.value);update();});
+    document.getElementById("jdPd").addEventListener("input",e=>{pd5=parseFloat(e.target.value);update();});
+    let drag=false,lx=0;
+    cv.addEventListener("pointerdown",e=>{drag=true;lx=e.clientX;cv.setPointerCapture(e.pointerId);});
+    cv.addEventListener("pointermove",e=>{if(!drag)return;rho=Math.max(-0.4,Math.min(0.9,rho+(e.clientX-lx)*0.005));lx=e.clientX;document.getElementById("jdRho").value=rho;update();});
+    cv.addEventListener("pointerup",()=>drag=false);
+    update();
+  })();</script>
+
+
+  <p><strong>Translator:</strong> That’s beautiful. I could just fall in love with the mathematical elegance, put this in every Excel calculator, and blow up the financial system through epistemic blindness.</p>
   <p><strong>Jiang:</strong> No, it isn't. Not here. It is a pretty object applied to a very unnatural thing,
   default <em>times</em>, for exactly the reason we went through before: the picture is static and a default
   time is not. The square sits still; the moment one name defaults the whole thing reprices and the survivors'
