@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Demos — allocation</title>
-  <meta name="description" content="Interactive, in-browser demos: implied correlation on the World Cup, tail-sensitive Black-Litterman on the Dow, and a bowling-alley generative model of default contagion.">
+  <meta name="description" content="Interactive, in-browser demos of the allocation package's estimators — the Thurstone race and the Schur gamma coupling — plus implied correlation on the World Cup, tail-sensitive Black-Litterman, and a generative model of default contagion.">
   <style>
     :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
       --accent:#4a3aff;--border:#e2e2e2;--ink:#1f1d3d;}
@@ -27,6 +27,10 @@
     a.card p{margin:0;color:var(--muted);font-size:1rem}
     a.card .tag{display:inline-block;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;
       color:var(--faint);font-weight:600;margin-bottom:8px}
+    h2.group{font-size:1.05rem;margin:28px 0 2px;color:var(--muted);font-weight:600;
+      border-bottom:1px solid var(--border);padding-bottom:4px}
+    a.card code{background:#f3f3f7;padding:0 4px;border-radius:3px;font-size:.9em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
     footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
   </style>
 </head>
@@ -49,6 +53,29 @@
 <main>
   <h1>Demos</h1>
   <p class="subtitle">Interactive, in-browser — they run on the page, no install.</p>
+
+  <h2 class="group">The estimators</h2>
+
+  <a class="card" href="thurstone-race/index.html">
+    <span class="tag">Thurstone portfolio · live race in the browser</span>
+    <h2>The Thurstone race: clone a stock</h2>
+    <p>Weights are the winning probabilities of a race among the assets. Add a near-duplicate of
+    a Dow name and drag its correlation: the race de-duplicates the pair continuously, equal
+    weight is blind to it, and minimum variance takes large opposite positions whose sign flips
+    under a 0.1% input change. Runs the estimator's forward pass on 131,072 common-seed
+    scenarios, live.</p>
+  </a>
+
+  <a class="card" href="schur-gamma/index.html">
+    <span class="tag">Schur-complementary · HRP to minimum variance</span>
+    <h2>One slider from HRP to minimum variance</h2>
+    <p>The Schur <code>γ</code> coupling on 28 Dow names: drag <code>γ</code> and watch the
+    weights deform continuously from HRP toward minimum variance, over a Fiedler-seriated
+    correlation heatmap. Includes the turnover cost of the dendrogram this construction
+    replaces, measured over 700 weekly rebalances.</p>
+  </a>
+
+  <h2 class="group">Dependence, tails, and 2008</h2>
 
   <a class="card" href="world-cup/index.html">
     <span class="tag">Implied correlation · live Kalshi markets</span>
