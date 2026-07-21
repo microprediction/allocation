@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Tetrachoric correlation: World Cup edition — allocation</title>
-  <meta name="description" content="A teaching introduction to implied correlation — the Gaussian-copula number behind the 2008 crisis — made concrete on live Kalshi World Cup markets.">
+  <meta name="description" content="A teaching introduction to implied correlation, made concrete on live Kalshi World Cup markets.">
   <style>
     :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
       --accent:#4a3aff;--accent-soft:#ecebfb;--border:#e2e2e2;--ink:#1f1d3d;
@@ -101,16 +101,13 @@
 
 <main>
   <h1>Tetrachoric correlation: World Cup edition</h1>
-  <p class="subtitle">Backing a hidden dependence out of market prices — the implied correlation behind the 2008 crisis, on something friendlier than mortgages.</p>
+  <p class="subtitle">Backing a hidden dependence out of market prices.</p>
 
   <p class="lead"><em>Implied correlation</em> is a number you never measure directly; you back it out of prices.
   Whenever a market quotes a joint event next to its parts, exactly one correlation makes the two agree under a
-  Gaussian copula — that is the implied correlation. A number of exactly this kind — a price on how often things
-  happen <em>together</em> — sat at the centre of the 2008 crisis. Not the “complexity” the post-mortems blamed
-  (a CDO is an empty box that buys bonds and pays them out in order of seniority); the one genuinely hard input was
-  putting a number on <em>joint</em> defaults, and that is where the trouble lived.</p>
+  Gaussian copula — that is the implied correlation.</p>
 
-  <p>This page backs the same number out of a football tournament. For two teams in <em>opposite halves</em> of the
+  <p>This page backs the number out of a football tournament. For two teams in <em>opposite halves</em> of the
   draw, “both reach the final” is the very same event as “meet in the final.” Kalshi prices each team's chance of
   reaching the final (the parts) and the chance a given pair meet there (the joint); those prices pin the implied
   correlation between the two teams' fates — no model of the teams required. The demo does this for every cross-half
@@ -160,8 +157,7 @@
   <em>you</em> assume: at zero, the fair price of each “meet in the final” contract is simply the product of the two
   make-final odds; raise it and co-moving pairs grow dearer, lower it and they grow cheaper. The gaps below are how
   far each market price sits from the fair price implied by <em>your</em> number. A basket is worth only what you
-  assume about the joint behaviour of its parts — which is exactly why a single mispriced joint-default input, not
-  any “complexity”, was the decisive one in 2008.</p>
+  assume about the joint behaviour of its parts.</p>
   <div class="widget">
     <div class="controls">
       <label for="rho">Correlation you assume</label>
