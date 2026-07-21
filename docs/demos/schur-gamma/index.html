@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Schur-complementary allocation — allocation</title>
+  <meta name="description" content="One slider from HRP to minimum variance: the Schur gamma coupling on real Dow data, with Fiedler seriation in place of a dendrogram, and the turnover consequence.">
+  <style>
+    :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
+      --accent:#4a3aff;--accent-soft:#ecebfb;--border:#e2e2e2;--ink:#1f1d3d;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.6;font-size:17px}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:860px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    main{max-width:860px;margin:32px auto;padding:0 24px 60px}
+    h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2}
+    .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 24px}
+    .lead{font-size:1.07rem}
+    h2{font-size:1.3rem;margin:2.2em 0 .6em;border-bottom:1px solid var(--border);padding-bottom:4px}
+    p{margin:.8em 0} .muted{color:var(--muted)}
+    code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+    footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+    .widget{border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin:18px 0;background:var(--panel)}
+    .controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+    .controls label{font-weight:600;font-size:.95rem;white-space:nowrap}
+    .controls button{font:inherit;font-size:.92rem;padding:3px 10px;border:1px solid var(--border);
+      border-radius:5px;background:#fff;color:var(--text);cursor:pointer}
+    .controls button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+    .controls input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+    .gv{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent);min-width:3em;text-align:right}
+    .ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--faint);margin-top:-2px}
+    canvas{width:100%;height:auto;display:block;margin:6px 0}
+    .readout{font-size:.9rem;color:var(--muted);margin-top:6px}
+    .readout b{color:var(--text)}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <a href="../../index.html#methods">Methods</a>
+      <a href="../../index.html#estimators">Estimators</a>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>Schur-complementary allocation</h1>
+  <p class="subtitle">One slider from HRP to minimum variance, over a smooth ordering.</p>
+
+  <p class="lead">Hierarchical risk parity splits the universe in two, allocates between the
+  halves by inverse variance, and recurses — never inverting a matrix, but also never using the
+  covariance <em>between</em> the halves. Minimum variance uses all of it, through
+  <code>Σ⁻¹</code>. The Schur-complementary portfolio connects them with a single coupling
+  parameter: at <code>γ = 0</code> the recursion is exactly HRP; as <code>γ → 1</code> the
+  off-diagonal blocks are folded back in via Schur complements and the weights approach minimum
+  variance.</p>
+
+  <p>One more substitution matters for streaming use. Classic HRP orders assets by an
+  agglomerative dendrogram, which can reorder discontinuously as the covariance drifts. Here the
+  order comes from <em>Fiedler seriation</em> — the second eigenvector of the similarity graph's
+  Laplacian — which moves continuously with the covariance. The second widget shows what that is
+  worth in turnover.</p>
+
+  <h2>Try it: drag γ</h2>
+  <p>Daily returns of 28 Dow names, 2010–2024. The heatmap is the empirical correlation in the
+  chosen order; the bars are the Schur weights, recomputed by the actual package
+  (<code>compute_monotonic_weights</code>) on a grid of γ and shown in the same order.</p>
+
+  <div class="widget">
+    <div class="controls">
+      <label for="gamma">coupling γ</label>
+      <input type="range" id="gamma" min="0" max="1" step="0.02" value="0" />
+      <span class="gv" id="gammaVal">0.00</span>
+    </div>
+    <div class="ends"><span>0 — HRP (block-diagonal)</span><span>minimum variance — 1</span></div>
+    <div class="controls" style="margin-top:10px">
+      <label>order</label>
+      <button id="ordF" class="on">Fiedler seriation</button>
+      <button id="ordD">dendrogram</button>
+      <button id="ordA">alphabetical</button>
+    </div>
+    <canvas id="chart" width="820" height="620"></canvas>
+    <div class="readout" id="readout"></div>
+  </div>
+
+  <p>Two things to notice. The weights deform <em>continuously</em> in γ — there is no point at
+  which the portfolio switches regime. And the slider quietly stops helping: past
+  <code>γ ≈ 0.67</code> on this covariance, pushing further no longer reduces variance, so the
+  estimator caps the effective γ there (the <code>keep_monotonic</code> behaviour; the readout
+  shows both the requested and effective value). Portfolio variance falls from 1.39× the
+  unconstrained minimum-variance level at γ = 0 to 1.34× at the cap — a modest gain on this
+  particular covariance, priced long-only and without ever inverting <code>Σ</code>.</p>
+
+  <h2>What the smooth ordering is worth</h2>
+  <p>Same experiment twice: an EWMA covariance (60-day halflife) over the same 28 names,
+  rebalanced weekly at γ = 0.5, 2011–2024. The only difference is the ordering fed to the
+  recursion — a dendrogram recomputed each week, versus Fiedler seriation warm-started from the
+  previous week. Cumulative one-way turnover:</p>
+
+  <div class="widget">
+    <canvas id="turn" width="820" height="300"></canvas>
+    <div class="readout" id="turnReadout"></div>
+  </div>
+
+  <p>The dendrogram portfolio pays about 40% more turnover for the same recursion on the same
+  covariance — the extra trades are pure reordering, not information. The gap is the point of
+  replacing the combinatorial step with a spectral one: the allocation becomes a continuous
+  function of the covariance end to end, which is what makes a streaming
+  <code>partial_fit</code> cheap to follow in practice.</p>
+
+  <p class="muted">Reproducible: <code>experiments/gen_schur_gamma_data.py</code> computes
+  everything shown here (orders, weight grid, turnover series) with the
+  <code>allocation</code> package. Estimator: <code>allocation/schur.py</code>
+  (<code>SchurComplementary</code>, and <code>HierarchicalRiskParity</code> as its
+  <code>γ = 0</code> case). Background and bibliography at
+  <a href="https://schur.microprediction.org">schur.microprediction.org</a>.</p>
+</main>
+
+<footer>
+  Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.
+</footer>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  const {names, n, corr, orderF, orderD, gammas, Wg, effg, varr, years, cumF, cumD} = SG;
+  const dpr = window.devicePixelRatio || 1;
+  const cv = document.getElementById("chart"), ctx = cv.getContext("2d");
+  const gEl = document.getElementById("gamma"), gVal = document.getElementById("gammaVal"),
+        readout = document.getElementById("readout");
+  const ordBtns = {F: document.getElementById("ordF"), D: document.getElementById("ordD"),
+                   A: document.getElementById("ordA")};
+  const orders = {F: orderF, D: orderD, A: Array.from({length:n}, (_,i)=>i)};
+  let ord = "F";
+
+  function setup(c, cssH){
+    const el = c, cx = el.getContext("2d");
+    const cssW = el.clientWidth || 820;
+    el.width = cssW*dpr; el.height = cssH*dpr; el.style.height = cssH + "px";
+    cx.setTransform(dpr,0,0,dpr,0,0);
+    return {cx, W: cssW, H: cssH};
+  }
+
+  // colour scale stretched to the off-diagonal range, so block structure is visible
+  let cmin = 1, cmax = -1;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++)
+    if (i !== j){ cmin = Math.min(cmin, corr[i][j]); cmax = Math.max(cmax, corr[i][j]); }
+  function cellColor(v){
+    const t = Math.max(0, Math.min(1, (v - cmin) / (cmax - cmin)));
+    const r = Math.round(255 + t*(74-255)), g = Math.round(255 + t*(58-255));
+    return `rgb(${r},${g},255)`;
+  }
+
+  function draw(){
+    const {cx, W} = setup(cv, 620);
+    cx.clearRect(0,0,W,620);
+    const o = orders[ord];
+    // ---- heatmap (left-ish, centered), labels on left and top
+    const labelPad = 44, hmSize = Math.min(W - labelPad - 10, 420);
+    const cell = hmSize / n, hx = labelPad, hy = labelPad;
+    cx.font = "8.5px sans-serif";
+    for (let i = 0; i < n; i++){
+      for (let j = 0; j < n; j++){
+        cx.fillStyle = cellColor(corr[o[i]][o[j]]);
+        cx.fillRect(hx + j*cell, hy + i*cell, cell+0.5, cell+0.5);
+      }
+      cx.fillStyle = "#555"; cx.textAlign = "right";
+      cx.fillText(names[o[i]], hx - 3, hy + i*cell + cell*0.75);
+      cx.save(); cx.translate(hx + i*cell + cell*0.75, hy - 3); cx.rotate(-Math.PI/2);
+      cx.textAlign = "left"; cx.fillText(names[o[i]], 0, 0); cx.restore();
+    }
+    cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
+    cx.fillText("empirical correlation, " +
+      (ord === "F" ? "Fiedler order" : ord === "D" ? "dendrogram order" : "alphabetical order") +
+      ` (colour stretched over ${cmin.toFixed(2)}–${cmax.toFixed(2)})`,
+      hx, hy + hmSize + 16);
+
+    // ---- weight bars under the heatmap, same order
+    const gi = Math.round(+gEl.value / 0.02);
+    const w = Wg[gi];
+    const top = hy + hmSize + 30, bh = 620 - top - 40;
+    let wmax = 0; for (const wi of w) wmax = Math.max(wmax, wi);
+    const y0 = top + bh;
+    cx.strokeStyle = "#ccc"; cx.beginPath(); cx.moveTo(hx, y0+0.5); cx.lineTo(hx+hmSize, y0+0.5); cx.stroke();
+    for (let k = 0; k < n; k++){
+      const i = o[k], x = hx + k*cell + cell*0.5;
+      cx.fillStyle = "#4a3aff"; cx.globalAlpha = 0.75;
+      cx.fillRect(x - cell*0.32, y0, cell*0.64, -(w[i]/wmax)*(bh-14));
+      cx.globalAlpha = 1;
+    }
+    cx.fillStyle = "#666"; cx.font = "11px sans-serif";
+    cx.fillText("Schur weights at this γ (same order; tallest = " + (wmax*100).toFixed(1) + "%)", hx, top + 8);
+
+    readout.innerHTML = `Requested <b>γ = ${(+gEl.value).toFixed(2)}</b>, effective ` +
+      `<b>γ = ${effg[gi].toFixed(2)}</b> (capped where variance stops falling). ` +
+      `Portfolio variance: <b>${varr[gi].toFixed(2)}×</b> the unconstrained minimum-variance level.`;
+  }
+
+  // ---- turnover chart (static)
+  function drawTurn(){
+    const c = document.getElementById("turn");
+    const {cx, W, H} = setup(c, 300);
+    cx.clearRect(0,0,W,H);
+    const padL = 40, padR = 120, padT = 16, padB = 26;
+    const x0 = years[0], x1 = years[years.length-1];
+    const ymax = Math.max(cumD[cumD.length-1], cumF[cumF.length-1]) * 1.05;
+    const X = v => padL + (v - x0)/(x1 - x0)*(W - padL - padR);
+    const Y = v => H - padB - v/ymax*(H - padT - padB);
+    cx.strokeStyle = "#ddd"; cx.fillStyle = "#888"; cx.font = "10px sans-serif"; cx.textAlign = "center";
+    for (let yr = Math.ceil(x0); yr <= x1; yr += 2){
+      cx.beginPath(); cx.moveTo(X(yr), padT); cx.lineTo(X(yr), H-padB); cx.stroke();
+      cx.fillText(yr, X(yr), H-10);
+    }
+    cx.textAlign = "right";
+    for (let v = 0; v <= ymax; v += 50){
+      cx.beginPath(); cx.moveTo(padL, Y(v)); cx.lineTo(W-padR, Y(v)); cx.stroke();
+      cx.fillText(v, padL-5, Y(v)+3);
+    }
+    function line(series, color, label){
+      cx.strokeStyle = color; cx.lineWidth = 1.8; cx.beginPath();
+      for (let i = 0; i < years.length; i++){
+        const x = X(years[i]), y = Y(series[i]);
+        i ? cx.lineTo(x,y) : cx.moveTo(x,y);
+      }
+      cx.stroke();
+      cx.fillStyle = color; cx.textAlign = "left"; cx.font = "11px sans-serif";
+      cx.fillText(label, X(x1)+6, Y(series[series.length-1])+4);
+    }
+    line(cumD, "#9aa0b0", "dendrogram " + Math.round(cumD[cumD.length-1]));
+    line(cumF, "#4a3aff", "Fiedler " + Math.round(cumF[cumF.length-1]));
+    cx.fillStyle = "#888"; cx.textAlign = "left"; cx.font = "11px sans-serif";
+    cx.fillText("cumulative one-way turnover (L1), weekly rebalance, γ = 0.5", padL, 12);
+    document.getElementById("turnReadout").innerHTML =
+      `${years.length} weekly rebalances, 2011–2024. Per rebalance: ` +
+      `<b>${(cumF[cumF.length-1]/years.length).toFixed(3)}</b> under Fiedler seriation vs ` +
+      `<b>${(cumD[cumD.length-1]/years.length).toFixed(3)}</b> under the dendrogram — ` +
+      `<b>${(cumD[cumD.length-1]/cumF[cumF.length-1]).toFixed(2)}×</b>.`;
+  }
+
+  const update = () => { gVal.textContent = (+gEl.value).toFixed(2); draw(); };
+  gEl.addEventListener("input", update);
+  Object.entries(ordBtns).forEach(([k, b]) => b.addEventListener("click", () => {
+    ord = k;
+    Object.values(ordBtns).forEach(x => x.classList.toggle("on", x === b));
+    draw();
+  }));
+  window.addEventListener("resize", () => { draw(); drawTurn(); });
+  update(); drawTurn();
+})();
+</script>
+</body>
+</html>

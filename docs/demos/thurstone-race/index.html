@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Thurstone race — allocation</title>
+  <meta name="description" content="Weights as winning probabilities. Add a near-duplicate of an asset and compare how a Thurstone race, equal weight, and minimum variance respond.">
+  <style>
+    :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
+      --accent:#4a3aff;--accent-soft:#ecebfb;--border:#e2e2e2;--ink:#1f1d3d;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.6;font-size:17px}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:860px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    main{max-width:860px;margin:32px auto;padding:0 24px 60px}
+    h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2}
+    .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 24px}
+    .lead{font-size:1.07rem}
+    h2{font-size:1.3rem;margin:2.2em 0 .6em;border-bottom:1px solid var(--border);padding-bottom:4px}
+    p{margin:.8em 0} .muted{color:var(--muted)}
+    code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+    footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+    .widget{border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin:18px 0;background:var(--panel)}
+    .controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+    .controls label{font-weight:600;font-size:.95rem;white-space:nowrap}
+    .controls select,.controls button{font:inherit;font-size:.92rem;padding:3px 8px;border:1px solid var(--border);
+      border-radius:5px;background:#fff;color:var(--text)}
+    .controls button{cursor:pointer}
+    .controls button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+    .controls input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+    .rho{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent);min-width:3.4em;text-align:right}
+    .ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--faint);margin-top:-2px}
+    canvas{width:100%;height:auto;display:block;margin:6px 0}
+    .readout{font-size:.9rem;color:var(--muted);margin-top:6px}
+    .readout b{color:var(--text)} .neg{color:#c0392b;font-weight:600}
+    .loading{color:var(--faint);font-style:italic;padding:30px 0;text-align:center}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <a href="../../index.html#methods">Methods</a>
+      <a href="../../index.html#estimators">Estimators</a>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>The Thurstone race</h1>
+  <p class="subtitle">Weights are winning probabilities. What happens when you add a near-duplicate?</p>
+
+  <p class="lead">A classic test of a choice model is the <em>red bus / blue bus</em> problem:
+  split one option into two near-identical copies and see whether the model treats them as one
+  option or two. Portfolios face the same test. Universes contain near-duplicates — share
+  classes, an ETF and its top holding, two miners of the same commodity — and an allocator has
+  to decide how much a near-copy of something it already holds is worth.</p>
+
+  <p>The <a href="../../index.html#methods">Thurstone portfolio</a> answers by simulation:
+  weights are the winning probabilities of a race among the assets, run under the estimated
+  correlation. A clone at correlation <code>ρ = 1</code> can only split its original's wins, so
+  the pair inherits the original's weight. At <code>ρ = 0</code> the clone is a genuinely new
+  asset and earns a full weight of its own. In between, the race prices <em>how new</em> the
+  asset really is, continuously in <code>ρ</code>.</p>
+
+  <h2>Try it: clone a Dow stock</h2>
+  <p>Twelve Dow names, daily returns 2010–2024, with abilities calibrated so the race under the
+  empirical correlation reproduces equal weight. Pick a stock, and drag <code>ρ</code> — the
+  correlation of a synthetic clone (same volatility, same ability, correlation to everything
+  else scaled by <code>ρ</code>). The race below re-runs live in your browser on a fixed
+  ensemble of 131,072 scenarios — the same common-seed transport the streaming estimator uses,
+  which is why the bars move smoothly as you drag rather than flickering with sampling noise.
+  Two standard allocators run alongside on the same inputs.</p>
+
+  <div class="widget">
+    <div class="controls">
+      <label for="asset">clone</label>
+      <select id="asset"></select>
+      <label for="rho">at correlation ρ</label>
+      <input type="range" id="rho" min="0" max="0.999" step="0.001" value="0.95" disabled />
+      <span class="rho" id="rhoVal">0.950</span>
+    </div>
+    <div class="ends"><span>0 — an unrelated new asset</span><span>a near-duplicate — 0.999</span></div>
+    <div class="controls" style="margin-top:10px">
+      <label>nudge the clone's volatility</label>
+      <button id="dvDn">−0.1%</button>
+      <button id="dv0" class="on">exact</button>
+      <button id="dvUp">+0.1%</button>
+    </div>
+    <div id="loading" class="loading">colouring the scenario ensemble…</div>
+    <canvas id="chart" width="820" height="470" style="display:none"></canvas>
+    <div class="readout" id="readout"></div>
+  </div>
+
+  <h2>What to look at</h2>
+  <p><em>Equal weight</em> is blind to the duplication: the pair gets 2/13 of the portfolio at
+  every <code>ρ</code>. Adding enough copies of one asset would concentrate the whole portfolio
+  in it.</p>
+  <p><em>The race</em> de-duplicates: as <code>ρ → 1</code> the pair's combined weight falls
+  back to what the original had alone, and the other eleven names barely move. At
+  <code>ρ = 0</code> the clone earns a genuine weight, funded pro-rata. The interpolation
+  between those endpoints is smooth, because winning probability is a smooth function of the
+  correlation.</p>
+  <p><em>Minimum variance</em> responds to <code>ρ</code> too, but through
+  <code>Σ⁻¹</code>, and near-duplication makes <code>Σ</code> nearly singular. The direction
+  "long the clone, short the original" costs almost nothing, so the inverse is free to take
+  large opposite positions in two economically identical assets — and the split it picks is
+  decided by whatever noise is in the inputs. Press the <em>nudge</em> buttons: a 0.1% change
+  in the clone's volatility flips the sign of the split at high <code>ρ</code>. The race
+  weights cannot move under that nudge — the Gaussian race depends on the correlation and the
+  abilities, not the volatilities — but the deeper difference is that no inverse is taken
+  anywhere, so there is no ill-conditioned direction for input noise to be amplified into.</p>
+
+  <p class="muted">The same singularity that breaks the inverse is what the race uses as a
+  signal: duplication shows up as shared wins, not as an unstable matrix. That is the property
+  the <a href="../../papers/index.html">paper</a> calls redundancy consistency, and it is what
+  lets the estimator run on universes where near-duplicates are the rule rather than the
+  exception.</p>
+
+  <p class="muted">Reproducible: <code>experiments/gen_thurstone_race_data.py</code> builds the
+  embedded data (tickers, correlation, calibrated abilities) with the actual
+  <code>allocation</code> package; the in-browser race is the forward pass of
+  <code>ThurstonePortfolio</code> with <code>target="equal"</code>. Estimator:
+  <code>allocation/thurstone.py</code>.</p>
+</main>
+
+<footer>
+  Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.
+</footer>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  const {names, n, theta, vol, C} = TR;
+  const M = 1 << 17;
+
+  // deterministic seeds: mulberry32 + Box-Muller, so the ensemble is fixed
+  function mulberry32(a){ return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const rand = mulberry32(42);
+  let spare = null;
+  function randn(){
+    if (spare !== null){ const s = spare; spare = null; return s; }
+    let u = 0, v = 0;
+    while (u === 0) u = rand();
+    while (v === 0) v = rand();
+    const r = Math.sqrt(-2*Math.log(u)), t = 2*Math.PI*v;
+    spare = r*Math.sin(t); return r*Math.cos(t);
+  }
+
+  // Cholesky of C (n x n, lower)
+  function chol(A, m){
+    const L = Array.from({length:m}, () => new Float64Array(m));
+    for (let i = 0; i < m; i++){
+      for (let j = 0; j <= i; j++){
+        let s = A[i][j];
+        for (let k = 0; k < j; k++) s -= L[i][k]*L[j][k];
+        if (i === j) L[i][i] = Math.sqrt(Math.max(s, 1e-12));
+        else L[i][j] = s / L[j][j];
+      }
+    }
+    return L;
+  }
+
+  // colour the ensemble once: G[m*n+i] ~ correlated noise, eps[m] the clone's own seed
+  const G = new Float32Array(M*n), eps = new Float32Array(M);
+  const wPre = new Float64Array(n);      // race weights before the clone
+  let mvPre;                             // min-variance weights before the clone
+
+  function colour(){
+    const L = chol(C, n), z = new Float64Array(n);
+    for (let m = 0; m < M; m++){
+      for (let j = 0; j < n; j++) z[j] = randn();
+      let bi = 0, bv = Infinity;
+      for (let i = 0; i < n; i++){
+        let s = 0; const Li = L[i];
+        for (let j = 0; j <= i; j++) s += Li[j]*z[j];
+        G[m*n+i] = s;
+        const v = theta[i] + s;
+        if (v < bv){ bv = v; bi = i; }
+      }
+      wPre[bi] += 1;
+      eps[m] = randn();
+    }
+    for (let i = 0; i < n; i++) wPre[i] /= M;
+  }
+
+  // race with the clone of asset a at correlation rho (common seeds)
+  function race(a, rho){
+    const w = new Float64Array(n+1), s2 = Math.sqrt(Math.max(1 - rho*rho, 0));
+    const ta = theta[a];
+    for (let m = 0; m < M; m++){
+      let bi = 0, bv = Infinity;
+      const off = m*n;
+      for (let i = 0; i < n; i++){
+        const v = theta[i] + G[off+i];
+        if (v < bv){ bv = v; bi = i; }
+      }
+      const vc = ta + rho*G[off+a] + s2*eps[m];
+      if (vc < bv) bi = n;
+      w[bi]++;
+    }
+    for (let i = 0; i <= n; i++) w[i] /= M;
+    return w;
+  }
+
+  // solve S w = 1 by Gaussian elimination with partial pivoting, normalize
+  function solveOnes(S, m){
+    const A = S.map(r => r.slice()), b = new Float64Array(m).fill(1);
+    for (let c = 0; c < m; c++){
+      let p = c;
+      for (let r = c+1; r < m; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+      [A[c], A[p]] = [A[p], A[c]]; const t = b[c]; b[c] = b[p]; b[p] = t;
+      for (let r = c+1; r < m; r++){
+        const f = A[r][c]/A[c][c];
+        for (let k = c; k < m; k++) A[r][k] -= f*A[c][k];
+        b[r] -= f*b[c];
+      }
+    }
+    const w = new Float64Array(m);
+    for (let r = m-1; r >= 0; r--){
+      let s = b[r];
+      for (let k = r+1; k < m; k++) s -= A[r][k]*w[k];
+      w[r] = s/A[r][r];
+    }
+    let sum = 0; for (let i = 0; i < m; i++) sum += w[i];
+    for (let i = 0; i < m; i++) w[i] /= sum;
+    return w;
+  }
+
+  function minvar(a, rho, dv){
+    const m = n+1, volC = vol[a]*(1+dv);
+    const S = Array.from({length:m}, () => new Float64Array(m));
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) S[i][j] = vol[i]*vol[j]*C[i][j];
+    for (let j = 0; j < n; j++){ S[n][j] = S[j][n] = volC*vol[j]*rho*C[a][j]; }
+    S[n][a] = S[a][n] = volC*vol[a]*rho;
+    S[n][n] = volC*volC;
+    return solveOnes(S, m);
+  }
+
+  // ---------------------------------------------------------------- drawing
+  const cv = document.getElementById("chart"), ctx = cv.getContext("2d");
+  const rhoEl = document.getElementById("rho"), rhoVal = document.getElementById("rhoVal"),
+        readout = document.getElementById("readout"), loading = document.getElementById("loading"),
+        assetEl = document.getElementById("asset");
+  const dvBtns = [["dvDn",-0.001],["dv0",0],["dvUp",0.001]].map(([id,v]) => {
+    const el = document.getElementById(id); el.dataset.dv = v; return el;
+  });
+  let dv = 0;
+  const dpr = window.devicePixelRatio || 1;
+  names.forEach((nm,i) => {
+    const o = document.createElement("option"); o.value = i; o.textContent = nm; assetEl.appendChild(o);
+  });
+  assetEl.value = 0;
+
+  function setupCanvas(){
+    const cssW = cv.clientWidth || 820, cssH = 470;
+    cv.width = cssW*dpr; cv.height = cssH*dpr; cv.style.height = cssH + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {W: cssW, H: cssH};
+  }
+
+  function panel(W, top, h, title, w, pre, a, signed, scaleMax){
+    const padL = 8, padR = 8, m = n+1, bw = (W-padL-padR)/m;
+    const y0 = signed ? top + h*0.52 : top + h;
+    const scale = (signed ? h*0.42 : h*0.86) / scaleMax;
+    ctx.strokeStyle = "#ccc"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL,y0+0.5); ctx.lineTo(W-padR,y0+0.5); ctx.stroke();
+    for (let i = 0; i < m; i++){
+      const x = padL + i*bw + bw*0.5;
+      const wi = Math.max(-scaleMax, Math.min(scaleMax, w[i]));
+      const isPair = (i === a || i === n);
+      // ghost: pre-clone weight (original assets only)
+      if (i < n && pre){
+        const g = Math.max(-scaleMax, Math.min(scaleMax, pre[i]));
+        ctx.strokeStyle = "#b8b8b8";
+        ctx.strokeRect(x - bw*0.36, y0 - g*scale, bw*0.72, g*scale);
+      }
+      ctx.fillStyle = w[i] < 0 ? "#c0392b" : (isPair ? "#4a3aff" : "#9aa0b0");
+      if (i === n) ctx.globalAlpha = 0.55;
+      ctx.fillRect(x - bw*0.32, y0, bw*0.64, -wi*scale);
+      ctx.globalAlpha = 1;
+      if (Math.abs(w[i]) > scaleMax){   // clipped bar marker
+        ctx.fillStyle = "#555"; ctx.textAlign = "center"; ctx.font = "9px sans-serif";
+        ctx.fillText("…", x, w[i] > 0 ? y0 - scaleMax*scale - 3 : y0 + scaleMax*scale + 9);
+      }
+    }
+    ctx.fillStyle = "#666"; ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText(title, padL, top + 11);
+  }
+
+  function labels(W, H, a){
+    const padL = 8, padR = 8, m = n+1, bw = (W-padL-padR)/m;
+    ctx.font = "10px sans-serif";
+    for (let i = 0; i < m; i++){
+      const x = padL + i*bw + bw*0.5;
+      ctx.save(); ctx.translate(x, H-4); ctx.rotate(-Math.PI/2);
+      ctx.fillStyle = (i === a || i === n) ? "#4a3aff" : "#555";
+      ctx.textAlign = "left";
+      ctx.fillText(i === n ? names[a] + "′" : names[i], 0, 3);
+      ctx.restore();
+    }
+  }
+
+  const pc = x => (x*100).toFixed(1) + "%";
+
+  function draw(){
+    const a = +assetEl.value, rho = +rhoEl.value;
+    const wT = race(a, rho), wMV = minvar(a, rho, dv);
+    const eq = new Float64Array(n+1).fill(1/(n+1));
+    const {W, H} = setupCanvas();
+    ctx.clearRect(0,0,W,H);
+    const lh = 42, ph = (H - lh - 12)/3;
+    let mT = 0; for (let i = 0; i <= n; i++) mT = Math.max(mT, wT[i], wPre[i] || 0);
+    panel(W, 6,          ph-8, "Thurstone race — pair de-duplicates as ρ → 1 (outlines = before the clone)", wT, wPre, a, false, mT*1.15);
+    panel(W, 6+ph,       ph-8, "equal weight — blind to ρ", eq, new Float64Array(n).fill(1/n), a, false, mT*1.15);
+    panel(W, 6+2*ph,     ph-8, "minimum variance Σ⁻¹1 — signed; clipped at ±25%", wMV, mvPre, a, true, 0.25);
+    labels(W, H, a);
+
+    let others = 0;
+    for (let i = 0; i < n; i++) if (i !== a) others += Math.abs(wT[i]-wPre[i]);
+    const mvA = wMV[a], mvC = wMV[n];
+    readout.innerHTML =
+      `<b>${names[a]}</b> had ${pc(wPre[a])} before the clone. Race: pair now holds ` +
+      `<b>${pc(wT[a]+wT[n])}</b> (${pc(wT[a])} + ${pc(wT[n])}); the other eleven names moved ` +
+      `${pc(others)} in total. Equal weight: pair holds ${pc(2/(n+1))} at any ρ. ` +
+      `Min variance: pair at <b>${mvA<0?'<span class="neg">':''}${pc(mvA)}${mvA<0?'</span>':''} / ` +
+      `${mvC<0?'<span class="neg">':''}${pc(mvC)}${mvC<0?'</span>':''}</b>` +
+      (dv !== 0 ? ` — with the clone's volatility nudged ${dv>0?'+':'−'}0.1%.` : `.`);
+  }
+
+  function go(){
+    colour();
+    mvPre = (function(){
+      const S = Array.from({length:n}, (_,i) => Float64Array.from(names, (_,j) => vol[i]*vol[j]*C[i][j]));
+      return solveOnes(S, n);
+    })();
+    loading.style.display = "none"; cv.style.display = "block"; rhoEl.disabled = false;
+    const update = () => { rhoVal.textContent = (+rhoEl.value).toFixed(3); draw(); };
+    rhoEl.addEventListener("input", update);
+    assetEl.addEventListener("change", update);
+    dvBtns.forEach(b => b.addEventListener("click", () => {
+      dv = +b.dataset.dv;
+      dvBtns.forEach(x => x.classList.toggle("on", x === b));
+      draw();
+    }));
+    window.addEventListener("resize", draw);
+    update();
+  }
+  setTimeout(go, 30);
+})();
+</script>
+</body>
+</html>
