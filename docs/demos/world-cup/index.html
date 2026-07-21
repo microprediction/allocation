@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tetrachoric correlation: World Cup edition — allocation</title>
+  <meta name="description" content="A teaching introduction to implied correlation — the Gaussian-copula number behind the 2008 crisis — made concrete on live Kalshi World Cup markets.">
+  <style>
+    :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
+      --accent:#4a3aff;--accent-soft:#ecebfb;--border:#e2e2e2;--ink:#1f1d3d;
+      --neg:#c0392b;--pos:#1e8449;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.6;font-size:17px}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:860px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    main{max-width:860px;margin:32px auto;padding:0 24px 60px}
+    h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2}
+    .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 24px}
+    .lead{font-size:1.07rem}
+    h2{font-size:1.3rem;margin:2.2em 0 .6em;border-bottom:1px solid var(--border);padding-bottom:4px}
+    p{margin:.8em 0} .muted{color:var(--muted)} .small{font-size:.9rem}
+    em{font-style:italic}
+    code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+    .widget{border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin:18px 0;background:var(--panel)}
+    .controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+    .controls label{font-weight:600;font-size:.95rem;white-space:nowrap}
+    .controls input[type=range]{flex:1;min-width:200px;accent-color:var(--accent)}
+    .phi{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent);min-width:3.6em;text-align:right}
+    .widget button{font:inherit;font-size:.9rem;font-weight:600;color:var(--accent);background:var(--panel);
+      border:1px solid var(--border);border-radius:6px;padding:6px 12px;cursor:pointer}
+    .widget button:hover{border-color:var(--accent)}
+    .widget select{font:inherit;font-size:.9rem;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--panel);color:var(--text)}
+    #plane{border:1px solid var(--border);border-radius:8px;background:var(--panel);cursor:ew-resize;touch-action:none;max-width:100%;height:auto}
+    .qinfo .big{font-family:"SFMono-Regular",Menlo,monospace;font-size:1.7rem;font-weight:600;color:var(--accent);line-height:1.1}
+    .qinfo p{margin:.7em 0}
+    .matched{color:var(--pos);font-weight:600}
+    footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+
+    /* ranking */
+    .scale{display:flex;justify-content:space-between;font-size:.78rem;color:var(--faint);
+      margin:0 0 10px;padding:0 50px 0 96px;font-variant-numeric:tabular-nums}
+    .rank{display:flex;flex-direction:column;gap:4px}
+    .rrow{display:grid;grid-template-columns:92px 1fr 50px;gap:10px;align-items:center;font-size:.9rem;
+      border-radius:5px;padding:2px 4px;transition:background .12s}
+    .rrow:hover{background:#f3f3f7}
+    .rrow.dim{opacity:.3}
+    .rrow .pn{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .barwrap{position:relative;height:15px}
+    .barwrap .mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--border)}
+    .barwrap .b{position:absolute;top:2px;height:11px;border-radius:2px}
+    .rrow .rv{font-family:"SFMono-Regular",Menlo,monospace;font-size:.82rem;text-align:right;font-variant-numeric:tabular-nums}
+
+    /* value bets */
+    .bet{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;
+      padding:9px 12px;border:1px solid var(--border);border-radius:7px;background:var(--bg);margin-bottom:8px}
+    .bet .tag{font-size:.72rem;font-weight:700;letter-spacing:.05em;padding:3px 0;text-align:center;border-radius:4px}
+    .bet .tag.buy{color:var(--pos);background:#e9f4ee} .bet .tag.sell{color:var(--neg);background:#f8ebe9}
+    .bet .desc{font-size:.95rem} .bet .desc .m{font-weight:600}
+    .bet .desc small{color:var(--muted);font-family:"SFMono-Regular",Menlo,monospace;font-size:.78rem}
+    .bet .edge{font-family:"SFMono-Regular",Menlo,monospace;font-size:1.05rem;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+    .readout{font-size:.9rem;color:var(--muted);margin-top:10px} .readout b{color:var(--text)}
+
+    /* bracket */
+    .bracket-scroll{overflow-x:auto}
+    #bracket{position:relative}
+    #bracket svg{position:absolute;inset:0;pointer-events:none;overflow:visible}
+    .card{position:absolute;border-radius:6px}
+    .card.leaf{background:var(--bg);border:1px solid var(--border);padding:3px 9px;width:150px;font-size:.85rem;
+      font-weight:600;display:flex;justify-content:space-between;align-items:baseline;gap:6px;cursor:pointer}
+    .card.leaf:hover{border-color:var(--accent)}
+    .card.leaf.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+    .card.leaf .w{font-family:"SFMono-Regular",Menlo,monospace;font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums}
+    .card.node{background:transparent;border:1px dashed var(--border);padding:2px 8px;width:118px;
+      font-family:"SFMono-Regular",Menlo,monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+    .tip{position:fixed;z-index:30;background:var(--ink);color:#fff;font-size:.8rem;padding:7px 10px;border-radius:6px;
+      pointer-events:none;opacity:0;transition:opacity .1s;max-width:250px;line-height:1.5;
+      font-family:"SFMono-Regular",Menlo,monospace}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <a href="../../index.html#methods">Methods</a>
+      <a href="../../index.html#estimators">Estimators</a>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>Tetrachoric correlation: World Cup edition</h1>
+  <p class="subtitle">Backing a hidden dependence out of market prices — the implied correlation behind the 2008 crisis, on something friendlier than mortgages.</p>
+
+  <p class="lead"><em>Implied correlation</em> is a number you never measure directly; you back it out of prices.
+  Whenever a market quotes a joint event next to its parts, exactly one correlation makes the two agree under a
+  Gaussian copula — that is the implied correlation. A number of exactly this kind — a price on how often things
+  happen <em>together</em> — sat at the centre of the 2008 crisis. Not the “complexity” the post-mortems blamed
+  (a CDO is an empty box that buys bonds and pays them out in order of seniority); the one genuinely hard input was
+  putting a number on <em>joint</em> defaults, and that is where the trouble lived. See
+  <a href="../../essays/gfc/index.html">Opiate for the Mathless</a> for the real account, told by someone who led the modelling.</p>
+
+  <p>This page backs the same number out of a football tournament. For two teams in <em>opposite halves</em> of the
+  draw, “both reach the final” is the very same event as “meet in the final.” Kalshi prices each team's chance of
+  reaching the final (the parts) and the chance a given pair meet there (the joint); those prices pin the implied
+  correlation between the two teams' fates — no model of the teams required. The demo does this for every cross-half
+  pair, ranks them, and lets you see how sharply the joint price moves with the correlation you assume.</p>
+  <p class="muted small">Live Kalshi snapshot — 2026 Men's World Cup quarterfinals. A teaching example of implied correlation, not investment advice.</p>
+
+  <h2>What an implied correlation <em>is</em></h2>
+  <p>Two yes/no events each split the plane at a threshold, carving it into four rectangles. The chance that
+  <em>both</em> happen is the mass of a two-dimensional bell sitting in the corner where both are true. Correlation
+  tilts the bell — spin it (drag the cloud, or use the slider) and that corner fills or empties. The <em>implied</em>
+  correlation is simply the tilt that makes the corner's mass equal the market's “meet in the final” price.</p>
+  <div class="widget">
+    <div class="controls">
+      <label for="pairSel">Pair</label>
+      <select id="pairSel"></select>
+      <label for="spin" style="margin-left:auto">Spin&nbsp;ρ</label>
+      <input type="range" id="spin" min="-0.95" max="0.95" step="0.01" value="0">
+      <span class="phi" id="spinV">0.00</span>
+      <button id="snap" type="button">Snap to market</button>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-top:8px">
+      <canvas id="plane" width="380" height="380" aria-label="Bivariate normal cloud with two thresholds"></canvas>
+      <div class="qinfo" id="planeInfo" style="flex:1;min-width:220px"></div>
+    </div>
+  </div>
+
+  <h2>The bracket</h2>
+  <div class="widget">
+    <div class="bracket-scroll"><div id="bracket"></div></div>
+    <p class="muted small" style="margin:.6em 0 0">Percentages are the tournament-winner market. Click a team to spotlight its pairs in the ranking.</p>
+  </div>
+
+  <h2>The implied correlations, ranked</h2>
+  <p>For each cross-half pair, the correlation of the two latent normals whose thresholds reproduce the make-final
+  odds and the meet-in-the-final price — the tetrachoric correlation of the events “A reaches the final” and
+  “B reaches the final.” <span style="color:var(--accent);font-weight:600">Indigo = co-move</span> (their runs rise
+  and fall together); <span style="color:var(--neg);font-weight:600">red = substitute</span> (one team's deep run
+  tends to come at the other's expense). The board averages near zero — the market treats the two halves as roughly
+  independent — but the spread is where the implied correlation lives.</p>
+  <div class="widget">
+    <div class="scale"><span>−0.3 &nbsp;substitute</span><span>0</span><span>co-move&nbsp; +0.3</span></div>
+    <div class="rank" id="rank"></div>
+  </div>
+
+  <h2>Why the number matters: price sensitivity</h2>
+  <p>Implied correlation earns its name because basket prices are exquisitely sensitive to it. Set the correlation
+  <em>you</em> assume: at zero, the fair price of each “meet in the final” contract is simply the product of the two
+  make-final odds; raise it and co-moving pairs grow dearer, lower it and they grow cheaper. The gaps below are how
+  far each market price sits from the fair price implied by <em>your</em> number. A basket is worth only what you
+  assume about the joint behaviour of its parts — which is exactly why a single mispriced joint-default input, not
+  any “complexity”, was the decisive one in 2008.</p>
+  <div class="widget">
+    <div class="controls">
+      <label for="rho">Correlation you assume</label>
+      <input type="range" id="rho" min="-0.2" max="0.4" step="0.01" value="0">
+      <span class="phi" id="rhoV">0.00</span>
+    </div>
+    <div id="bets"></div>
+    <p class="readout" id="betnote"></p>
+  </div>
+
+  <footer id="foot"></footer>
+</main>
+<div class="tip" id="tip"></div>
+
+<script>
+"use strict";
+const SEED = {"tree":{"r":"F","l":{"r":"SF","l":{"r":"QF","l":{"r":"R16","l":{"t":"Switzerland"},"R":{"t":"Colombia"}},"R":{"r":"R16","l":{"t":"Egypt"},"R":{"t":"Argentina"}}},"R":{"r":"QF","l":{"t":"Norway"},"R":{"t":"England"}}},"R":{"r":"SF","l":{"r":"QF","l":{"t":"Spain"},"R":{"t":"Belgium"}},"R":{"r":"QF","l":{"t":"Morocco"},"R":{"t":"France"}}}},"half1":["Switzerland","Colombia","Egypt","Argentina","Norway","England"],"half2":["Spain","Belgium","Morocco","France"],"theta":{"Argentina":0.5531,"Belgium":-0.4501,"Colombia":-0.0703,"Egypt":-0.9399,"England":0.3682,"France":0.8626,"Morocco":-0.225,"Norway":-0.1215,"Spain":0.4767,"Switzerland":-0.454},"winner":{"Egypt":0.0035,"Norway":0.0575,"Morocco":0.0285,"Colombia":0.0335,"Switzerland":0.0095,"England":0.1495,"Belgium":0.0235,"Argentina":0.1775,"France":0.3375,"Spain":0.1905},"final":{"Switzerland":0.035,"Norway":0.14500000000000002,"Morocco":0.08499999999999999,"France":0.525,"Spain":0.345,"England":0.345,"Egypt":0.015,"Colombia":0.10500000000000001,"Belgium":0.065,"Argentina":0.365},"advance":{"Spain":0.745,"Belgium":0.265,"Norway":0.365,"England":0.645,"Morocco":0.225,"France":0.775,"Switzerland":0.395,"Colombia":0.615,"Egypt":0.14500000000000002,"Argentina":0.855},"final_dev":{"Switzerland":0.0347,"Colombia":0.104,"Egypt":0.0149,"Argentina":0.3614,"Norway":0.1436,"England":0.3416,"Spain":0.3382,"Belgium":0.0637,"Morocco":0.0833,"France":0.5147},"final_matchup":{"Morocco|Switzerland":0.0025,"Morocco|Norway":0.012,"Morocco|England":0.0265,"Morocco|Egypt":0.0025,"Morocco|Colombia":0.0085,"Morocco|Argentina":0.0295,"France|Switzerland":0.0125,"France|Norway":0.10450000000000001,"France|England":0.1835,"France|Egypt":0.006999999999999999,"France|Colombia":0.0555,"France|Argentina":0.218,"Spain|Switzerland":0.008,"Spain|Norway":0.058499999999999996,"Spain|England":0.1155,"Spain|Egypt":0.0035,"Spain|Colombia":0.035,"Spain|Argentina":0.14550000000000002,"Belgium|Switzerland":0.002,"Belgium|Norway":0.0155,"Belgium|England":0.020499999999999997,"Belgium|Egypt":0.0015,"Belgium|Colombia":0.005,"Belgium|Argentina":0.023},"codes":{"ESP":"Spain","BEL":"Belgium","NOR":"Norway","ENG":"England","MAR":"Morocco","FRA":"France","SUI":"Switzerland","COL":"Colombia","EGY":"Egypt","ARG":"Argentina"},"pairs":[{"a":"France","b":"Norway","fa":0.5147,"fb":0.1436,"joint":0.0953,"rho":0.2392,"edge":-2.15},{"a":"Belgium","b":"Norway","fa":0.0637,"fb":0.1436,"joint":0.0141,"rho":0.1566,"edge":-0.5},{"a":"Morocco","b":"Egypt","fa":0.0833,"fb":0.0149,"joint":0.0023,"rho":0.147,"edge":-0.1},{"a":"France","b":"Argentina","fa":0.5147,"fb":0.3614,"joint":0.1989,"rho":0.0863,"edge":-1.29},{"a":"Belgium","b":"Egypt","fa":0.0637,"fb":0.0149,"joint":0.0014,"rho":0.0792,"edge":-0.04},{"a":"Spain","b":"Argentina","fa":0.3382,"fb":0.3614,"joint":0.1328,"rho":0.0763,"edge":-1.05},{"a":"Spain","b":"Norway","fa":0.3382,"fb":0.1436,"joint":0.0534,"rho":0.0575,"edge":-0.48},{"a":"Morocco","b":"Norway","fa":0.0833,"fb":0.1436,"joint":0.0109,"rho":-0.0299,"edge":0.1},{"a":"Morocco","b":"Colombia","fa":0.0833,"fb":0.104,"joint":0.0078,"rho":-0.0338,"edge":0.09},{"a":"France","b":"Colombia","fa":0.5147,"fb":0.104,"joint":0.0506,"rho":-0.0398,"edge":0.29},{"a":"Belgium","b":"Switzerland","fa":0.0637,"fb":0.0347,"joint":0.0018,"rho":-0.0425,"edge":0.04},{"a":"Belgium","b":"Argentina","fa":0.0637,"fb":0.3614,"joint":0.021,"rho":-0.0443,"edge":0.2},{"a":"Spain","b":"Colombia","fa":0.3382,"fb":0.104,"joint":0.0319,"rho":-0.0496,"edge":0.32},{"a":"Morocco","b":"Switzerland","fa":0.0833,"fb":0.0347,"joint":0.0023,"rho":-0.0554,"edge":0.06},{"a":"Morocco","b":"Argentina","fa":0.0833,"fb":0.3614,"joint":0.0269,"rho":-0.0565,"edge":0.32},{"a":"France","b":"England","fa":0.5147,"fb":0.3416,"joint":0.1674,"rho":-0.0573,"edge":0.84},{"a":"Belgium","b":"England","fa":0.0637,"fb":0.3416,"joint":0.0187,"rho":-0.0684,"edge":0.31},{"a":"Spain","b":"England","fa":0.3382,"fb":0.3416,"joint":0.1054,"rho":-0.0761,"edge":1.02},{"a":"Morocco","b":"England","fa":0.0833,"fb":0.3416,"joint":0.0242,"rho":-0.0779,"edge":0.43},{"a":"France","b":"Egypt","fa":0.5147,"fb":0.0149,"joint":0.0064,"rho":-0.0841,"edge":0.13},{"a":"Belgium","b":"Colombia","fa":0.0637,"fb":0.104,"joint":0.0046,"rho":-0.1012,"edge":0.21},{"a":"Spain","b":"Egypt","fa":0.3382,"fb":0.0149,"joint":0.0032,"rho":-0.1442,"edge":0.18},{"a":"Spain","b":"Switzerland","fa":0.3382,"fb":0.0347,"joint":0.0073,"rho":-0.1703,"edge":0.44},{"a":"France","b":"Switzerland","fa":0.5147,"fb":0.0347,"joint":0.0114,"rho":-0.2127,"edge":0.64}]};
+const SQRT2=Math.SQRT2;
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+const Phi=x=>0.5*(1+erf(x/SQRT2));
+function PhiInv(p){if(p<=0)return -1e9;if(p>=1)return 1e9;
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const pl=0.02425,ph=1-pl;let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p<=ph){q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+  q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+const GLx=[-0.1252334085,0.1252334085,-0.3678314990,0.3678314990,-0.5873179543,0.5873179543,-0.7699026742,0.7699026742,-0.9041172564,0.9041172564,-0.9815606342,0.9815606342];
+const GLw=[0.2491470458,0.2491470458,0.2334925365,0.2334925365,0.2031674267,0.2031674267,0.1600783285,0.1600783285,0.1069393260,0.1069393260,0.0471753364,0.0471753364];
+function bvnUpper(a,b,r){const base=(1-Phi(a))*(1-Phi(b));if(Math.abs(r)<1e-9)return base;
+  let s=0;const hl=r/2;for(let i=0;i<GLx.length;i++){const t=hl+hl*GLx[i];
+    s+=GLw[i]*1/(2*Math.PI*Math.sqrt(1-t*t))*Math.exp(-(a*a-2*t*a*b+b*b)/(2*(1-t*t)));}
+  return base+hl*s;}
+const fairJoint=(fa,fb,rho)=>bvnUpper(PhiInv(1-fa),PhiInv(1-fb),rho);
+
+const PAIRS=SEED.pairs.slice();
+const CODE={}; Object.entries(SEED.codes).forEach(([c,t])=>CODE[t]=c);
+const code=t=>CODE[t]||t.slice(0,3).toUpperCase();
+const tip=document.getElementById("tip");
+let spot=null;
+const RMAX=0.3;
+
+function buildRank(){
+  const el=document.getElementById("rank");
+  const rows=PAIRS.slice().sort((x,y)=>y.rho-x.rho);
+  el.innerHTML=rows.map(p=>{
+    const w=Math.min(Math.abs(p.rho)/RMAX,1)*50, pos=p.rho>=0;
+    const col=pos?"var(--accent)":"var(--neg)";
+    const bar=`<span class="b" style="${pos?`left:50%;width:${w}%`:`right:50%;width:${w}%`};background:${col}"></span>`;
+    return `<div class="rrow" data-a="${p.a}" data-b="${p.b}">
+      <span class="pn">${code(p.a)} · ${code(p.b)}</span>
+      <span class="barwrap"><span class="mid"></span>${bar}</span>
+      <span class="rv" style="color:${col}">${pos?'+':''}${p.rho.toFixed(2)}</span></div>`;}).join("");
+  el.querySelectorAll(".rrow").forEach(r=>{
+    const p=PAIRS.find(q=>q.a===r.dataset.a&&q.b===r.dataset.b);
+    r.addEventListener("mousemove",e=>{
+      tip.innerHTML=`${p.a} × ${p.b}<br>reach-final ${(p.fa*100).toFixed(0)}% · ${(p.fb*100).toFixed(0)}%`
+        +`<br>market joint <b>${(p.joint*100).toFixed(1)}%</b> vs indep ${(p.fa*p.fb*100).toFixed(1)}%`
+        +`<br>implied ρ = <b>${p.rho>=0?'+':''}${p.rho.toFixed(2)}</b>`;
+      tip.style.opacity=1;tip.style.left=Math.min(e.clientX+14,innerWidth-260)+"px";tip.style.top=(e.clientY+14)+"px";});
+    r.addEventListener("mouseleave",()=>tip.style.opacity=0);});
+  applySpot();
+}
+function applySpot(){document.querySelectorAll(".rrow").forEach(r=>
+  r.classList.toggle("dim", spot && r.dataset.a!==spot && r.dataset.b!==spot));}
+
+function renderBets(){
+  const rho=parseFloat(document.getElementById("rho").value);
+  document.getElementById("rhoV").textContent=(rho>=0?'+':'')+rho.toFixed(2);
+  const scored=PAIRS.map(p=>{const fair=fairJoint(p.fa,p.fb,rho);return {...p,fair,edge:(fair-p.joint)*100};});
+  scored.sort((x,y)=>Math.abs(y.edge)-Math.abs(x.edge));
+  document.getElementById("bets").innerHTML=scored.slice(0,7).map(p=>{const cheap=p.edge>0;
+    return `<div class="bet"><span class="tag ${cheap?'buy':'sell'}">${cheap?'CHEAP':'RICH'}</span>
+      <span class="desc"><span class="m">${p.a} vs ${p.b}</span> in the final<br>
+        <small>market ${(p.joint*100).toFixed(1)}¢ · your fair ${(p.fair*100).toFixed(1)}¢</small></span>
+      <span class="edge" style="color:${cheap?'var(--pos)':'var(--neg)'}">${p.edge>=0?'+':''}${p.edge.toFixed(1)}¢</span></div>`;}).join("");
+  document.getElementById("betnote").innerHTML = Math.abs(rho)<0.005
+    ? `At <b>independence</b>, the fair price of “A &amp; B both reach the final” is just Pf(A)·Pf(B). The gaps above are how far the market's meet-in-the-final prices sit from that — the market's own implied correlation.`
+    : `At ρ = ${rho.toFixed(2)} the fair joints ${rho>0?'rise':'fall'}, so the gaps ${rho>0?'shrink for co-moving favourites':'widen'}. That a single number swings every basket price this much is the whole point.`;
+}
+
+/* bracket */
+let LEAVES=[]; function build(nd){if(nd.t!==undefined){LEAVES.push(nd.t);return{team:nd.t};}return{round:nd.r,l:build(nd.l),R:build(nd.R)};}
+const ROOT=build(SEED.tree);
+const layout=[];let rowC=0,maxD=0;
+function place(nd,depth){maxD=Math.max(maxD,depth);
+  if(nd.team!==undefined){const o={leaf:true,team:nd.team,row:rowC++,depth};layout.push(o);return o;}
+  const lo=place(nd.l,depth+1),ro=place(nd.R,depth+1);
+  const o={leaf:false,round:nd.round,row:(lo.row+ro.row)/2,depth,kids:[lo,ro]};layout.push(o);return o;}
+place(ROOT,0);layout.forEach(o=>o.col=maxD-o.depth);
+const ROWH=40,COLW=168,CARDW=150,PADX=6,PADY=6;
+function buildBracket(){
+  const bk=document.getElementById("bracket");bk.innerHTML="";
+  const W=maxD*COLW+CARDW+PADX*2,H=(LEAVES.length-1)*ROWH+ROWH+PADY*2;
+  bk.style.width=W+"px";bk.style.height=H+"px";
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("width",W);svg.setAttribute("height",H);
+  const stroke=getComputedStyle(document.documentElement).getPropertyValue("--faint");
+  const X=o=>PADX+o.col*COLW, Y=o=>PADY+o.row*ROWH+ROWH/2;
+  layout.filter(o=>!o.leaf).forEach(p=>p.kids.forEach(c=>{
+    const cx=X(c)+(c.leaf?CARDW:118),cy=Y(c),px=X(p),py=Y(p),mx=(cx+px)/2;
+    const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d",`M${cx} ${cy} H${mx} V${py} H${px}`);path.setAttribute("fill","none");
+    path.setAttribute("stroke",stroke);path.setAttribute("stroke-width","1");path.setAttribute("opacity",".55");svg.appendChild(path);}));
+  bk.appendChild(svg);
+  layout.forEach(o=>{const el=document.createElement("div");
+    el.style.left=X(o)+"px";el.style.top=(PADY+o.row*ROWH)+"px";
+    if(o.leaf){el.className="card leaf"+(o.team===spot?" sel":"");el.dataset.team=o.team;
+      el.innerHTML=`<span>${o.team}</span><span class="w">${((SEED.winner[o.team]||0)*100).toFixed(0)}%</span>`;
+      el.addEventListener("click",()=>{spot=(spot===o.team)?null:o.team;
+        document.querySelectorAll(".card.leaf").forEach(c=>c.classList.toggle("sel",c.dataset.team===spot));applySpot();});
+    }else{el.className="card node";el.textContent=o.round==="F"?"Final":o.round;}
+    bk.appendChild(el);});
+}
+
+document.getElementById("foot").innerHTML=
+  `Method: for each cross-half pair, invert the bivariate normal on the make-final marginals and the `
+  +`<code>KXWCMATCHUP</code> meet-in-the-final price (both de-vigged) to get the tetrachoric correlation. `
+  +`Mean implied ρ ≈ ${(PAIRS.reduce((s,p)=>s+p.rho,0)/PAIRS.length).toFixed(2)} — the board is broadly independence-consistent; the spread is the signal. `
+  +`A teaching example of implied correlation, not investment advice. Part of <a href="../../index.html">allocation</a>.`;
+/* ---- the tetrachoric plane: spin the cloud until the corner matches the market ---- */
+const NB=1200, bz1=new Float64Array(NB), bz2=new Float64Array(NB);
+(function(){let a=99991;const rng=()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  let sp=null;const rn=()=>{if(sp!=null){const s=sp;sp=null;return s;}let u,v,s;do{u=rng()*2-1;v=rng()*2-1;s=u*u+v*v;}while(s>=1||s===0);const m=Math.sqrt(-2*Math.log(s)/s);sp=v*m;return u*m;};
+  for(let i=0;i<NB;i++){bz1[i]=rn();bz2[i]=rn();}})();
+let planePair=null, planeRho=0;
+const plane=document.getElementById("plane"), pinfo=document.getElementById("planeInfo");
+function drawPlane(){
+  const g=plane.getContext&&plane.getContext("2d"); if(!g)return;
+  const W=plane.width,H=plane.height,L=3.3;
+  const cs=getComputedStyle(document.documentElement);
+  const acc=cs.getPropertyValue("--accent").trim(),faint=cs.getPropertyValue("--faint").trim(),
+        border=cs.getPropertyValue("--border").trim(),soft=cs.getPropertyValue("--accent-soft").trim(),mut=cs.getPropertyValue("--muted").trim();
+  g.clearRect(0,0,W,H);
+  const X=v=>(v+L)/(2*L)*W, Y=v=>H-(v+L)/(2*L)*H;
+  const a=PhiInv(1-planePair.fa), b=PhiInv(1-planePair.fb);
+  g.fillStyle=soft; g.fillRect(X(a),0,W-X(a),Y(b));                     // "both" corner
+  g.strokeStyle=border;g.lineWidth=1;
+  g.beginPath();g.moveTo(X(a),0);g.lineTo(X(a),H);g.moveTo(0,Y(b));g.lineTo(W,Y(b));g.stroke();
+  const r=planeRho, s=Math.sqrt(Math.max(1-r*r,0));
+  for(let i=0;i<NB;i++){const x=bz1[i], y=r*bz1[i]+s*bz2[i], both=(x>a&&y>b);
+    g.fillStyle=both?acc:faint; g.globalAlpha=both?0.8:0.26;
+    g.beginPath();g.arc(X(x),Y(y),both?2:1.4,0,7);g.fill();}
+  g.globalAlpha=1;
+  g.fillStyle=mut;g.font="11px -apple-system,system-ui,sans-serif";
+  g.fillText("→ "+planePair.a+" reaches final", X(a)+6, 13);
+  g.save();g.translate(13,Y(b)-6);g.rotate(-Math.PI/2);g.fillText("→ "+planePair.b+" reaches final",0,0);g.restore();
+}
+function updatePlane(){
+  document.getElementById("spin").value=planeRho;
+  document.getElementById("spinV").textContent=(planeRho>=0?'+':'')+planeRho.toFixed(2);
+  drawPlane();
+  const corner=bvnUpper(PhiInv(1-planePair.fa),PhiInv(1-planePair.fb),planeRho)*100;
+  const mkt=planePair.joint*100, imp=planePair.rho, matched=Math.abs(corner-mkt)<0.3;
+  pinfo.innerHTML=`<div class="big">${corner.toFixed(1)}%</div>
+    <div class="muted small">mass in the “both reach the final” corner, at ρ = ${(planeRho>=0?'+':'')+planeRho.toFixed(2)}</div>
+    <p>The market prices <b>${planePair.a} &amp; ${planePair.b}</b> both reaching the final at <b>${mkt.toFixed(1)}%</b>.
+    ${matched?`<span class="matched">Matched — the implied correlation is ρ = ${imp>=0?'+':''}${imp.toFixed(2)}.</span>`
+             :`Spin until the corner reads ${mkt.toFixed(1)}%.`}</p>
+    <p class="muted small">At independence (ρ = 0) the corner would hold ${(planePair.fa*planePair.fb*100).toFixed(1)}%. The gap between that and the market price is the implied correlation.</p>`;
+}
+function initPlane(){
+  const sel=document.getElementById("pairSel");
+  sel.innerHTML=PAIRS.map((p,i)=>`<option value="${i}">${p.a} vs ${p.b}</option>`).join("");
+  let def=PAIRS.findIndex(p=>p.a==="France"&&p.b==="Argentina"); if(def<0)def=0;
+  sel.value=def; planePair=PAIRS[def]; planeRho=0;
+  const onSel=()=>{planePair=PAIRS[+sel.value];planeRho=0;updatePlane();};
+  sel.addEventListener("change",onSel);sel.addEventListener("input",onSel);
+  document.getElementById("spin").addEventListener("input",e=>{planeRho=parseFloat(e.target.value);updatePlane();});
+  document.getElementById("snap").addEventListener("click",()=>{planeRho=planePair.rho;updatePlane();});
+  let drag=false,lastX=0;
+  plane.addEventListener("pointerdown",e=>{drag=true;lastX=e.clientX;plane.setPointerCapture(e.pointerId);});
+  plane.addEventListener("pointermove",e=>{if(!drag)return;
+    planeRho=Math.max(-0.95,Math.min(0.95,planeRho+(e.clientX-lastX)*0.005));lastX=e.clientX;updatePlane();});
+  plane.addEventListener("pointerup",()=>drag=false);
+  updatePlane();
+}
+
+document.getElementById("rho").addEventListener("input",renderBets);
+buildRank();renderBets();buildBracket();initPlane();
+</script>
+</body>
+</html>
