@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Five hundred assets, T days — allocation</title>
+  <meta name="description" content="What happens to portfolio construction when the universe is as wide as the history is long: the sample minimum-variance catastrophe at n/T = 1, and a race that does not take an inverse.">
+  <style>
+    :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
+      --accent:#4a3aff;--accent-soft:#ecebfb;--border:#e2e2e2;--ink:#1f1d3d;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.6;font-size:17px}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:860px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    main{max-width:860px;margin:32px auto;padding:0 24px 60px}
+    h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2}
+    .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 24px}
+    .lead{font-size:1.07rem}
+    h2{font-size:1.3rem;margin:2.2em 0 .6em;border-bottom:1px solid var(--border);padding-bottom:4px}
+    p{margin:.8em 0} .muted{color:var(--muted)}
+    code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+    footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+    .widget{border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin:18px 0;background:var(--panel)}
+    .controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+    .controls label{font-weight:600;font-size:.95rem;white-space:nowrap}
+    .controls input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+    .tv{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent);min-width:9em;text-align:right}
+    .ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--faint);margin-top:-2px}
+    canvas{width:100%;height:auto;display:block;margin:6px 0}
+    .readout{font-size:.9rem;color:var(--muted);margin-top:6px}
+    .readout b{color:var(--text)} .neg{color:#c0392b;font-weight:600}
+    .loading{color:var(--faint);font-style:italic;padding:30px 0;text-align:center}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <a href="../../index.html#methods">Methods</a>
+      <a href="../../index.html#estimators">Estimators</a>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>Five hundred assets, T days</h1>
+  <p class="subtitle">What happens to portfolio construction when the universe is as wide as the history is long.</p>
+
+  <p class="lead">Portfolio methods are usually demonstrated on a dozen assets and decades of
+  data. Real universes are wide: hundreds or thousands of names, and often less history than
+  that — new listings, regime changes, or simply a survivorship-clean window. A covariance
+  matrix on <code>n</code> assets has <code>n(n+1)/2</code> free parameters; with <code>n</code>
+  wider than the number of observations <code>T</code>, the sample covariance is singular, and
+  every allocator built on <code>Σ⁻¹</code> stops being defined — not approximately, exactly.</p>
+
+  <p>This page watches that happen. The market is synthetic on purpose: 500 names in 10
+  sectors, each driven by one market factor and one sector factor, so the <em>true</em>
+  covariance — and therefore the true minimum-variance portfolio and its variance — is known
+  exactly. Every "× true GMV" below has an exact denominator, which no real dataset can give
+  you. One simulated history of 2000 days; the slider shortens the estimation window.</p>
+
+  <h2>Try it: shrink the window</h2>
+  <div class="widget">
+    <div class="controls">
+      <label for="ti">estimation window T</label>
+      <input type="range" id="ti" min="0" max="15" step="1" value="0" disabled />
+      <span class="tv" id="tiVal"></span>
+    </div>
+    <div class="ends"><span>2000 days — n/T = 0.25</span><span>n/T = 1.67 — 300 days</span></div>
+    <div id="loading" class="loading">running the 16 low-rank races on the common-seed ensemble…</div>
+    <canvas id="curve" width="820" height="300" style="display:none"></canvas>
+    <canvas id="wchart" width="820" height="240" style="display:none"></canvas>
+    <div class="readout" id="readout"></div>
+  </div>
+
+  <h2>What to look at</h2>
+  <p>The sample minimum-variance portfolio <code>w ∝ S⁻¹1</code> passes through three regimes.
+  With plenty of data (<code>n/T = 0.25</code>) it is the best thing on the page — 1.4× the true
+  minimum variance, better than anything else here achieves; when the data supports the
+  inversion, invert. As <code>T</code> falls toward <code>n</code> the out-of-sample variance
+  climbs — 2× at <code>n/T = 0.5</code>, 16× at 0.95, 91× at 0.99 — while the leverage the
+  portfolio takes rises from 4× to 40×. Past <code>n/T = 1</code> the matrix is singular and
+  what the solver returns is decided by rounding error: the plotted values jump across orders of
+  magnitude from one window to the next, because they are noise, not estimates.</p>
+  <p>The race line does not move. Weights are the winning probabilities of a Thurstone race run
+  with a rank-12 factor decomposition of the sample correlation — the <code>factors=k</code>
+  low-rank transport, <code>O(Mnk)</code> per update, with no matrix inverted anywhere — so
+  nothing changes qualitatively when <code>T</code> crosses <code>n</code>: long-only, leverage
+  1, out-of-sample variance flat at about 3.3× the true minimum.</p>
+  <p>The honest comparison to keep in mind: equal weight sits at 3.5× on this market, so the
+  race buys only a few percent of variance over the naive portfolio here. Its claim in high
+  dimension is not that it beats a well-estimated GMV — nothing on this page does — but that it
+  remains <em>defined, stable, and correlation-aware</em> in the regime where inversion-based
+  weights are noise. The same low-rank transport is what makes the estimator usable at
+  Russell-3000 scale, where <code>n/T &gt; 1</code> is not a stress test but the everyday
+  condition.</p>
+
+  <p class="muted">Reproducible: <code>experiments/gen_highdim_data.py</code> builds the market,
+  the minimum-variance sweep, and the factor decompositions with the
+  <code>allocation</code> package; the in-browser race is the forward pass of
+  <code>transport_weights_lowrank</code> (see <code>ThurstonePortfolio(factors=k)</code> in
+  <code>allocation/thurstone.py</code>) on a fixed ensemble of 8,192 scenarios.</p>
+</main>
+
+<footer>
+  Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.
+</footer>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  const {n, k, Ts, eq_ratio, Bt, dt, MVOOS, MVLEV, MVW, LOB, LOS} = HD;
+  const M = 1 << 13, nT = Ts.length, kt = Bt[0].length;
+
+  function mulberry32(a){ return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const rand = mulberry32(7);
+  let spare = null;
+  function randn(){
+    if (spare !== null){ const s = spare; spare = null; return s; }
+    let u = 0, v = 0;
+    while (u === 0) u = rand();
+    while (v === 0) v = rand();
+    const r = Math.sqrt(-2*Math.log(u)), t = 2*Math.PI*v;
+    spare = r*Math.sin(t); return r*Math.cos(t);
+  }
+  const SF = new Float32Array(M*k), SI = new Float32Array(M*n);
+  for (let i = 0; i < M*k; i++) SF[i] = randn();
+  for (let i = 0; i < M*n; i++) SI[i] = randn();
+
+  // win frequencies of the low-rank race: x = f B' + s * eps, argmin wins
+  function raceLowrank(B, s){
+    const w = new Float64Array(n);
+    for (let m = 0; m < M; m++){
+      const fo = m*k, io = m*n;
+      let bi = 0, bv = Infinity;
+      for (let i = 0; i < n; i++){
+        const Bi = B[i];
+        let x = s[i]*SI[io+i];
+        for (let j = 0; j < k; j++) x += SF[fo+j]*Bi[j];
+        if (x < bv){ bv = x; bi = i; }
+      }
+      w[bi]++;
+    }
+    for (let i = 0; i < n; i++) w[i] /= M;
+    return w;
+  }
+
+  // exact OOS variance under the true factor covariance
+  function oosVar(w){
+    let v = 0;
+    for (let j = 0; j < kt; j++){
+      let r = 0;
+      for (let i = 0; i < n; i++) r += Bt[i][j]*w[i];
+      v += r*r;
+    }
+    for (let i = 0; i < n; i++) v += (dt[i]*w[i])*(dt[i]*w[i]);
+    return v;
+  }
+  const v_gmv = HD.v_gmv;
+
+  const raceW = new Array(nT), raceOOS = new Array(nT);
+  const dpr = window.devicePixelRatio || 1;
+  const cv1 = document.getElementById("curve"), cv2 = document.getElementById("wchart");
+  const tiEl = document.getElementById("ti"), tiVal = document.getElementById("tiVal"),
+        readout = document.getElementById("readout"), loading = document.getElementById("loading");
+
+  function setup(c, cssH){
+    const cx = c.getContext("2d"), cssW = c.clientWidth || 820;
+    c.width = cssW*dpr; c.height = cssH*dpr; c.style.height = cssH + "px";
+    cx.setTransform(dpr,0,0,dpr,0,0);
+    return {cx, W: cssW, H: cssH};
+  }
+
+  function drawCurve(idx){
+    const {cx, W, H} = setup(cv1, 300);
+    cx.clearRect(0,0,W,H);
+    const padL = 46, padR = 14, padT = 18, padB = 30;
+    const xs = Ts.map(T => n/T);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs);
+    const ymax = Math.max(...MVOOS)*2, ymin = 1;
+    const X = v => padL + (v - x0)/(x1 - x0)*(W - padL - padR);
+    const Y = v => { const t = Math.log(Math.max(v,ymin))/Math.log(ymax); return H - padB - t*(H - padT - padB); };
+    cx.strokeStyle = "#e5e5e5"; cx.fillStyle = "#888"; cx.font = "10px sans-serif";
+    for (const g of [1,10,100,1000,10000]){
+      if (g > ymax) break;
+      cx.beginPath(); cx.moveTo(padL, Y(g)); cx.lineTo(W-padR, Y(g)); cx.stroke();
+      cx.textAlign = "right"; cx.fillText(g + "×", padL-5, Y(g)+3);
+    }
+    for (const g of [0.25,0.5,0.75,1,1.25,1.5]){
+      cx.textAlign = "center"; cx.fillText(g, X(g), H-12);
+    }
+    cx.fillText("n / T", (padL+W-padR)/2, H-1);
+    // n/T = 1 divider
+    cx.strokeStyle = "#c0392b"; cx.setLineDash([4,4]);
+    cx.beginPath(); cx.moveTo(X(1), padT); cx.lineTo(X(1), H-padB); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle = "#c0392b"; cx.textAlign = "left"; cx.fillText("Σ singular →", X(1)+4, padT+8);
+    // equal-weight reference
+    cx.strokeStyle = "#bbb"; cx.setLineDash([2,4]);
+    cx.beginPath(); cx.moveTo(padL, Y(eq_ratio)); cx.lineTo(W-padR, Y(eq_ratio)); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle = "#999"; cx.fillText("equal weight " + eq_ratio.toFixed(1) + "×", padL+4, Y(eq_ratio)-5);
+    function line(ys, color){
+      cx.strokeStyle = color; cx.lineWidth = 1.8; cx.beginPath();
+      for (let i = 0; i < nT; i++){ const x = X(xs[i]), y = Y(ys[i]); i ? cx.lineTo(x,y) : cx.moveTo(x,y); }
+      cx.stroke();
+    }
+    line(MVOOS, "#c0392b");
+    line(raceOOS, "#4a3aff");
+    cx.fillStyle = "#c0392b"; cx.textAlign = "left";
+    cx.fillText("sample minimum variance", X(xs[8]) - 60, Y(MVOOS[8]) - 12);
+    cx.fillStyle = "#4a3aff";
+    cx.fillText("low-rank Thurstone race", X(xs[1]), Y(raceOOS[1]) + 16);
+    // marker
+    cx.fillStyle = "#1a1a1a";
+    for (const [ys] of [[MVOOS],[raceOOS]]){
+      cx.beginPath(); cx.arc(X(xs[idx]), Y(ys[idx]), 3.5, 0, 7); cx.fill();
+    }
+    cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
+    cx.fillText("out-of-sample variance, × the true minimum (log scale)", padL, 11);
+  }
+
+  function drawWeights(idx){
+    const {cx, W, H} = setup(cv2, 240);
+    cx.clearRect(0,0,W,H);
+    const half = (W - 30)/2, padT = 22, padB = 14, h = H - padT - padB;
+    function panelSorted(x0, w, title, color, signed){
+      const ws = Array.from(w).sort((a,b) => b-a);
+      const wmax = Math.max(Math.abs(ws[0]), Math.abs(ws[n-1]));
+      const y0 = signed ? padT + h/2 : padT + h;
+      const sc = (signed ? h/2 : h) / (wmax || 1);
+      cx.strokeStyle = "#ccc"; cx.beginPath(); cx.moveTo(x0, y0+0.5); cx.lineTo(x0+half, y0+0.5); cx.stroke();
+      cx.beginPath();
+      cx.moveTo(x0, y0 - ws[0]*sc);
+      for (let i = 1; i < n; i++) cx.lineTo(x0 + i/(n-1)*half, y0 - ws[i]*sc);
+      cx.strokeStyle = color; cx.lineWidth = 1.6; cx.stroke();
+      cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
+      cx.fillText(title + " (peak " + (wmax*100).toFixed(wmax > 0.02 ? 1 : 2) + "%)", x0, 11);
+    }
+    panelSorted(0, MVW[idx], "min-variance weights, sorted", "#c0392b", true);
+    panelSorted(half + 30, raceW[idx], "race weights, sorted", "#4a3aff", false);
+  }
+
+  function draw(){
+    const idx = +tiEl.value;
+    tiVal.textContent = Ts[idx] + " days · n/T = " + (n/Ts[idx]).toFixed(2);
+    drawCurve(idx); drawWeights(idx);
+    const singular = n/Ts[idx] > 1;
+    readout.innerHTML =
+      `At <b>T = ${Ts[idx]}</b>: sample min-variance is at <b>${MVOOS[idx] < 100 ? MVOOS[idx].toFixed(1) : Math.round(MVOOS[idx]).toLocaleString()}×</b> ` +
+      `the true minimum variance with leverage <b>${MVLEV[idx].toFixed(1)}×</b>` +
+      (singular ? ` <span class="neg">(Σ is singular — this value is rounding noise, not an estimate)</span>` : ``) +
+      `. The race is at <b>${raceOOS[idx].toFixed(2)}×</b>, long-only, leverage 1.`;
+  }
+
+  // run the 16 races progressively so the loading line can update
+  let done = 0;
+  function step(){
+    if (done < nT){
+      raceW[done] = raceLowrank(LOB[done], LOS[done]);
+      raceOOS[done] = oosVar(raceW[done]) / v_gmv;
+      done++;
+      loading.textContent = `running the 16 low-rank races on the common-seed ensemble… ${done}/${nT}`;
+      setTimeout(step, 0);
+      return;
+    }
+    loading.style.display = "none";
+    cv1.style.display = "block"; cv2.style.display = "block"; tiEl.disabled = false;
+    tiEl.addEventListener("input", draw);
+    window.addEventListener("resize", draw);
+    draw();
+  }
+  setTimeout(step, 30);
+})();
+</script>
+</body>
+</html>
