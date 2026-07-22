@@ -30,6 +30,9 @@
     .widget{border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin:18px 0;background:var(--panel)}
     .controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
     .controls label{font-weight:600;font-size:.95rem;white-space:nowrap}
+    .controls button{font:inherit;font-size:.92rem;padding:3px 10px;border:1px solid var(--border);
+      border-radius:5px;background:#fff;color:var(--text);cursor:pointer}
+    .controls button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
     .controls input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
     .tv{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent);min-width:9em;text-align:right}
     .ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--faint);margin-top:-2px}
@@ -80,6 +83,11 @@
       <span class="tv" id="tiVal"></span>
     </div>
     <div class="ends"><span>2000 days — n/T = 0.25</span><span>n/T = 1.67 — 300 days</span></div>
+    <div class="controls" style="margin-top:10px">
+      <label>covariance estimator</label>
+      <button id="estS" class="on">raw sample</button>
+      <button id="estLW">Ledoit–Wolf shrinkage</button>
+    </div>
     <div id="loading" class="loading">running the 16 low-rank races on the common-seed ensemble…</div>
     <canvas id="curve" width="820" height="300" style="display:none"></canvas>
     <canvas id="wchart" width="820" height="240" style="display:none"></canvas>
@@ -130,7 +138,8 @@
 <script src="data.js"></script>
 <script>
 (function(){
-  const {n, k, Ts, eq_ratio, Bt, dt, MVOOS, MVLEV, MVW, LOB, LOS, LWOOS, LWLEV} = HD;
+  const {n, k, Ts, eq_ratio, Bt, dt, MVOOS, MVLEV, MVW, LOB, LOS, LWOOS, LWLEV, LWW} = HD;
+  let useLW = false;
   const M = 1 << 13, nT = Ts.length, kt = Bt[0].length;
 
   function mulberry32(a){ return function(){
@@ -228,18 +237,18 @@
       for (let i = 0; i < nT; i++){ const x = X(xs[i]), y = Y(ys[i]); i ? cx.lineTo(x,y) : cx.moveTo(x,y); }
       cx.stroke();
     }
-    line(MVOOS, "#c0392b");
-    line(LWOOS, "#ef6c00");
-    line(raceOOS, "#4a3aff");
-    cx.fillStyle = "#c0392b"; cx.textAlign = "left";
+    cx.globalAlpha = useLW ? 0.25 : 1; line(MVOOS, "#c0392b");
+    cx.globalAlpha = useLW ? 1 : 0.25; line(LWOOS, "#ef6c00");
+    cx.globalAlpha = 1; line(raceOOS, "#4a3aff");
+    cx.fillStyle = "#c0392b"; cx.textAlign = "left"; cx.globalAlpha = useLW ? 0.4 : 1;
     cx.fillText("sample minimum variance", X(xs[8]) - 60, Y(MVOOS[8]) - 12);
-    cx.fillStyle = "#ef6c00";
+    cx.fillStyle = "#ef6c00"; cx.globalAlpha = useLW ? 1 : 0.4;
     cx.fillText("Ledoit–Wolf minimum variance", X(xs[5]), Y(LWOOS[5]) + 14);
-    cx.fillStyle = "#4a3aff";
+    cx.globalAlpha = 1; cx.fillStyle = "#4a3aff";
     cx.fillText("low-rank Thurstone race", X(xs[12]), Y(raceOOS[12]) - 6);
-    // marker
+    // marker on the selected estimator and on the race
     cx.fillStyle = "#1a1a1a";
-    for (const [ys] of [[MVOOS],[raceOOS]]){
+    for (const ys of [useLW ? LWOOS : MVOOS, raceOOS]){
       cx.beginPath(); cx.arc(X(xs[idx]), Y(ys[idx]), 3.5, 0, 7); cx.fill();
     }
     cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
@@ -263,7 +272,9 @@
       cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
       cx.fillText(title + " (peak " + (wmax*100).toFixed(wmax > 0.02 ? 1 : 2) + "%)", x0, 11);
     }
-    panelSorted(0, MVW[idx], "min-variance weights, sorted", "#c0392b", true);
+    panelSorted(0, (useLW ? LWW : MVW)[idx],
+      (useLW ? "Ledoit–Wolf" : "sample") + " min-variance weights, sorted",
+      useLW ? "#ef6c00" : "#c0392b", true);
     panelSorted(half + 30, raceW[idx], "race weights, sorted", "#4a3aff", false);
   }
 
@@ -272,12 +283,14 @@
     tiVal.textContent = Ts[idx] + " days · n/T = " + (n/Ts[idx]).toFixed(2);
     drawCurve(idx); drawWeights(idx);
     const singular = n/Ts[idx] > 1;
-    readout.innerHTML =
-      `At <b>T = ${Ts[idx]}</b>: sample min-variance is at <b>${MVOOS[idx] < 100 ? MVOOS[idx].toFixed(1) : Math.round(MVOOS[idx]).toLocaleString()}×</b> ` +
-      `the true minimum variance with leverage <b>${MVLEV[idx].toFixed(1)}×</b>` +
-      (singular ? ` <span class="neg">(Σ is singular — this value is rounding noise, not an estimate)</span>` : ``) +
-      `. Ledoit–Wolf min-variance: <b>${LWOOS[idx].toFixed(2)}×</b> at leverage ${LWLEV[idx].toFixed(1)}×. ` +
-      `The race is at <b>${raceOOS[idx].toFixed(2)}×</b>, long-only, leverage 1.`;
+    readout.innerHTML = useLW
+      ? `At <b>T = ${Ts[idx]}</b>: Ledoit–Wolf min-variance is at <b>${LWOOS[idx].toFixed(2)}×</b> ` +
+        `the true minimum variance with leverage <b>${LWLEV[idx].toFixed(1)}×</b> — defined and finite ` +
+        `at every n/T, short legs included. The race is at <b>${raceOOS[idx].toFixed(2)}×</b>, long-only, leverage 1.`
+      : `At <b>T = ${Ts[idx]}</b>: sample min-variance is at <b>${MVOOS[idx] < 100 ? MVOOS[idx].toFixed(1) : Math.round(MVOOS[idx]).toLocaleString()}×</b> ` +
+        `the true minimum variance with leverage <b>${MVLEV[idx].toFixed(1)}×</b>` +
+        (singular ? ` <span class="neg">(Σ is singular — this value is rounding noise, not an estimate)</span>` : ``) +
+        `. The race is at <b>${raceOOS[idx].toFixed(2)}×</b>, long-only, leverage 1.`;
   }
 
   // run the 16 races progressively so the loading line can update
@@ -294,6 +307,13 @@
     loading.style.display = "none";
     cv1.style.display = "block"; cv2.style.display = "block"; tiEl.disabled = false;
     tiEl.addEventListener("input", draw);
+    const bS = document.getElementById("estS"), bLW = document.getElementById("estLW");
+    for (const [b, v] of [[bS, false], [bLW, true]])
+      b.addEventListener("click", () => {
+        useLW = v;
+        bS.classList.toggle("on", !v); bLW.classList.toggle("on", v);
+        draw();
+      });
     window.addEventListener("resize", draw);
     draw();
   }

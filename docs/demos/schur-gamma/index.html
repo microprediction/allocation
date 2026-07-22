@@ -113,6 +113,11 @@
   shows) and evaluated on the 2018–2024 covariance, averaged over 26 windows:</p>
 
   <div class="widget">
+    <div class="controls">
+      <label>training covariance</label>
+      <button id="brRaw" class="on">raw sample</button>
+      <button id="brLW">Ledoit–Wolf shrinkage</button>
+    </div>
     <canvas id="bridge" width="820" height="280"></canvas>
     <div class="readout" id="bridgeReadout"></div>
   </div>
@@ -123,10 +128,10 @@
   the coupling parameter is a bias–variance dial, not a formality. The γ slider above moves the
   marker here too.</p>
   <p>The natural objection is that raw one-year covariances overfit by construction, and a
-  practitioner would shrink first. The dashed line answers it: with Ledoit–Wolf shrinkage
-  applied to every training covariance, the interior optimum survives — slightly deeper
-  (0.97× at γ = 0.6) and γ = 1 still pays 24%. On this data, shrinkage moves the best γ a
-  little to the right; it does not rescue the far end of the bridge.</p>
+  practitioner would shrink first. The toggle answers it: switch the training covariances to
+  Ledoit–Wolf and the interior optimum survives — slightly deeper (0.97× at γ = 0.6) and γ = 1
+  still pays 24%. On this data, shrinkage moves the best γ a little to the right; it does not
+  rescue the far end of the bridge.</p>
   <p>Nor is the interior optimum an accident of this dataset — it is provable. In a four-asset,
   two-block example with a two-point error on one cross-block covariance entry, the expected
   out-of-sample variance satisfies <code>F(0.9) &lt; F(0)</code> and
@@ -243,7 +248,10 @@
   }
 
   // ---- out-of-sample bridge (marker follows the gamma slider)
+  let bridgeLW = false;
   function drawBridge(){
+    const sel = bridgeLW ? oosLW : oos, oth = bridgeLW ? oos : oosLW;
+    const selColor = bridgeLW ? "#ef6c00" : "#4a3aff";
     const c = document.getElementById("bridge");
     const {cx, W, H} = setup(c, 280);
     cx.clearRect(0,0,W,H);
@@ -272,27 +280,27 @@
       }
       cx.stroke(); cx.setLineDash([]);
     }
-    bline(oos, "#4a3aff", []);
-    bline(oosLW, "#ef6c00", [5,3]);
-    cx.fillStyle = "#ef6c00"; cx.textAlign = "left"; cx.font = "10.5px sans-serif";
-    cx.fillText("Ledoit–Wolf input (dashed)", X(0.72), Y(oosLW[14]) - 8);
-    // minimum
-    let mi = 0; for (let i = 1; i < oos.length; i++) if (oos[i] < oos[mi]) mi = i;
+    cx.globalAlpha = 0.25; bline(oth, "#9aa0b0", [5,3]); cx.globalAlpha = 1;
+    bline(sel, selColor, []);
+    // minimum of the selected curve
+    let mi = 0; for (let i = 1; i < sel.length; i++) if (sel[i] < sel[mi]) mi = i;
     cx.fillStyle = "#1a1a1a";
-    cx.beginPath(); cx.arc(X(oosg[mi]), Y(oos[mi]), 3, 0, 7); cx.fill();
+    cx.beginPath(); cx.arc(X(oosg[mi]), Y(sel[mi]), 3, 0, 7); cx.fill();
     cx.textAlign = "center"; cx.font = "10px sans-serif";
-    cx.fillText(`min ${oos[mi].toFixed(3)} at γ = ${oosg[mi]}`, X(oosg[mi]), Y(oos[mi])+14);
+    cx.fillText(`min ${sel[mi].toFixed(3)} at γ = ${oosg[mi]}`, X(oosg[mi]), Y(sel[mi])+14);
     // marker at the slider's gamma (interpolated)
     const g = +gEl.value;
     let k = 0; while (k < oosg.length-2 && oosg[k+1] < g) k++;
-    const t = (g - oosg[k])/(oosg[k+1]-oosg[k]), v = oos[k] + t*(oos[k+1]-oos[k]);
+    const t = (g - oosg[k])/(oosg[k+1]-oosg[k]), v = sel[k] + t*(sel[k+1]-sel[k]);
     cx.fillStyle = "#c0392b";
     cx.beginPath(); cx.arc(X(g), Y(v), 4, 0, 7); cx.fill();
     cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
-    cx.fillText(`out-of-sample variance vs γ, relative to HRP (${oosWindows} one-year training windows)`, padL, 11);
+    cx.fillText(`out-of-sample variance vs γ, relative to raw-HRP (${oosWindows} one-year ` +
+      `${bridgeLW ? "Ledoit–Wolf-shrunk" : "raw"} training windows)`, padL, 11);
     document.getElementById("bridgeReadout").innerHTML =
-      `At the slider's <b>γ = ${g.toFixed(2)}</b>: out-of-sample variance <b>${v.toFixed(3)}×</b> HRP's. ` +
-      `Bridge minimum <b>${oos[mi].toFixed(3)}×</b> at γ = ${oosg[mi]}; γ = 1 pays <b>${oos[oos.length-1].toFixed(2)}×</b>.`;
+      `At the slider's <b>γ = ${g.toFixed(2)}</b> with ${bridgeLW ? "Ledoit–Wolf-shrunk" : "raw"} ` +
+      `training covariances: out-of-sample variance <b>${v.toFixed(3)}×</b>. ` +
+      `Bridge minimum <b>${sel[mi].toFixed(3)}×</b> at γ = ${oosg[mi]}; γ = 1 pays <b>${sel[sel.length-1].toFixed(2)}×</b>.`;
   }
 
   // ---- turnover chart (static)
@@ -343,6 +351,13 @@
     Object.values(ordBtns).forEach(x => x.classList.toggle("on", x === b));
     draw();
   }));
+  const brRaw = document.getElementById("brRaw"), brLW = document.getElementById("brLW");
+  for (const [b, v] of [[brRaw, false], [brLW, true]])
+    b.addEventListener("click", () => {
+      bridgeLW = v;
+      brRaw.classList.toggle("on", !v); brLW.classList.toggle("on", v);
+      drawBridge();
+    });
   window.addEventListener("resize", () => { draw(); drawBridge(); drawTurn(); });
   update(); drawTurn();
 })();
