@@ -88,18 +88,26 @@
 
   <h2>What to look at</h2>
   <p>The sample minimum-variance portfolio <code>w ∝ S⁻¹1</code> passes through three regimes.
-  With plenty of data (<code>n/T = 0.25</code>) it is the best thing on the page — 1.4× the true
-  minimum variance, better than anything else here achieves; when the data supports the
+  With plenty of data (<code>n/T = 0.25</code>) it sits at 1.4× the true
+  minimum variance — when the data supports the
   inversion, invert. As <code>T</code> falls toward <code>n</code> the out-of-sample variance
   climbs — 2× at <code>n/T = 0.5</code>, 16× at 0.95, 91× at 0.99 — while the leverage the
   portfolio takes rises from 4× to 40×. Past <code>n/T = 1</code> the matrix is singular and
   what the solver returns is decided by rounding error: the plotted values jump across orders of
   magnitude from one window to the next, because they are noise, not estimates.</p>
+  <p>Shrinkage is the standard repair, so it is on the chart too. Ledoit–Wolf minimum variance
+  is defined at every <code>n/T</code> and does well here — 1.3× to 2.0× across the whole
+  sweep, better variance than anything long-only on this page. What it does not repair is the
+  <em>character</em> of the position: it holds roughly 4.5× gross leverage with substantial
+  short legs at every window length, and its weights remain estimates of an inverse. Where a
+  levered long–short mandate is available and variance is the whole objective, shrunk minimum
+  variance is the right tool, and this page says so.</p>
   <p>The race line does not move. Weights are the winning probabilities of a Thurstone race run
   with a rank-12 factor decomposition of the sample correlation — the <code>factors=k</code>
   low-rank transport, <code>O(Mnk)</code> per update, with no matrix inverted anywhere — so
   nothing changes qualitatively when <code>T</code> crosses <code>n</code>: long-only, leverage
-  1, out-of-sample variance flat at about 3.3× the true minimum.</p>
+  1, out-of-sample variance flat at about 3.3× the true minimum. Within the long-only,
+  unlevered class its comparison is equal weight at 3.5×.</p>
   <p>The honest comparison to keep in mind: equal weight sits at 3.5× on this market, so the
   race buys only a few percent of variance over the naive portfolio here. Its claim in high
   dimension is not that it beats a well-estimated GMV — nothing on this page does — but that it
@@ -122,7 +130,7 @@
 <script src="data.js"></script>
 <script>
 (function(){
-  const {n, k, Ts, eq_ratio, Bt, dt, MVOOS, MVLEV, MVW, LOB, LOS} = HD;
+  const {n, k, Ts, eq_ratio, Bt, dt, MVOOS, MVLEV, MVW, LOB, LOS, LWOOS, LWLEV} = HD;
   const M = 1 << 13, nT = Ts.length, kt = Bt[0].length;
 
   function mulberry32(a){ return function(){
@@ -221,11 +229,14 @@
       cx.stroke();
     }
     line(MVOOS, "#c0392b");
+    line(LWOOS, "#ef6c00");
     line(raceOOS, "#4a3aff");
     cx.fillStyle = "#c0392b"; cx.textAlign = "left";
     cx.fillText("sample minimum variance", X(xs[8]) - 60, Y(MVOOS[8]) - 12);
+    cx.fillStyle = "#ef6c00";
+    cx.fillText("Ledoit–Wolf minimum variance", X(xs[5]), Y(LWOOS[5]) + 14);
     cx.fillStyle = "#4a3aff";
-    cx.fillText("low-rank Thurstone race", X(xs[1]), Y(raceOOS[1]) + 16);
+    cx.fillText("low-rank Thurstone race", X(xs[12]), Y(raceOOS[12]) - 6);
     // marker
     cx.fillStyle = "#1a1a1a";
     for (const [ys] of [[MVOOS],[raceOOS]]){
@@ -265,7 +276,8 @@
       `At <b>T = ${Ts[idx]}</b>: sample min-variance is at <b>${MVOOS[idx] < 100 ? MVOOS[idx].toFixed(1) : Math.round(MVOOS[idx]).toLocaleString()}×</b> ` +
       `the true minimum variance with leverage <b>${MVLEV[idx].toFixed(1)}×</b>` +
       (singular ? ` <span class="neg">(Σ is singular — this value is rounding noise, not an estimate)</span>` : ``) +
-      `. The race is at <b>${raceOOS[idx].toFixed(2)}×</b>, long-only, leverage 1.`;
+      `. Ledoit–Wolf min-variance: <b>${LWOOS[idx].toFixed(2)}×</b> at leverage ${LWLEV[idx].toFixed(1)}×. ` +
+      `The race is at <b>${raceOOS[idx].toFixed(2)}×</b>, long-only, leverage 1.`;
   }
 
   // run the 16 races progressively so the loading line can update

@@ -20,6 +20,7 @@ transport_weights_lowrank on a fixed common-seed ensemble.
 """
 import json, os, numpy as np
 from numpy.random import default_rng
+from sklearn.covariance import LedoitWolf
 from allocation._thurstone.covariance import cov_to_corr, factor_decompose
 from allocation._thurstone.transport import transport_weights_lowrank
 
@@ -45,6 +46,7 @@ print(f"true GMV var {v_gmv:.5f} (leverage {np.abs(gmv).sum():.2f}); equal weigh
 X = rng.multivariate_normal(np.zeros(N), Sig, max(TS))
 
 MVOOS, MVLEV, MVW, LOB, LOS = [], [], [], [], []
+LWOOS, LWLEV = [], []
 # verification only: the page recomputes race weights live on its own seeds
 sf = default_rng(1).standard_normal((1 << 13, K))
 si = default_rng(2).standard_normal((1 << 13, N))
@@ -54,6 +56,10 @@ for T in TS:
     MVOOS.append(round(float(w @ Sig @ w) / v_gmv, 2))
     MVLEV.append(round(float(np.abs(w).sum()), 2))
     MVW.append([round(float(v), 5) for v in w])
+    Slw = LedoitWolf().fit(X[:T]).covariance_
+    wl = np.linalg.solve(Slw, np.ones(N)); wl = wl / wl.sum()
+    LWOOS.append(round(float(wl @ Sig @ wl) / v_gmv, 2))
+    LWLEV.append(round(float(np.abs(wl).sum()), 2))
     B, dv = factor_decompose(cov_to_corr(S), K, seed=0)
     LOB.append([[round(float(v), 3) for v in row] for row in B])
     LOS.append([round(float(v), 3) for v in np.sqrt(np.clip(dv, 0.0, None))])
@@ -65,7 +71,8 @@ data = {"n": N, "k": K, "Ts": TS,
         "v_gmv": round(v_gmv, 6), "eq_ratio": round(v_eq / v_gmv, 3),
         "Bt": [[round(float(v), 4) for v in row] for row in Bt],
         "dt": [round(float(v), 4) for v in d],
-        "MVOOS": MVOOS, "MVLEV": MVLEV, "MVW": MVW, "LOB": LOB, "LOS": LOS}
+        "MVOOS": MVOOS, "MVLEV": MVLEV, "MVW": MVW, "LOB": LOB, "LOS": LOS,
+        "LWOOS": LWOOS, "LWLEV": LWLEV}
 out = os.path.join(os.path.dirname(__file__), "..", "docs", "demos", "high-dim", "data.js")
 os.makedirs(os.path.dirname(out), exist_ok=True)
 with open(out, "w") as f:

@@ -92,23 +92,29 @@ print(f"turnover over {len(tF)} rebalances: Fiedler total {cumF[-1]:.2f}, "
 # ---- out-of-sample variance across the bridge (interior optimum) -----------
 # Fit on short windows from the first half, evaluate on the second half's
 # covariance. Raw compute_weights (no monotonic cap) so the whole bridge shows.
+from sklearn.covariance import LedoitWolf
+
 TRAIN_END = np.searchsorted(dates, np.datetime64("2018-01-01"))
 S_test = np.cov(Rv[TRAIN_END:].T)
 oosg = np.round(np.linspace(0.0, 1.0, 21), 2)
 WIN = 252
 starts = np.arange(252, TRAIN_END - WIN, 60)
 oos = np.zeros(len(oosg))
+oosLW = np.zeros(len(oosg))
 for s in starts:
-    S_tr = np.cov(Rv[s:s + WIN].T)
-    o, _ = seriate(S_tr)
-    for j, g in enumerate(oosg):
-        w = compute_weights(o, S_tr, float(g), force_spd=True)
-        oos[j] += float(w @ S_test @ w)
-oos /= len(starts)
+    Xw = Rv[s:s + WIN]
+    for acc, S_tr in ((oos, np.cov(Xw.T)), (oosLW, LedoitWolf().fit(Xw).covariance_)):
+        o, _ = seriate(S_tr)
+        for j, g in enumerate(oosg):
+            w = compute_weights(o, S_tr, float(g), force_spd=True)
+            acc[j] += float(w @ S_test @ w)
+oos /= len(starts); oosLW /= len(starts)
+oosLW = oosLW / oos[0]
 oos = oos / oos[0]
-j = int(np.argmin(oos))
-print(f"OOS bridge over {len(starts)} windows: min {oos[j]:.3f} at gamma={oosg[j]}, "
-      f"endpoints ({oos[0]:.3f}, {oos[-1]:.3f})")
+j = int(np.argmin(oos)); jl = int(np.argmin(oosLW))
+print(f"OOS bridge over {len(starts)} windows: raw min {oos[j]:.3f} at gamma={oosg[j]} "
+      f"(end {oos[-1]:.3f}); Ledoit-Wolf min {oosLW[jl]:.3f} at gamma={oosg[jl]} "
+      f"(end {oosLW[-1]:.3f})")
 
 data = {"names": names, "n": n,
         "corr": [[round(float(v), 3) for v in row] for row in corr],
@@ -121,6 +127,7 @@ data = {"names": names, "n": n,
         "cumD": [round(float(v), 3) for v in cumD],
         "oosg": [float(g) for g in oosg],
         "oos": [round(float(v), 4) for v in oos],
+        "oosLW": [round(float(v), 4) for v in oosLW],
         "oosWindows": int(len(starts))}
 out = os.path.join(os.path.dirname(__file__), "..", "docs", "demos", "schur-gamma", "data.js")
 os.makedirs(os.path.dirname(out), exist_ok=True)
