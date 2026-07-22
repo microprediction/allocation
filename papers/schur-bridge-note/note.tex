@@ -112,6 +112,29 @@ $D$ --- are read through the naive variances of their parents; only the
 top-level $B$ is never read.)
 \end{proof}
 
+\begin{remark}[Scope: HRP variants and data-driven trees]
+\label{rem:scope}
+\Cref{lem:blind} is a statement about the recursion \emph{with a given tree},
+in the variant used here (and in \textcite{lopezdeprado2016}'s recursive
+bisection), where each split reads the naive variance of the full child
+sub-blocks. Other flavours read less --- a split on diagonal variances alone
+reads nothing off-diagonal at all --- so the blind set depends on the variant;
+the top-level cross-block is what this one never reads. In practice the tree
+itself is data-driven (a dendrogram, or the Fiedler seriation of
+\textcite{cotton2024schur}), and the ordering step \emph{does} read the
+cross-block. That dependence is combinatorial: for a generic estimate the
+order is a locally constant function of the matrix, so the $\gamma = 0$
+allocation is locally constant in the top-level cross-block --- zero
+derivative off a null set of tree-flip boundaries --- and the differential
+statements below are unaffected for noise small enough to leave the tree
+unchanged. (In the witness of \Cref{prop:witness} this is verified directly:
+Fiedler seriation returns the same top partition on both noise branches, so
+the fixed-order hypothesis is without loss there.) For noise large enough to
+flip the tree, $\gamma = 0$ inherits discrete noise through the ordering
+itself --- the re-seriation turnover channel, distinct from the smooth channel
+studied here.
+\end{remark}
+
 \begin{theorem}[HRP is strictly suboptimal under small noise]
 \label{thm:nohrp}
 Suppose the population curve strictly decreases at the HRP end,
