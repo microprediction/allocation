@@ -1,0 +1,480 @@
+% Rapid Communication for Frontiers of Mathematical Finance.
+% Constraint (FMF Rapid Communications): main text <= 5 pages; figures,
+% tables, and references <= 4 additional pages. Text runs pages 1-5 with no
+% floats; bibliography, tables, and the figure follow a \clearpage.
+% Build: tectonic paper.tex (from this directory).
+\documentclass[11pt]{article}
+
+\input{../shared/preamble.tex}
+
+\usepackage[margin=1in]{geometry}
+\ExecuteBibliographyOptions{useprefix=true}
+\usepackage{cleveref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
+\DeclareMathOperator*{\argminop}{arg\,min}
+\DeclareMathOperator*{\argmaxop}{arg\,max}
+
+\title{Thurstone Portfolios:\\ Long-Only Allocation by Inverting Winning Probabilities}
+\author{Peter Cotton\thanks{%
+  [Affiliation and postal address to be supplied.] Email:
+  \texttt{peter.cotton@gsmc.ai}. Code: the \texttt{allocation} and
+  \texttt{thurstone} packages, \texttt{github.com/microprediction}.}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We construct long-only portfolios by reading weights as the winning
+probabilities of a Thurstonian race among assets: each asset draws a noisy
+performance under an arbitrary centered joint law, and its weight is the
+probability that it comes out best. Latent abilities are backed out of any
+benchmark by a fast exact inverse, and the portfolio is the race re-run under
+the estimated dependence. The organizing property is \emph{redundancy
+consistency}---a near-duplicate asset splits a position rather than doubling
+it---which capitalization and equal weighting violate by axiom (the
+red-bus/blue-bus failure of Luce's rule) and which mean--variance attains only
+through an unstable inverse of a near-singular covariance. Because the race
+samples from a correlation rather than inverting one, the same near-singularity
+that breaks $\Sigma^{-1}$ is priced smoothly: the construction is feasible on
+the simplex without optimization, reproduces its benchmark exactly, admits
+tail-dependent simulations no covariance functional can express, solves an
+implied mean--(convex-regularizer) program, and is locally Lipschitz in the
+correlation, bounding turnover. We state and prove these properties and
+document them empirically: a fourteen-year Dow walk-forward at four to nine
+times less turnover than clustering allocators, and a $500$-asset known-truth
+market where sample minimum variance degrades from $1.4\times$ to $91\times$
+the true minimum variance as $n/T \to 1$ while the race holds flat at
+$3.3\times$, long-only, with no inverse taken.
+\end{abstract}
+
+\noindent\textbf{Keywords:} portfolio construction; discrete choice; Thurstone
+model; independence of irrelevant alternatives; redundancy; tail dependence;
+turnover.\\
+\textbf{JEL:} G11, C25, C15, C58. \quad \textbf{MSC2020:} 91G10, 62P05, 60E15.
+
+\section{Introduction}
+\label{sec:intro}
+
+A classical test of a probabilistic choice model is duplication: split one
+alternative into two near-identical copies and ask what happens to the choice
+probabilities. Luce's axiom---independence of irrelevant alternatives
+(IIA)---forces the copies to draw fresh probability from the whole field, the
+red-bus/blue-bus paradox that unseated the logit model in discrete choice
+\parencite{mcfadden1974}. Portfolio construction faces the same test daily.
+Universes contain near-duplicates---share classes, an ETF beside its dominant
+holding, two miners of one commodity---and every weighting rule implicitly
+decides how much a near-copy of something already held is worth. Rules that fix
+the ratio of two weights independently of the rest of the field
+(capitalization weighting on a restricted universe, equal weighting, any
+softmax score rule) are \emph{Lucian}: they let duplicated exposure count
+twice. Mean--variance de-duplicates correctly in population, but through
+$\Sigma^{-1}$, and the direction in which two assets become identical is
+exactly the direction in which $\Sigma$ loses rank: the sample answer divides
+by a vanishing eigenvalue and swings between the twins. Inversion-free
+clustering allocators (hierarchical risk parity, \textcite{lopezdeprado2016};
+Schur-complementary allocation, \textcite{cotton2024schur}) de-duplicate by
+grouping, but discretely, the split jumping as cluster membership flips.
+
+This paper develops the Thurstonian alternative: treat allocation as a
+\emph{choice} among assets, model the choice with Thurstone's law of
+comparative judgment \parencite{thurstone1927}, and use the resulting winning
+probabilities as weights. Two assets that move together compete with each
+other rather than independently, so a co-moving pair collapses smoothly toward
+a single position---redundancy consistency without an inverse, with a closed
+characterization (\Cref{prop:redundancy,prop:monotone}) and a Lipschitz bound
+on turnover (\Cref{thm:smooth}). The Thurstonian (probit) model is older and
+strictly more general than the logit; it lost the applied field only on
+tractability, the choice probabilities being Gaussian orthant integrals with
+an inverse long considered prohibitive. Two developments remove the
+obstruction. The \emph{Fast Ability Transform} \parencite{cotton2021}
+evaluates the forward and inverse maps of the independent race in linear time
+on a lattice, exactly and Monte-Carlo-free; and the correlated forward race is
+cheap to simulate, with a common-seed construction that makes the simulated
+weights move smoothly with the correlation.
+
+Three properties usually treated separately are then one. Redundancy is
+near-singularity, so an allocator that prices redundancy \emph{smoothly} is by
+the same token robust to ill-conditioning (it samples from a correlation, never
+inverting it) and low in turnover (its weights move only as far as the
+correlation moves). A fourth property stands apart: driven by a tail-dependent
+simulation, the race responds to lower-tail co-movement that no covariance
+functional can encode (\Cref{prop:tail})---the winner of a race is an order
+statistic of the joint draw, and an order statistic reads the tail copula
+where a second moment cannot. Over 2010--2024, days on which all $28$
+continuously listed Dow constituents fell by more than $2\%$ occurred roughly
+$80$ times more often than a Gaussian fit to their full mean and covariance
+allows; a cluster that crashes together, but only in the crash, is invisible
+to every covariance-based allocator and is priced by the race.
+
+We claim no out-of-sample outperformance. The contribution is a construction
+with provable structure: feasibility without optimization, exact benchmark
+reproduction, redundancy, monotone de-duplication, tail consistency, an
+implied convex program, and a turnover bound---together with empirical
+evidence that the properties bind in practice (\Cref{sec:evidence}).
+
+\section{The construction}
+\label{sec:method}
+
+Each of $n$ assets has a latent ability $a_i \in \R$ and a noisy
+\emph{performance}
+\begin{equation}
+  X_i = a_i + \varepsilon_i, \qquad
+  \varepsilon = (\varepsilon_1,\dots,\varepsilon_n) \sim S,
+  \label{eq:performance}
+\end{equation}
+where $S$ is any centered joint law (the \emph{simulation}), and the
+\emph{minimum} performance wins, so a smaller ability denotes a stronger
+competitor. Writing $\theta = -a$ and
+\begin{equation}
+  G_S(\theta) = \E_{\eta\sim S}\Big[\max_i\,(\theta_i + \eta_i)\Big], \qquad
+  W_S(\theta) = \nabla G_S(\theta) \in \Delta,
+  \label{eq:popmap}
+\end{equation}
+$W_S(\theta)_i = \Prob(X_i = \min_k X_k)$ is the vector of winning
+probabilities (the gradient identity is part of \Cref{thm:objective}). The
+portfolio uses two laws: a \emph{reference} $S_0$ under which abilities are
+\emph{calibrated} to reproduce a target allocation
+$w^{\mathrm{target}} \in \operatorname{int}\Delta$ (a capitalization index, an
+equal-weight book, any benchmark), and a \emph{target} law $S_1$ carrying the
+estimated dependence, under which the race is re-run:
+\begin{equation}
+  T_{S_0\to S_1}(w^{\mathrm{target}})
+  \;=\; W_{S_1}\!\big(W_{S_0}^{-1}(w^{\mathrm{target}})\big).
+  \label{eq:tiltmap}
+\end{equation}
+
+\begin{proposition}[Calibration]
+\label{prop:calib}
+For a Gaussian reference $S_0 = \mathcal N(0, C_0)$ with $C_0 \succ 0$, the map
+$W_{S_0} : \R^n/\operatorname{span}\{\mathbf 1\} \to \operatorname{int}\Delta$
+is a smooth bijection with smooth inverse: every strictly positive benchmark
+has a unique ability vector, modulo an additive constant.
+\end{proposition}
+\begin{proof}
+$G_{S_0}$ is convex and, for $C_0 \succ 0$, $C^\infty$, with Hessian
+$\nabla^2 G_{S_0} = \nabla_\theta W_{S_0}$ positive definite on
+$\{v : \mathbf 1^\top v = 0\}$ and annihilating $\mathbf 1$ (since
+$G_{S_0}(\theta + c\mathbf 1) = G_{S_0}(\theta) + c$). Hence $G_{S_0}$ is
+strictly convex on the quotient, so its gradient is a diffeomorphism onto the
+relative interior of its range, which is $\operatorname{int}\Delta$ since any
+coordinate is driven to $0$ or $1$ by sending abilities to $\mp\infty$.
+\end{proof}
+
+In the Gaussian workhorse the two laws are two correlation matrices, a
+reference $C_{\mathrm{calib}}$ (identity, or a one-factor market model) and
+the estimated $C_{\mathrm{tilt}}$, blended by a scalar $\phi \in [0,1]$,
+$C_\phi = (1-\phi)\,C_{\mathrm{calib}} + \phi\,\widehat C$, so $\phi = 0$
+reproduces the benchmark (\Cref{prop:fixedpoint}) and $\phi = 1$ uses the full
+estimate. But nothing restricts $S_1$ to Gaussian: the implementation treats it
+as a black-box sampler, so a copula with genuine tail dependence, a
+multivariate $t$, or an arbitrary structured generator are equally admissible.
+
+\emph{Computation.} Calibration under the independent reference is the exact
+linear-time lattice inverse of \textcite{cotton2021}; under the one-factor
+reference the assets are conditionally independent given the factor, so the
+same lattice race is integrated over a few Gauss--Hermite nodes with a damped
+fixed point. The tilt is Monte Carlo: win frequencies of $M \sim 10^4$--$10^5$
+draws, with three provisions that matter in practice. (i) \emph{Common seeds:}
+a fixed standard-normal ensemble $Z_1,\dots,Z_M$ is recoloured by
+$C_\phi^{1/2}$, so identical correlations give identical weights exactly, and
+turnover tracks correlation change rather than sampling noise. (ii) \emph{No
+inversion:} only the square root is formed, and only ever multiplied by;
+$\operatorname{cond}(C^{1/2}) = \sqrt{\operatorname{cond}(C)}$, and a
+rank-deficient correlation merely yields a valid degenerate race. (iii)
+\emph{Scale:} a $k$-factor decomposition $C = BB^\top + D$ keeps the transport
+$O(Mnk)$, streaming, and well-posed to thousands of names.
+
+\section{Properties}
+\label{sec:properties}
+
+Fix the calibrated abilities and view the weights as a function of the target
+law.
+
+\begin{proposition}[Feasibility; benchmark reproduction]
+\label{prop:fixedpoint}
+For every centered $S$ the weights lie in the simplex, $w_i \ge 0$,
+$\sum_i w_i = 1$; and if $S_1 = S_0$ then $w = w^{\mathrm{target}}$.
+\end{proposition}
+\begin{proof}
+Each realization awards one unit of weight, split evenly among the assets
+attaining the minimum; summing preserves nonnegativity and total mass.
+Reproduction is \eqref{eq:tiltmap} at $S_1 = S_0$.
+\end{proof}
+Long-only, fully invested portfolios therefore come free---no constraints,
+penalties, or projection---and the tilt is a controlled perturbation of its
+benchmark, departing only as the dependence estimate departs from the
+reference.
+
+\begin{proposition}[Redundancy consistency]
+\label{prop:redundancy}
+Replace asset $k$ by two duplicates $k', k''$ (equal ability, unit variance,
+mutual correlation $1$, the same correlation as $k$ with every other asset).
+Then, splitting ties evenly,
+$w_{k'} = w_{k''} = \tfrac12 w_k^{\setminus}$ and $w_j = w_j^{\setminus}$ for
+$j \ne k', k''$, where $w^{\setminus}$ is the allocation of the original field.
+\end{proposition}
+\begin{proof}
+Perfectly correlated unit-variance Gaussians with equal mean are almost surely
+equal, so the field minimum, and hence every other asset's winning event, is
+unchanged, while the pair ties exactly when $k$ would have won; the even split
+halves that probability. (Mutual correlation $1$ is singular, so the statement
+is read in the positive-semidefinite limit, by continuity as the correlation
+$\uparrow 1$.)
+\end{proof}
+
+\begin{proposition}[Diversification monotonicity]
+\label{prop:monotone}
+Let $T$ be a subgroup of equal-ability assets, independent of the rest of the
+field, with common pairwise correlation $\rho$ within $T$. The subgroup's
+combined weight is non-increasing in $\rho$, falling from its independent
+value at $\rho = 0$ to a single asset's weight at $\rho = 1$.
+\end{proposition}
+\begin{proof}
+Write $X_i = a + \sqrt{\rho}\,Z + \sqrt{1-\rho}\,\varepsilon_i$ for $i \in T$.
+By Slepian's inequality \parencite{slepian1962}, raising the off-diagonal
+correlations of a Gaussian vector at fixed marginals raises
+$\Prob(\min_{i\in T} X_i > t)$ for every $t$, so $\min_{i\in T} X_i$ is
+stochastically increasing in $\rho$. The subgroup wins exactly when its
+minimum beats the $\rho$-independent minimum of the complement, a probability
+that is therefore non-increasing; the endpoints are $|T|$ independent chances
+and \Cref{prop:redundancy} respectively.
+\end{proof}
+
+At $\rho = 0$ a duplicate is a genuinely fresh bet and the pair's combined
+weight properly exceeds $w_k^{\setminus}$; as $\rho \uparrow 1$ it descends
+continuously to redundancy coherence (\Cref{tab:redundancy}). A Lucian rule is
+pinned at the $\rho$-blind headcount value for every $\rho$.
+
+\begin{proposition}[Tail consistency]
+\label{prop:tail}
+Take $X_i$ centred loss-side performances (larger is worse, minimum wins). Let
+$G$ be a subgroup of equal-ability assets with $M_G = \min_{i\in G} X_i$ and
+$Y = \min_{j\notin G} X_j$ independent of $G$, so $w_G = \Prob(M_G < Y)$.
+(i) If a change of the subgroup's joint law raises $M_G$ in first-order
+stochastic order while fixing $Y$ and the marginals, then $w_G$ does not
+increase. (ii) In the comonotone limit $X_i = Z_G$ for all $i \in G$, $w_G$
+equals a single competitor's winning probability, independent of $|G|$, split
+equally within $G$.
+\end{proposition}
+\begin{proof}
+(i) $w_G = \E[\overline F_Y(M_G)]$ with $\overline F_Y$ non-increasing. (ii)
+Comonotonicity gives $M_G = Z_G$, the winning event of one competitor;
+exchangeability splits it.
+\end{proof}
+Deepening joint lower-tail co-movement at fixed marginals---and even at fixed
+correlation---raises $M_G$ stochastically, so a cluster that crashes together
+is de-weighted toward a single bet even when its covariance is unchanged: the
+effective number of bets is state-dependent, $|G|$ in calm states and $1$ in
+the crash, a collapse a covariance averages away. Driving the race with a
+downside (lower-partial-moment) covariance recovers most of the effect; a
+tail-dependent simulation is exact.
+
+\begin{theorem}[Implied objective]
+\label{thm:objective}
+For any centered $S$, $G_S$ in \eqref{eq:popmap} is convex; the tie-split
+winning vector is a selected subgradient
+$w \in \partial G_S(\theta) = \argmaxop_{p\in\Delta}\{\langle\theta,p\rangle -
+\Omega_S(p)\}$ with $\Omega_S = G_S^{*}$ convex on the simplex, and when $S$ is
+full-rank continuous, $w = \nabla G_S(\theta)$ uniquely.
+\end{theorem}
+\begin{proof}
+$G_S$ is an expectation of affine functions of $\theta$, hence convex; with an
+almost-surely unique maximizer the envelope theorem gives
+$\partial G_S/\partial\theta_i = \Prob(i = \argmaxop_k(\theta_k+\eta_k)) = w_i$
+(the Williams--Daly--Zachary identity;
+\cite{williams1977,mcfadden1981}). The variational form is Fenchel--Young
+duality.
+\end{proof}
+The portfolio thus maximizes ability-weighted exposure minus a convex
+\emph{diversification penalty} determined by the dependence law---the
+perturbed-optimizer construction \parencite{berthet2020}. The perturbation is
+decisive: Gumbel noise yields Shannon entropy and softmax, a
+correlation-\emph{blind} Lucian allocator; Gaussian noise with correlation $C$
+makes $\Omega_C$ correlation-aware, which is exactly
+\Cref{prop:redundancy,prop:monotone}; a tail-dependent law makes it tail-aware
+(\Cref{prop:tail}). Calibration is then reverse optimization in the sense of
+\textcite{black1992}: the benchmark implies the abilities under the reference
+geometry, and the tilt expresses a view on \emph{dependence}---including a
+tail view Black--Litterman cannot state---while the abilities, hence the
+return-bearing content of the benchmark, are never touched.
+
+\begin{theorem}[Smoothness and turnover]
+\label{thm:smooth}
+For fixed abilities, on any compact set of correlation matrices with smallest
+eigenvalue bounded below by $\lambda > 0$, the Gaussian-race weight map is
+$C^\infty$ with
+$\|w(C_1) - w(C_0)\|_1 \le L_\lambda\,\|C_1 - C_0\|_F$, where
+$L_\lambda < \infty$ and $L_\lambda \to \infty$ as $\lambda \downarrow 0$.
+\end{theorem}
+\begin{proof}[Proof sketch]
+Asset $i$ wins iff $Y \sim \mathcal N(0,C)$ lands in the fixed polyhedral cone
+$A_i = \{y : y_i - y_j \le a_j - a_i\ \forall j\}$, so
+$w_i(C) = \int_{A_i} \varphi_C$. Smoothness is differentiation under the
+integral on the positive-definite cone. For the bound, Price's theorem
+\parencite{price1958}, $\partial\varphi_C/\partial C_{jk} =
+\partial^2\varphi_C/\partial y_j\partial y_k$ for $j \ne k$, followed by the
+divergence theorem over $A_i$, expresses $\partial w_i/\partial C_{jk}$ as an
+integral of $\varphi_C$ over the pairwise-tie faces of $A_i$, which is finite
+and controlled by the conditioning of $C$. The common-seed realization
+inherits the population motion with difference noise
+$O(\sqrt{\|\Delta C\|_F/M})$ and is exactly zero at $\Delta C = 0$.
+\end{proof}
+
+\section{Empirical evidence}
+\label{sec:evidence}
+
+Three exhibits document that the properties bind; none claims risk-adjusted
+outperformance.
+
+\emph{Redundancy} (\Cref{tab:redundancy}). Three equal-ability assets, two of
+them duplicates at mutual correlation $\rho_{12}$: the pair's combined weight
+descends monotonically from the Lucian headcount $2/3$ at $\rho_{12} = 0$ to
+the redundancy-coherent $1/2$ at $\rho_{12} = 1$, as
+\Cref{prop:redundancy,prop:monotone} require.
+
+\emph{Turnover} (\Cref{tab:dow}). A daily walk-forward over the $28$ Dow
+constituents with full 2010--2024 history, all estimators updated online from
+a $252$-day warm-up. The tilt trades four to nine times less than minimum
+variance and the clustering allocators at comparable gross Sharpe: its weights
+move with the correlation (\Cref{thm:smooth}), not with the re-clustering or
+re-seriation those methods incur each step. Charging $10$ basis points on
+turnover, only the near-static allocators (equal weight, inverse variance,
+risk parity) net more.
+
+\emph{High dimension} (\Cref{tab:highdim}). A known-truth market---$500$ names
+in $10$ sectors, one market and one sector factor each, so the true
+minimum-variance portfolio and its variance are exact---with the estimation
+window $T$ shrunk past $n$. Sample minimum variance passes from best-on-table
+($1.4\times$ the true minimum at $n/T = 0.25$: when the data supports the
+inversion, invert) through $16\times$ at $n/T = 0.95$ and $91\times$ at
+$0.99$, to pure rounding noise beyond $n/T = 1$, where the sample covariance
+is singular and $\Sigma^{-1}\mathbf 1$ is undefined. The low-rank race
+($k = 12$ factors) holds flat at $3.3\times$ throughout---marginally below
+equal weight at $3.5\times$---long-only, leverage $1$, with no qualitative
+change at the singularity. Its high-dimensional claim is precisely this:
+defined, stable, and correlation-aware in the regime where inversion-based
+weights are noise, at $O(Mnk)$ per update.
+
+\emph{Tail consistency} (\Cref{fig:tail}) is illustrated with one independent
+asset racing a $99$-name cluster whose lower-tail dependence is swept at fixed
+margins: the cluster's combined weight falls toward the two-body limit
+$\tfrac12$, the full covariance stays tail-blind, and a downside-covariance
+proxy recovers most of the gap.
+
+\section{Discussion}
+\label{sec:discussion}
+
+Reading weights as winning probabilities yields a long-only allocator that is
+feasible without optimization, anchored to any benchmark, inversion-free and
+therefore well-posed at any $n/T$, smooth enough for online use, and---alone
+among the allocators discussed---responsive to tail dependence. The same
+machinery is a general simplex-regression device (winning probabilities as
+redundancy-aware credit among collinear regressors), with forecast combination
+the natural application. A companion manuscript in preparation develops the
+reverse-optimization geometry (the Bregman form of the tilt and its displaced
+Markowitz inverse), concentration control, the CAPM restriction argument, and
+the forecast-combination evidence at full length.
+
+\clearpage
+\printbibliography
+
+\clearpage
+
+\begin{table}[p]
+  \centering
+  \caption{Redundancy consistency and diversification monotonicity. Three
+  equal-ability assets; assets $1,2$ are duplicates with mutual correlation
+  $\rho_{12}$, asset $0$ independent of them ($M = 4\times10^5$ paths). The
+  duplicated pair's combined weight falls monotonically from the Lucian
+  headcount $2/3$ to the redundancy-coherent $1/2$
+  (\Cref{prop:redundancy,prop:monotone}).}
+  \label{tab:redundancy}
+  \begin{tabular}{ccc}
+    \toprule
+    $\rho_{12}$ & $w_0$ & $w_1 + w_2$ \\
+    \midrule
+    $0.00$ & $0.333$ & $0.667$ \\
+    $0.50$ & $0.384$ & $0.616$ \\
+    $0.90$ & $0.449$ & $0.551$ \\
+    $0.99$ & $0.484$ & $0.516$ \\
+    $1.00$ & $0.500$ & $0.500$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[p]
+  \centering
+  \caption{Walk-forward over $28$ Dow constituents, 2010--2024, daily online
+  updates. Turnover is the mean one-way fraction of the book traded per day;
+  net Sharpe charges $10$ basis points on it. The tilt turns over four to nine
+  times less than minimum variance and the clustering allocators at comparable
+  gross Sharpe (\Cref{thm:smooth}); no risk-adjusted-return claim is made.}
+  \label{tab:dow}
+  \begin{tabular}{lccc}
+    \toprule
+    Method & Turnover & Sharpe & Net Sharpe \\
+    \midrule
+    Equal weight              & $0.000$ & $0.74$ & $0.74$ \\
+    Inverse variance          & $0.005$ & $0.78$ & $0.76$ \\
+    Risk parity               & $0.004$ & $0.78$ & $0.76$ \\
+    Minimum variance          & $0.045$ & $0.77$ & $0.60$ \\
+    Hierarchical risk parity  & $0.034$ & $0.79$ & $0.67$ \\
+    Schur ($\gamma=0.5$)      & $0.071$ & $0.78$ & $0.53$ \\
+    Thurstone tilt            & $0.008$ & $0.71$ & $0.69$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[p]
+  \centering
+  \caption{High dimension: known-truth market with $n = 500$ names in $10$
+  sectors (one market factor, one sector factor each), one simulated history,
+  estimation window $T$ its first $T$ days. Out-of-sample variance is the
+  weight vector's variance under the \emph{true} covariance, as a multiple of
+  the true global-minimum variance; the true GMV has leverage $3.4$ and equal
+  weight sits at $3.5\times$. Sample minimum variance is
+  $w \propto S^{-1}\mathbf 1$; beyond $n/T = 1$ the sample covariance is
+  singular and the solver output is rounding noise, reported for illustration.
+  The race uses a rank-$12$ factor decomposition of the sample correlation and
+  $M = 8192$ common-seed paths.}
+  \label{tab:highdim}
+  \begin{tabular}{cc cc c}
+    \toprule
+    & & \multicolumn{2}{c}{sample minimum variance} & race ($k=12$) \\
+    \cmidrule(lr){3-4}\cmidrule(lr){5-5}
+    $T$ & $n/T$ & OOS var & leverage & OOS var \\
+    \midrule
+    $2000$ & $0.25$ & $1.4\times$ & $4.2$ & $3.3\times$ \\
+    $1000$ & $0.50$ & $2.0\times$ & $5.5$ & $3.3\times$ \\
+    $750$  & $0.67$ & $2.7\times$ & $6.4$ & $3.3\times$ \\
+    $600$  & $0.83$ & $5.8\times$ & $9.7$ & $3.3\times$ \\
+    $525$  & $0.95$ & $16\times$  & $16$  & $3.3\times$ \\
+    $505$  & $0.99$ & $91\times$  & $40$  & $3.3\times$ \\
+    $400$  & $1.25$ & $1.7\times10^4$ (noise) & $523$ & $3.3\times$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.80\textwidth]{figures/tail_consistency.png}
+  \caption{Tail consistency (\Cref{prop:tail}). One independent asset versus a
+  $99$-name cluster with Clayton lower-tail dependence $\lambda_L$ (assets
+  crash together, rally independently; standard-normal margins;
+  $M = 1.5\times10^5$; loss-side race on centred performances). As
+  $\lambda_L \to 1$ within this family the cluster's combined weight falls
+  toward the two-body limit $\tfrac12$: the $99$ names de-duplicate to a
+  single horse. A downside-semicovariance drive recovers almost all of the
+  effect; the full covariance is tail-blind and stays far above.}
+  \label{fig:tail}
+\end{figure}
+
+\end{document}
