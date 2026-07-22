@@ -46,7 +46,7 @@ print(f"true GMV var {v_gmv:.5f} (leverage {np.abs(gmv).sum():.2f}); equal weigh
 X = rng.multivariate_normal(np.zeros(N), Sig, max(TS))
 
 MVOOS, MVLEV, MVW, LOB, LOS = [], [], [], [], []
-LWOOS, LWLEV = [], []
+LWOOS, LWLEV, LWW = [], [], []
 # verification only: the page recomputes race weights live on its own seeds
 sf = default_rng(1).standard_normal((1 << 13, K))
 si = default_rng(2).standard_normal((1 << 13, N))
@@ -60,6 +60,7 @@ for T in TS:
     wl = np.linalg.solve(Slw, np.ones(N)); wl = wl / wl.sum()
     LWOOS.append(round(float(wl @ Sig @ wl) / v_gmv, 2))
     LWLEV.append(round(float(np.abs(wl).sum()), 2))
+    LWW.append([round(float(v), 5) for v in wl])
     B, dv = factor_decompose(cov_to_corr(S), K, seed=0)
     LOB.append([[round(float(v), 3) for v in row] for row in B])
     LOS.append([round(float(v), 3) for v in np.sqrt(np.clip(dv, 0.0, None))])
@@ -72,7 +73,7 @@ data = {"n": N, "k": K, "Ts": TS,
         "Bt": [[round(float(v), 4) for v in row] for row in Bt],
         "dt": [round(float(v), 4) for v in d],
         "MVOOS": MVOOS, "MVLEV": MVLEV, "MVW": MVW, "LOB": LOB, "LOS": LOS,
-        "LWOOS": LWOOS, "LWLEV": LWLEV}
+        "LWOOS": LWOOS, "LWLEV": LWLEV, "LWW": LWW}
 out = os.path.join(os.path.dirname(__file__), "..", "docs", "demos", "high-dim", "data.js")
 os.makedirs(os.path.dirname(out), exist_ok=True)
 with open(out, "w") as f:
