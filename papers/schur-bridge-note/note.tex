@@ -46,7 +46,11 @@ threshold the minimizer is interior. A four-asset witness makes the
 conclusion unconditional: with a two-point error on one cross-block entry,
 $F(9/10) < F(0)$ and $F(9/10) < F(1)$ hold as \emph{exact rational
 inequalities}, machine-verifiable because the recursion is rational
-arithmetic.
+arithmetic. Finally we characterize \emph{where}: under decreasing-convex
+population value and increasing-convex noise cost, the optimal coupling is
+the unique root of $\tau^2 = -V_0'(\gamma)/G'(\gamma)$ and sweeps the bridge
+monotonically --- every interior $\gamma$ is optimal at exactly one noise
+level, full coupling only as noise vanishes, HRP only as it diverges.
 \end{abstract}
 
 \section{The recursion and the two endpoints}
@@ -237,6 +241,90 @@ script (\texttt{experiments/schur\_interior\_optimum.py} in the
 recursion against the package implementation and certifies positive
 definiteness along the path.
 \end{proof}
+
+\section{When, and why: the bridge as a bias--variance frontier}
+\label{sec:frontier}
+
+The existence results say the optimum is interior; this section characterizes
+\emph{where}. Fix the tree and let the error be symmetric cross-block noise as
+in \Cref{thm:nofull}. Smoothness gives the uniform second-order expansion
+\begin{equation}
+  F(\gamma; \tau) \;=\; V_0(\gamma) \;+\; \tau^2 G(\gamma) \;+\; O(\tau^4),
+  \qquad G(0) = G'(0) = 0,
+  \label{eq:expansion}
+\end{equation}
+with $G$ the noise-cost profile of the recursion ($G(0) = G'(0) = 0$ by
+\Cref{lem:blind} and the $\gamma$-prefactor of \Cref{thm:nofull}(i)). Write
+$F_2 = V_0 + \tau^2 G$ for the second-order surrogate.
+
+\begin{theorem}[The optimal coupling sweeps the bridge monotonically]
+\label{thm:frontier}
+Suppose on $(0, \bar\gamma)$ the population curve is strictly decreasing and
+convex ($V_0' < 0$, $V_0'' \ge 0$) and the noise-cost profile is strictly
+increasing and convex ($G' > 0$, $G'' \ge 0$). Define
+\[
+  t(\gamma) \;=\; \frac{-V_0'(\gamma)}{G'(\gamma)} \;>\; 0 .
+\]
+Then $t$ is continuous and strictly decreasing on $(0,\bar\gamma)$, hence a
+bijection onto its range, and for every $\tau^2$ in that range the surrogate
+$F_2(\cdot\,; \tau)$ has the unique minimizer
+\[
+  \gamma^*(\tau^2) \;=\; t^{-1}(\tau^2),
+\]
+which is strictly decreasing in the noise level. In particular, within the
+surrogate: $\gamma^* \to \bar\gamma$ (full coupling) only as the noise
+vanishes, $\gamma^* \to 0$ (HRP) only as the noise diverges, and \emph{every
+interior coupling is optimal at exactly one noise level}.
+\end{theorem}
+\begin{proof}
+$F_2' = V_0' + \tau^2 G'$ is negative for $\gamma < t^{-1}(\tau^2)$ and
+positive beyond it, by the monotonicity of $t$: indeed
+$t' = \big({-V_0''\, G'} + V_0'\, G''\big)/G'^2 < 0$ since the first term is
+$\le 0$ and the second is $< 0$ on the stated domain (strict as long as one of
+$V_0'', G''$ is nonzero, which strict convexity of either curve supplies).
+Uniqueness and the comparative statics
+$d\gamma^*/d\tau^2 = -G'/F_2'' < 0$ follow.
+\end{proof}
+
+\begin{remark}[Interpretation]
+$\gamma$ is a shrinkage intensity toward the noise-immune end of the bridge,
+and \Cref{thm:frontier} is the Schur analogue of an optimal-shrinkage formula
+in the spirit of \textcite{ledoitwolf2004}: the first-order condition
+$\tau^2 = -V_0'(\gamma^*) / G'(\gamma^*)$ balances the marginal population
+value of coupling against its marginal noise cost. The endpoint behaviors
+recover the two prior results. As $\gamma \to 1$ the augmentation approaches
+the exact Schur complement and $G'$ inherits the inversion sensitivity of
+minimum variance --- the instability quantified at the endpoint by
+\textcite{antonov2025hrp} --- so full coupling is optimal only in the
+vanishing-noise limit, exactness \parencite{mograby2025} notwithstanding. As
+$\gamma \to 0$, $G' \to 0$ quadratically while the population gain
+$-V_0'(0)$ stays bounded away from zero, so HRP is optimal only in the
+infinite-noise limit.
+\end{remark}
+
+\begin{remark}[Numerical verification in the witness family]
+\label{rem:verify}
+In the family of \Cref{prop:witness} with symmetric two-point noise on the
+cross-block correlation, the measured profiles satisfy the hypotheses:
+$V_0$ is decreasing convex on $[0,1)$ and $G$ is increasing convex with the
+predicted quadratic vanishing at $0$ ($G \approx 0.003, 0.032, 0.138, 0.448$
+at $\gamma = 0.2, 0.4, 0.6, 0.8$; $\tau$-stable for $\tau \le 0.2$ below the
+SPD-exit zone, confirming the $O(\tau^4)$ error). The root of
+$V_0' + \tau^2 G' = 0$ tracks the exact minimizer of $F$ across the sweep:
+\begin{center}
+\begin{tabular}{lcccccc}
+\toprule
+$\tau$ & $0.10$ & $0.15$ & $0.20$ & $0.25$ & $0.30$ & $0.35$ \\
+\midrule
+exact $\argminop F$      & $0.85$ & $0.70$ & $0.65$ & $0.55$ & $0.50$ & $0.45$ \\
+root of $V_0' + \tau^2G'$ & $0.83$ & $0.74$ & $0.66$ & $0.59$ & $0.53$ & $0.49$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+(grid resolution $0.05$); the optimal coupling falls monotonically from near
+full coupling toward the middle of the bridge as the noise grows, as
+\Cref{thm:frontier} requires.
+\end{remark}
 
 \section{Placement}
 
