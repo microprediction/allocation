@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The geometry of choice — allocation</title>
+  <meta name="description" content="The Thurstone portfolio maximizes ability minus a dependence-aware entropy. Watch that entropy's geometry collapse from a triangle to a segment as two assets become clones — while softmax's never moves.">
+  <style>
+    :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
+      --accent:#4a3aff;--accent-soft:#ecebfb;--border:#e2e2e2;--ink:#1f1d3d;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.6;font-size:17px}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:860px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    main{max-width:860px;margin:32px auto;padding:0 24px 60px}
+    h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2}
+    .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 24px}
+    .lead{font-size:1.07rem}
+    h2{font-size:1.3rem;margin:2.2em 0 .6em;border-bottom:1px solid var(--border);padding-bottom:4px}
+    p{margin:.8em 0} .muted{color:var(--muted)}
+    code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+    footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+    .widget{border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin:18px 0;background:var(--panel)}
+    .controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+    .controls label{font-weight:600;font-size:.95rem;white-space:nowrap}
+    .controls input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+    .rv{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent);min-width:3.2em;text-align:right}
+    .ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--faint);margin-top:-2px}
+    canvas{width:100%;height:auto;display:block;margin:6px 0}
+    .readout{font-size:.9rem;color:var(--muted);margin-top:6px}
+    .readout b{color:var(--text)}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <a href="../../index.html#methods">Methods</a>
+      <a href="../../index.html#estimators">Estimators</a>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>The geometry of choice</h1>
+  <p class="subtitle">The Thurstone portfolio maximizes ability minus an entropy that knows the correlation.</p>
+
+  <p class="lead">The Thurstone portfolio is defined procedurally — weights are winning
+  probabilities — but it secretly solves a recognizable program: the weights maximize
+  <code>⟨θ, p⟩ − Ω(p)</code> over the simplex, where <code>θ</code> is the ability vector and
+  <code>Ω</code> is a convex regularizer determined by the noise law of the race. The noise is
+  decisive. Gumbel noise makes <code>Ω</code> the Shannon entropy and the allocator softmax —
+  a rule that rewards spreading across three names <em>whether or not two of them are the same
+  asset in different wrappers</em>. Gaussian noise with correlation <code>C</code> makes
+  <code>Ω</code> a <em>dependence-aware</em> entropy: it rewards spreading only across
+  genuinely distinct bets.</p>
+
+  <p>This page draws that entropy. Three assets; assets 1 and 2 are progressively correlated
+  (the twins), asset 3 stays independent. A fixed grid of ability vectors (radius 3, the
+  "ability budget") is pushed through each allocator, and every attainable portfolio is
+  plotted in the simplex triangle, colored by its diversification reward
+  <code>−Ω(p)</code> — computed live from the race, 8,192 common-seed paths per grid point.</p>
+
+  <h2>Try it: merge two of the three assets</h2>
+  <div class="widget">
+    <div class="controls">
+      <label for="rho">correlation of the twins ρ₁₂</label>
+      <input type="range" id="rho" min="0" max="0.99" step="0.01" value="0" />
+      <span class="rv" id="rhoVal">0.00</span>
+    </div>
+    <div class="ends"><span>0 — three distinct assets</span><span>two assets in three wrappers — 0.99</span></div>
+    <canvas id="chart" width="820" height="430"></canvas>
+    <div class="readout" id="readout"></div>
+  </div>
+
+  <h2>What to look at</h2>
+  <p><em>The softmax triangle never moves.</em> Luce's axiom in geometric form: the set of
+  portfolios a given ability budget can reach, and the entropy prices attached to them, are
+  the same whether the twins are independent or identical. Softmax will cheerfully hold
+  (⅓, ⅓, ⅓) of what is really two assets.</p>
+  <p><em>The race's triangle collapses to a segment.</em> As ρ₁₂ rises, allocations that
+  <em>distinguish</em> the twins become progressively more expensive in ability terms — the
+  grid's image pinches onto the line w₁ = w₂ — until at ρ₁₂ = 1 the geometry loses a
+  dimension: a three-asset choice becomes a two-asset choice, the redundancy priced into the
+  entropy itself. This is the same near-singularity that makes <code>Σ⁻¹</code> explode,
+  showing up not as an instability but as a re-shaped penalty.</p>
+  <p><em>The equal-ability portfolio drifts.</em> The marker is <code>θ = 0</code>: with no
+  ability information at all, the race's maximum-entropy portfolio moves from (⅓, ⅓, ⅓) to
+  (¼, ¼, ½) — the twins jointly worth one asset, the independent name worth the other. The
+  darkest attainable color also lightens as ρ₁₂ rises: the maximum diversification reward on
+  offer, <code>−Ω</code> at its minimum, shrinks as the third genuine bet disappears.</p>
+  <p class="muted">Honest footnotes: for ρ₁₂ &lt; 1 the race map is still a bijection onto the
+  open triangle — the pinch is about the ability <em>cost</em> of off-median portfolios
+  diverging, not impossibility; at ρ₁₂ = 1 exactly it is impossibility. The two panels use
+  different noise laws (unit-variance Gumbel vs Gaussian), so colors compare within a panel,
+  not across panels. Theory: the implied-objective theorem in the
+  <a href="../../papers/index.html">paper</a> (the Williams–Daly–Zachary /
+  perturbed-optimizer construction).</p>
+</main>
+
+<footer>
+  Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.
+</footer>
+
+<script>
+(function(){
+  const M = 1 << 13, K = 25, R = 3.0;
+  const dpr = window.devicePixelRatio || 1;
+  const cv = document.getElementById("chart"), ctx = cv.getContext("2d");
+  const rhoEl = document.getElementById("rho"), rhoVal = document.getElementById("rhoVal"),
+        readout = document.getElementById("readout");
+
+  // fixed seeds
+  function mulberry32(a){ return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const rand = mulberry32(3);
+  let spare = null;
+  function randn(){
+    if (spare !== null){ const s = spare; spare = null; return s; }
+    let u = 0, v = 0;
+    while (u === 0) u = rand();
+    while (v === 0) v = rand();
+    const r = Math.sqrt(-2*Math.log(u)), t = 2*Math.PI*v;
+    spare = r*Math.sin(t); return r*Math.cos(t);
+  }
+  const Z = new Float32Array(M*3);
+  for (let i = 0; i < M*3; i++) Z[i] = randn();
+
+  // theta grid on the sum-zero plane
+  const grid = [];
+  for (let i = 0; i < K; i++) for (let j = 0; j < K; j++){
+    const a = -R + 2*R*i/(K-1), b = -R + 2*R*j/(K-1);
+    grid.push([a, b, -(a+b)]);
+  }
+
+  // independent third-asset seeds (fixed)
+  const ZI = new Float32Array(M);
+  { const r2 = mulberry32(99); let sp = null;
+    const rn = () => {
+      if (sp !== null){ const s = sp; sp = null; return s; }
+      let u = 0, v = 0;
+      while (u === 0) u = r2();
+      while (v === 0) v = r2();
+      const r = Math.sqrt(-2*Math.log(u)), t = 2*Math.PI*v;
+      sp = r*Math.sin(t); return r*Math.cos(t);
+    };
+    for (let m = 0; m < M; m++) ZI[m] = rn();
+  }
+
+  function computeCloud(rho){
+    const s = Math.sqrt(rho), t = Math.sqrt(1-rho);
+    const e = new Float32Array(M*3);
+    for (let m = 0; m < M; m++){
+      e[m*3]   = s*Z[m*3] + t*Z[m*3+1];
+      e[m*3+1] = s*Z[m*3] + t*Z[m*3+2];
+      e[m*3+2] = ZI[m];
+    }
+    const pts = [];
+    for (const th of grid){
+      let c0 = 0, c1 = 0, c2 = 0, G = 0;
+      for (let m = 0; m < M; m++){
+        const x0 = th[0] + e[m*3], x1 = th[1] + e[m*3+1], x2 = th[2] + e[m*3+2];
+        let mx = x0, k = 0;
+        if (x1 > mx){ mx = x1; k = 1; }
+        if (x2 > mx){ mx = x2; k = 2; }
+        G += mx;
+        if (k === 0) c0++; else if (k === 1) c1++; else c2++;
+      }
+      G /= M;
+      const w = [c0/M, c1/M, c2/M];
+      pts.push({w, omega: th[0]*w[0] + th[1]*w[1] + th[2]*w[2] - G});
+    }
+    // equal-ability marker
+    let c0 = 0, c1 = 0, c2 = 0, G0 = 0;
+    for (let m = 0; m < M; m++){
+      const x0 = e[m*3], x1 = e[m*3+1], x2 = e[m*3+2];
+      let mx = x0, k = 0;
+      if (x1 > mx){ mx = x1; k = 1; }
+      if (x2 > mx){ mx = x2; k = 2; }
+      G0 += mx;
+      if (k === 0) c0++; else if (k === 1) c1++; else c2++;
+    }
+    return {pts, w0: [c0/M, c1/M, c2/M], G0: G0/M};
+  }
+
+  // softmax cloud (unit-variance Gumbel): closed form, rho-independent
+  const SGM = Math.sqrt(6)/Math.PI, EULER = 0.5772156649;
+  const softPts = grid.map(th => {
+    const es = th.map(v => Math.exp(v/SGM)), sum = es[0]+es[1]+es[2];
+    const w = es.map(v => v/sum);
+    const H = w.reduce((a,p) => a + (p > 0 ? p*Math.log(p) : 0), 0);
+    return {w, omega: SGM*(H - EULER)};
+  });
+  const softW0 = [1/3, 1/3, 1/3];
+
+  // viridis-ish ramp
+  const RAMP = [[68,1,84],[59,82,139],[33,145,140],[94,201,98],[253,231,37]];
+  function color(v, lo, hi){
+    const t = Math.max(0, Math.min(1, (v - lo)/(hi - lo))) * (RAMP.length - 1);
+    const i = Math.min(RAMP.length - 2, Math.floor(t)), f = t - i;
+    const c = RAMP[i].map((a,k) => Math.round(a + f*(RAMP[i+1][k]-a)));
+    return `rgb(${c[0]},${c[1]},${c[2]})`;
+  }
+
+  function setup(){
+    const cssW = cv.clientWidth || 820, cssH = 430;
+    cv.width = cssW*dpr; cv.height = cssH*dpr; cv.style.height = cssH + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {W: cssW, H: cssH};
+  }
+
+  function panel(x0, size, title, pts, w0, lo, hi){
+    // vertices: 1 bottom-left, 2 bottom-right, 3 top
+    const bx = x0 + 10, by = 395, s = size;
+    const P = w => [bx + (w[1] + w[2]/2)*s, by - w[2]*Math.SQRT1_2*1.2247*s]; // sqrt(3)/2
+    ctx.strokeStyle = "#bbb"; ctx.lineWidth = 1;
+    const v1 = P([1,0,0]), v2 = P([0,1,0]), v3 = P([0,0,1]);
+    ctx.beginPath(); ctx.moveTo(v1[0],v1[1]); ctx.lineTo(v2[0],v2[1]); ctx.lineTo(v3[0],v3[1]); ctx.closePath(); ctx.stroke();
+    // median w1=w2
+    const mid = P([0.5,0.5,0]);
+    ctx.strokeStyle = "#e0e0e0"; ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(mid[0],mid[1]); ctx.lineTo(v3[0],v3[1]); ctx.stroke(); ctx.setLineDash([]);
+    for (const p of pts){
+      const [x,y] = P(p.w);
+      ctx.fillStyle = color(p.omega, lo, hi);
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath(); ctx.arc(x, y, 2.4, 0, 7); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    const m = P(w0);
+    ctx.strokeStyle = "#c0392b"; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(m[0], m[1], 5, 0, 7); ctx.stroke();
+    ctx.fillStyle = "#555"; ctx.font = "10px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("asset 1 (twin)", v1[0]+18, v1[1]+14);
+    ctx.fillText("asset 2 (twin)", v2[0]-18, v2[1]+14);
+    ctx.fillText("asset 3 (independent)", v3[0], v3[1]-8);
+    ctx.fillStyle = "#666"; ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText(title, x0 + 10, 16);
+  }
+
+  function draw(){
+    const rho = +rhoEl.value;
+    const {W} = setup();
+    ctx.clearRect(0, 0, W, 430);
+    const size = Math.min((W - 60)/2, 330);
+    const {pts, w0, G0} = computeCloud(rho);
+    let lo = 0; for (const p of pts) lo = Math.min(lo, p.omega);
+    let loS = 0; for (const p of softPts) loS = Math.min(loS, p.omega);
+    panel(0, size, "softmax (Gumbel noise) — blind to ρ by axiom", softPts, softW0, loS, 0);
+    panel(W/2 + 10, size, `Thurstone race (Gaussian noise, ρ₁₂ = ${rho.toFixed(2)})`, pts, w0, lo, 0);
+    readout.innerHTML =
+      `At <b>ρ₁₂ = ${rho.toFixed(2)}</b>: the equal-ability portfolio (circled) is ` +
+      `<b>(${w0.map(v => (v*100).toFixed(0)).join("%, ")}%)</b> — the two-horse limit is (25%, 25%, 50%). ` +
+      `Maximum diversification reward −Ω = <b>${G0.toFixed(2)}</b> ` +
+      `(0.85 at ρ = 0): the third genuine bet is disappearing.`;
+  }
+
+  let pending = null;
+  rhoEl.addEventListener("input", () => {
+    rhoVal.textContent = (+rhoEl.value).toFixed(2);
+    if (pending) cancelAnimationFrame(pending);
+    pending = requestAnimationFrame(draw);
+  });
+  window.addEventListener("resize", draw);
+  rhoVal.textContent = (+rhoEl.value).toFixed(2);
+  draw();
+})();
+</script>
+</body>
+</html>
