@@ -105,6 +105,24 @@
   unconstrained minimum-variance level at γ = 0 to 1.34× at the cap — a modest gain on this
   particular covariance, priced long-only and without ever inverting <code>Σ</code>.</p>
 
+  <h2>Out of sample, the middle of the bridge wins</h2>
+  <p>In sample, variance can only fall as γ rises — more of the covariance is used. Out of
+  sample the question is different: the cross-block terms that γ folds in are <em>estimated</em>,
+  and estimation error grows with how aggressively they are used. Here weights are fitted on
+  one-year windows drawn from 2010–2017 (raw weights, no monotonic cap, so the whole bridge
+  shows) and evaluated on the 2018–2024 covariance, averaged over 26 windows:</p>
+
+  <div class="widget">
+    <canvas id="bridge" width="820" height="280"></canvas>
+    <div class="readout" id="bridgeReadout"></div>
+  </div>
+
+  <p>Neither endpoint is best. HRP (γ = 0) ignores cross-block covariance it could have used;
+  γ = 1 trusts estimated cross-block terms it shouldn't, and pays 21% for it. The minimum sits
+  mid-bridge, at γ ≈ 0.55, about 2.5% below HRP — a modest dip, but a real interior optimum:
+  the coupling parameter is a bias–variance dial, not a formality. The γ slider above moves the
+  marker here too.</p>
+
   <h2>What the smooth ordering is worth</h2>
   <p>Same experiment twice: an EWMA covariance (60-day halflife) over the same 28 names,
   rebalanced weekly at γ = 0.5, 2011–2024. The only difference is the ordering fed to the
@@ -137,7 +155,8 @@
 <script src="data.js"></script>
 <script>
 (function(){
-  const {names, n, corr, orderF, orderD, gammas, Wg, effg, varr, years, cumF, cumD} = SG;
+  const {names, n, corr, orderF, orderD, gammas, Wg, effg, varr, years, cumF, cumD,
+         oosg, oos, oosWindows} = SG;
   const dpr = window.devicePixelRatio || 1;
   const cv = document.getElementById("chart"), ctx = cv.getContext("2d");
   const gEl = document.getElementById("gamma"), gVal = document.getElementById("gammaVal"),
@@ -210,6 +229,53 @@
       `Portfolio variance: <b>${varr[gi].toFixed(2)}×</b> the unconstrained minimum-variance level.`;
   }
 
+  // ---- out-of-sample bridge (marker follows the gamma slider)
+  function drawBridge(){
+    const c = document.getElementById("bridge");
+    const {cx, W, H} = setup(c, 280);
+    cx.clearRect(0,0,W,H);
+    const padL = 46, padR = 16, padT = 18, padB = 30;
+    const ymin = Math.min(...oos)*0.99, ymax = Math.max(...oos)*1.01;
+    const X = g => padL + g*(W - padL - padR);
+    const Y = v => H - padB - (v - ymin)/(ymax - ymin)*(H - padT - padB);
+    cx.strokeStyle = "#e5e5e5"; cx.fillStyle = "#888"; cx.font = "10px sans-serif";
+    for (let v = Math.ceil(ymin*20)/20; v <= ymax; v += 0.05){
+      cx.beginPath(); cx.moveTo(padL, Y(v)); cx.lineTo(W-padR, Y(v)); cx.stroke();
+      cx.textAlign = "right"; cx.fillText(v.toFixed(2), padL-5, Y(v)+3);
+    }
+    for (const g of [0,0.2,0.4,0.6,0.8,1]){
+      cx.textAlign = "center"; cx.fillText(g, X(g), H-12);
+    }
+    cx.fillText("γ", (padL+W-padR)/2, H-1);
+    // HRP reference at 1.0
+    cx.strokeStyle = "#bbb"; cx.setLineDash([2,4]);
+    cx.beginPath(); cx.moveTo(padL, Y(1)); cx.lineTo(W-padR, Y(1)); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle = "#999"; cx.textAlign = "left"; cx.fillText("HRP (γ = 0) = 1.00", padL+4, Y(1)-5);
+    cx.strokeStyle = "#4a3aff"; cx.lineWidth = 1.8; cx.beginPath();
+    for (let i = 0; i < oosg.length; i++){
+      const x = X(oosg[i]), y = Y(oos[i]);
+      i ? cx.lineTo(x,y) : cx.moveTo(x,y);
+    }
+    cx.stroke();
+    // minimum
+    let mi = 0; for (let i = 1; i < oos.length; i++) if (oos[i] < oos[mi]) mi = i;
+    cx.fillStyle = "#1a1a1a";
+    cx.beginPath(); cx.arc(X(oosg[mi]), Y(oos[mi]), 3, 0, 7); cx.fill();
+    cx.textAlign = "center"; cx.font = "10px sans-serif";
+    cx.fillText(`min ${oos[mi].toFixed(3)} at γ = ${oosg[mi]}`, X(oosg[mi]), Y(oos[mi])+14);
+    // marker at the slider's gamma (interpolated)
+    const g = +gEl.value;
+    let k = 0; while (k < oosg.length-2 && oosg[k+1] < g) k++;
+    const t = (g - oosg[k])/(oosg[k+1]-oosg[k]), v = oos[k] + t*(oos[k+1]-oos[k]);
+    cx.fillStyle = "#c0392b";
+    cx.beginPath(); cx.arc(X(g), Y(v), 4, 0, 7); cx.fill();
+    cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
+    cx.fillText(`out-of-sample variance vs γ, relative to HRP (${oosWindows} one-year training windows)`, padL, 11);
+    document.getElementById("bridgeReadout").innerHTML =
+      `At the slider's <b>γ = ${g.toFixed(2)}</b>: out-of-sample variance <b>${v.toFixed(3)}×</b> HRP's. ` +
+      `Bridge minimum <b>${oos[mi].toFixed(3)}×</b> at γ = ${oosg[mi]}; γ = 1 pays <b>${oos[oos.length-1].toFixed(2)}×</b>.`;
+  }
+
   // ---- turnover chart (static)
   function drawTurn(){
     const c = document.getElementById("turn");
@@ -251,14 +317,14 @@
       `<b>${(cumD[cumD.length-1]/cumF[cumF.length-1]).toFixed(2)}×</b>.`;
   }
 
-  const update = () => { gVal.textContent = (+gEl.value).toFixed(2); draw(); };
+  const update = () => { gVal.textContent = (+gEl.value).toFixed(2); draw(); drawBridge(); };
   gEl.addEventListener("input", update);
   Object.entries(ordBtns).forEach(([k, b]) => b.addEventListener("click", () => {
     ord = k;
     Object.values(ordBtns).forEach(x => x.classList.toggle("on", x === b));
     draw();
   }));
-  window.addEventListener("resize", () => { draw(); drawTurn(); });
+  window.addEventListener("resize", () => { draw(); drawBridge(); drawTurn(); });
   update(); drawTurn();
 })();
 </script>

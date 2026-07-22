@@ -13,6 +13,10 @@ Emits docs/demos/schur-gamma/data.js with:
               cumulative L1 turnover of a weekly-rebalanced gamma=0.5 portfolio
               under (F) warm-started Fiedler seriation and (D) a dendrogram
               order recomputed each week, same EWMA covariance for both
+  oosg, oos  : out-of-sample variance across the gamma bridge: weights fitted on
+              252-day training windows drawn from 2010-2017 (raw compute_weights,
+              no monotonic cap), evaluated on the 2018-2024 covariance, averaged
+              over the windows and normalized by the gamma=0 (HRP) value
 """
 import json, os, warnings, numpy as np
 warnings.filterwarnings("ignore")
@@ -20,7 +24,7 @@ import yfinance as yf
 from scipy.cluster.hierarchy import linkage, leaves_list
 from scipy.spatial.distance import squareform
 from allocation._schur.seriation import seriate
-from allocation._schur.coupling import compute_monotonic_weights
+from allocation._schur.coupling import compute_monotonic_weights, compute_weights
 from allocation._thurstone.covariance import cov_to_corr
 
 TICKERS = ["AAPL","AMGN","AXP","BA","CAT","CSCO","CVX","DIS","GS","HD","HON","IBM",
@@ -85,6 +89,27 @@ cumF = np.cumsum(tF); cumD = np.cumsum(tD)
 print(f"turnover over {len(tF)} rebalances: Fiedler total {cumF[-1]:.2f}, "
       f"dendrogram total {cumD[-1]:.2f} (x{cumD[-1]/cumF[-1]:.1f})")
 
+# ---- out-of-sample variance across the bridge (interior optimum) -----------
+# Fit on short windows from the first half, evaluate on the second half's
+# covariance. Raw compute_weights (no monotonic cap) so the whole bridge shows.
+TRAIN_END = np.searchsorted(dates, np.datetime64("2018-01-01"))
+S_test = np.cov(Rv[TRAIN_END:].T)
+oosg = np.round(np.linspace(0.0, 1.0, 21), 2)
+WIN = 252
+starts = np.arange(252, TRAIN_END - WIN, 60)
+oos = np.zeros(len(oosg))
+for s in starts:
+    S_tr = np.cov(Rv[s:s + WIN].T)
+    o, _ = seriate(S_tr)
+    for j, g in enumerate(oosg):
+        w = compute_weights(o, S_tr, float(g), force_spd=True)
+        oos[j] += float(w @ S_test @ w)
+oos /= len(starts)
+oos = oos / oos[0]
+j = int(np.argmin(oos))
+print(f"OOS bridge over {len(starts)} windows: min {oos[j]:.3f} at gamma={oosg[j]}, "
+      f"endpoints ({oos[0]:.3f}, {oos[-1]:.3f})")
+
 data = {"names": names, "n": n,
         "corr": [[round(float(v), 3) for v in row] for row in corr],
         "orderF": [int(i) for i in orderF],
@@ -93,7 +118,10 @@ data = {"names": names, "n": n,
         "Wg": Wg, "effg": effg, "varr": varr,
         "years": years,
         "cumF": [round(float(v), 3) for v in cumF],
-        "cumD": [round(float(v), 3) for v in cumD]}
+        "cumD": [round(float(v), 3) for v in cumD],
+        "oosg": [float(g) for g in oosg],
+        "oos": [round(float(v), 4) for v in oos],
+        "oosWindows": int(len(starts))}
 out = os.path.join(os.path.dirname(__file__), "..", "docs", "demos", "schur-gamma", "data.js")
 os.makedirs(os.path.dirname(out), exist_ok=True)
 with open(out, "w") as f:
