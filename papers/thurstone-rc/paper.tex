@@ -32,27 +32,17 @@
 \maketitle
 
 \begin{abstract}
-We construct long-only portfolios by reading weights as the winning
-probabilities of a Thurstonian race among assets: each asset draws a noisy
-performance under an arbitrary centered joint law, and its weight is the
-probability that it comes out best. Latent abilities are backed out of any
-benchmark by a fast exact inverse, and the portfolio is the race re-run under
-the estimated dependence. The organizing property is \emph{redundancy
-consistency}---a near-duplicate asset splits a position rather than doubling
-it---which capitalization and equal weighting violate by axiom (the
-red-bus/blue-bus failure of Luce's rule) and which mean--variance attains only
-through an unstable inverse of a near-singular covariance. Because the race
-samples from a correlation rather than inverting one, the same near-singularity
-that breaks $\Sigma^{-1}$ is priced smoothly: the construction is feasible on
-the simplex without optimization, reproduces its benchmark exactly, admits
-tail-dependent simulations no covariance functional can express, solves an
-implied mean--(convex-regularizer) program, and is locally Lipschitz in the
-correlation, bounding turnover. We state and prove these properties and
-document them empirically: a fourteen-year Dow walk-forward at four to nine
-times less turnover than clustering allocators, and a $500$-asset known-truth
-market where sample minimum variance degrades from $1.4\times$ to $91\times$
-the true minimum variance as $n/T \to 1$ while the race holds flat at
-$3.3\times$, long-only, with no inverse taken.
+A portfolio weight is read as a winning probability: each asset draws a noisy
+performance under a centered joint law, and its weight is the probability it
+comes out best. Abilities are backed out of any benchmark by a fast exact
+inverse, and the portfolio is the race re-run under the estimated dependence.
+A near-duplicate asset splits a position rather than doubling it. The
+construction takes no covariance inverse and needs no optimizer, reproduces
+its benchmark exactly, admits tail-dependent simulations, and is locally
+Lipschitz in the correlation. A fourteen-year Dow walk-forward runs at four to
+nine times less turnover than clustering allocators. In a $500$-asset
+known-truth market, sample minimum variance degrades from $1.4\times$ to
+$91\times$ the true minimum as $n/T \to 1$; the race holds at $3.3\times$.
 \end{abstract}
 
 \noindent\textbf{Keywords:} portfolio construction; discrete choice; Thurstone
