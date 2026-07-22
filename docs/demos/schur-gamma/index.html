@@ -127,6 +127,14 @@
   applied to every training covariance, the interior optimum survives — slightly deeper
   (0.97× at γ = 0.6) and γ = 1 still pays 24%. On this data, shrinkage moves the best γ a
   little to the right; it does not rescue the far end of the bridge.</p>
+  <p>Nor is the interior optimum an accident of this dataset — it is provable. In a four-asset,
+  two-block example with a two-point error on one cross-block covariance entry, the expected
+  out-of-sample variance satisfies <code>F(0.9) &lt; F(0)</code> and
+  <code>F(0.9) &lt; F(1)</code> as exact rational inequalities (every step of the recursion is
+  rational arithmetic, so the comparison is a certificate, not a simulation), while γ = 0 is
+  structurally noise-immune — the HRP recursion never reads the cross block, so the minimizer
+  is never at 0 and, above the exhibited noise level, never at 1 either. The construction and
+  certificate: <code>experiments/schur_interior_optimum.py</code>.</p>
 
   <h2>What the smooth ordering is worth</h2>
   <p>Same experiment twice: an EWMA covariance (60-day halflife) over the same 28 names,
