@@ -122,6 +122,11 @@
   mid-bridge, at γ ≈ 0.55, about 2.5% below HRP — a modest dip, but a real interior optimum:
   the coupling parameter is a bias–variance dial, not a formality. The γ slider above moves the
   marker here too.</p>
+  <p>The natural objection is that raw one-year covariances overfit by construction, and a
+  practitioner would shrink first. The dashed line answers it: with Ledoit–Wolf shrinkage
+  applied to every training covariance, the interior optimum survives — slightly deeper
+  (0.97× at γ = 0.6) and γ = 1 still pays 24%. On this data, shrinkage moves the best γ a
+  little to the right; it does not rescue the far end of the bridge.</p>
 
   <h2>What the smooth ordering is worth</h2>
   <p>Same experiment twice: an EWMA covariance (60-day halflife) over the same 28 names,
@@ -156,7 +161,7 @@
 <script>
 (function(){
   const {names, n, corr, orderF, orderD, gammas, Wg, effg, varr, years, cumF, cumD,
-         oosg, oos, oosWindows} = SG;
+         oosg, oos, oosLW, oosWindows} = SG;
   const dpr = window.devicePixelRatio || 1;
   const cv = document.getElementById("chart"), ctx = cv.getContext("2d");
   const gEl = document.getElementById("gamma"), gVal = document.getElementById("gammaVal"),
@@ -235,7 +240,7 @@
     const {cx, W, H} = setup(c, 280);
     cx.clearRect(0,0,W,H);
     const padL = 46, padR = 16, padT = 18, padB = 30;
-    const ymin = Math.min(...oos)*0.99, ymax = Math.max(...oos)*1.01;
+    const ymin = Math.min(...oos, ...oosLW)*0.99, ymax = Math.max(...oos, ...oosLW)*1.01;
     const X = g => padL + g*(W - padL - padR);
     const Y = v => H - padB - (v - ymin)/(ymax - ymin)*(H - padT - padB);
     cx.strokeStyle = "#e5e5e5"; cx.fillStyle = "#888"; cx.font = "10px sans-serif";
@@ -251,12 +256,18 @@
     cx.strokeStyle = "#bbb"; cx.setLineDash([2,4]);
     cx.beginPath(); cx.moveTo(padL, Y(1)); cx.lineTo(W-padR, Y(1)); cx.stroke(); cx.setLineDash([]);
     cx.fillStyle = "#999"; cx.textAlign = "left"; cx.fillText("HRP (γ = 0) = 1.00", padL+4, Y(1)-5);
-    cx.strokeStyle = "#4a3aff"; cx.lineWidth = 1.8; cx.beginPath();
-    for (let i = 0; i < oosg.length; i++){
-      const x = X(oosg[i]), y = Y(oos[i]);
-      i ? cx.lineTo(x,y) : cx.moveTo(x,y);
+    function bline(series, color, dash){
+      cx.strokeStyle = color; cx.lineWidth = 1.8; cx.setLineDash(dash); cx.beginPath();
+      for (let i = 0; i < oosg.length; i++){
+        const x = X(oosg[i]), y = Y(series[i]);
+        i ? cx.lineTo(x,y) : cx.moveTo(x,y);
+      }
+      cx.stroke(); cx.setLineDash([]);
     }
-    cx.stroke();
+    bline(oos, "#4a3aff", []);
+    bline(oosLW, "#ef6c00", [5,3]);
+    cx.fillStyle = "#ef6c00"; cx.textAlign = "left"; cx.font = "10.5px sans-serif";
+    cx.fillText("Ledoit–Wolf input (dashed)", X(0.72), Y(oosLW[14]) - 8);
     // minimum
     let mi = 0; for (let i = 1; i < oos.length; i++) if (oos[i] < oos[mi]) mi = i;
     cx.fillStyle = "#1a1a1a";
