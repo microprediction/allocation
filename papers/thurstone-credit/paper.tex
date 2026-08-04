@@ -54,7 +54,10 @@ old problem with a canonical answer, the Shapley value \parencite{shapley1953}, 
 a canonical difficulty, its cost: the exact value sums marginal contributions over
 all $2^n$ coalitions, and the practical estimators sample permutations
 \parencite{strumbelj2014} or, in machine learning, fit a local surrogate (SHAP,
-\textcite{lundberg2017}). Correlated contributors compound the difficulty: a
+\textcite{lundberg2017}). In finance the same gradient logic appears as Euler
+risk-capital allocation, where a unit's charge is its marginal contribution to a
+coherent risk measure \parencite{denault2001, kalkbrener2005, tasche2008}.
+Correlated contributors compound the difficulty: a
 contributor and a near-duplicate should \emph{share} credit, not each receive it in
 full, and many cheap importance measures (marginal screening, regression
 coefficients, permutation importance) either double-count the pair or split it
