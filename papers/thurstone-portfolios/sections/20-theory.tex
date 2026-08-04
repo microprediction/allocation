@@ -271,7 +271,9 @@ almost-surely unique maximizer the envelope theorem gives
 $\partial G_C/\partial\theta_i = \Prob(i = \argmaxop_k(\theta_k + \eta_k)) = w_i$,
 i.e.\ $w = \nabla G_C$ (the Williams--Daly--Zachary identity
 \parencite{williams1977, mcfadden1981}). Equation~\eqref{eq:regularized} is the
-Fenchel--Young duality for the convex $G_C$.
+Fenchel--Young duality for the convex $G_C$ \parencite{blondel2020}; softmax and
+sparsemax are the special cases where $\Omega$ is Shannon entropy or the squared
+Euclidean norm \parencite{martins2016}.
 \end{proof}
 
 So the portfolio maximizes an ability-weighted exposure $\langle\theta,p\rangle$
@@ -279,17 +281,21 @@ minus a convex \emph{diversification penalty} $\Omega_C$ that is determined by
 the correlation---a mean--(convex-risk) allocator whose feasible set is the
 simplex, which is why the solution is long-only and fully invested. This is the
 random-utility ``social-surplus'' / perturbed-optimizer construction
-\parencite{mcfadden1981, williams1977, berthet2020}. The perturbation law indexes a
-whole \emph{family of dependence-aware entropies}---$\Omega_S(p)$ is the cost of
-concentrating choice probability on $p$ under dependence $S$. The choice is decisive:
+\parencite{mcfadden1981, williams1977, berthet2020, papandreou2011}. The perturbation
+law indexes a whole \emph{family of dependence-aware entropies}---$\Omega_S(p)$ is
+the cost of concentrating choice probability on $p$ under dependence $S$, the
+information cost of a rationally inattentive chooser whose logit foundation is the
+Gumbel case \parencite{matejka2015, fosgerau2020}. The choice is decisive:
 Gumbel noise yields $\Omega = $ Shannon entropy and $w = $ softmax, a
-\emph{correlation-blind} (Lucian) allocator; Gaussian noise with covariance $C$
+\emph{correlation-blind} (Lucian) allocator---the Gumbel-softmax of the
+machine-learning literature \parencite{jang2017, maddison2017}; Gaussian noise with covariance $C$
 makes $\Omega_C$ \emph{correlation-aware}, which is precisely what produces the
 redundancy consistency of \Cref{prop:redundancy}; a tail-dependent law makes it
 \emph{tail-aware} (\Cref{prop:tail}). Spreading across independent names is rewarded;
 spreading across comonotone names is not---the entropy knows the dependence. Finally, since
 $w = \nabla G_C(\theta)$ is the gradient of a convex potential, it is
-automatically smooth---consistent with \Cref{thm:smooth}. (For general $C$ the
+automatically smooth---$G_C$ is a smoothing of the max in the sense of
+\textcite{nesterov2005}---consistent with \Cref{thm:smooth}. (For general $C$ the
 regularizer $\Omega_C$ has no closed form, unlike the entropy/softmax special
 case, but it provably exists and is convex, which is all we use.)
 
