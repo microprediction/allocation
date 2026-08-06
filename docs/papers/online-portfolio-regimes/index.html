@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>When Does Portfolio Construction Work? A Map across the Number of
+Assets and the Cost of Trading — allocation</title>
+<style>
+  :root{--bg:#fafafa;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;--accent:#4a3aff;--border:#e6e6e6}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.65;font-size:17px}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  code{background:#f1f1f4;padding:1px 5px;border-radius:3px;font-size:.92em;
+    font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+  .crumb{max-width:760px;margin:0 auto;padding:20px 24px 0;display:flex;gap:18px;font-size:.95rem}
+  .crumb a{color:var(--muted)} .crumb a:hover{color:var(--accent)}
+  main{max-width:760px;margin:14px auto 0;padding:0 24px 40px}
+  h1{font-size:1.95rem;line-height:1.25;margin:.3em 0 .1em}
+  .author{color:var(--muted);margin:.2em 0 1.4em}
+  .abstract{background:#fff;border:1px solid var(--border);border-radius:8px;
+    padding:14px 18px;margin:0 0 28px;font-size:.97rem;color:#2a2a2a}
+  h2{font-size:1.3rem;margin:1.9em 0 .5em;border-bottom:1px solid var(--border);padding-bottom:3px}
+  h3{font-size:1.06rem;margin:1.4em 0 .35em}
+  p{margin:.7em 0}
+  .math.display{overflow-x:auto;overflow-y:hidden}
+  table{border-collapse:collapse;margin:16px 0;font-size:.95rem;width:100%}
+  th,td{text-align:left;padding:7px 12px;border-bottom:1px solid var(--border)}
+  thead th{border-bottom:2px solid var(--border)}
+  figure{margin:20px 0;text-align:center} figure img{max-width:100%;height:auto}
+  figcaption{color:var(--muted);font-size:.9rem;margin-top:6px}
+  .algorithm{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 16px 14px;margin:18px 0}
+  .algo-title{margin:0 0 6px;font-size:.98rem}
+  ol.algo{margin:0;padding-left:1.5em} ol.algo li{margin:.3em 0}
+  .algo .kw{font-variant:small-caps;font-weight:600}
+  .algo .cmt{color:var(--faint);font-size:.9em;margin-left:.3em}
+  .references{font-size:.92rem} .references div{margin:.4em 0}
+  footer{max-width:760px;margin:24px auto 40px;padding:18px 24px 0;border-top:1px solid var(--border);
+    color:var(--faint);font-size:.85rem} footer a{color:var(--muted)}
+</style>
+<script defer=""
+src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+type="text/javascript"></script>
+</head>
+<body>
+<div class="crumb">
+  <a href="../../">&larr; allocation</a>
+  <a href="../">papers</a>
+  <a href="https://github.com/microprediction/allocation">GitHub</a>
+</div>
+<main>
+<h1>When Does Portfolio Construction Work? A Map across the Number of
+Assets and the Cost of Trading</h1>
+<p class="author">Peter Cotton</p>
+<div class="abstract"><p>A portfolio rule is a covariance estimate
+feeding an allocator. We ask a plain question: which rules actually work
+out of sample—after trading costs, and as the number of assets grows? We
+backtest eleven online constructions over thousands of random subsets of
+U.S. stocks and draw a map of the winner against two axes, the number of
+names and the cost of trading. The map has three regions. With few names
+and cheap trading, classic minimum-variance wins. With many names and
+cheap trading, a factor-model minimum-variance wins—and by a margin that
+grows with the number of names—because the ordinary version becomes
+undefined once there are more assets than data. Once trading costs rise
+above about five to ten basis points, simple inverse-variance weighting
+wins everywhere, because turnover, not estimation error, is what hurts.
+We then give the two ingredients that make the many-names corner work: a
+Woodbury inversion of a factor covariance, and a ridge-regularized
+version of the Schur coupling.</p></div>
+<h1 data-number="1" id="the-question"><span
+class="header-section-number">1</span> The question</h1>
+<p>Most studies compare portfolio methods one against another and crown
+a winner. A practitioner faces a different question: which method should
+I run, given how many names I hold, how noisy my covariance estimate is,
+and how much it costs me to trade? The answer is not a single method; it
+is a map.</p>
+<p>Write a portfolio rule as <span
+class="math display">\[\begin{equation}
+  w \;=\; \mathcal{A}\!\left(\widehat{\Sigma}\right):
+\end{equation}\]</span> an allocator <span
+class="math inline">\(\mathcal{A}\)</span> (minimum-variance, risk
+parity, a tilt, …) applied to an estimated covariance <span
+class="math inline">\(\widehat{\Sigma}\)</span>. Whether a rule is
+usable as the universe grows comes down to three things:</p>
+<ul>
+<li><p><strong>Is it defined?</strong> With more assets than data, <span
+class="math inline">\(\widehat{\Sigma}\)</span> is rank-deficient and
+<span class="math inline">\(\widehat{\Sigma}^{-1}\)</span> does not
+exist. Any rule that needs the full inverse simply has no
+answer.</p></li>
+<li><p><strong>Is it fast enough?</strong> An <span
+class="math inline">\(O(n^3)\)</span> step is unusable at thousands of
+names.</p></li>
+<li><p><strong>Does it pay after costs?</strong> In-sample variance is
+not the point; net-of-cost return is.</p></li>
+</ul>
+<p>This paper measures all three at once and reports the result as a
+two-axis map.</p>
+<h1 data-number="2" id="the-methods-in-one-breath"><span
+class="header-section-number">2</span> The methods, in one breath</h1>
+<p>We use online estimators: a one-time <code>fit</code>, then a cheap
+<code>partial_fit</code> each period over an exponentially-weighted
+covariance. This is the setting of online learning—one decision per
+period against a changing world, judged by regret <span class="citation"
+data-cites="cover1991 hazan2016">(Cover 1991; Hazan 2016)</span>—and the
+Thurstone tilt in particular is a follow-the-perturbed-leader rule,
+which perturbs abilities and takes the winner <span class="citation"
+data-cites="hannan1957 kalaivempala2005">(Hannan 1957; Kalai and Vempala
+2005)</span>. They split into two families by how they use <span
+class="math inline">\(\widehat{\Sigma}\)</span>.</p>
+<h4 data-number="2.0.0.1"
+id="rules-that-never-invert-the-covariance-work-at-any-size."><span
+class="header-section-number">2.0.0.1</span> Rules that never invert the
+covariance (work at any size).</h4>
+<p>Equal weight; inverse-variance (<span class="math inline">\(w_i
+\propto 1/\widehat\sigma_i^2\)</span>, using only the diagonal); risk
+parity (equal risk contributions, an interior solution we solve by
+warm-started iteration) <span class="citation"
+data-cites="maillard2010">(Maillard et al. 2010)</span>; hierarchical
+risk parity (HRP), which allocates down a tree <span class="citation"
+data-cites="lopezdeprado2016">(López de Prado 2016)</span>; and the
+Thurstone tilt, which nudges a chosen benchmark and never touches <span
+class="math inline">\(\Sigma^{-1}\)</span>.</p>
+<h4 data-number="2.0.0.2"
+id="rules-that-invert-the-covariance-need-it-full-rank."><span
+class="header-section-number">2.0.0.2</span> Rules that invert the
+covariance (need it full-rank).</h4>
+<p>Minimum-variance (<span
+class="math inline">\(w\propto\Sigma^{-1}\mathbf 1\)</span>); maximum
+diversification <span class="citation"
+data-cites="choueifaty2008">(Choueifaty and Coignard 2008)</span>;
+maximum decorrelation; and mean–variance. Each is a clean function of
+<span class="math inline">\(\Sigma\)</span>, but undefined when <span
+class="math inline">\(\Sigma\)</span> is singular—which is the normal
+state of affairs at scale.</p>
+<h4 data-number="2.0.0.3" id="the-bridge."><span
+class="header-section-number">2.0.0.3</span> The bridge.</h4>
+<p>The Schur construction <span class="citation"
+data-cites="cotton2024schur">(Cotton 2024a)</span> has a dial <span
+class="math inline">\(\gamma\)</span> that slides from HRP (<span
+class="math inline">\(\gamma{=}0\)</span>) to minimum-variance (<span
+class="math inline">\(\gamma{\to}1\)</span>).</p>
+<h4 data-number="2.0.0.4"
+id="why-turnover-is-built-in-not-bolted-on."><span
+class="header-section-number">2.0.0.4</span> Why turnover is built in,
+not bolted on.</h4>
+<p>Because <span
+class="math inline">\(w=\mathcal{A}(\widehat\Sigma)\)</span>, weights
+jolt around whenever either factor does. For the inverting rules the
+allocator is already a smooth function of <span
+class="math inline">\(\Sigma\)</span>, so smooth weights just need a
+smooth covariance. The harder cases are HRP and the tilt, where the
+allocator itself is jumpy—a re-sorted tree, a fresh random draw—and we
+smooth those directly (a stable spectral ordering for the tree; a fixed
+random seed reused across updates for the tilt).</p>
+<h1 data-number="3" id="how-we-test"><span
+class="header-section-number">3</span> How we test</h1>
+<p>We use daily returns for the U.S. large-cap cross-section <span
+class="citation" data-cites="winningport">(Cotton 2024b)</span>; we
+redistribute no data. One trial works like this:</p>
+<ol>
+<li><p>draw a random set of <span class="math inline">\(k\)</span> names
+and a random time window;</p></li>
+<li><p>walk forward—form weights from the past, earn the next day,
+update;</p></li>
+<li><p>record gross Sharpe, turnover, and Sharpe after a <span
+class="math inline">\(c\)</span>-bp trading cost.</p></li>
+</ol>
+<p>We run thousands of trials with <span
+class="math inline">\(k\)</span> and the window drawn at random.
+Averaging over trials removes the luck of which names and period a
+single backtest happened to pick—luck large enough, we found, to flip
+the ranking. One more convenience: net Sharpe is just gross minus a
+cost-proportional drag, so a single run at <span
+class="math inline">\(10\)</span> bp recovers the ranking at any
+cost.</p>
+<h1 data-number="4" id="what-the-map-shows"><span
+class="header-section-number">4</span> What the map shows</h1>
+<h2 data-number="4.1" id="at-scale-trading-cost-decidesnot-skill"><span
+class="header-section-number">4.1</span> At scale, trading cost
+decides—not skill</h2>
+<p>On broad subsets (hundreds of names) the gross and net winners are
+different methods. Minimum-variance has the best gross Sharpe, and its
+raw skill even grows with the number of names. But it trades a lot, and
+after costs it falls behind. Inverse-variance and risk parity trade
+roughly ten times less and win net. The crossover is early: about <span
+class="math inline">\(5\)</span>–<span
+class="math inline">\(10\)</span> bp.</p>
+<h2 data-number="4.2" id="the-three-regions"><span
+class="header-section-number">4.2</span> The three regions</h2>
+<p><a href="#tab:regime" data-reference-type="ref+Label"
+data-reference="tab:regime">1</a> is the headline: the winning method,
+by mean net Sharpe, over <span class="math inline">\(2{,}638\)</span>
+trials.</p>
+<div id="tab:regime">
+<table>
+<caption>The regime map: winner and its mean out-of-sample net Sharpe,
+by number of names and trading cost. Dense minimum-variance (MinVar) is
+undefined past the point where names exceed the data, so it is absent
+there; the factor-model version (FactorMV) takes that corner and wins by
+a widening margin (its win rate reaches <span
+class="math inline">\(79\%\)</span> at <span
+class="math inline">\(k{=}500\)</span>, zero cost).</caption>
+<thead>
+<tr>
+<th style="text-align: right;">names <span
+class="math inline">\(k\;\backslash\;\)</span> cost</th>
+<th style="text-align: left;"><span
+class="math inline">\(0\)</span> bp</th>
+<th style="text-align: left;"><span
+class="math inline">\(5\)</span> bp</th>
+<th style="text-align: left;"><span
+class="math inline">\(10\)</span> bp</th>
+<th style="text-align: left;"><span
+class="math inline">\(20\)</span> bp</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;"><span
+class="math inline">\(25\)</span></td>
+<td style="text-align: left;">MinVar <span
+class="math inline">\(0.59\)</span></td>
+<td style="text-align: left;">MinVar <span
+class="math inline">\(0.53\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.50\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.49\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;"><span
+class="math inline">\(50\)</span></td>
+<td style="text-align: left;">MinVar <span
+class="math inline">\(0.71\)</span></td>
+<td style="text-align: left;">MinVar <span
+class="math inline">\(0.61\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.56\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.54\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;"><span
+class="math inline">\(100\)</span></td>
+<td style="text-align: left;"><strong>FactorMV</strong> <span
+class="math inline">\(0.83\)</span></td>
+<td style="text-align: left;"><strong>FactorMV</strong> <span
+class="math inline">\(0.65\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.54\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.52\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;"><span
+class="math inline">\(200\)</span></td>
+<td style="text-align: left;"><strong>FactorMV</strong> <span
+class="math inline">\(0.89\)</span></td>
+<td style="text-align: left;"><strong>FactorMV</strong> <span
+class="math inline">\(0.66\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.56\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.54\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;"><span
+class="math inline">\(350\)</span></td>
+<td style="text-align: left;"><strong>FactorMV</strong> <span
+class="math inline">\(0.95\)</span></td>
+<td style="text-align: left;"><strong>FactorMV</strong> <span
+class="math inline">\(0.69\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.56\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.54\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;"><span
+class="math inline">\(500\)</span></td>
+<td style="text-align: left;"><strong>FactorMV</strong> <span
+class="math inline">\(0.94\)</span></td>
+<td style="text-align: left;"><strong>FactorMV</strong> <span
+class="math inline">\(0.66\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.53\)</span></td>
+<td style="text-align: left;">InvVar <span
+class="math inline">\(0.51\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Read it in three pieces:</p>
+<ul>
+<li><p><strong>Few names, cheap trading <span
+class="math inline">\(\Rightarrow\)</span> minimum-variance.</strong>
+The classic answer, while the covariance is still full-rank.</p></li>
+<li><p><strong>Many names, cheap trading <span
+class="math inline">\(\Rightarrow\)</span> factor
+minimum-variance.</strong> Here ordinary minimum-variance is undefined.
+The factor version (<a href="#sec:wellposed"
+data-reference-type="ref+label" data-reference="sec:wellposed">5</a>)
+not only fills the gap, it wins outright, and its lead grows with the
+number of names.</p></li>
+<li><p><strong>Costs above <span
+class="math inline">\({\sim}10\)</span> bp <span
+class="math inline">\(\Rightarrow\)</span> inverse-variance,</strong>
+everywhere. When trading is expensive, the rule that barely trades
+wins.</p></li>
+</ul>
+<p>The novel coupling and tilt are competitive in the middle but rarely
+top the mean; their value is staying robust and well-defined at scale,
+not setting the net-Sharpe record.</p>
+<h2 data-number="4.3" id="how-to-set-the-schur-dial-gamma"><span
+class="header-section-number">4.3</span> How to set the Schur dial <span
+class="math inline">\(\gamma\)</span></h2>
+<p>Restricting to cases where the construction is well-defined, a middle
+setting of <span class="math inline">\(\gamma\)</span> does beat HRP on
+raw skill—the best is near <span
+class="math inline">\(\gamma\approx0.25\)</span> (<span
+class="math inline">\(0.539\)</span> versus HRP’s <span
+class="math inline">\(0.529\)</span>). But the edge is small and
+turnover climbs quickly with <span
+class="math inline">\(\gamma\)</span>, so the moment trading costs
+anything the best <span class="math inline">\(\gamma\)</span> drops to
+<span class="math inline">\(0\)</span> (plain HRP) by about <span
+class="math inline">\(2\)</span> bp. The rule of thumb: pick <span
+class="math inline">\(\gamma\)</span> to maximise <span
+class="math inline">\(\text{skill}(\gamma)-\text{cost}\times\text{turnover}(\gamma)\)</span>,
+which at realistic costs means keep it near zero.</p>
+<h2 data-number="4.4" id="do-the-shorts-pay-no."><span
+class="header-section-number">4.4</span> Do the shorts pay? No.</h2>
+<p>The winning rules in the first two regions (minimum-variance and its
+factor version) allow short positions. Are those shorts earning their
+place, or are they just noise from inverting a noisy covariance? We test
+it directly: take the allocator’s own weight path, remove the shorts
+(clip to zero, renormalise), and re-price it on the same returns. The
+shorts add value only if the signed book beats this long-only version
+out of sample. On every subset we tried, it does not.</p>
+<ul>
+<li><p>The short book grows with the number of names—its gross size
+reaches <span class="math inline">\(180\%\)</span> at <span
+class="math inline">\(k{=}400\)</span>—which is the error-maximization
+one expects from an ill-conditioned inverse.</p></li>
+<li><p>Net of cost, dropping the shorts matches or beats keeping them at
+every dimension; only a sliver (<span
+class="math inline">\(+0.03\)</span> to <span
+class="math inline">\(+0.05\)</span> Sharpe) ever favours the shorts,
+and at large <span class="math inline">\(k\)</span> they cost <span
+class="math inline">\(0.2\)</span> or more.</p></li>
+</ul>
+<p>So on this universe the negative weights are not needed: a long-only
+version of the same idea does as well or better after costs. This is
+consistent with the map, where the long-only inverse-variance rule
+already wins once trading is not free.</p>
+<h1 data-number="5" id="sec:wellposed"><span
+class="header-section-number">5</span> Making the many-names corner
+work</h1>
+<p>Two small fixes are what let the high-dimension column exist.</p>
+<h4 data-number="5.0.0.1"
+id="factor-minimum-variance-a-stable-inverse."><span
+class="header-section-number">5.0.0.1</span> Factor minimum-variance (a
+stable inverse).</h4>
+<p>Model the covariance as a few factors plus noise, <span
+class="math inline">\(\Sigma= BB^\top +
+\mathop{\mathrm{diag}}(\psi)\)</span> with <span
+class="math inline">\(B\in\mathbb{R}^{n\times k}\)</span>. Its inverse
+is then cheap and stable through the Woodbury identity, <span
+class="math display">\[\begin{equation}
+  \Sigma^{-1} = D^{-1} - D^{-1}B\,(I_k + B^\top D^{-1}B)^{-1}B^\top
+D^{-1},
+  \qquad D=\mathop{\mathrm{diag}}(\psi),
+\end{equation}\]</span> costing <span
+class="math inline">\(O(nk^2)\)</span>. Keep the noise term <span
+class="math inline">\(\psi\)</span> above a small floor and the inverse
+always exists, no matter how many names. That single change turns
+“minimum-variance is undefined” into the winner of <a href="#tab:regime"
+data-reference-type="ref+label" data-reference="tab:regime">1</a>.</p>
+<h4 data-number="5.0.0.2" id="ridge-schur-a-stable-coupling."><span
+class="header-section-number">5.0.0.2</span> Ridge Schur (a stable
+coupling).</h4>
+<p>The Schur dial needs to invert one block using another; at scale that
+other block is singular. Add a small ridge to that solve. It restores
+well-posedness and is self-correcting: when a block is poorly estimated
+the ridge dominates, the coupling fades, and Schur slides safely back
+toward HRP (a large ridge reproduces <span
+class="math inline">\(\gamma{=}0\)</span> exactly).</p>
+<h4 data-number="5.0.0.3" id="scaling-the-tilt."><span
+class="header-section-number">5.0.0.3</span> Scaling the tilt.</h4>
+<p>The tilt’s naive cost is <span
+class="math inline">\(O(Mn^2)+O(n^3)\)</span>. Writing its correlation
+in the same factor form makes a sample cost only <span
+class="math inline">\(O(Mnk)\)</span>, so the benchmark-anchored,
+no-inverse tilt runs at about <span class="math inline">\(0.4\)</span> s
+per rebalance on <span class="math inline">\(3{,}000\)</span> names.</p>
+<h1 data-number="6" id="what-it-all-means"><span
+class="header-section-number">6</span> What it all means</h1>
+<p>One idea ties the map together. In high dimension you can only
+reliably estimate simple structure: a diagonal, a few factors, or a
+tree. The methods that survive are exactly the ones that use only
+that—inverse-variance (diagonal), factor minimum-variance and the factor
+tilt (factors), HRP (tree). A rule that demands the full <span
+class="math inline">\(n\times n\)</span> inverse is trying to pin down
+<span class="math inline">\(O(n^2)\)</span> numbers from far less data;
+the only way to rescue it is to shrink it into one of those simple
+forms, at which point it has effectively become one of the
+survivors.</p>
+<p>The second lesson is about cost. Because the cost axis decides the
+winner over so much of the map, an explicit turnover penalty and a
+constraint mechanism that does not jolt the weights are not
+niceties—they are what let a high-skill allocator keep its skill after
+costs. This sharpens the classic finding that naive diversification is
+hard to beat net of cost <span class="citation"
+data-cites="demiguel2009">(DeMiguel et al. 2009)</span>: the one place
+it is beaten is the cheap-trading, many-names corner, and the thing that
+beats it is a factor optimizer, not a dense one.</p>
+<h1 data-number="7" id="conclusion"><span
+class="header-section-number">7</span> Conclusion</h1>
+<p>“Is this method good?” is the wrong question; “when is it good?” is
+the useful one. Across the number of names and the cost of trading, the
+answer is a map with three regions—dense minimum-variance, factor
+minimum-variance, and inverse-variance—divided by where the covariance
+runs out of rank and by a <span class="math inline">\(5\)</span>–<span
+class="math inline">\(10\)</span> bp cost line. At the frontier, the
+methods that work are the ones that never need a full inverse, made
+well-defined by a factor model and a ridge and made fast by a low-rank
+draw.</p>
+<div id="refs" class="references csl-bib-body hanging-indent"
+role="list">
+<div id="ref-choueifaty2008" class="csl-entry" role="listitem">
+Choueifaty, Yves, and Yves Coignard. 2008. <span>“Toward Maximum
+Diversification.”</span> <em>Journal of Portfolio Management</em> 35
+(1): 40–51.
+</div>
+<div id="ref-cotton2024schur" class="csl-entry" role="listitem">
+Cotton, Peter. 2024a. <em>Schur Complementary Allocation: A Unification
+of Hierarchical and Optimization-Based Portfolio Construction</em>. <a
+href="https://arxiv.org/abs/2411.05807">https://arxiv.org/abs/2411.05807</a>.
+</div>
+<div id="ref-winningport" class="csl-entry" role="listitem">
+Cotton, Peter. 2024b. <em><span class="nocase">winningport</span>:
+Winning Portfolios</em>. <a
+href="https://github.com/microprediction/winningport"
+class="uri">Https://github.com/microprediction/winningport</a>.
+</div>
+<div id="ref-cover1991" class="csl-entry" role="listitem">
+Cover, Thomas M. 1991. <span>“Universal Portfolios.”</span>
+<em>Mathematical Finance</em> 1 (1): 1–29. <a
+href="https://doi.org/10.1111/j.1467-9965.1991.tb00002.x">https://doi.org/10.1111/j.1467-9965.1991.tb00002.x</a>.
+</div>
+<div id="ref-demiguel2009" class="csl-entry" role="listitem">
+DeMiguel, Victor, Lorenzo Garlappi, and Raman Uppal. 2009.
+<span>“Optimal Versus Naive Diversification: How Inefficient Is the
+<span>1/N</span> Portfolio Strategy?”</span> <em>Review of Financial
+Studies</em> 22 (5): 1915–53.
+</div>
+<div id="ref-hannan1957" class="csl-entry" role="listitem">
+Hannan, James. 1957. <span>“Approximation to <span>Bayes</span> Risk in
+Repeated Play.”</span> In <em>Contributions to the Theory of Games,
+Volume III (AM-39)</em>, edited by M. Dresher, A. W. Tucker, and P.
+Wolfe. Princeton University Press.
+</div>
+<div id="ref-hazan2016" class="csl-entry" role="listitem">
+Hazan, Elad. 2016. <span>“Introduction to Online Convex
+Optimization.”</span> <em>Foundations and Trends in Optimization</em> 2
+(3–4): 157–325. <a
+href="https://doi.org/10.1561/2400000013">https://doi.org/10.1561/2400000013</a>.
+</div>
+<div id="ref-kalaivempala2005" class="csl-entry" role="listitem">
+Kalai, Adam, and Santosh Vempala. 2005. <span>“Efficient Algorithms for
+Online Decision Problems.”</span> <em>Journal of Computer and System
+Sciences</em> 71 (3): 291–307. <a
+href="https://doi.org/10.1016/j.jcss.2004.10.016">https://doi.org/10.1016/j.jcss.2004.10.016</a>.
+</div>
+<div id="ref-lopezdeprado2016" class="csl-entry" role="listitem">
+López de Prado, Marcos. 2016. <span>“Building Diversified Portfolios
+That Outperform Out of Sample.”</span> <em>Journal of Portfolio
+Management</em> 42 (4): 59–69.
+</div>
+<div id="ref-maillard2010" class="csl-entry" role="listitem">
+Maillard, Sébastien, Thierry Roncalli, and Jérôme Teiletche. 2010.
+<span>“The Properties of Equally Weighted Risk Contribution
+Portfolios.”</span> <em>Journal of Portfolio Management</em> 36 (4):
+60–70.
+</div>
+</div>
+</main>
+<footer>
+  allocation &middot; MIT licensed &middot;
+  <a href="https://github.com/microprediction/allocation">microprediction/allocation</a>
+</footer>
+</body>
+</html>
