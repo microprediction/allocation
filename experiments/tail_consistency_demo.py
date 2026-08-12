@@ -114,13 +114,12 @@ def main():
         return
 
     fig, ax = plt.subplots(figsize=(7.2, 4.6))
-    ax.plot(lam, rows["true"], "o-", lw=2, color="#1b5e20", label="true simulation (sees the tail copula)")
-    ax.plot(lam, rows["low"], "s--", lw=1.8, color="#ef6c00", label="downside-$\\Sigma$ summary (Thing 1 only)")
-    ax.plot(lam, rows["full"], "^:", lw=1.8, color="#90a4ae", label="full-$\\Sigma$ summary (tail-blind)")
-    ax.axhline(0.5, color="#b71c1c", lw=1.2, ls="-.", label="two-body limit (proof): cluster = one horse")
+    ax.plot(lam, rows["true"], "o-", lw=2, color="#1b5e20", label="tail-dependent simulation")
+    ax.plot(lam, rows["low"], "s--", lw=1.8, color="#ef6c00", label="downside-covariance summary")
+    ax.plot(lam, rows["full"], "^:", lw=1.8, color="#90a4ae", label="full-covariance summary (tail-blind)")
+    ax.axhline(0.5, color="#b71c1c", lw=1.2, ls="-.", label="two-body limit (comonotone)")
     ax.set_xlabel("lower-tail dependence  $\\lambda_L$  (cluster crashes together)")
     ax.set_ylabel("$w_{\\mathrm{cluster}}$  (total weight on the 99-name cluster)")
-    ax.set_title("Tail-Consistent Thurstone: the co-crashing cluster de-duplicates to one horse")
     ax.set_ylim(0.45, 1.0)
     ax.legend(frameon=False, fontsize=9, loc="upper right")
     ax.grid(alpha=0.25)
