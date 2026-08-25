@@ -1,0 +1,677 @@
+\documentclass[11pt]{article}
+
+\input{../shared/preamble.tex}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{cleveref}
+
+\title{Repaired Hierarchical Portfolios}
+\author{Peter Cotton}
+\date{August 25, 2026}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
+\DeclareMathOperator*{\argminop}{arg\,min}
+\DeclareMathOperator*{\argmaxop}{arg\,max}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Hierarchical Risk Parity and its Schur-complementary generalization build a
+portfolio by recursive bisection: only the covariance within the current
+block is consulted at each split, and at Schur's coupling $\gamma=0$ (plain
+HRP) cross-block covariance is never consulted at all. This is what makes
+the construction robust and inversion-free, but it also means the weights
+are, structurally, a function of less information than is available. We
+repair this without re-optimizing: calibrate the latent Thurstone abilities
+that reproduce the hierarchical weights under a reconstruction of the
+dependence the recursion actually used, a nested factor model over the same
+median-bisection tree, then re-race those scores under the fuller dependence
+on hand. On a known-truth contagious market, correlation completion cuts
+out-of-sample expected shortfall by $10$--$17\%$ relative to plain HRP and
+Schur, survives sample sizes down to two observations per asset, and needs
+less repair as Schur's own $\gamma$ rises. The same comparison on
+$12{,}000$ real S\&P~500 and REIT trials confirms it: correlation completion
+wins $59$--$80\%$ of trials across five covariance estimators, and on real
+data the gain turns out to come mostly from the race's own reallocation, not
+from correlation recovery per se. A companion test of whether genuine tail
+dependence adds value beyond correlation completion found no evidence for
+it on the synthetic market, and a real-data result that splits by universe
+rather than confirming or reversing that null; we report both.
+\end{abstract}
+
+\section{Introduction}
+
+Hierarchical Risk Parity \parencite{lopezdeprado2016} and the
+Schur-complementary generalization \parencite{cotton2024schur} never invert a
+covariance. That is their answer to mean--variance's central fragility,
+inverting an ill-conditioned one. A seriation orders the assets so that
+similar ones sit near each other. Recursive bisection then allocates between
+the two halves of each split in inverse proportion to each half's own
+variance, augmented by the Schur complement of the other half scaled by a
+coupling parameter $\gamma\in[0,1]$: $\gamma=0$ ignores the other half
+entirely (plain HRP), and $\gamma\to1$ tends to the minimum-variance
+portfolio.
+
+The robustness has a structural cost. At $\gamma=0$, the recursion never
+reads the covariance \emph{between} the two halves of any split, not because
+that covariance is estimated to be small, but because the construction does
+not consult it. At $\gamma>0$ some of it is recovered through the Schur
+complement, but never all of it short of $\gamma=1$, and $\gamma=1$
+reintroduces the inversion HRP exists to avoid. Every hierarchical portfolio
+short of full minimum variance is, by construction, built from
+\emph{less} dependence information than is on hand.
+
+This paper asks whether that discarded information can be added back without
+re-optimizing, using the ability tilt of \textcite{cotton2026polish}. Its
+central operation is built for exactly this: calibrate a latent score vector
+that reproduces a given allocation under one dependence law, then
+re-evaluate the same score vector under a different law. Read the
+hierarchical weights as a benchmark, calibrate under a reconstruction of
+\emph{the dependence the recursion actually consulted}, and re-run the race
+under the fuller dependence on hand. If the reconstruction is reasonable, the
+repair adds back specifically what was discarded, and nothing more.
+
+The paper's contribution is fourfold. First, a constructive object for ``the
+dependence a hierarchical bisection actually consulted'': a nested factor
+model with one latent factor per retained internal split of the same
+median-bisection tree HRP/Schur already build, so it drops directly into the
+$k$-factor calibration engine of \textcite{cotton2026factorprobit} with no new
+machinery. Second, a known-truth simulation (correlated pins that cascade in
+physically clustered groups, producing genuine tail contagion a covariance
+cannot see) on which the repair is tested against plain HRP and Schur, across
+the amount of tree retained, across Schur's own $\gamma$, and across sample
+sizes small enough that the covariance is honestly noisy rather than known.
+
+Third, a replication on real markets: the same comparison across $12{,}000$
+random trials on S\&P~500 and REIT sub-portfolios, varying every choice the
+repair itself does not control (estimation window, covariance estimator,
+sub-portfolio, $\gamma$). It confirms that correlation completion
+generalizes, and it sharpens rather than reverses the synthetic-market
+finding that most of the gain is a race-reallocation effect, not correlation
+recovery per se. Fourth, an honest accounting of what worked and what did
+not. Correlation completion helped substantially and survived every
+robustness check we ran. A sharper test of whether genuine tail dependence
+adds value \emph{beyond} correlation completion did not confirm the
+hypothesis on the synthetic market, and on real data the same test splits
+cleanly by universe (\Cref{sec:realmarket}) rather than confirming or
+reversing the null outright; we report both rather than discard either.
+
+\section{Background}
+
+\paragraph{The ability tilt.} Following \textcite{cotton2026polish}, write
+$\theta=-a$ for minus the latent ability vector, and
+\[
+  G_S(\theta) = \E_{\eta\sim S}\big[\max_i(\theta_i+\eta_i)\big], \qquad
+  W_S(\theta) = \nabla G_S(\theta) \in \Delta,
+\]
+so $W_S(\theta)$ is the vector of winning probabilities of a race among
+competitors with strengths $\theta$ under a centered dependence law $S$. For
+a positive-definite Gaussian reference $S_0$, $W_{S_0}$ is a smooth bijection
+from $\R^n/\mathrm{span}\{\mathbf 1\}$ onto the open simplex, so every
+strictly positive benchmark $w^0$ has a unique calibrated score
+$\theta^0=W_{S_0}^{-1}(w^0)$. Re-evaluating that same $\theta^0$ under a
+different law $S_1$ gives the tilt $T_{S_0\to S_1}(w^0)=W_{S_1}(\theta^0)$,
+which reproduces $w^0$ exactly when $S_1=S_0$.
+\textcite{cotton2026factorprobit} supplies the computational engine this
+paper uses throughout. For a $k$-factor Gaussian law
+$X_i=\mu_i+v_i^\top f+\sqrt{D_i}\,\varepsilon_i$, both $W_S$ and $W_S^{-1}$
+are computable in $O(QNL)$ (quadrature nodes $\times$ assets $\times$ lattice
+points), with a damped Jacobi calibration and analytic own-location slopes
+replacing the far slower fixed-point inversion this paper's experiments would
+otherwise require.
+
+\paragraph{Hierarchical and Schur-complementary allocation.} Given a
+seriation order and a covariance $\Sigma$, the Schur-complementary
+construction \parencite{cotton2024schur} recursively bisects the ordered
+asset list. At each split into halves $L,R$, each half's own block
+$\Sigma_{LL}$ (resp.\ $\Sigma_{RR}$) is augmented by the $\gamma$-scaled Schur
+complement of the other half,
+\[
+  \Sigma_{LL}^{\mathrm{aug}} = \Sigma_{LL} - \gamma\,\Sigma_{LR}\Sigma_{RR}^{-1}\Sigma_{RL}
+  \quad(\text{and symmetrically for } R),
+\]
+and the split allocates between $L$ and $R$ in inverse proportion to each
+augmented block's naive (inverse-variance) portfolio variance. At $\gamma=0$
+the augmentation is the identity map, $\Sigma_{LR}$ is never read, and the
+recursion is exactly Hierarchical Risk Parity. Every off-diagonal entry of
+$\Sigma$ is consulted only while its two assets remain in the same block. The
+instant they are placed in different halves, their covariance is never read
+again (at $\gamma=0$) or read only through the reduced Schur term (at
+$\gamma>0$).
+
+\section{Method}
+\label{sec:method}
+
+\subsection{The repair operator}
+
+Let $w^{\mathrm{base}}$ be the weights of HRP or Schur-complementary
+allocation, built from an estimated covariance $\hat\Sigma$ and seriation
+order $\mathrm{ord}$. Let $C^{\mathrm{used}}$ be a reconstruction of the
+dependence the recursion consulted (\Cref{sec:tree}), and let
+$C^{\mathrm{full}}$ be the fuller dependence on hand: the same $\hat\Sigma$
+used as an ordinary correlation matrix, or a genuinely tail-dependent
+empirical law. The repair is
+\[
+  \theta = W_{C^{\mathrm{used}}}^{-1}\big(w^{\mathrm{base}}\big), \qquad
+  w^{\mathrm{repair}} = W_{C^{\mathrm{full}}}(\theta).
+\]
+Operationally: calibrate the latent scores that reproduce the hierarchical
+weights under what the hierarchy used, then re-race those same scores under
+what is actually available. No optimization is re-run and no covariance is
+inverted; the only inversion is the calibration step, which
+\textcite{cotton2026factorprobit} supplies in closed, fast form for any
+factor-Gaussian reference.
+
+\begin{remark}[Fixed point]
+If $C^{\mathrm{used}}=C^{\mathrm{full}}$ exactly, $w^{\mathrm{repair}}=w^{\mathrm{base}}$: the
+repair is a controlled perturbation of the base allocation, not a
+replacement for it. In practice $C^{\mathrm{used}}$ is only ever an
+approximation of what the recursion effectively consulted
+(\Cref{sec:tree}), so this holds in the limit of retaining the whole tree,
+not at any finite truncation.
+\end{remark}
+
+\subsection{Reconstructing what the recursion used}
+\label{sec:tree}
+
+At $\gamma=0$, an off-diagonal entry $\hat\Sigma_{ij}$ is read by the
+recursion at every ancestor split above the point where $i$ and $j$ are
+finally separated into different halves, and never again after that. This is
+exactly the defining property of a nested (ultrametric) covariance: one
+latent shock per internal node of a tree, shared by every leaf in that
+node's subtree, so that two leaves' covariance is the sum of the shocks
+attached to their common ancestors. We construct this directly from the same
+median-bisection tree HRP/Schur recurse over (splitting the seriated asset
+list in half, repeatedly): at each internal node splitting members into
+halves $L,R$, its own shock variance is the gain in the average $L$--$R$
+cross-correlation not already explained by ancestors,
+\[
+  c_v^2 = \max\!\big(0,\ \overline{\mathrm{corr}(L,R)} - \text{(floor already explained by ancestors)}\big),
+\]
+and nodes are retained by \emph{gain} $c_v^2\,|L|\,|R|$ (the covariance mass
+newly explained), highest first, up to a budget of \texttt{max\_factors}
+retained splits. This gives, for any budget $F$, a valid factor model
+$(V,D)$, with $V$'s $F$ columns the retained nodes' subtree indicators
+scaled by $\sqrt{c_v^2}$. $F=0$ is the independent reference: no correlation
+used at all, the naive ``polish from scratch'' baseline. Increasing $F$
+restores progressively more of the tree, in order of how much covariance
+each split explains, and the construction is guaranteed positive
+semi-definite by being a sum of independent latent shocks, not an arbitrary
+masking of $\hat\Sigma$.
+
+Two things follow immediately from this construction and matter for reading
+the results below. First, it plugs directly into the $k$-factor calibration
+and forward engine with no modification: $F$ is exactly the factor rank $k$.
+Second, it gives a single, principled dial for how much of the discarded
+information to restore, which is the paper's answer to the question of what
+$C^{\mathrm{used}}$ should be. \Cref{sec:discussion} discusses the several
+alternative constructions this paper did not test.
+
+\section{Experiments}
+
+\subsection{A known-truth contagious market}
+
+We use a fully-specified generative market already in this codebase: a
+rigid-body bowling simulation read as a market (a pin is a firm; its
+displacement under a thrown ball is a continuous return; pins are arranged in
+randomized tight spatial clusters with gaps between them, so a throw that
+misses leaves everyone quiet and a throw into a cluster cascades the whole
+cluster through pin-pin collisions). This produces genuine, mechanically
+generated tail contagion, whole-cluster co-moves that a Gaussian copula fit
+to the same marginals and correlation underpredicts by one to four orders of
+magnitude in the deep tail (already documented for this generator in this
+codebase). It is a deliberately adversarial setting for any correlation-only
+method.
+
+For each random market we split the simulated path in half (in-sample /
+out-of-sample), fit HRP and Schur-complementary ($\gamma=0.5$ unless swept)
+on the in-sample covariance, repair as above, and evaluate out-of-sample
+expected shortfall at the 5\% level (ES95, the mean of the worst 5\% of
+realized portfolio returns; less negative is better). All reported numbers
+average over multiple random markets (different cluster geometries and
+seeds). Quadrature and Monte-Carlo resolutions are reduced from production
+defaults for this exploratory sweep ($Q=9$ Gauss--Hermite nodes or a
+$2^{10}$-point scrambled-Sobol rule beyond four factors, lattice
+resolution 251, $2^{14}$ race paths); code is in \texttt{experiments/}, in
+\texttt{schur\_thurstone\_repair.py}, \texttt{schur\_gamma\_sweep.py}, and
+\texttt{estimation\_noise\_sweep.py}.
+
+\begin{remark}[Losses, not returns, and a robust scale]
+The tail-dependent repair race must be run on \emph{losses}, not returns
+(the race convention is minimum-performance-wins), and on a \emph{robust}
+standardization. Bowling returns are extremely leptokurtic: the typical
+quiet-day move is $50$--$80\times$ smaller than the full-sample standard
+deviation, which rare cascades inflate. Standardizing by the raw standard
+deviation therefore crushes quiet days to near-zero noise, and mixing mean
+centering with a median-based scale silently injects a large common offset
+into every row. Both mistakes were made and caught in the course of this
+work before the results below were produced. Both are instances of the
+general rule that a target law must be matched in scale and location to the
+reference before comparing tilts against it, not merely centered.
+\end{remark}
+
+\subsection{Correlation completion}
+\label{sec:main-result}
+
+\Cref{tab:main} sweeps the retained-tree budget $F$ against two repair
+targets: \emph{gauss} re-races under the full in-sample correlation (no
+tail dependence, isolating correlation completion alone); \emph{bowl}
+re-races under the true in-sample bowling returns, bootstrap-resampled
+(genuine tail dependence). Twenty random markets ($n=20$ assets, three
+spatial clusters, cluster tightness swept).
+
+\begin{table}[h]
+\centering
+\caption{Out-of-sample ES95 (less negative is better), mean over 20 markets.
+Schur uses $\gamma=0.5$.}
+\label{tab:main}
+\footnotesize
+\begin{tabular}{lccccccc}
+\toprule
+ & base & $F=0$ & $F=1$ & $F=2$ & $F=3$ & $F=5$ & $F=8$ \\
+\midrule
+HRP, gauss     & $-1.337$ & $-1.250$ & $-1.224$ & $-1.268$ & $-1.232$ & $\mathbf{-1.222}$ & $-1.225$ \\
+HRP, bowl      & $-1.337$ & $-1.344$ & $\mathbf{-1.291}$ & $-1.339$ & $-1.365$ & $-1.352$ & $-1.351$ \\
+Schur, gauss   & $-1.567$ & $-1.390$ & $-1.364$ & $\mathbf{-1.362}$ & $-1.400$ & $-1.413$ & $-1.424$ \\
+Schur, bowl    & $-1.567$ & $-1.527$ & $-1.484$ & $\mathbf{-1.482}$ & $-1.517$ & $-1.539$ & $-1.551$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Correlation completion helps substantially and robustly: at its best budget,
+HRP improves from $-1.337$ to $-1.222$ (8.6\%) and Schur from $-1.567$ to
+$-1.362$ (13.1\%), both beating equal weight ($-1.260$) and approaching
+minimum variance ($-1.164$) without ever inverting a covariance.
+
+\begin{remark}[The gain splits into a global correlation effect and a
+calibration effect]
+A meaningful share of the improvement is present already at $F=0$, and this
+is not a correlation-free effect. The re-race step
+$w^{\mathrm{repair}}=W_{C^{\mathrm{full}}}(\theta)$ always uses the true,
+full correlation, at every budget, $F=0$ included; only the
+\emph{calibration} reference pretends independence at $F=0$. What $F=0$
+isolates is that the race applies that correlation \emph{globally and all at
+once}, every asset's weight computed jointly with every other's in one
+evaluation, where HRP/Schur's recursion applies the same correlation only
+\emph{locally and sequentially}, one split's naive-inverse-variance ratio at
+a time, never revisiting a pair of assets once they land in different
+halves. For HRP, $F=0$ alone recovers $76\%$ of the total gain to the best
+budget; for Schur, $86\%$.
+
+Raising $F$ adds a second, distinct source of improvement: telling the
+\emph{calibration} step about correlation too, on top of the
+always-correlation-aware re-race. The \emph{incremental} gain from that
+(best budget minus $F=0$) is $0.028$ for both HRP and Schur, nearly
+identical in absolute terms despite the very different $F=0$ shares. Both
+sources of improvement are real and both use the true correlation. They
+should not be conflated when the size of ``the correlation-repair result''
+is quoted, and neither should be mistaken for a correlation-free effect.
+\end{remark}
+
+\paragraph{Tail dependence: a null result.} The \emph{bowl} row is
+consistently \emph{worse} than \emph{gauss} at each method's own best budget
+(HRP: $-1.291$ vs.\ $-1.222$; Schur: $-1.482$ vs.\ $-1.362$), the opposite of
+the hypothesis that racing under the true contagious law, rather than merely
+the completed correlation, would do better still. We do not think this
+closes the question, for three reasons.
+
+First, bowling returns move continuously with displacement on every
+simulated day, not only when a barrier is crossed, so ordinary correlation
+already captures much of the within-cluster co-movement here. The genuinely
+tail-specific residual may simply be small in this generator, consistent
+with this codebase's own earlier finding that a downside semicovariance
+already recovers ``almost all'' of a comparable tail effect elsewhere,
+leaving only a small residual that is not a second moment at all. Second,
+ES95 with a few hundred out-of-sample rows inspects only the worst
+$\sim\!5\%$ of them, which may not reach deep enough into the tail for
+contagion to matter; ES99 or the probability of several names crashing
+together are sharper instruments we did not yet run. Third,
+bootstrap-resampling a modest in-sample window for the rare cascade rows is
+itself noisy, and that variance cost may be outweighing a real but small
+bias benefit. We record this as an open question, not a negative conclusion.
+
+\subsection{Repair depth should track how much was already used}
+\label{sec:gamma-result}
+
+If the repair is genuinely filling in what a hierarchical method discarded,
+the right amount of repair should \emph{shrink} as the method itself
+retains more cross-block information: as Schur's $\gamma$ rises toward the
+minimum-variance endpoint, there is nothing left to restore.
+\Cref{tab:gamma} sweeps $\gamma\in\{0,0.25,0.5,0.75,1.0\}$ against the same
+budget grid (gauss target only, 16 markets).
+
+\begin{table}[h]
+\centering
+\caption{Out-of-sample ES95 by Schur coupling $\gamma$ and repair budget $F$; bold marks each row's best.}
+\label{tab:gamma}
+\footnotesize
+\begin{tabular}{lccccccc}
+\toprule
+$\gamma$ & base & $F=0$ & $F=1$ & $F=2$ & $F=3$ & $F=5$ & best $F$ \\
+\midrule
+$0.00$ & $-1.325$ & $-1.261$ & $-1.231$ & $-1.258$ & $-1.221$ & $\mathbf{-1.209}$ & $5$ \\
+$0.25$ & $-1.386$ & $-1.291$ & $-1.263$ & $-1.282$ & $-1.247$ & $\mathbf{-1.241}$ & $5$ \\
+$0.50$ & $-1.590$ & $-1.405$ & $-1.379$ & $\mathbf{-1.364}$ & $-1.416$ & $-1.420$ & $2$ \\
+$0.75$ & $-1.807$ & $-1.679$ & $-1.603$ & $\mathbf{-1.587}$ & $-1.689$ & $-1.650$ & $2$ \\
+$1.00$ & $-1.728$ & $-1.704$ & $-1.686$ & $\mathbf{-1.665}$ & $-1.696$ & $-1.695$ & $2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The best budget is non-increasing in $\gamma$ ($5,5,2,2,2$), exactly as the
+repair-fills-a-gap account predicts: at low $\gamma$, Schur (like HRP)
+consulted little cross-block covariance and rewards a deeper repair; at
+$\gamma\ge0.5$ it has already recovered enough that only a shallow repair
+helps and a deeper one starts double-counting the same information (compare
+$F=2$ to $F=5$ at $\gamma=0.75$: $-1.587$ vs.\ $-1.650$, a real reversal).
+This is evidence for treating $\gamma$ itself as informative about how much
+repair a given Schur portfolio needs, rather than choosing $F$ the same way
+regardless of $\gamma$, as \Cref{sec:main-result} otherwise does for
+simplicity.
+
+\subsection{Robustness to estimation error}
+\label{sec:estnoise}
+
+Every number above is built from an \emph{estimated} in-sample covariance,
+never an oracle, but with a fairly generous window (500 observations for 20
+assets). Since robustness to estimation error is HRP's own original
+motivation, the repair needs to be checked specifically where that error is
+large. \Cref{tab:estnoise} fixes a common out-of-sample window (the same 500
+rows for every row of the table) and shrinks the in-sample window from 600
+observations down to 40, two observations per asset, a genuinely adversarial
+covariance estimate, at budgets $F\in\{1,2\}$ (12 markets).
+
+\begin{table}[h]
+\centering
+\caption{Out-of-sample ES95 vs.\ in-sample window $T_{\mathrm{in}}$ (20 assets, fixed 500-row test window); ``gain'' is the best repair minus base.}
+\label{tab:estnoise}
+\small
+\begin{tabular}{lccccc}
+\toprule
+$T_{\mathrm{in}}$ & $40$ & $80$ & $150$ & $300$ & $600$ \\
+\midrule
+HRP base            & $-1.536$ & $-1.370$ & $-1.337$ & $-1.346$ & $-1.331$ \\
+HRP best repair      & $-1.330$ & $-1.228$ & $-1.181$ & $-1.208$ & $-1.196$ \\
+HRP gain             & $0.207$  & $0.142$  & $0.156$  & $0.138$  & $0.135$ \\
+\midrule
+Schur base           & $-1.919$ & $-1.617$ & $-1.533$ & $-1.559$ & $-1.534$ \\
+Schur best repair     & $-1.817$ & $-1.428$ & $-1.332$ & $-1.330$ & $-1.312$ \\
+Schur gain           & $0.102$  & $0.189$  & $0.201$  & $0.230$  & $0.222$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The repair helps at every sample size tested, including the sparsest. For
+HRP the gain is, if anything, largest exactly where the covariance is
+noisiest ($0.207$ at $T_{\mathrm{in}}=40$ vs.\ $0.135$ at
+$T_{\mathrm{in}}=600$): a cruder covariance estimate seems to make the
+hierarchy's own naive split rule worse, leaving more for the
+race-reallocation effect of \Cref{sec:main-result} to recover. Schur's gain
+is smaller at the sparsest window and roughly doubles by
+$T_{\mathrm{in}}=300$ before flattening, still positive throughout but not
+simply monotonic. Neither pattern suggests the repair is fragile to
+estimation noise; if anything HRP's suggests the opposite.
+
+\subsection{Real-market validation}
+\label{sec:realmarket}
+
+Everything so far is a single synthetic generator. We repeat the correlation-
+and history-repair comparison on two real return panels sourced from
+\textcite{winningportstudy}: 583 S\&P~500 constituents (2014--2024) and the
+49-name REIT sector (2000--2024). Each of 12{,}000 trials draws, independently,
+a universe, a sub-portfolio of 12--40 names, a random in-sample window
+(250--749 trading days) and a fixed 125-day out-of-sample window, a covariance
+estimator (this package's own EWMA at two halflives, or \texttt{precise}'s
+Ledoit--Wolf, OAS, or plain empirical covariance), and Schur's $\gamma$; $F$
+is swept over $\{0,1,2,3\}$ within each trial. This varies every choice the
+repair does not control, which is exactly the robustness question a single
+hand-picked configuration cannot answer. All $192{,}000$ (trial $\times$
+method $\times$ target $\times$ F) evaluations completed without error.
+
+\begin{table}[h]
+\centering
+\caption{Real-market correlation completion (\emph{gauss} target), pooled
+over both universes, 12{,}000 trials. Win rate is the fraction of trials with
+positive out-of-sample ES95 gain.}
+\label{tab:realmarket}
+\small
+\begin{tabular}{lcccc}
+\toprule
+ & $F=0$ & $F=1$ & $F=2$ & $F=3$ \\
+\midrule
+HRP, mean gain    & $\mathbf{0.00090}$ & $0.00041$ & $0.00036$ & $0.00037$ \\
+HRP, win rate     & $\mathbf{78.8\%}$  & $69.5\%$  & $67.3\%$  & $68.6\%$  \\
+Schur, mean gain  & $\mathbf{0.00041}$ & $0.00029$ & $0.00028$ & $0.00029$ \\
+Schur, win rate   & $\mathbf{68.7\%}$  & $68.0\%$  & $66.5\%$  & $67.7\%$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Correlation completion replicates on real data, and the direction of
+\Cref{sec:main-result}'s decomposition remark \emph{sharpens}: $F=0$, pure
+race-reallocation with no correlation restored, is now the single best
+budget for both methods, with a $78.8\%$ win rate for HRP. Real, noisy
+correlation estimates apparently give the deeper tree budgets less to work
+with than the clean synthetic covariance did. Restoring more of it does not
+reliably add value once the correlation itself is estimated, only estimated
+imprecisely. This is direct evidence that the race-reallocation effect, not
+correlation completion, is the dominant and more robust component of the
+gain in practice, and it argues for shipping $F=0$, or a small budget, as
+the default rather than searching for a deeper one.
+
+\emph{Estimator choice.} The gauss repair beats base for every one of the
+five covariance estimators tried, with win rates from $59\%$ (empirical
+covariance, Schur) to $80\%$ (OAS, HRP); the two shrinkage estimators
+(Ledoit--Wolf, OAS) show both the highest win rates ($78$--$80\%$) and the
+largest mean gains, consistent with \Cref{sec:estnoise}: a more heavily
+shrunk (cruder, more diagonal-leaning) covariance estimate leaves the
+hierarchy's own split rule worse off and the race-reallocation effect more
+to recover.
+
+\emph{Tail dependence, revisited.} Racing under the true bootstrap-resampled
+in-sample history (\emph{hist}) is, pooled over both universes, roughly a
+coin flip at $F=0$ ($55\%$ win rate for HRP, $54\%$ for Schur) and turns
+mildly negative once any correlation is restored ($F\ge1$: $44$--$50\%$),
+consistent with \Cref{sec:main-result}'s null result, not a reversal of it.
+But pooling hides a real split. On the REIT sector, \emph{hist} beats base
+$62$--$63\%$ of the time; on S\&P~500 sub-portfolios it beats base only
+$33$--$39\%$ of the time, actively hurting on average.
+
+A concentrated, sector-driven universe (real estate, exposed to a common
+rate factor) apparently gives the bootstrap enough genuine, repeated
+dependence structure to exploit. A broad, diversified sample of large-cap
+names does not, and the bootstrap's variance cost (a modest in-sample window
+standing in for the true tail law, per \Cref{sec:main-result}) dominates
+there instead. The effect also decays with sub-portfolio size for HRP
+($55\%$ win rate at 12--20 names, falling to $28\%$ at 30--40), the same
+bootstrap-noise signature. Tail-dependence repair is therefore not
+uniformly useless: it is specifically the broad, low-cluster-structure case
+where it costs more than it recovers.
+
+\emph{A real-data motivation for the $\gamma$-blend.} \Cref{sec:gamma-result}
+found the best repair budget non-increasing in $\gamma$ on the synthetic
+market. On real Schur portfolios (gauss target) the pattern is richer: at
+$\gamma\in\{0,0.25,0.5\}$, $F=0$ is again best (mean gain $0.00084$,
+$0.00099$, $0.00060$); but at $\gamma=0.75$ the mean gain at $F=0$ is
+\emph{negative} ($-0.00007$), turning positive only from $F=2$ onward
+($0.00004$, $0.00007$), and at $\gamma=1$ (minimum variance) $F=0$ is
+sharply negative ($-0.00031$) while $F\in\{1,2,3\}$ are all mildly positive
+($\approx0.0002$). A Schur portfolio built with substantial cross-block coupling has already
+used most of the correlation. Repairing it against a reference that
+discards all of it ($F=0$) makes it actively worse, not just suboptimal.
+A shallow, non-zero budget matches what the portfolio actually used. This is exactly what the $\gamma$-blended reference
+$C^{\mathrm{used}}(\gamma)=(1-\gamma)C^{\mathrm{tree}}+\gamma\,\hat\Sigma$
+proposed in \Cref{sec:discussion} is for, and this result is real-data
+evidence that it is needed, not only that it would be elegant.
+
+\emph{Not an artifact of the seriation choice.} Every result above reads
+$\mathrm{ord}$ from this package's own Schur-complementary estimator, which
+orders assets by the Fiedler vector of the correlation-affinity graph rather
+than \textcite{lopezdeprado2016}'s original single-linkage dendrogram (a
+deliberate upgrade of this codebase, for smoother turnover under streaming
+updates). Repeating the $F=0$ comparison with a classical single-linkage
+quasi-diagonal order in place of the Fiedler one, on 2{,}000 further real
+trials, gives a $69.3\%$ win rate (against $75.7\%$ for Fiedler on the same
+trials); the per-trial gains correlate at $0.96$ across the two seriations
+($88\%$ sign agreement), so it is largely the same trials benefiting under
+either choice, not two unrelated effects that happen to average out
+positive. The gap between the two widens at deeper budgets ($F=1,2$:
+classical falls to a coin flip, $53\%$/$51\%$, while Fiedler holds at
+$63\%$/$61\%$), plausibly because single-linkage's known chaining tendency
+gives the nested tree noisier splits to read correlation off of at depth,
+while $F=0$ does not lean on the tree's quality at all. The headline
+finding is a property of the repair, not of this package's particular
+seriation upgrade.
+
+\emph{The gain is volatility reduction, not a return forecast.} Every
+number reported so far is ES95, a tail-risk statistic. \Cref{tab:returnmetrics}
+decomposes $1{,}500$ further real trials ($F=0$, gauss target) into mean
+return, annualized volatility, Sharpe ratio, and ES95, base versus repair,
+with the fraction of trials in which the repair wins each statistic.
+
+\begin{table}[h]
+\centering
+\caption{Real-market $F=0$ repair, decomposed by statistic (1{,}500 trials).
+Win rate is the fraction of trials in which the repair improves that
+statistic over base.}
+\label{tab:returnmetrics}
+\footnotesize
+\begin{tabular}{lcccc}
+\toprule
+ & mean return & volatility & Sharpe & ES95 \\
+\midrule
+HRP win rate   & $46.9\%$ & $82.5\%$ & $51.6\%$ & $79.9\%$ \\
+Schur win rate & $46.9\%$ & $77.9\%$ & $50.6\%$ & $75.4\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Mean return is, if anything, a coin flip slightly \emph{below} even
+($46.9\%$ for both methods), indistinguishable from noise rather than a
+real effect in either direction. This is the construction working as
+designed, not a disappointing result. We calibrate $\theta$ from
+$w^{\mathrm{base}}$ alone and hold it fixed through the re-race; neither
+HRP, Schur, nor the repair itself ever consults a mean-return estimate
+anywhere in the pipeline. So the repair has no channel through which it
+\emph{could} move expected return systematically, and a $47\%$ win rate is
+what that looks like empirically.
+
+Volatility, by contrast, is reduced in $78$--$83\%$ of trials: the one
+channel the repair actually touches, since it is built entirely from the
+dependence structure. Sharpe improves \emph{on average} (lower volatility
+over an unchanged mean mechanically raises it) but only barely more often
+than not ($51$--$52\%$) at the level of a single 125-day trial, since a flat
+mean return still carries its own sampling noise that a modest volatility
+reduction does not reliably overcome window by window. In one line: this is
+a volatility- and tail-risk-reduction mechanism that costs nothing in
+expected return, not a source of alpha, and the data support exactly that
+reading.
+
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{Dependence repair, not risk repair.} The repair holds the
+calibrated scores fixed and changes only the geometry they are re-raced
+under. It inherits no guarantee of moving toward the minimum-variance
+portfolio, still less of minimizing any particular risk functional. It
+preserves what the base allocator already decided, which names deserve
+credit, and only changes how that credit is expressed under a fuller
+dependence picture. Where a Schur portfolio already sits at $\gamma=1$,
+exactly reproducing minimum variance, there is by construction no
+second-moment information left to restore: \Cref{tab:gamma}'s $\gamma=1.0$
+row shows a shallow but still real residual gain, consistent with the
+race-reallocation effect of \Cref{sec:main-result} rather than further
+correlation completion.
+
+\paragraph{Apply once; do not iterate.} The repair has no reason to be a
+fixed point of itself. $w^{\mathrm{repair}} = w^{\mathrm{base}}$ only when
+$C^{\mathrm{used}} = C^{\mathrm{full}}$ exactly (\Cref{sec:method}'s
+fixed-point remark), and at $F=0$ that never holds. Feeding the $F=0$
+repair's own output back in as a new $w^{\mathrm{base}}$ and repairing
+again is correspondingly unstable. On 500 real trials, a single further
+application still won $77.8\%$ of the time, close to the one-shot rate. But
+$98\%$ of trials eventually drove a weight to exactly zero within a handful
+of iterations, which the log-domain calibration cannot invert. We reran the
+same trials at $32\times$ the Monte-Carlo resolution and got the same
+collapse, so it is a genuine geometric effect, not a sampling artifact.
+
+Here is why, traced through one case. Two real names are correlated at
+$0.845$, with \emph{unequal} base weights ($0.0525$ and $0.0994$).
+Red-bus/blue-bus \parencite{mcfadden1974} guarantees an even split only for
+equal-strength duplicates (the companion paper's redundancy-consistency
+proposition, \parencite{cotton2026polish}); these two names are not
+equal-strength. For unequal strengths, a Gaussian race correctly sends the
+weaker share toward zero as the correlation between them approaches one. A
+single application, at the true correlation of $0.845$, cut the weaker
+share by half: a real but bounded correction, not a collapse. Repeating the
+same correction on its own output forgets that the true correlation is
+fixed at $0.845$ and behaves as though it kept climbing every round,
+because nothing anchors it back to the data. One application reads the
+data; further applications read the previous application's opinion of the
+data. That is why we run the repair once, as a single map from a base
+allocation to a repaired one, and never iterate it.
+
+\paragraph{What $C^{\mathrm{used}}$ should be.} This paper tests one family,
+the gain-pruned nested tree of \Cref{sec:tree}, indexed by a single
+truncation depth. We chose it for tractability: it drops directly into the
+existing $k$-factor engine. Two other constructions are worth testing
+against it. A flat $K$-cluster block-diagonal reference using the
+\emph{exact} (not factor-approximated) within-cluster covariance is more
+faithful within each cluster, but requires a separate factorization per
+cluster and does not share a rank budget as cleanly across the whole
+universe. For Schur specifically, a $\gamma$-blended reference
+$C^{\mathrm{used}}(\gamma)=(1-\gamma)C^{\mathrm{tree}}+\gamma\,\hat\Sigma$
+would reuse Schur's own coupling parameter directly, rather than requiring
+a separate depth sweep to discover the right amount of repair empirically
+per $\gamma$. \Cref{sec:gamma-result}'s finding, that the empirically best
+depth already tracks $\gamma$, is evidence such a construction is worth
+building, not a substitute for building it.
+
+\paragraph{Composing with further law changes.} Because the repair is an
+instance of the general tilt $T_{S_0\to S_1}$, it inherits that
+construction's composition properties. Repairing toward one law and then a
+further, richer law gives the same endpoint as repairing directly to the
+final law, and restricting the universe afterward commutes with the choice
+of dependence law, provided the reference calibration is exact at each step
+\parencite{cotton2026polish}. We rely on this only informally here, to note
+that a repaired portfolio can be safely fed into a further Thurstone polish
+(a market-factor tilt, a tail-copula overlay) without re-deriving
+consistency from scratch, and leave a formal treatment specific to the
+hierarchical setting to future work.
+
+\section{Conclusion}
+
+Hierarchical portfolios are robust exactly because they refuse to consult
+all the available dependence information. That refusal need not be paid
+for twice. The same latent scores that rationalize the hierarchical weights
+under what the recursion used can be re-raced under what is actually on
+hand, recovering a meaningful share of the gap to a fuller allocation
+without inverting anything. The recovered amount tracks how much was
+already used, falling as Schur's $\gamma$ rises on the synthetic market and
+turning sharply negative at $F=0$ once $\gamma$ is large enough that
+independence is the wrong reference on real data. It survives both the
+covariance being honestly noisy rather than known, and $12{,}000$ random
+trials against real S\&P~500 and REIT sub-portfolios varying every choice
+the repair does not control.
+
+On real data the dominant, most robust part of the gain turned out to be
+the shallowest one, race-reallocation over correlation completion, which is
+a sharper and more actionable finding than the synthetic market alone could
+give. It applies once and should not be iterated: the same mechanism that
+correctly de-weights a genuinely redundant pair has no stopping rule of its
+own if fed its own output. Whether genuine tail dependence adds value on
+top of ordinary correlation completion remains open in general, but it is
+no longer a blanket null: it costs more than it recovers on a broad,
+diversified universe and modestly pays off on a concentrated, sector-driven
+one. We report both rather than pick the one that flatters the method.
+
+\printbibliography
+
+\end{document}

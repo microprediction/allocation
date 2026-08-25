@@ -24,6 +24,24 @@ papers/
 | Slug | Title | Status |
 |------|-------|--------|
 | [thurstone-portfolios](thurstone-portfolios/) | Thurstone Portfolios: Long-Only Allocation by Inverting Winning Probabilities | draft |
+| [repaired-hierarchical-portfolios](repaired-hierarchical-portfolios/) | Repaired Hierarchical Portfolios | draft |
+| [thurstone-credit](thurstone-credit/) | Winning Probabilities as Credit: Fast, Redundancy-Aware Attribution | draft |
+| [online-portfolio-regimes](online-portfolio-regimes/) | When Does Portfolio Construction Work? A Map across the Number of Assets and the Cost of Trading | draft |
+
+### Portfolio papers kept in other repos
+
+Not every portfolio-construction paper lives here. The Schur-complementary
+family is split off in [`microprediction/schur`](https://github.com/microprediction/schur),
+`paper/`:
+
+- `neither-end-of-the-bridge.tex` — When the Out-of-Sample-Optimal Schur
+  Portfolio Lies Between HRP and Minimum Variance
+- `schur-damping-pdlp.tex` — Schur Damping for Perpetual Demand Lending Pools
+
+Both build directly on the original Schur-complementary allocation paper
+(`cotton2024schur`, arXiv:2411.05807), which this repo's papers also cite.
+This split is historical, not principled; check both locations before
+assuming you've found every portfolio paper.
 
 ## Starting a new paper
 
