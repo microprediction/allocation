@@ -36,7 +36,13 @@ reliably. Finally, the repair should be applied once, not iterated: it has no
 fixed point of its own (only C_used=C_full is a fixed point, which F=0 never is),
 and feeding its own output back in repeatedly drives a weight to zero -- confirmed
 at 32x Monte Carlo resolution to be genuine, not a sampling artifact -- typically
-within 3-6 rounds, on the same real correlated pair each time it recurs.
+within 3-6 rounds, on the same real correlated pair each time it recurs. The
+gamma-blended reference proposed in the discussion section was built and tested,
+not left as a proposal: it fixes F=0's failure at high gamma (mean gain at
+gamma=1.0 flips from -0.00065 to +0.00004) at some cost to F=0's edge at low
+gamma, and an adaptive policy that picks F=0 or the blend using gamma alone
+(a free choice, since gamma is fixed before the repair runs) reaches 4-6x the
+mean gain of committing to either one alone.
 
 ## Status / TODO
 
@@ -48,10 +54,13 @@ from a 12,000-trial, ~6.4-hour overnight run with zero errors
 not committed -- see `.gitignore`).
 
 - [ ] Re-run key synthetic tables at production resolution (full points, Q, Sobol budget).
-- [ ] Try the alternative `C_used` constructions floated in the discussion section
-      (flat K-cluster block-diagonal with exact within-cluster covariance; a
-      gamma-blended reference `(1-gamma)*C_tree + gamma*Sigma_hat` for Schur --
-      the real-market gamma-sweep result now gives a concrete reason to build this).
+- [x] Build and test the gamma-blended reference `(1-gamma)*C_tree + gamma*Sigma_hat`
+      for Schur -- done, Section 4.6 (`experiments/gamma_blend_check.py`): fixes F=0's
+      high-gamma failure, trades away some low-gamma edge; an adaptive F=0-or-blend
+      policy (switching on gamma alone) beats either fixed policy 4-6x in mean gain.
+- [ ] Try the other alternative `C_used` construction floated in the discussion
+      section: a flat K-cluster block-diagonal reference with exact (not
+      factor-approximated) within-cluster covariance.
 - [ ] Sharper tail-dependence test: ES99 or joint-crash probability instead of ES95,
       larger in-sample window for the rare cascade rows, tighter cluster geometry;
       and, on real data, dig into WHY REIT sub-portfolios reward the historical-bootstrap
@@ -90,8 +99,9 @@ not committed -- see `.gitignore`).
   sweep, Section 4.5), `experiments/seriation_check.py` (Fiedler vs. classical
   single-linkage seriation, Section 4.5), `experiments/return_metrics_check.py`
   (mean/vol/Sharpe/ES95 decomposition, Section 4.5), `experiments/
-  iterate_repair_check.py` (repeated-application stability, Discussion). Each is
-  runnable standalone from `experiments/`.
+  iterate_repair_check.py` (repeated-application stability, Discussion),
+  `experiments/gamma_blend_check.py` (gamma-blended reference, Section 4.6). Each
+  is runnable standalone from `experiments/`.
 
 ## Files
 

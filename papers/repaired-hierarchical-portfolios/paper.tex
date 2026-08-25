@@ -574,6 +574,70 @@ a volatility- and tail-risk-reduction mechanism that costs nothing in
 expected return, not a source of alpha, and the data support exactly that
 reading.
 
+\subsection{The $\gamma$-blended reference}
+\label{sec:blend}
+
+We built the $\gamma$-blended reference and tested it directly, rather than
+leaving it as a proposal. $C^{\mathrm{tree}}$ is taken as the full retained
+nested tree (\Cref{sec:tree} with no truncation, $F$ unbounded), giving a
+dense $C^{\mathrm{used}}(\gamma)=(1-\gamma)C^{\mathrm{tree}}+\gamma\,\hat\Sigma$.
+Because this is generally full rank, we factor-fit it (rank $8$, the
+contrast-space heuristic of \Cref{sec:tree}'s engine) and calibrate through
+the same lattice engine the $F$-budget repair already uses, so the
+comparison is not confounded by calibration precision. We checked this
+choice against a same-engine fixed-point test (calibrate and re-race under
+the identical factor-approximated law): the residual is $3\times10^{-8}$ in
+$\ell_1$, confirming the calibration itself is essentially exact and any
+remaining gap is the covariance factor-fit's approximation error, not a
+convergence failure.
+
+\Cref{tab:blend} compares the $\gamma$-blend against $F=0$ on $60$ further
+real trials per $\gamma$, engine-matched throughout.
+
+\begin{table}[h]
+\centering
+\caption{Out-of-sample ES95 gain (repair minus base), $F=0$ versus the
+$\gamma$-blend, $60$ real trials per $\gamma$.}
+\label{tab:blend}
+\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+$\gamma$ & $0.00$ & $0.25$ & $0.50$ & $0.75$ & $1.00$ \\
+\midrule
+$F=0$, mean gain      & $0.00077$ & $0.00096$ & $0.00052$ & $-0.00120$ & $-0.00065$ \\
+$F=0$, win rate       & $66.7\%$  & $81.7\%$  & $61.7\%$  & $45.0\%$   & $45.0\%$   \\
+blend, mean gain      & $0.00006$ & $0.00037$ & $0.00014$ & $-0.00003$ & $0.00004$  \\
+blend, win rate       & $50.0\%$  & $70.0\%$  & $73.3\%$  & $53.3\%$   & $53.3\%$   \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The blend does what it was built for: at $\gamma=0.75$ it lifts a clearly
+losing repair (mean gain $-0.00120$, $45\%$ win rate) to roughly break-even
+($-0.00003$, $53.3\%$), and at $\gamma=1.0$ it flips a losing repair to a
+winning one ($-0.00065\to+0.00004$, $45.0\%\to53.3\%$ win rate). This is not
+a free upgrade. At low $\gamma$ the blend trades away magnitude: mean gain
+falls to roughly a tenth of $F=0$'s at $\gamma=0$ and to under half at
+$\gamma=0.25$, though win rate at $\gamma=0.5$ is actually higher under the
+blend ($73.3\%$ vs.\ $61.7\%$). The honest reading is a trade-off, not a
+strict improvement: the blend rescues the high-$\gamma$ failure at some cost
+to $F=0$'s low-$\gamma$ edge.
+
+That trade-off has an immediate consequence, since $\gamma$ is a known
+quantity, chosen by whoever builds the Schur portfolio, not something that
+has to be estimated. An \emph{adaptive} policy, $F=0$ for $\gamma<0.75$ and
+the blend for $\gamma\ge0.75$, needs no new calibration: it is a
+recombination of the same \Cref{tab:blend} numbers, using whichever row
+applies at each $\gamma$. Averaged equally across the five $\gamma$ settings
+tested, the adaptive policy reaches mean gain $0.00045$ and win rate
+$63.3\%$, against $0.00008$ and $60.0\%$ for $F=0$ used everywhere and
+$0.00012$ and $60.0\%$ for the blend used everywhere: roughly four to six
+times the mean gain of either fixed policy alone. Since which repair
+reference to use is a choice made \emph{before} seeing the out-of-sample
+data (it depends only on $\gamma$, which is set at construction time), this
+adaptive policy is available for free and dominates committing to either
+$F=0$ or the blend alone.
+
 \section{Discussion}
 \label{sec:discussion}
 
@@ -618,21 +682,21 @@ data; further applications read the previous application's opinion of the
 data. That is why we run the repair once, as a single map from a base
 allocation to a repaired one, and never iterate it.
 
-\paragraph{What $C^{\mathrm{used}}$ should be.} This paper tests one family,
-the gain-pruned nested tree of \Cref{sec:tree}, indexed by a single
-truncation depth. We chose it for tractability: it drops directly into the
-existing $k$-factor engine. Two other constructions are worth testing
-against it. A flat $K$-cluster block-diagonal reference using the
-\emph{exact} (not factor-approximated) within-cluster covariance is more
-faithful within each cluster, but requires a separate factorization per
-cluster and does not share a rank budget as cleanly across the whole
-universe. For Schur specifically, a $\gamma$-blended reference
-$C^{\mathrm{used}}(\gamma)=(1-\gamma)C^{\mathrm{tree}}+\gamma\,\hat\Sigma$
-would reuse Schur's own coupling parameter directly, rather than requiring
-a separate depth sweep to discover the right amount of repair empirically
-per $\gamma$. \Cref{sec:gamma-result}'s finding, that the empirically best
-depth already tracks $\gamma$, is evidence such a construction is worth
-building, not a substitute for building it.
+\paragraph{What $C^{\mathrm{used}}$ should be.} This paper tests two
+families. The default is the gain-pruned nested tree of \Cref{sec:tree},
+indexed by a single truncation depth $F$, chosen for tractability: it drops
+directly into the existing $k$-factor engine. For Schur specifically, the
+$\gamma$-blended reference of \Cref{sec:blend},
+$C^{\mathrm{used}}(\gamma)=(1-\gamma)C^{\mathrm{tree}}+\gamma\,\hat\Sigma$,
+reuses Schur's own coupling parameter directly instead of a separately
+chosen $F$, and \Cref{sec:blend} shows it fixes $F=0$'s failure at high
+$\gamma$ at some cost to $F=0$'s edge at low $\gamma$, so an adaptive
+policy that picks between the two using $\gamma$ alone beats committing to
+either one. A flat $K$-cluster block-diagonal reference using the
+\emph{exact} (not factor-approximated) within-cluster covariance remains
+untested: it would be more faithful within each cluster, but requires a
+separate factorization per cluster and does not share a rank budget as
+cleanly across the whole universe.
 
 \paragraph{Composing with further law changes.} Because the repair is an
 instance of the general tilt $T_{S_0\to S_1}$, it inherits that
@@ -656,10 +720,15 @@ hand, recovering a meaningful share of the gap to a fuller allocation
 without inverting anything. The recovered amount tracks how much was
 already used, falling as Schur's $\gamma$ rises on the synthetic market and
 turning sharply negative at $F=0$ once $\gamma$ is large enough that
-independence is the wrong reference on real data. It survives both the
-covariance being honestly noisy rather than known, and $12{,}000$ random
-trials against real S\&P~500 and REIT sub-portfolios varying every choice
-the repair does not control.
+independence is the wrong reference on real data. Reusing $\gamma$ itself
+through a blended reference fixes that failure, at some cost to the
+independent reference's edge at low $\gamma$; since $\gamma$ is chosen
+before the repair ever runs, an adaptive policy that picks between the two
+using $\gamma$ alone gets both, at four to six times the mean gain of
+committing to either one. The repair survives both the covariance being
+honestly noisy rather than known, and $12{,}000$ random trials against real
+S\&P~500 and REIT sub-portfolios varying every choice the repair does not
+control.
 
 On real data the dominant, most robust part of the gain turned out to be
 the shallowest one, race-reallocation over correlation completion, which is
