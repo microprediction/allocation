@@ -1,0 +1,436 @@
+\documentclass[11pt]{article}
+
+\input{../shared/preamble.tex}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{cleveref}
+
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {3.25ex \@plus1ex \@minus.2ex}{-1em}%
+  {\normalfont\normalsize\itshape}}
+\makeatother
+
+\title{Conditioned Cores: A Schur Bridge from Nested Clustered Optimization
+to Global Minimum Variance}
+\author{Peter Cotton}
+\date{September 17, 2026}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\ones}{\mathbf{1}}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Var}{Var}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Nested clustered optimization allocates within each cluster from the
+cluster's own covariance block and then across the resulting cluster
+portfolios. Block inversion says the unconstrained minimum-variance
+portfolio has the same two-tier shape, with each block replaced by its Schur
+complement against every other asset. We show that under a rank-one model of
+cross-cluster dependence, in which each asset reaches other clusters only
+through a representative ``core'' of its own cluster, the complement against
+everything equals the complement against the other cores. Damping that
+complement by $\gamma\in[0,1]$ gives a bridge with nested clustered
+optimization at $\gamma=0$ and the global optimum at $\gamma=1$, with no
+inverse larger than a cluster or the number of clusters. The cores are
+borrowed from the core-orbital allocation of \textcite{hcoa2026}, and the
+same model says when that method's strategic use of the core covariance is
+accurate.
+\end{abstract}
+
+\section{Introduction}
+
+Two-stage cluster methods partition the assets, allocate inside each
+cluster, and then allocate across clusters. In nested clustered
+optimization, NCO \parencite{lopezdeprado2020}, the inner step optimizes
+each cluster on its own covariance block and the outer step optimizes across
+the resulting cluster portfolios. The outer problem has one dimension per
+cluster, which is the source of the method's numerical stability.
+
+\textcite{hcoa2026} proposes a variant for universes with strong systematic
+structure, such as bonds denominated in USD. It is called hierarchical
+core-orbital allocation, or HCOA. One representative ``core'' asset is chosen in each
+cluster: the medoid, the member most aligned with the cluster's first
+principal component, or the member with the largest sum of squared
+correlations to the rest. The strategic tier allocates across the cores
+with any objective. A tactical rule then redistributes each cluster's
+budget among the remaining ``orbital'' members.
+
+In both methods the inner step reads only the cluster's own block. The only
+channel by which one cluster's weights respond to another cluster is its
+scalar budget.
+
+Schur-complementary allocation \parencite{cotton2024schur} removes the same
+blind spot from hierarchical risk parity \parencite{lopezdeprado2016}. At
+each split of a bisection tree it replaces a block by its Schur complement
+against the sibling block, damped by $\gamma\in[0,1]$, and carries a
+companion vector alongside. The result is a bridge with hierarchical risk
+parity at $\gamma=0$ and minimum variance at $\gamma=1$.
+
+This note builds the corresponding bridge for a flat partition. The left
+end is NCO and the right end is the unconstrained global minimum-variance
+portfolio. The obstacle is cost, since the complement of a cluster against
+everything else needs an inverse of nearly full size.
+
+The cores remove the obstacle. Under a stated model of cross-cluster
+dependence, the other clusters' cores are a sufficient conditioning set,
+and no inverse exceeds the size of a cluster or the number of clusters.
+That is what we take from \textcite{hcoa2026}. HCOA itself is not an
+endpoint of the bridge, and \cref{sec:hcoa} says where it sits.
+
+All exactness statements concern the unconstrained, fully invested,
+long-short problem. With box or long-only constraints no block
+decomposition of the optimum is exact, here or on the tree.
+
+\section{Setup and the two published constructions}
+
+Let $\Sigma\succ0$ be the covariance of $n$ assets partitioned into
+clusters $I_1,\dots,I_k$. Cluster $i$ has a core $c_i\in I_i$ and orbitals
+$O_i=I_i\setminus\{c_i\}$. Write $C=\{c_1,\dots,c_k\}$ and
+$C_{-i}=C\setminus\{c_i\}$. For index sets $X,Y$ write $\Sigma_{XY}$ for the
+corresponding block, $\Sigma_{ii}$ for the block of cluster $i$, and $-i$
+for the complement of $I_i$.
+
+A two-stage method is specified by two objects per cluster. The
+\emph{implemented portfolio} $v_i$, supported on $I_i$ with
+$\ones^\top v_i=1$, is where the cluster's budget is spent. The
+\emph{strategic proxy} $s_i$ is the portfolio that stands for the cluster
+when budgets are set. With $S$ and $V$ the $n\times k$ matrices of proxies
+and implemented portfolios, the method is
+\begin{equation}
+  a \;=\; \operatorname{alloc}\!\big(S^\top\Sigma S\big),
+  \qquad w \;=\; Va .
+  \label{eq:twostage}
+\end{equation}
+
+NCO sets $s_i=v_i$, the minimum-variance portfolio of $\Sigma_{ii}$. The
+cluster is priced at the strategic tier by the portfolio it will hold.
+
+HCOA sets $s_i=e_{c_i}$, so that $S^\top\Sigma S=\Sigma_{CC}$, and
+$v_i=g_i(\Sigma_{ii})$ for a tactical rule $g_i$ described as
+``hierarchical rules or local optimization'' within the
+cluster.\footnote{We work from the abstract, the author's announcement,
+\url{https://lnkd.in/p/ekyaNa-E}, and indexed excerpts of the full text,
+which was not otherwise available to us.} The cluster is priced by its core
+and held as something else.
+
+\section{Block inversion}
+
+Fix a vector $u$ and a cluster $i$. Block inversion of $\Sigma$ on the
+partition $(I_i,-i)$ gives \parencite[App.~A]{cotton2024schur}
+\begin{equation}
+  \big(\Sigma^{-1}u\big)_{I_i}
+  \;=\; \big(\Sigma^{c}_{ii}\big)^{-1} b_i,
+  \label{eq:blockinv}
+\end{equation}
+where
+\begin{equation}
+  \Sigma^{c}_{ii} = \Sigma_{ii}-\Sigma_{i,-i}\Sigma_{-i,-i}^{-1}\Sigma_{-i,i},
+  \qquad
+  b_i = u_{I_i}-\Sigma_{i,-i}\Sigma_{-i,-i}^{-1}u_{-i} .
+  \label{eq:complement}
+\end{equation}
+For a positive-definite $Q$ and a vector $b$ we call $Q^{-1}b$ a
+\emph{generalized minimum-variance direction}. Up to scale it minimizes
+$x^\top Qx$ subject to $b^\top x=1$, which is ordinary minimum variance only
+when $b=\ones$.
+
+With $u=\ones$, the blocks of the global minimum-variance direction
+$\Sigma^{-1}\ones$ are therefore generalized minimum-variance directions,
+one per cluster, on the cluster's covariance conditional on everything
+else. There is no cross-cluster optimizer in the global optimum. The
+cluster totals are whatever the stacked directions sum to, and every piece
+of cross-cluster information enters through the conditioning.
+
+NCO has the same shape with the conditioning removed. Restoring it costs an
+inverse of size $n-|I_i|$ per cluster, which is what a two-stage method
+exists to avoid.
+
+\section{The orbital model}
+
+\begin{definition}[Orbital model]
+For every cluster $j$, the residual of the orbitals $O_j$ after linear
+regression on their own core is uncorrelated with every asset outside
+$I_j$. Equivalently the cross-cluster residual
+\begin{equation}
+  R_j(c_j) \;=\; \Sigma_{O_j,-j}-\Sigma_{O_j c_j}\,\sigma_{c_j}^{-2}\,\Sigma_{c_j,-j}
+  \label{eq:residual}
+\end{equation}
+is zero.
+\end{definition}
+
+An orbital may be correlated with anything, but its correlation with other
+clusters passes entirely through its core. Each cross-cluster block of
+$\Sigma$ then has rank one.
+
+This is a strong assumption, and clustering alone does not imply it. It
+asks that orbital residuals be uncorrelated both with the other cores and
+with the other clusters' orbital residuals.
+
+\begin{proposition}[Cores are sufficient]
+\label{prop:sufficient}
+Under the orbital model, for each cluster $i$ and every $u$,
+\begin{equation}
+  \Sigma^{c}_{ii}
+  \;=\; \Sigma_{ii}-\Sigma_{i,C_{-i}}\,\Sigma_{C_{-i}C_{-i}}^{-1}\,\Sigma_{C_{-i},i},
+  \qquad
+  b_i \;=\; u_{I_i}-\Sigma_{i,C_{-i}}\,\Sigma_{C_{-i}C_{-i}}^{-1}\,u_{C_{-i}} .
+  \label{eq:cheap}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+The matrix $\Sigma_{i,-i}\Sigma_{-i,-i}^{-1}$ holds the coefficients of the
+linear regression of cluster $i$ on all other assets. Split the regressors
+into the other cores $C_{-i}$ and the other orbitals $O_{-i}$, and write
+$O_{-i}=\beta\,C_{-i}+\varepsilon$ for the block-diagonal regression of
+each orbital set on its own core. The map from $(C_{-i},O_{-i})$ to
+$(C_{-i},\varepsilon)$ is invertible, so the regression may be run on the
+latter pair. Under the orbital model $\varepsilon$ is uncorrelated with
+cluster $i$ and with $C_{-i}$, so its coefficients vanish and the
+coefficients on $C_{-i}$ are $\Sigma_{i,C_{-i}}\Sigma_{C_{-i}C_{-i}}^{-1}$.
+Substituting into \eqref{eq:complement} gives \eqref{eq:cheap}, with
+$u_{-i}$ contributing only through its $C_{-i}$ entries.
+\end{proof}
+
+Conditioning cluster $i$ on the other cores is the same as conditioning it
+on everything. The inverse in \eqref{eq:cheap} is $(k-1)\times(k-1)$.
+
+\begin{remark}[Testing the model and choosing cores]
+Regressing each orbital on its own core and the other cores, and checking
+that the other-core coefficients vanish, does not test the model. Orbital
+residuals can be orthogonal to every core and still be correlated with each
+other across clusters, and the sufficiency of the cores then fails. The
+direct diagnostic is the size of $R_j(c_j)$ in \eqref{eq:residual},
+computed from the sample covariance before any portfolio is built. The same
+quantity gives a core-selection rule aligned with
+\cref{prop:sufficient}: choose $c_j$ to minimize $\|R_j(c)\|$ over
+$c\in I_j$. The medoid, principal-component and squared-correlation
+criteria of \textcite{hcoa2026} read only within-cluster structure.
+\end{remark}
+
+\begin{remark}[A symmetric factor model]
+Suppose instead that every member of cluster $j$ loads on a latent cluster
+factor, $r_m=\lambda_m f_j+\eta_m$, with idiosyncratic terms uncorrelated
+with each other and with the factors. Then
+$R_j(c)=(1-\rho_c)\,\lambda_{O_j}\Cov(f_j,r_{-j})$, where
+$\rho_c=\lambda_c^2\Var(f_j)/\sigma_c^2$ is the share of the core's variance
+explained by the factor. The orbital model holds to the extent the core is
+the factor. In this model the within-cluster criteria that favour a high
+$\rho_c$ are approximately the right ones.
+\end{remark}
+
+\section{The bridge}
+
+Following \textcite{cotton2024schur}, damp the conditioning. For
+$\gamma\in[0,1]$ define the \emph{conditioned pair} of cluster $i$,
+\begin{equation}
+\begin{aligned}
+  Q_i(\gamma) &= \Sigma_{ii}-\gamma\,\Sigma_{i,C_{-i}}\Sigma_{C_{-i}C_{-i}}^{-1}\Sigma_{C_{-i},i},\\
+  b_i(\gamma) &= u_{I_i}-\gamma\,\Sigma_{i,C_{-i}}\Sigma_{C_{-i}C_{-i}}^{-1}u_{C_{-i}},
+\end{aligned}
+  \label{eq:pair}
+\end{equation}
+and the direction $d_i(\gamma)=Q_i(\gamma)^{-1}b_i(\gamma)$. When
+$\ones^\top d_i(\gamma)\neq0$ set $v_i=d_i/\ones^\top d_i$, take $s_i=v_i$
+in \eqref{eq:twostage}, and let the strategic tier solve the same problem
+on the span of $V$, which gives
+\begin{equation}
+  a \;\propto\; \big(V^\top\Sigma V\big)^{-1}V^\top u,
+  \qquad w = Va .
+  \label{eq:top}
+\end{equation}
+The induced strategic inputs are the $k\times k$ covariance $V^\top\Sigma V$
+and the $k$-vector $V^\top u$, which is $\ones$ when $u=\ones$.
+
+\begin{proposition}[The two ends of the bridge]
+\label{prop:bridge}
+\leavevmode
+\begin{enumerate}
+\item At $\gamma=0$ with $u=\ones$ the recipe is NCO with minimum variance
+  at both tiers.
+\item Under the orbital model the stacked directions $d_i(1)$ are the blocks
+  of $\Sigma^{-1}u$.
+\item If in addition every $\ones^\top d_i(1)$ is nonzero, then $w$ in
+  \eqref{eq:top} is proportional to $\Sigma^{-1}u$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+At $\gamma=0$ the pair is $(\Sigma_{ii},\ones)$, so $v_i$ is the
+minimum-variance portfolio of the block and \eqref{eq:top} is minimum
+variance across the cluster portfolios. The second claim is
+\eqref{eq:blockinv} with \cref{prop:sufficient}. For the third,
+$w^\star=\Sigma^{-1}u$ lies in the column span of $V$, say
+$w^\star=V\alpha$. Then
+$(V^\top\Sigma V)^{-1}V^\top u
+=(V^\top\Sigma V)^{-1}V^\top\Sigma V\alpha=\alpha$.
+\end{proof}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+$\gamma$ & Method \\
+\midrule
+$0$ & NCO \parencite{lopezdeprado2020} \\
+$(0,1)$ & conditioned cores \\
+$1$ & unconstrained global minimum variance, under the orbital model \\
+\bottomrule
+\end{tabular}
+\caption{The bridge with $u=\ones$ and minimum variance at both tiers.}
+\label{tab:bridge}
+\end{table}
+
+\paragraph{Scope.} The right end is the unconstrained, fully invested,
+long-short solution. The third claim also needs every cluster total to be
+nonzero. A global solution can hold a self-financing position inside a
+cluster with zero net weight, and then no cluster budget times a normalized
+cluster portfolio represents it. The second claim is unaffected, because it
+stacks unnormalized directions.
+
+\begin{remark}[Other objectives]
+\Cref{prop:bridge} is stated for a direction $\Sigma^{-1}u$. With $u=\mu$
+this is the maximum Sharpe direction, normalized afterwards when
+$\ones^\top\Sigma^{-1}\mu\neq0$. Mean--variance problems with a budget
+constraint have solutions that combine $\Sigma^{-1}\mu$ and
+$\Sigma^{-1}\ones$, and each part is covered separately. Risk parity is not
+of this form. The recipe still runs with a risk-parity strategic tier, but
+nothing is exact at $\gamma=1$.
+\end{remark}
+
+\begin{remark}[Rules that read only a covariance]
+A tactical rule that cannot take a constraint vector can be applied after
+a change of variables. With $y=b_i\circ x$ the constraint $b_i^\top x=1$
+becomes $\ones^\top y=1$ and the covariance becomes
+$M=\diag(b_i)^{-1}Q_i\diag(b_i)^{-1}$. Apply the rule to $M$ and map back by
+$x=y/b_i$, coordinate by coordinate. For minimum variance this returns
+$Q_i^{-1}b_i$. It requires $b_i$ to have no zero entry. Applying minimum
+variance to $M$ without mapping back returns $\diag(b_i)Q_i^{-1}b_i$, which
+is a different portfolio.
+\end{remark}
+
+\begin{remark}[Relation to the tree]
+Schur complements compose: the complement of a complement is the complement
+against the union. So at $\gamma=1$ the recursion of
+\textcite{cotton2024schur}, run down any tree whose leaves are the clusters
+and stopped there, hands each cluster the pair \eqref{eq:complement}. The
+flat construction and the iterated one agree at the right end. They differ
+in the interior, because the tree damps at every split and the damping
+compounds along the path, while \eqref{eq:pair} damps each cluster once
+against all the other cores.
+\end{remark}
+
+\begin{remark}[What $\gamma$ means]
+The cross-core regression coefficients in \eqref{eq:pair} are estimated.
+\textcite{cotton2026bridge} show that on the bisection tree, with
+estimation error, the out-of-sample-optimal $\gamma$ generically lies
+strictly inside $(0,1)$. We conjecture the same here, since the cross-core
+block is the only object $\gamma$ touches, but we do not prove it. Core
+covariances in a bond universe are highly correlated, so the inverse in
+\eqref{eq:pair} is where we would expect damping to matter.
+\end{remark}
+
+\section{Where HCOA sits}
+\label{sec:hcoa}
+
+The two-stage form \eqref{eq:twostage} nests all three methods.
+\Cref{tab:nest} lists the proxy and the implemented portfolio for each.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+Method & Strategic proxy $s_i$ & Implemented $v_i$ \\
+\midrule
+NCO & minimum variance on $\Sigma_{ii}$ & same as $s_i$ \\
+HCOA & the core, $e_{c_i}$ & $g_i(\Sigma_{ii})$ \\
+Conditioned cores & $d_i(\gamma)$, normalized & same as $s_i$ \\
+\bottomrule
+\end{tabular}
+\caption{Three instances of the two-stage form \eqref{eq:twostage}.}
+\label{tab:nest}
+\end{table}
+
+HCOA differs from NCO and from the bridge on a second axis. Its strategic
+proxy is the core while its implemented portfolio is something else.
+Changing $\gamma$ alone does not reach it, and setting $v_i=e_{c_i}$ in the
+bridge would hold only the cores.
+
+The orbital model says what the core covariance is a proxy for.
+
+\begin{proposition}[The core covariance is the systematic part]
+\label{prop:proxy}
+Under the orbital model, let $v_i$ be any portfolios supported on their
+clusters. Write $\beta_i=\Sigma_{O_ic_i}/\sigma_{c_i}^2$ for the orbital
+betas, $E_i=\Sigma_{O_iO_i}-\beta_i\beta_i^\top\sigma_{c_i}^2$ for the
+residual covariance, and $\kappa_i=v_{i,c_i}+\beta_i^\top v_{i,O_i}$ for
+the core beta of the cluster portfolio. Then
+\begin{equation}
+  V^\top\Sigma V \;=\; K\,\Sigma_{CC}\,K + D,
+  \qquad K=\diag(\kappa_i),
+  \quad D=\diag\!\big(v_{i,O_i}^\top E_i\,v_{i,O_i}\big).
+  \label{eq:proxy}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Under the orbital model $\Sigma_{O_i,l}=\beta_i\Sigma_{c_i,l}$ for every
+asset $l$ outside $I_i$. Applying this on both sides gives
+$v_i^\top\Sigma_{I_iI_l}v_l=\kappa_i\kappa_l\Sigma_{c_ic_l}$ for $i\neq l$.
+On the diagonal, the core is uncorrelated with the orbital residual, so
+$v_i^\top\Sigma_{ii}v_i=\kappa_i^2\sigma_{c_i}^2+v_{i,O_i}^\top E_iv_{i,O_i}$.
+\end{proof}
+
+The consistent strategic matrix is the core covariance scaled by the
+cluster portfolios' core betas, plus their residual variances on the
+diagonal. HCOA's strategic tier is \eqref{eq:proxy} with $K=I$ and $D=0$.
+
+It is accurate when the implemented cluster portfolios have unit beta to
+their cores and little residual variance, which describes tight,
+homogeneous clusters. The correction is still $k\times k$ and needs nothing
+beyond $\beta_i$ and $E_i$, which the tactical tier already has.
+
+\section{Cost}
+
+No step forms an $n\times n$ inverse. The largest inverse has dimension
+$\max(k-1,\max_i|I_i|)$, as in NCO. The bridge adds work that NCO does not
+do: the cross-block products $\Sigma_{i,C_{-i}}$, and a leave-one-core-out
+inverse per cluster, obtainable from $\Sigma_{CC}^{-1}$ by a rank-one
+downdate.
+
+If the orbital model fails, \eqref{eq:cheap} approximates the full
+complement in \eqref{eq:complement}, and the recipe is a Schur allocation
+with a truncated conditioning set. The size of $R_j$ in
+\eqref{eq:residual} measures the truncation.
+
+\section{Closing}
+
+The contribution is deliberately small.\footnote{\texttt{verify\_conditioned\_cores.py}
+next to the manuscript checks \cref{prop:sufficient,prop:bridge,prop:proxy},
+the two remarks on diagnostics and on covariance-only rules, and the
+symmetric-factor formula, on random covariances to $10^{-10}$. It also
+confirms that the exactness claims fail when the orbital model is violated.
+The repository's test suite runs it.} The identity is block inversion, the
+cores are from \textcite{hcoa2026}, and the damping is from
+\textcite{cotton2024schur}. What is added is the observation that under a
+rank-one cross-cluster model the cores are a sufficient conditioning set,
+which makes the bridge from NCO to the global optimum cheap.
+
+\Cref{prop:sufficient} may also serve Schur-complementary allocation on the
+tree, where the complement against a sibling block could be taken against
+that block's cores. We leave that, and an empirical comparison on a bond
+universe, to future work.
+
+\printbibliography
+
+\end{document}

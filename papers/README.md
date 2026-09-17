@@ -24,6 +24,7 @@ papers/
 | Slug | Title | Status |
 |------|-------|--------|
 | [thurstone-portfolios](thurstone-portfolios/) | Thurstone Portfolios: Long-Only Allocation by Inverting Winning Probabilities | draft |
+| [conditioned-cores](conditioned-cores/) | Conditioned Cores: A Schur Bridge from Nested Clustered Optimization to Global Minimum Variance | draft |
 
 ## Starting a new paper
 
