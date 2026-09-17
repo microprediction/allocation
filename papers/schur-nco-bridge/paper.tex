@@ -35,9 +35,8 @@ Nested clustered optimization allocates within each cluster from the
 cluster's own covariance block and then across the resulting cluster
 portfolios. Block inversion says the unconstrained minimum-variance
 portfolio has the same two-tier shape, with each block replaced by its Schur
-complement against every other asset. Conditioning instead on one knot from each other cluster is a Vecchia
-approximation,
-and we give the rank-one model of cross-cluster dependence under which it is
+complement against every other asset. Conditioning instead on one knot from each other cluster truncates the
+conditioning set in the manner of a Vecchia approximation, and we give the rank-one model of cross-cluster dependence under which it is
 exact. Damping the complement by $\gamma\in[0,1]$ then gives a bridge with
 nested clustered optimization at $\gamma=0$ and the global optimum at
 $\gamma=1$, with no linear solve larger than a cluster or the number of
@@ -184,14 +183,21 @@ $u_{-i}$ contributing only through its $P_{-i}$ entries.
 Conditioning cluster $i$ on the other knots is the same as conditioning it
 on everything. The inverse in \eqref{eq:cheap} is $(k-1)\times(k-1)$.
 
-\begin{remark}[A Vecchia approximation]
-Replacing the conditioning set $-i$ in \eqref{eq:complement} by the index
-set $P_{-i}$ is a Vecchia approximation \parencite{vecchia1988}. The
-conditionals there are the same Schur complements, and the approximation is
-a choice of which indices to condition on. In the framework of
-\textcite{katzfuss2021} most Gaussian-process approximations are choices of
-this kind. The gateway model is the conditional independence under which
-this particular choice is exact.
+\begin{remark}[Relation to Vecchia approximations]
+A Vecchia approximation \parencite{vecchia1988} orders the variables and
+conditions each on a small subset of its predecessors. The conditionals are
+Schur complements, and the approximation is the choice of conditioning
+sets. The gateway model is one such choice made exact: the knots come
+first, jointly, and each cluster's remaining members are conditioned on
+their own knot alone. It is a sparser relative of the knot-based special
+cases collected by \textcite{katzfuss2021}.
+
+\Cref{prop:sufficient} is the Markov property of that graph. Given the other
+knots, a cluster is uncorrelated with every other asset outside it. The
+conditioning here is on a subset of all other variables rather than of
+predecessors, because only the blocks of $\Sigma^{-1}u$ are needed and no
+joint density is formed. When the model fails, using \eqref{eq:cheap}
+anyway is the approximation.
 \end{remark}
 
 \begin{remark}[Testing the model and choosing knots]
@@ -335,7 +341,7 @@ The gateway model also gives the outer covariance a simple form.
 \label{prop:outer}
 Under the gateway model, let $v_i$ be any portfolios supported on their
 clusters. Write $\beta_i=\Sigma_{J_ip_i}/\sigma_{p_i}^2$ for the member
-betas, $E_i=\Sigma_{J_iS_i}-\beta_i\beta_i^\top\sigma_{p_i}^2$ for the
+betas, $E_i=\Sigma_{J_iJ_i}-\beta_i\beta_i^\top\sigma_{p_i}^2$ for the
 residual covariance, and $\kappa_i=v_{i,p_i}+\beta_i^\top v_{i,J_i}$ for
 the cluster portfolio's beta to its knot. Then
 \begin{equation}
