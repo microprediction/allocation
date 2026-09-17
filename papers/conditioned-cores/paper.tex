@@ -402,8 +402,9 @@ beyond $\beta_i$ and $E_i$, which the tactical tier already has.
 
 \section{Cost}
 
-No step forms an $n\times n$ inverse. The largest inverse has dimension
-$\max(k-1,\max_i|I_i|)$, as in NCO. The bridge adds work that NCO does not
+No step forms an $n\times n$ inverse. The largest linear solve has dimension
+$\max(k,\max_i|I_i|)$, as in NCO: the strategic tier is $k\times k$ and each
+conditioning inverse is $(k-1)\times(k-1)$. The bridge adds work that NCO does not
 do: the cross-block products $\Sigma_{i,C_{-i}}$, and a leave-one-core-out
 inverse per cluster, obtainable from $\Sigma_{CC}^{-1}$ by a rank-one
 downdate.
