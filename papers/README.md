@@ -24,14 +24,10 @@ papers/
 | Slug | Title | Status |
 |------|-------|--------|
 | [thurstone-portfolios](thurstone-portfolios/) | Thurstone Portfolios: Long-Only Allocation by Inverting Winning Probabilities | draft |
-<<<<<<< HEAD
 | [thurstone-rc](thurstone-rc/) | Thurstone Portfolios, five-page Rapid Communication draft for Frontiers of Mathematical Finance | draft |
 | [repaired-hierarchical-portfolios](repaired-hierarchical-portfolios/) | Repaired Hierarchical Portfolios | draft |
 | [thurstone-credit](thurstone-credit/) | Winning Probabilities as Credit: Fast, Redundancy-Aware Attribution | draft |
 | [online-portfolio-regimes](online-portfolio-regimes/) | When Does Portfolio Construction Work? A Map across the Number of Assets and the Cost of Trading | draft |
-| [schur-nco-bridge](schur-nco-bridge/) | A Schur Bridge from Nested Clustered Optimization to Global Minimum Variance | draft |
-=======
->>>>>>> origin/main
 
 ### Portfolio papers kept in other repos
 
@@ -42,13 +38,14 @@ family is split off in [`microprediction/schur`](https://github.com/micropredict
 - `neither-end-of-the-bridge.tex` — When the Out-of-Sample-Optimal Schur
   Portfolio Lies Between HRP and Minimum Variance
 - `schur-damping-pdlp.tex` — Schur Damping for Perpetual Demand Lending Pools
+- `schur-nco-bridge.tex` — A Schur Bridge from Nested Clustered Optimization
+  to Global Minimum Variance
 
-Both build directly on the original Schur-complementary allocation paper
+All build directly on the original Schur-complementary allocation paper
 (`cotton2024schur`, arXiv:2411.05807), which this repo's papers also cite.
-This split is historical, not principled; check both locations before
-assuming you've found every portfolio paper. The reverse also holds:
-`schur-nco-bridge` lives here and is cross-listed at
-[schur.microprediction.org](https://schur.microprediction.org/papers.html).
+The rule of thumb is that theory lives in `schur`, and the package and its
+empirical papers live here. Check both locations before assuming you've found
+every portfolio paper.
 
 ## Starting a new paper
 
