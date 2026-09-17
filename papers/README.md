@@ -24,6 +24,7 @@ papers/
 | Slug | Title | Status |
 |------|-------|--------|
 | [thurstone-portfolios](thurstone-portfolios/) | Thurstone Portfolios: Long-Only Allocation by Inverting Winning Probabilities | draft |
+| [schur-nco-bridge](schur-nco-bridge/) | A Schur Bridge from Nested Clustered Optimization to Global Minimum Variance | draft |
 
 ## Starting a new paper
 
