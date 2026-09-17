@@ -24,6 +24,7 @@ papers/
 | Slug | Title | Status |
 |------|-------|--------|
 | [thurstone-portfolios](thurstone-portfolios/) | Thurstone Portfolios: Long-Only Allocation by Inverting Winning Probabilities | draft |
+| [thurstone-rc](thurstone-rc/) | Thurstone Portfolios, five-page Rapid Communication draft for Frontiers of Mathematical Finance | draft |
 | [repaired-hierarchical-portfolios](repaired-hierarchical-portfolios/) | Repaired Hierarchical Portfolios | draft |
 | [thurstone-credit](thurstone-credit/) | Winning Probabilities as Credit: Fast, Redundancy-Aware Attribution | draft |
 | [online-portfolio-regimes](online-portfolio-regimes/) | When Does Portfolio Construction Work? A Map across the Number of Assets and the Cost of Trading | draft |
