@@ -38,13 +38,14 @@ portfolio has the same two-tier shape, with each block replaced by its Schur
 complement against every other asset. We show that under a rank-one model of
 cross-cluster dependence, in which each asset reaches other clusters only
 through a representative ``core'' of its own cluster, the complement against
-everything equals the complement against the other cores. Damping that
+everything equals the complement against the other cores, which is a
+Vecchia approximation made exact. Damping that
 complement by $\gamma\in[0,1]$ gives a bridge with nested clustered
 optimization at $\gamma=0$ and the global optimum at $\gamma=1$, with no
-inverse larger than a cluster or the number of clusters. The cores are
-borrowed from the core-orbital allocation of \textcite{hcoa2026}, and the
-same model says when that method's strategic use of the core covariance is
-accurate.
+inverse larger than a cluster or the number of clusters. The two-stage form
+also nests the core-orbital allocation of \textcite{hcoa2026}, from which we
+take the word core, and the same model says when that method's strategic use
+of the core covariance is accurate.
 \end{abstract}
 
 \section{Introduction}
@@ -84,8 +85,11 @@ everything else needs an inverse of nearly full size.
 The cores remove the obstacle. Under a stated model of cross-cluster
 dependence, the other clusters' cores are a sufficient conditioning set,
 and no inverse exceeds the size of a cluster or the number of clusters.
-That is what we take from \textcite{hcoa2026}. HCOA itself is not an
-endpoint of the bridge, and \cref{sec:hcoa} says where it sits.
+Restricting a conditioning set to a few indices is the approximation of
+\textcite{vecchia1988}, and the model is the condition under which it loses
+nothing. The word core is from \textcite{hcoa2026}, where a core stands in
+for its cluster. Here it is a conditioning variable. HCOA is not an endpoint
+of the bridge, and \cref{sec:hcoa} says where it sits.
 
 All exactness statements concern the unconstrained, fully invested,
 long-short problem. With box or long-only constraints no block
@@ -204,6 +208,16 @@ $u_{-i}$ contributing only through its $C_{-i}$ entries.
 
 Conditioning cluster $i$ on the other cores is the same as conditioning it
 on everything. The inverse in \eqref{eq:cheap} is $(k-1)\times(k-1)$.
+
+\begin{remark}[A Vecchia approximation]
+Replacing the conditioning set $-i$ in \eqref{eq:complement} by the index
+set $C_{-i}$ is a Vecchia approximation \parencite{vecchia1988}. The
+conditionals there are the same Schur complements, and the approximation is
+a choice of which indices to condition on. In the framework of
+\textcite{katzfuss2021} most Gaussian-process approximations are choices of
+this kind. The orbital model is the conditional independence under which
+this particular choice is exact.
+\end{remark}
 
 \begin{remark}[Testing the model and choosing cores]
 Regressing each orbital on its own core and the other cores, and checking
@@ -422,8 +436,8 @@ the two remarks on diagnostics and on covariance-only rules, and the
 symmetric-factor formula, on random covariances to $10^{-10}$. It also
 confirms that the exactness claims fail when the orbital model is violated.
 The repository's test suite runs it.} The identity is block inversion, the
-cores are from \textcite{hcoa2026}, and the damping is from
-\textcite{cotton2024schur}. What is added is the observation that under a
+restricted conditioning set is Vecchia's, the damping is from
+\textcite{cotton2024schur}, and the word core is from \textcite{hcoa2026}. What is added is the observation that under a
 rank-one cross-cluster model the cores are a sufficient conditioning set,
 which makes the bridge from NCO to the global optimum cheap.
 
