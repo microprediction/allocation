@@ -24,26 +24,20 @@
 
 \begin{abstract}
 Hierarchical Risk Parity and its Schur-complementary generalization build a
-portfolio by recursive bisection: only the covariance within the current
-block is consulted at each split, and at Schur's coupling $\gamma=0$ (plain
-HRP) cross-block covariance is never consulted at all. This is what makes
-the construction robust and inversion-free, but it also means the weights
-are, structurally, a function of less information than is available. We
-repair this without re-optimizing: calibrate the latent Thurstone abilities
-that reproduce the hierarchical weights under a reconstruction of the
-dependence the recursion actually used, a nested factor model over the same
-median-bisection tree, then re-race those scores under the fuller dependence
-on hand. On a known-truth contagious market, correlation completion cuts
-out-of-sample expected shortfall by $10$--$17\%$ relative to plain HRP and
-Schur, survives sample sizes down to two observations per asset, and needs
-less repair as Schur's own $\gamma$ rises. The same comparison on
-$12{,}000$ real S\&P~500 and REIT trials confirms it: correlation completion
-wins $59$--$80\%$ of trials across five covariance estimators, and on real
-data the gain turns out to come mostly from the race's own reallocation, not
-from correlation recovery per se. A companion test of whether genuine tail
-dependence adds value beyond correlation completion found no evidence for
-it on the synthetic market, and a real-data result that splits by universe
-rather than confirming or reversing that null; we report both.
+portfolio by recursive bisection, consulting only the covariance within
+each current block and discarding cross-block information the sample
+already contains. We repair this without re-optimizing: calibrate latent
+Thurstone abilities that reproduce the hierarchical weights under the
+dependence the recursion actually used, then re-race those same scores
+under the fuller dependence on hand. Tested on a known-truth synthetic
+market and $12{,}000$ real S\&P~500 and REIT trials, the repair reliably
+reduces out-of-sample tail risk, with most of the gain coming from the
+race's own reallocation rather than from correlation recovery per se.
+Whether genuine tail dependence adds further value beyond correlation is
+mixed on real data; separated from that estimation question, a
+confidence-weighted tail view gives a provably bounded-regret way to act on
+a tail belief however it was formed, mirroring the scope of
+Black--Litterman's own return views.
 \end{abstract}
 
 \section{Introduction}
@@ -100,8 +94,8 @@ not. Correlation completion helped substantially and survived every
 robustness check we ran. A sharper test of whether genuine tail dependence
 adds value \emph{beyond} correlation completion did not confirm the
 hypothesis on the synthetic market, and on real data the same test splits
-cleanly by universe (\Cref{sec:realmarket}) rather than confirming or
-reversing the null outright; we report both rather than discard either.
+cleanly by universe (\Cref{sec:realmarket}): a modest win on one, a net
+loss on the other.
 
 \section{Background}
 
@@ -130,21 +124,37 @@ otherwise require.
 \paragraph{Hierarchical and Schur-complementary allocation.} Given a
 seriation order and a covariance $\Sigma$, the Schur-complementary
 construction \parencite{cotton2024schur} recursively bisects the ordered
-asset list. At each split into halves $L,R$, each half's own block
-$\Sigma_{LL}$ (resp.\ $\Sigma_{RR}$) is augmented by the $\gamma$-scaled Schur
-complement of the other half,
+asset list. At each split into halves $L,R$, the $\gamma$-damped Schur
+complement of each half's own block,
 \[
-  \Sigma_{LL}^{\mathrm{aug}} = \Sigma_{LL} - \gamma\,\Sigma_{LR}\Sigma_{RR}^{-1}\Sigma_{RL}
+  \Sigma_{LL}^c(\gamma) = \Sigma_{LL} - \gamma\,\Sigma_{LR}\Sigma_{RR}^{-1}\Sigma_{RL}
   \quad(\text{and symmetrically for } R),
+\]
+is collapsed into the augmented block actually used for the split,
+\[
+  \Sigma_{LL}^{\mathrm{aug}} = \mathrm{sym}\Big[\big(I - \gamma\,\Sigma_{LR}\Sigma_{RR}^{-1}\big)^{-1}\Sigma_{LL}^c(\gamma)\Big],
 \]
 and the split allocates between $L$ and $R$ in inverse proportion to each
 augmented block's naive (inverse-variance) portfolio variance. At $\gamma=0$
-the augmentation is the identity map, $\Sigma_{LR}$ is never read, and the
-recursion is exactly Hierarchical Risk Parity. Every off-diagonal entry of
-$\Sigma$ is consulted only while its two assets remain in the same block. The
-instant they are placed in different halves, their covariance is never read
-again (at $\gamma=0$) or read only through the reduced Schur term (at
-$\gamma>0$).
+both the damped Schur complement and its collapse reduce to $\Sigma_{LL}$
+itself, $\Sigma_{LR}$ is never read, and the recursion is exactly
+Hierarchical Risk Parity. Every off-diagonal entry of $\Sigma$ is consulted
+only while its two assets remain in the same block. The instant they are
+placed in different halves, their covariance is never read again (at
+$\gamma=0$) or read only through the damped Schur complement and its
+collapse (at $\gamma>0$).
+
+\paragraph{Two-stage cluster methods.} Nested clustered optimization
+\parencite{lopezdeprado2020} replaces the bisection tree with one flat
+partition into clusters. Each cluster is allocated internally from its own
+block, and a $k\times k$ problem across the cluster portfolios sets the
+cluster budgets. The within-cluster step reads no cross-cluster covariance,
+so the information discarded is the same as at an HRP split, once rather
+than recursively. The repair operator below applies once
+$C^{\mathrm{used}}$ is specified for a flat partition; we do not pursue
+that here. \textcite{cotton2026ncobridge} gives a Schur bridge from NCO to
+unconstrained minimum variance that conditions each cluster on one
+representative of every other cluster.
 
 \section{Method}
 \label{sec:method}
@@ -577,8 +587,7 @@ reading.
 \subsection{The $\gamma$-blended reference}
 \label{sec:blend}
 
-We built the $\gamma$-blended reference and tested it directly, rather than
-leaving it as a proposal. $C^{\mathrm{tree}}$ is taken as the full retained
+We built and tested the $\gamma$-blended reference. $C^{\mathrm{tree}}$ is taken as the full retained
 nested tree (\Cref{sec:tree} with no truncation, $F$ unbounded), giving a
 dense $C^{\mathrm{used}}(\gamma)=(1-\gamma)C^{\mathrm{tree}}+\gamma\,\hat\Sigma$.
 Because this is generally full rank, we factor-fit it (rank $8$, the
@@ -637,6 +646,142 @@ reference to use is a choice made \emph{before} seeing the out-of-sample
 data (it depends only on $\gamma$, which is set at construction time), this
 adaptive policy is available for free and dominates committing to either
 $F=0$ or the blend alone.
+
+\subsection{A confidence-weighted tail view}
+\label{sec:tailbelief}
+
+\Cref{sec:main-result} and \Cref{sec:realmarket} both asked whether the
+repair can \emph{discover} tail dependence from ordinary historical data,
+by fitting or resampling a tail law and re-racing under it. The answer was
+no: a fitted degrees-of-freedom parameter is badly biased at realistic
+sample sizes, and a bootstrap of historical returns has nothing to work
+with when the window contains no example of the crash it would need to
+anticipate. That is a genuine limit on \emph{estimating} a tail view from
+data. It is a different question from whether the repair gives a safe way
+to \emph{act} on a tail view an investor already holds, however that view
+was formed. Black--Litterman does not claim to generate good return
+views either; it claims to let an investor act coherently on ones they
+already hold, anchored to a benchmark, with a confidence parameter
+controlling how far to depart from it. The same structure applies here,
+and two of its properties are provable without knowing whether the view is
+correct.
+
+First, the fixed-point property already established for the repair itself
+extends directly to a confidence-weighted tail view: at zero confidence the
+construction reproduces the correlation-only repair exactly, before any
+tail belief is applied. Second, the smoothness theorem and the local
+Bregman expansion in \textcite{cotton2026polish}'s reverse-optimization
+section together give a departure from that anchor that grows linearly in
+the confidence weight $\phi$, at a cost that grows quadratically. A
+cautious investor who is unsure whether their tail belief is right can cap
+its worst-case damage by choosing $\phi$ small, while still capturing a
+proportional share of the benefit if the belief turns out to be right.
+Raising $\phi$ does not provably improve realized performance in general:
+whether it does depends on whether the belief is correct, exactly the
+discovery problem \Cref{sec:main-result} and \Cref{sec:realmarket} showed
+is hard.
+
+\paragraph{Construction.} Let $w^{\mathrm{gauss}}$ be the correlation-only
+repair of \Cref{sec:main-result} and $w^{\mathrm{tail}}$ the same repair
+re-raced under a supplied tail law (the same cluster-specific Student-t
+race used in \Cref{sec:main-result}'s known-truth market, one degree-of-freedom
+parameter per correlated cluster). The confidence-weighted view is
+\[
+  w^\phi = \mathrm{normalize}\big((1-\phi)\,w^{\mathrm{gauss}} + \phi\,w^{\mathrm{tail}}\big),
+  \qquad \phi\in[0,1],
+\]
+the same linear-blend construction already used for the correlation dial
+in \textcite{cotton2026polish}. $\phi=0$ recovers $w^{\mathrm{gauss}}$
+exactly; $\phi=1$ is full confidence in the supplied tail view.
+
+\paragraph{A correct belief.} \Cref{tab:tailbelief} sweeps $\phi$ on the
+known-truth cluster-tail market of \Cref{sec:main-result} ($\nu=2.2$,
+supplied correctly), $400$ trials.
+
+\begin{table}[h]
+\centering
+\caption{ES99 gain over $w^{\mathrm{gauss}}$ as confidence $\phi$ rises,
+correct belief ($\nu=2.2$ true and supplied), $400$ trials.}
+\label{tab:tailbelief}
+\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+$\phi$ & $0.00$ & $0.25$ & $0.50$ & $0.75$ & $1.00$ \\
+\midrule
+mean gain & $0$ & $0.0117$ & $0.0200$ & $0.0248$ & $0.0260$ \\
+win rate  & --- & $68.2\%$ & $64.2\%$ & $61.3\%$ & $57.2\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The gain rises monotonically and never turns negative, with a diminishing-returns
+shape and a win rate that stays clearly above half at every tested $\phi$.
+
+\paragraph{A wrong belief.} The same sweep, but the market is actually
+Gaussian (no tail dependence at all) while the investor still supplies
+$\nu=2.2$, checks the other side of the guarantee.
+
+\begin{table}[h]
+\centering
+\caption{ES99 cost relative to $w^{\mathrm{gauss}}$ as confidence $\phi$
+rises, wrong belief (market is Gaussian, $\nu=2.2$ supplied anyway), $400$
+trials.}
+\label{tab:tailwrong}
+\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+$\phi$ & $0.00$ & $0.25$ & $0.50$ & $0.75$ & $1.00$ \\
+\midrule
+mean cost & $0$ & $-0.0046$ & $-0.0118$ & $-0.0214$ & $-0.0333$ \\
+win rate  & --- & $14.2\%$ & $10.5\%$ & $6.0\%$ & $3.2\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Being wrong costs something, and the cost grows with confidence exactly as
+the theory predicts: smoothly, with no jump, and controllable by choosing
+$\phi$. The magnitude at full confidence ($-0.0333$) is the same order as
+the gain at full confidence when the belief is correct ($+0.0260$): a
+symmetric bet, not a catastrophic asymmetric one.
+
+\paragraph{An imprecise belief.} A real investor rarely knows the exact
+degrees of freedom of a tail law; \Cref{tab:tailnu} holds $\phi=1$ fixed
+and sweeps the supplied $\nu$ against the true market $\nu=2.2$, $400$
+trials per row.
+
+\begin{table}[h]
+\centering
+\caption{ES99 gain at full confidence ($\phi=1$), true market $\nu=2.2$,
+varying the SUPPLIED $\nu$, $400$ trials per row.}
+\label{tab:tailnu}
+\footnotesize
+\begin{tabular}{lccccc}
+\toprule
+supplied $\nu$ & $2.2$ (exact) & $3.0$ & $5.0$ & $10.0$ & $30.0$ \\
+\midrule
+mean gain & $0.0173$ & $0.0453$ & $0.0629$ & $0.0587$ & $0.0561$ \\
+win rate  & $55.8\%$ & $68.2\%$ & $70.0\%$ & $69.5\%$ & $70.2\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Every supplied $\nu$ tested helps, including $30$, barely fat-tailed at
+all against a true $2.2$: knowing the qualitative direction of the belief
+matters far more than knowing its exact strength. The moderate values
+($5$--$10$) outperform the exact true value here, plausibly because an
+aggressively fat-tailed supplied law interacts riskily with the ordinary
+estimation noise already present in $\theta$ and the correlation estimate,
+while a more moderate stance captures most of the real effect with less of
+that added fragility.
+
+\paragraph{Scope.} An investor who already believes there is tail
+dependence, from sector knowledge, structural reasoning, or judgment the
+data alone would not reveal, has a coherent, boundedly safe way to act on
+that belief here, with $\phi=0$ always available as a fallback to the
+correlation-only repair and no requirement that the belief be
+statistically validated first. Discovering tail structure from ordinary
+historical data remains hard, exactly as \Cref{sec:main-result} and
+\Cref{sec:realmarket} found; this section leaves that finding in place.
 
 \section{Discussion}
 \label{sec:discussion}
@@ -739,7 +884,18 @@ own if fed its own output. Whether genuine tail dependence adds value on
 top of ordinary correlation completion remains open in general, but it is
 no longer a blanket null: it costs more than it recovers on a broad,
 diversified universe and modestly pays off on a concentrated, sector-driven
-one. We report both rather than pick the one that flatters the method.
+one.
+
+That null result is about \emph{discovering} tail dependence from data, not
+about acting on a belief already held. Separated from the estimation
+question, a confidence-weighted tail view has a provable safety property
+independent of whether the belief is correct: it reproduces the
+correlation-only repair exactly at zero confidence, and the cost of being
+wrong grows smoothly and boundedly with how much confidence is placed in
+it, never catastrophically. An investor who believes there is tail
+dependence, for reasons the data alone would not reveal, can act on that
+belief coherently without first winning the harder argument this paper's
+own tail-dependence checks could not settle.
 
 \printbibliography
 

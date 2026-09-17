@@ -26,8 +26,7 @@ dominant and most robust part of the gain. A sharper test of whether tail depend
 specifically adds further value did not confirm the hypothesis on the synthetic
 market or in aggregate on real data, but split cleanly by universe on real data: a
 modest win on the sector-concentrated REIT universe, a net loss on broad S&P 500
-sub-portfolios. Both results are reported rather than the one that flatters the
-method. Decomposing the real-market gain by statistic (1,500 further trials) shows
+sub-portfolios. Decomposing the real-market gain by statistic (1,500 further trials) shows
 it is specifically a volatility/tail-risk reduction, not a return forecast: mean
 return win rate is 46.9% (indistinguishable from a coin flip, exactly as the
 construction predicts, since neither the base allocators nor the repair ever
@@ -37,12 +36,19 @@ fixed point of its own (only C_used=C_full is a fixed point, which F=0 never is)
 and feeding its own output back in repeatedly drives a weight to zero -- confirmed
 at 32x Monte Carlo resolution to be genuine, not a sampling artifact -- typically
 within 3-6 rounds, on the same real correlated pair each time it recurs. The
-gamma-blended reference proposed in the discussion section was built and tested,
-not left as a proposal: it fixes F=0's failure at high gamma (mean gain at
+gamma-blended reference fixes F=0's failure at high gamma (mean gain at
 gamma=1.0 flips from -0.00065 to +0.00004) at some cost to F=0's edge at low
 gamma, and an adaptive policy that picks F=0 or the blend using gamma alone
 (a free choice, since gamma is fixed before the repair runs) reaches 4-6x the
-mean gain of committing to either one alone.
+mean gain of committing to either one alone. A separate, narrower claim
+survives the tail-dependence null result: separated from the (hard) question
+of whether tail structure can be discovered from data, a confidence-weighted
+tail view has a provable safety property regardless of whether the belief is
+correct -- zero confidence exactly reproduces the correlation-only repair,
+and the cost of a wrong belief grows smoothly and boundedly with confidence,
+never catastrophically -- mirroring the scope of Black-Litterman's own return
+views (BL doesn't claim to generate good views either, only to let an
+investor act coherently on ones already held).
 
 ## Status / TODO
 
@@ -76,7 +82,55 @@ not committed -- see `.gitignore`).
 - [x] Check whether the repair is safe to iterate -- done, Discussion ("Apply once;
       do not iterate", `experiments/iterate_repair_check.py`): it is not a fixed
       point of itself and should not be re-applied to its own output.
+- [x] A confidence-weighted tail view (Black-Litterman-style, given a belief rather
+      than trying to estimate one) -- done, Section 4.7 (`experiments/
+      tail_confidence_dial_check.py`): correct belief helps monotonically, wrong
+      belief costs boundedly (comparable magnitude, not catastrophic), an imprecise
+      belief (wrong nu, right qualitative direction) still helps.
 - [ ] Figures: ES95 vs. max_factors curves; gain vs. T_in; win rate by estimator.
+
+### Open threads NOT yet in the paper (real findings, need more work before write-up)
+
+A later, broader "which allocators does the repair help" investigation (not yet
+reflected above) found a major methodological gap worth flagging before any of it
+goes in: every comparison in this paper (and everything below) uses a ONE-SHOT,
+cold-start, fresh-Monte-Carlo-seed protocol -- not the common-seed-transport /
+streaming machinery (`BaseOnlinePortfolio.partial_fit`) the smoothness theorem is
+actually about. The one result re-checked under a fair walk-forward protocol
+(`experiments/turnover_walkforward_check.py`) saw its performance edge over simple
+alternatives largely evaporate while its turnover cost (2-3x higher) did not --
+i.e. the one-shot protocol can meaningfully overstate the repair's case. None of
+the following should be treated as confirmed until re-verified the same way:
+
+- The repair helps allocators in proportion to how little correlation they already
+  use (naive/blind: inverse-variance, HRP, equal-weight all win; already-optimized:
+  min-variance, max-decorrelation lose) -- `experiments/naive_baseline_repair_check.py`.
+- Real cap-weighted index tracking: the repair HURTS a real S&P 500 weight snapshot
+  (44.3% win rate, real return info the repair can't touch) --
+  `experiments/index_tracking_repair_check.py`.
+- Min-variance's harm is NOT (just) estimation noise: confirmed with a noise-free
+  known-truth market that the harm survives a perfect covariance -- a real,
+  provable second-order-optimality fact, NOT dependent on the streaming question --
+  `experiments/known_truth_minvar_check.py`. (This one IS structurally solid.)
+- Entrywise (not scalar) noise-aware correlation shrinkage as the repair TARGET:
+  real but modest, same trade-off shape as the gamma-blend --
+  `experiments/noise_aware_repair_check.py`.
+- The classic "naive beats optimized under noise" flip is real on real data (needs
+  T/n near 1) but the repair does NOT rescue it there -- repair quality itself
+  degrades as T/n falls, in every universe-size block tested --
+  `experiments/optim_vs_naive_noise_sweep.py`.
+- Real-data tail-dependence at ES99 (not just ES95): still doesn't beat plain
+  correlation repair, and during the actual COVID crash window the bootstrap tail
+  overlay was clearly worse than correlation-only (19.4% win rate) --
+  `experiments/real_tail_dependence_deep_check.py`, `experiments/covid_crash_tail_check.py`.
+- Repaired HRP vs. simple alternatives (shrunk/Ledoit-Wolf min-variance, risk
+  parity, a naive linear blend of weights): wins on raw one-shot performance, but
+  the fair walk-forward re-check above complicates this --
+  `experiments/repair_vs_simple_alternatives.py`.
+- Options / other nonlinear-payoff portfolios as a cleaner, naturally-occurring
+  path to genuine tail dependence (payoff convexity mechanically creates tail
+  comovement from ordinary linear correlation, sidestepping the "need a crash
+  example in-sample" problem) -- proposed, not yet built.
 
 ## Sources / reproducibility
 
@@ -100,8 +154,9 @@ not committed -- see `.gitignore`).
   single-linkage seriation, Section 4.5), `experiments/return_metrics_check.py`
   (mean/vol/Sharpe/ES95 decomposition, Section 4.5), `experiments/
   iterate_repair_check.py` (repeated-application stability, Discussion),
-  `experiments/gamma_blend_check.py` (gamma-blended reference, Section 4.6). Each
-  is runnable standalone from `experiments/`.
+  `experiments/gamma_blend_check.py` (gamma-blended reference, Section 4.6),
+  `experiments/tail_confidence_dial_check.py` (confidence-weighted tail view,
+  Section 4.7). Each is runnable standalone from `experiments/`.
 
 ## Files
 
