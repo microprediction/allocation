@@ -146,6 +146,20 @@ instant they are placed in different halves, their covariance is never read
 again (at $\gamma=0$) or read only through the reduced Schur term (at
 $\gamma>0$).
 
+\paragraph{Two-stage cluster methods.} Nested clustered optimization
+\parencite{lopezdeprado2020} and hierarchical core-orbital allocation
+\parencite{hcoa2026} replace the bisection tree with one flat partition
+into clusters. Each cluster is allocated internally from its own block,
+and a $k\times k$ problem across cluster summaries, intra-cluster
+portfolios for NCO and one representative asset for HCOA, sets the cluster
+budgets. The within-cluster step reads no cross-cluster covariance, so the
+information discarded is the same as at an HRP split, once rather than
+recursively. The repair operator below applies once $C^{\mathrm{used}}$ is
+specified for a flat partition; we do not pursue that here.
+\textcite{cotton2026cores} gives the Schur-complementary version of HCOA,
+which conditions each cluster on the other cores and reaches minimum
+variance at $\gamma=1$.
+
 \section{Method}
 \label{sec:method}
 

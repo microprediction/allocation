@@ -27,6 +27,7 @@ papers/
 | [repaired-hierarchical-portfolios](repaired-hierarchical-portfolios/) | Repaired Hierarchical Portfolios | draft |
 | [thurstone-credit](thurstone-credit/) | Winning Probabilities as Credit: Fast, Redundancy-Aware Attribution | draft |
 | [online-portfolio-regimes](online-portfolio-regimes/) | When Does Portfolio Construction Work? A Map across the Number of Assets and the Cost of Trading | draft |
+| [conditioned-cores](conditioned-cores/) | Conditioned Cores: Core-Orbital Allocation Derived from the Global Optimum | draft |
 
 ### Portfolio papers kept in other repos
 

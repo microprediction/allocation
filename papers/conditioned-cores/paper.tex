@@ -1,0 +1,385 @@
+\documentclass[11pt]{article}
+
+\input{../shared/preamble.tex}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{cleveref}
+
+\title{Conditioned Cores: Core-Orbital Allocation Derived from the Global Optimum}
+\author{Peter Cotton}
+\date{September 16, 2026}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\ones}{\mathbf{1}}
+\DeclareMathOperator*{\argminop}{arg\,min}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Hierarchical core-orbital allocation \parencite{hcoa2026} optimizes across
+one representative asset per cluster and then redistributes each cluster's
+budget among the remaining members. The method is presented as an
+architecture, with its properties stated rather than derived from an
+objective. We observe that the minimum-variance portfolio already has a
+core-orbital form: block inversion writes it as one problem per cluster on
+a Schur-complemented block, and under the assumption that orbitals depend on
+other clusters only through their own core, that complement is taken
+against the other cores alone. Feeding those conditioned blocks, damped by
+$\gamma\in[0,1]$, to the published architecture gives a family whose
+$\gamma=0$ end is the published method and whose $\gamma=1$ end is the
+global optimum, at the same cost. The same holds for every strategic
+objective that is minimum variance in disguise, maximum Sharpe included.
+\end{abstract}
+
+\section{Introduction}
+
+\textcite{hcoa2026} proposes hierarchical core-orbital allocation, HCOA, for
+universes with strong systematic structure such as USD-denominated bonds.
+Assets are clustered. Within each cluster one representative ``core'' asset
+is chosen: the medoid, the member most aligned with the cluster's first
+principal component, or the member with the largest sum of squared
+correlations to the rest. A strategic optimizer, with any objective,
+allocates across the cores. A tactical rule, ``hierarchical rules or local
+optimization'', then redistributes each cluster's budget among its
+``orbital'' members, and the cluster totals reproduce the strategic
+decision.
+
+The paper claims three properties: numerical robustness, because the
+strategic problem has one dimension per cluster; functional flexibility,
+because the two tiers can use different objectives; and structural
+coherence, because the tiers agree on cluster totals. It places itself in
+the tradition of hierarchical risk parity \parencite{lopezdeprado2016} and
+nested clustered optimization \parencite{lopezdeprado2020}, and its stated
+objection to HRP and HERC is that they ``implement an allocation logic that
+cannot be modified without altering the entire algorithm''. On a USD bond
+universe rebalanced quarterly from 2014 to 2025 its risk-adjusted
+performance is statistically comparable to NCO, which the paper names as
+its closest two-stage relative, with more diversification.
+
+The three properties are stated from the architecture rather than derived
+from an objective. That leaves a natural question open. Coherence holds for
+any top-down scheme, flexibility says what the tiers may do but not what
+they should do, and the robustness comes from working in fewer dimensions
+without a statement of what the reduction approximates. The method has no
+limiting object and no parameter that moves toward one.
+
+Schur-complementary allocation \parencite{cotton2024schur} answers the
+same question for the bisection tree. It starts from the minimum-variance
+portfolio, observes that the weights on
+any block are governed by that block's Schur complement, and defines a
+recursion that relaxes the global optimum by a coupling $\gamma\in[0,1]$.
+Every step is a consequence of one identity. The hierarchy, the augmented
+blocks, and the budget split are not design choices.
+
+This note makes one observation and develops its consequence: the
+minimum-variance portfolio is already core-orbital. The architecture
+survives intact. What changes is that each block HCOA reads
+is replaced by a Schur-complemented block, and the cores acquire a precise
+role: they are the variables one conditions on, not stand-ins for their
+clusters. The result is exact at $\gamma=1$ under an assumption the
+clustering already makes, and costs what HCOA costs.
+
+\section{The recipe as published}
+
+Let $\Sigma\succ0$ be the covariance of $n$ assets partitioned into
+clusters $I_1,\dots,I_k$. Cluster $i$ has a core $c_i\in I_i$ and orbitals
+$O_i=I_i\setminus\{c_i\}$. Write $C=\{c_1,\dots,c_k\}$ for the set of
+cores and $C_{-i}=C\setminus\{c_i\}$. For index sets $X,Y$ write
+$\Sigma_{XY}$ for the corresponding block, $\Sigma_{ii}$ for the block of
+cluster $i$, and $-i$ for the complement of $I_i$.
+
+HCOA reads two kinds of block.\footnote{We work from the abstract, the
+author's announcement, \url{https://lnkd.in/p/ekyaNa-E}, and indexed
+excerpts of the full text. The tactical rule is described there as
+``hierarchical rules or local optimization'' within the cluster, which we
+read as a rule on the cluster's own block. If a published variant consults
+other clusters, the $\gamma=0$ corner below moves but the family does
+not.} The strategic tier solves a
+$k$-dimensional problem on the core covariance,
+\begin{equation}
+  a \;=\; \argminop_{a\in\R^k:\;\ones^\top a=1} f\!\left(a;\,\Sigma_{CC}\right),
+  \label{eq:hcoa-top}
+\end{equation}
+for an objective $f$ such as variance, negative Sharpe ratio, or a
+risk-parity criterion. The tactical tier applies a rule $g$ to the cluster's
+own block, $v_i = g(\Sigma_{ii})$ with $\ones^\top v_i=1$, and assigns
+$w_{I_i}=a_i v_i$. Cluster $i$ receives exactly $a_i$, which is the
+coherence property.
+
+Both blocks are marginal. The strategic tier sees the cores' covariance
+with each other and nothing about the orbitals. The tactical tier sees one
+cluster and nothing outside it. The only channel by which cluster $i$'s
+weights respond to cluster $j$ is the scalar $a_i$.
+
+\section{The global optimum in core-orbital coordinates}
+
+Fix a cluster $i$ and partition the assets into $I_i$ and its complement.
+Block inversion of $\Sigma$ gives, for the minimum-variance direction
+$\Sigma^{-1}\ones$, the standard identity
+\parencite[App.~A]{cotton2024schur}
+\begin{equation}
+  \big(\Sigma^{-1}\ones\big)_{I_i}
+  \;=\; \big(\Sigma^{c}_{ii}\big)^{-1} b_i,
+  \label{eq:blockinv}
+\end{equation}
+where
+\begin{equation}
+  \Sigma^{c}_{ii} = \Sigma_{ii}-\Sigma_{i,-i}\Sigma_{-i,-i}^{-1}\Sigma_{-i,i},
+  \qquad
+  b_i = \ones-\Sigma_{i,-i}\Sigma_{-i,-i}^{-1}\ones .
+  \label{eq:complement}
+\end{equation}
+The minimum-variance weights on cluster $i$ are the solution of a problem
+posed on cluster $i$ alone, once its block has been replaced by the
+covariance of cluster $i$ conditional on everything else, and the
+constraint vector $\ones$ has been replaced by the companion $b_i$.
+
+There is no cross-cluster optimizer in the global optimum. It is $k$
+within-cluster problems stacked, and the cluster totals are whatever those
+problems return. Every piece of cross-cluster information enters through
+the conditioning, not through a top-level objective.
+
+HCOA routes the information the other way. All cross-cluster information
+enters through the $k\times k$ objective on marginal blocks, and none
+reaches the within-cluster step.
+
+The conditioning in \eqref{eq:complement} is against all $n-|I_i|$ other
+assets. That is exact and expensive. Under the orbital model below it
+collapses to conditioning on $k-1$ cores.
+
+\section{The orbital model}
+
+The announcement of HCOA says its ``cores capture systematic factors
+while orbitals preserve instrument-level diversification''. The \emph{orbital model} is that
+sentence as a second-moment restriction.
+
+\begin{definition}[Orbital model]
+For every cluster $j$, the residual of the orbitals $O_j$ after linear
+regression on their own core $c_j$ is uncorrelated with every asset outside
+$I_j$. Equivalently $\Sigma_{O_j,-j}=\Sigma_{O_j c_j}\,\sigma_{c_j}^{-2}\,\Sigma_{c_j,-j}$.
+\end{definition}
+
+An orbital may be correlated with anything, but its correlation with other
+clusters passes entirely through its core. This is a rank-one restriction
+on each cross-cluster block, and it is what makes a core a summary of its
+cluster rather than a member of it. HCOA's own core selection, the member
+most aligned with the cluster's first principal component or with the
+largest summed squared correlation to the rest, is a search for the asset
+that makes this restriction least false.
+
+\begin{proposition}[Cores are sufficient]
+\label{prop:sufficient}
+Under the orbital model, for each cluster $i$,
+\begin{equation}
+  \Sigma^{c}_{ii}
+  \;=\; \Sigma_{ii}-\Sigma_{i,C_{-i}}\,\Sigma_{C_{-i}C_{-i}}^{-1}\,\Sigma_{C_{-i},i},
+  \qquad
+  b_i \;=\; \ones-\Sigma_{i,C_{-i}}\,\Sigma_{C_{-i}C_{-i}}^{-1}\,\ones .
+  \label{eq:cheap}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+The matrix $\Sigma_{i,-i}\Sigma_{-i,-i}^{-1}$ holds the coefficients of the
+linear regression of cluster $i$ on all other assets. Split the regressors
+into the other cores $C_{-i}$ and the other orbitals $O_{-i}$, and write
+$O_{-i}=\beta\,C_{-i}+\varepsilon$ for the block-diagonal regression of
+each orbital set on its own core. The map from $(C_{-i},O_{-i})$ to
+$(C_{-i},\varepsilon)$ is invertible, so the regression may be run on the
+latter pair. Under the orbital model $\varepsilon$ is uncorrelated with
+cluster $i$ and with $C_{-i}$, so its coefficients vanish and the
+coefficients on $C_{-i}$ are $\Sigma_{i,C_{-i}}\Sigma_{C_{-i}C_{-i}}^{-1}$.
+Substituting into \eqref{eq:blockinv} gives \eqref{eq:cheap}, the $\ones$
+in $b_i$ contributing only through its $C_{-i}$ entries.
+\end{proof}
+
+Conditioning cluster $i$ on the other cores is the same as conditioning it
+on everything. The inverse in \eqref{eq:cheap} is $(k-1)\times(k-1)$.
+
+\section{Conditioned cores}
+
+Following \textcite{cotton2024schur}, damp the conditioning. For
+$\gamma\in[0,1]$ define the \emph{conditioned pair} of cluster $i$,
+\begin{equation}
+  Q_i(\gamma) \;=\; \Sigma_{ii}-\gamma\,\Sigma_{i,C_{-i}}\Sigma_{C_{-i}C_{-i}}^{-1}\Sigma_{C_{-i},i},
+  \qquad
+  b_i(\gamma) \;=\; \ones-\gamma\,\Sigma_{i,C_{-i}}\Sigma_{C_{-i}C_{-i}}^{-1}\ones .
+  \label{eq:pair}
+\end{equation}
+At $\gamma=0$ the pair is the marginal block and the ones vector, which is
+what HCOA reads. At $\gamma=1$ it is the conditioned block of
+\cref{prop:sufficient}.
+
+The recipe keeps HCOA's two tiers and changes what they are handed.
+
+\paragraph{Tactical tier.}
+Within cluster $i$, apply a rule to the pair $(Q_i(\gamma),b_i(\gamma))$
+to obtain $v_i$ with $\ones^\top v_i=1$. The canonical rule is constrained
+minimum variance, $v_i\propto Q_i(\gamma)^{-1}b_i(\gamma)$. A rule that
+reads only a covariance can be given the collapsed matrix
+$\big(Q_i^{-1}\circ b_ib_i^\top\big)^{-1}$ of \textcite{cotton2024schur}
+when $b_i$ has no zero entry.
+
+\paragraph{Strategic tier.}
+Let $V$ be the $n\times k$ matrix with $v_i$ in column $i$, supported on
+$I_i$. Allocate across clusters with any objective on the induced
+$k\times k$ covariance $V^\top\Sigma V$,
+\begin{equation}
+  a \;=\; \argminop_{a:\;\ones^\top a=1} f\!\left(a;\,V^\top\Sigma V\right),
+  \qquad w = Va .
+  \label{eq:top}
+\end{equation}
+Cluster $i$ receives $a_i$, so coherence holds as before. The summary asset
+for cluster $i$ is no longer the core but the conditioned within-cluster
+portfolio $v_i$.
+
+\begin{proposition}[The $\gamma=1$ end is minimum variance]
+\label{prop:exact}\footnote{\texttt{verify\_conditioned\_cores.py} next to
+the manuscript checks \cref{prop:sufficient}, this proposition, and
+\cref{prop:disguise} with a random exposure vector, on random covariances
+satisfying the orbital model, to $10^{-10}$, and confirms that all fail
+when the model is violated.}
+Under the orbital model, with $\gamma=1$ and minimum variance at both
+tiers, $w$ in \eqref{eq:top} is the global minimum-variance portfolio.
+\end{proposition}
+
+\begin{proof}
+By \eqref{eq:blockinv} and \cref{prop:sufficient}, the block of
+$w^\star\propto\Sigma^{-1}\ones$ on cluster $i$ is proportional to
+$Q_i(1)^{-1}b_i(1)$, hence to $v_i$. So $w^\star$ lies in the column span
+of $V$ and sums to one. The strategic problem minimizes variance over
+exactly that span with the same constraint, and $w^\star$ minimizes
+variance over all fully-invested portfolios, so the two minimizers
+coincide.
+\end{proof}
+
+The published method and its nearest relatives are corners of this family.
+\Cref{tab:corners} lists them.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+$\gamma$ & Tactical rule & Method \\
+\midrule
+$0$ & select the core, $v_i=e_{c_i}$ & HCOA \\
+$0$ & minimum variance on $\Sigma_{ii}$ & NCO \\
+$1$ & minimum variance on $(Q_i,b_i)$ & global minimum variance \\
+$(0,1)$ & minimum variance on $(Q_i,b_i)$ & conditioned cores \\
+\bottomrule
+\end{tabular}
+\caption{Corners of the family, all with a minimum-variance strategic tier.
+HCOA \parencite{hcoa2026} is the $\gamma=0$ end with the selection rule;
+NCO is \textcite{lopezdeprado2020}.}
+\label{tab:corners}
+\end{table}
+
+\begin{remark}[Cores as conditioning variables]
+At $\gamma=0$ the cores play no role in the tactical tier, and with the
+selection rule they play the only role in the strategic tier. At
+$\gamma>0$ the cores enter every cluster's block as regressors. A core
+``captures systematic factors'' by being the variable the other clusters
+are conditioned on. The selection rule $v_i=e_{c_i}$ does not read $Q_i$
+or $b_i$. It is closest to the conditioned rule when the cluster is nearly
+a single asset, which is the regime the core-selection criteria of
+\textcite{hcoa2026} aim for.
+\end{remark}
+
+\begin{proposition}[Minimum variance in disguise]
+\label{prop:disguise}
+Let the strategic objective have global solution $w^\star\propto\Sigma^{-1}u$
+for some vector $u$, and replace $\ones$ by $u$ in \eqref{eq:pair},
+\begin{equation}
+  b_i(\gamma) \;=\; u_{I_i}-\gamma\,\Sigma_{i,C_{-i}}\Sigma_{C_{-i}C_{-i}}^{-1}u_{C_{-i}} .
+  \label{eq:pair-u}
+\end{equation}
+Then \cref{prop:sufficient} and \cref{prop:exact} hold verbatim: under the
+orbital model, with $\gamma=1$, the tactical rule $v_i\propto Q_i^{-1}b_i$
+and the same objective at the strategic tier return $w^\star$.
+\end{proposition}
+
+\begin{proof}
+The block identity \eqref{eq:blockinv} is the top block of $\Sigma^{-1}u$
+for any $u$, with $\ones$ replaced by $u$ throughout, and the proof of
+\cref{prop:sufficient} never used that the vector was $\ones$. So the block
+of $w^\star$ on cluster $i$ is proportional to $Q_i(1)^{-1}b_i(1)$, hence to
+$v_i$, and $w^\star$ lies in the column span of $V$. The strategic problem
+optimizes the same objective over that span, so it returns $w^\star$.
+\end{proof}
+
+This covers maximum Sharpe ratio, $u=\mu$; mean--variance at any risk
+aversion, $u$ a combination of $\mu$ and $\ones$; and minimum variance under
+a prescribed exposure, $u$ the exposure vector. Each is minimum variance
+with a different constraint vector, and the companion $b_i$ is how the
+pair form carries that vector into the cluster. Risk parity is not of this
+form. The recipe still runs, since $Q_i(\gamma)$ is a covariance whatever
+$f$ is, but nothing is exact at $\gamma=1$.
+
+\begin{remark}[The strategic objective]
+The objective $f$ in \eqref{eq:top} is arbitrary, so the strategic
+freedom HCOA advertises is retained, and by \cref{prop:disguise} the
+exactness at $\gamma=1$ is retained for the quadratic ones. With minimum
+variance and $\gamma=1$ the optimizer is redundant. The ratio rule of
+\textcite{cotton2024schur}, $a_i \propto \ones^\top Q_i^{-1} b_i$, returns
+the same $a$ without solving \eqref{eq:top}. For other objectives the
+$k\times k$ problem is where they live, and it now reads a covariance of
+conditioned cluster portfolios rather than of single bonds.
+\end{remark}
+
+\begin{remark}[What $\gamma$ means]
+The cross-core coefficients $\Sigma_{i,C_{-i}}\Sigma_{C_{-i}C_{-i}}^{-1}$
+are estimated. \textcite{cotton2026bridge} show that with estimation error
+the out-of-sample-optimal $\gamma$ generically lies strictly inside
+$(0,1)$, and the argument transfers unchanged, since the cross-core block
+is the only object $\gamma$ touches. So $\gamma$ is how much of the
+estimated cross-core coupling to trust, and the interior is where one
+expects to sit.
+\end{remark}
+
+\section{Cost}
+
+HCOA inverts, or otherwise optimizes over, one $k\times k$ matrix and then
+solves $k$ problems of size $|I_i|$. The conditioned recipe adds the
+regression coefficients in \eqref{eq:pair}. These need $\Sigma_{CC}^{-1}$
+once, with a rank-one downdate per cluster to remove $c_i$, followed by a
+product with a $|I_i|\times(k-1)$ block. The count of large inverses is
+unchanged and the dimension of the strategic tier is unchanged. The
+robustness HCOA obtains from dimension is therefore kept, with a reason
+attached: under the orbital model the $k-1$ cores are all the conditioning
+there is.
+
+If the orbital model fails, \eqref{eq:cheap} is an approximation to the
+full complement in \eqref{eq:blockinv}, and the recipe is a Schur allocation
+with a truncated conditioning set. The model is directly testable:
+regress each orbital on its core and on the other cores, and check that the
+other-core coefficients vanish.
+
+\section{Closing}
+
+The contribution is deliberately small. The architecture belongs to
+\textcite{hcoa2026}, the identity is block inversion, and what is added is
+the pairing of the two and the dial.
+
+The core-orbital architecture is sound, and \textcite{hcoa2026} motivates
+it by the properties it has. Block inversion supplies the object it
+approximates. The minimum-variance portfolio is
+already core-orbital, and the orbital model, which is the clustering
+premise stated as a second-moment restriction, makes it cheap. Replacing
+HCOA's marginal blocks with the damped conditioned pairs
+\eqref{eq:pair} gives a one-parameter family with the published method at
+$\gamma=0$, the global optimum at $\gamma=1$, and a documented reason to sit
+between them.
+
+We leave to future work an empirical comparison on the USD bond universe
+of \textcite{hcoa2026}, where the orbital model can be tested by the
+regression above before any portfolio is built.
+
+\printbibliography
+
+\end{document}

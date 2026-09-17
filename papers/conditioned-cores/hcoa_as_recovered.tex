@@ -1,0 +1,128 @@
+\documentclass[11pt]{article}
+
+\input{../shared/preamble.tex}
+\usepackage[margin=1.15in]{geometry}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\setlist{nosep, leftmargin=*}
+
+\title{Hierarchical Core-Orbital Allocation\\[2pt]
+\large What Can Be Recovered from Public Sources}
+\author{Notes compiled by Peter Cotton}
+\date{September 16, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{tcolorbox}[colback=gray!6, colframe=gray!50, boxrule=0.4pt, arc=2pt]
+\small
+\textbf{The paper.} Mario Bajo Traver, \emph{Hierarchical Core-Orbital
+Allocation: Decoupling Clustering from Optimization in Portfolio
+Construction}. Forthcoming in \emph{The Journal of Financial Data Science}
+(Portfolio Management Research). DOI 10.2139/ssrn.5928122.
+
+\medskip
+\textbf{The author.} Head of Investment Strategies Unit, Department of
+Market Analysis and Intelligence, Banco de Espa\~na. No personal homepage.
+ORCID 0009-0006-3791-2216 points back to SSRN.
+
+\medskip
+\textbf{Provenance.} The full text is not publicly fetchable as of the date
+above. SSRN hosts the abstract sheet only. ResearchGate publication 398769353
+(updated 19~December~2025) holds the full text but blocks automated access.
+Everything below comes from the abstract, the author's LinkedIn
+announcement (\url{https://lnkd.in/p/ekyaNa-E}), and search-engine excerpts
+of the ResearchGate full text. Passages in quotation marks are verbatim
+from those sources.
+\end{tcolorbox}
+
+\section*{Architecture}
+
+Two levels.
+
+\paragraph{Strategic.} Cluster the universe. Select one representative
+``core'' asset per cluster. Solve the allocation ``operating exclusively on
+core assets, which constitute a representative set of reduced dimension'',
+with any objective (minimum variance, maximum Sharpe, risk parity), ``a
+formal optimization or a closed-form allocation''.
+
+\paragraph{Tactical.} Strategic weights ``are redistributed to individual
+assets within each cluster (`orbitals') through hierarchical rules or local
+optimization, preserving global coherence: the sum of intra-cluster weights
+exactly reproduces the upper-level allocation.''
+
+\section*{Core selection}
+
+Three criteria are described.
+
+\begin{itemize}
+\item \emph{Medoid.} ``Unlike the centroid (geometric center), the medoid is
+  always an element of the original set, conferring robustness against
+  outliers''; it ``captures the central position in correlation space''.
+\item \emph{Principal-component alignment.} ``Selects the asset whose
+  dynamics are most aligned with the cluster's first principal component.''
+  ``High values (PCA $> 0.7$) indicate that joint variation is predominantly
+  explained by a single factor.''
+\item \emph{CS$^2$, explanatory capacity.} ``Selects the asset that maximizes
+  the sum of squared correlations with other cluster members.''
+\end{itemize}
+
+Guidance given: ``in heterogeneous clusters, medoid is robust to subgroups
+or nonlinear structures, PCA is optimal when a clear dominant factor
+exists, and CS$^2$ maximizes internal predictive power.''
+
+Once the $k$ cores are fixed, ``the set of orbital assets for cluster $c$''
+is the remainder of the cluster.
+
+\section*{Claimed properties}
+
+\begin{enumerate}
+\item \emph{Numerical robustness.} ``Operating on a reduced covariance space
+  ($k$ clusters $< N$ assets) with improved condition number.''
+\item \emph{Functional flexibility.} ``Any combination of objectives at both
+  levels without altering the structural logic.''
+\item \emph{Hierarchical coherence.} ``Intra-cluster decisions respect the
+  upper-level allocation'', enforced ``through aggregation constraints''.
+\end{enumerate}
+
+Stated contrast with HRP and HERC: they ``optimize directly based on
+dendrogram topology, implementing an allocation logic that cannot be
+modified without altering the entire algorithm.''
+
+The clustering is described as ``stable in dimensionality yet flexible in
+allocation'', with ``a practically stable number of clusters'' over time.
+
+\section*{Empirical setup}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Universe & USD-denominated bonds: sovereign, supranational, corporate \\
+         & ``multiple maturities, issuers and credit ratings'' \\
+Sample   & July 2014 to September 2025, 135 months \\
+Rebalancing & 45 rebalancings (quarterly), out of sample \\
+Baselines & NCO, HRP, HERC, mean--variance, equal weight \\
+Profiles & conservative, balanced, aggressive \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+``Assets naturally group by issuer type, credit quality, and duration.''
+
+Headline result: ``risk-adjusted performance is statistically comparable to
+NCO, the closest two-stage alternative, while HCOA delivers greater
+diversification and, on average, lower constraint-projection distance.
+Results are robust to alternative clustering parameter choices.''
+
+\section*{Not recovered}
+
+Clustering distance and linkage, how $k$ is chosen, the exact tactical
+formulas, and the numerical tables.
+
+A third-party replication card at \texttt{paperswithbacktest.com} (48
+bonds, 1990 to 2026, quarterly) reports a Sharpe ratio of $0.25$ and a
+maximum drawdown of $8.1\%$. Its configuration is unknown and it is not
+evidence about the paper.
+
+\end{document}
