@@ -24,6 +24,7 @@ papers/
 | Slug | Title | Status |
 |------|-------|--------|
 | [thurstone-portfolios](thurstone-portfolios/) | Thurstone Portfolios: Long-Only Allocation by Inverting Winning Probabilities | draft |
+| [conditioned-cores](conditioned-cores/) | Conditioned Cores: Core-Orbital Allocation Derived from the Global Optimum | draft |
 
 ## Starting a new paper
 
