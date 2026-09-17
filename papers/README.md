@@ -24,11 +24,14 @@ papers/
 | Slug | Title | Status |
 |------|-------|--------|
 | [thurstone-portfolios](thurstone-portfolios/) | Thurstone Portfolios: Long-Only Allocation by Inverting Winning Probabilities | draft |
+<<<<<<< HEAD
 | [thurstone-rc](thurstone-rc/) | Thurstone Portfolios, five-page Rapid Communication draft for Frontiers of Mathematical Finance | draft |
 | [repaired-hierarchical-portfolios](repaired-hierarchical-portfolios/) | Repaired Hierarchical Portfolios | draft |
 | [thurstone-credit](thurstone-credit/) | Winning Probabilities as Credit: Fast, Redundancy-Aware Attribution | draft |
 | [online-portfolio-regimes](online-portfolio-regimes/) | When Does Portfolio Construction Work? A Map across the Number of Assets and the Cost of Trading | draft |
 | [schur-nco-bridge](schur-nco-bridge/) | A Schur Bridge from Nested Clustered Optimization to Global Minimum Variance | draft |
+=======
+>>>>>>> origin/main
 
 ### Portfolio papers kept in other repos
 
