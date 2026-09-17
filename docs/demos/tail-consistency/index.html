@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Two clusters, one covariance — allocation</title>
+  <meta name="description" content="Two five-name clusters with the same correlation matrix and the same marginals; one crashes together. Covariance-based allocators cannot tell them apart — a race driven by the tail can.">
+  <style>
+    :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
+      --accent:#4a3aff;--accent-soft:#ecebfb;--border:#e2e2e2;--ink:#1f1d3d;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.6;font-size:17px}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:860px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    main{max-width:860px;margin:32px auto;padding:0 24px 60px}
+    h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2}
+    .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 24px}
+    .lead{font-size:1.07rem}
+    h2{font-size:1.3rem;margin:2.2em 0 .6em;border-bottom:1px solid var(--border);padding-bottom:4px}
+    p{margin:.8em 0} .muted{color:var(--muted)}
+    code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+    footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+    .widget{border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin:18px 0;background:var(--panel)}
+    .controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+    .controls label{font-weight:600;font-size:.95rem;white-space:nowrap}
+    .controls input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+    .lv{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent);min-width:3.4em;text-align:right}
+    .ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--faint);margin-top:-2px}
+    canvas{width:100%;height:auto;display:block;margin:6px 0}
+    .readout{font-size:.9rem;color:var(--muted);margin-top:6px}
+    .readout b{color:var(--text)}
+    .bcl{color:#c0392b;font-weight:600} .acl{color:#1e8449;font-weight:600}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <a href="../../index.html#methods">Methods</a>
+      <a href="../../index.html#estimators">Estimators</a>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>Two clusters, one covariance</h1>
+  <p class="subtitle">The tail a covariance cannot see — and what a race does about it.</p>
+
+  <p class="lead">Twelve synthetic assets. Cluster <span class="acl">A</span> is five names with
+  Gaussian dependence. Cluster <span class="bcl">B</span> is five names with a Clayton copula:
+  they <em>crash together</em> — their joint lower tail is far heavier — but are constructed to
+  have exactly the same marginals (standard normal) and the same pairwise correlation as
+  cluster A, at every position of the slider. Two independent names round out the field. Any
+  allocator that is a functional of the covariance is <em>provably identical</em> on the two
+  clusters here: minimum variance, risk parity, HRP, Schur, and the Gaussian race all see two
+  copies of the same block. The difference between the clusters is real — B's five names all
+  fall by more than 1σ on the same day two to three times as often as A's — but it lives
+  entirely above the second moment.</p>
+
+  <h2>Try it: deepen the joint tail</h2>
+  <p>The slider sets B's lower-tail dependence <code>λ<sub>L</sub></code>; A's Gaussian
+  correlation is re-matched at each step so the two clusters' correlation matrices agree to
+  within 0.004 (verified at build time; the shared correlation is shown in the readout). The
+  <em>tail-driven race</em> — the Thurstone portfolio driven by the actual simulation rather
+  than its correlation summary — is the only line that separates.</p>
+
+  <div class="widget">
+    <div class="controls">
+      <label for="lam">B's lower-tail dependence λ<sub>L</sub></label>
+      <input type="range" id="lam" min="0" max="6" step="1" value="3" />
+      <span class="lv" id="lamVal"></span>
+    </div>
+    <div class="ends"><span>0.06 — barely tail-dependent</span><span>crashes as one — 0.96</span></div>
+    <canvas id="curve" width="820" height="270"></canvas>
+    <canvas id="bars" width="820" height="230"></canvas>
+    <canvas id="cloud" width="820" height="300"></canvas>
+    <div class="readout" id="readout"></div>
+  </div>
+
+  <h2>What this shows</h2>
+  <p>The two flat line-pairs are the covariance-based allocators: minimum variance, and the
+  Gaussian race driven by the empirical correlation of the very same simulation. Each assigns
+  clusters A and B the same weight at every <code>λ<sub>L</sub></code> — necessarily, since the
+  inputs they are permitted to read are identical between the clusters. The race driven by the
+  simulation itself gives cluster B up to a quarter less weight than its statistically
+  indistinguishable twin: in the states that decide the extreme, B's five names behave as one
+  or two names, and the race prices that <em>effective</em> headcount. This is the
+  tail-consistency property: the effective number of bets is state-dependent — five in calm
+  markets, closer to one in a crash — and a covariance, which averages over states, cannot
+  represent the collapse.</p>
+  <p>Two honest notes. First, the shared within-cluster correlation rises along the slider
+  (heavier joint tails at fixed margins force it); the comparison at each position is A versus
+  B, which is exact. Second, in practice one rarely simulates the true tail: driving the race
+  with a <em>downside</em> (lower-partial-moment) covariance recovers most of this effect, and
+  the full tail-dependent simulation is the exact limit — that trade-off is quantified in the
+  paper.</p>
+
+  <p class="muted">Reproducible: <code>experiments/gen_tail_consistency_data.py</code> builds
+  the embedded weight curves with the <code>allocation</code> package
+  (<code>transport_weights</code> for the Gaussian race; the loss-side argmin race for the
+  tail-driven weights; correlation matching verified numerically). The scatter clouds are
+  sampled live in the browser. Theory: the tail-consistency proposition in the
+  <a href="../../papers/index.html">paper</a>.</p>
+</main>
+
+<footer>
+  Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.
+</footer>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  const {nA, nB, nS, points} = TC;
+  const N = nA + nB + nS;
+  const names = [];
+  for (let i = 1; i <= nA; i++) names.push("A" + i);
+  for (let i = 1; i <= nB; i++) names.push("B" + i);
+  for (let i = 1; i <= nS; i++) names.push("S" + i);
+  const AC = "#1e8449", BC = "#c0392b", GC = "#9aa0b0";
+  const dpr = window.devicePixelRatio || 1;
+
+  const sum = (w, a, b) => { let s = 0; for (let i = a; i < b; i++) s += w[i]; return s; };
+  const tot = p => ({
+    rA: sum(p.wTrue, 0, nA),        rB: sum(p.wTrue, nA, nA+nB),
+    gA: sum(p.wGauss, 0, nA),       gB: sum(p.wGauss, nA, nA+nB),
+    mA: sum(p.wMV, 0, nA),          mB: sum(p.wMV, nA, nA+nB)
+  });
+
+  function setup(id, cssH){
+    const c = document.getElementById(id), cx = c.getContext("2d");
+    const cssW = c.clientWidth || 820;
+    c.width = cssW*dpr; c.height = cssH*dpr; c.style.height = cssH + "px";
+    cx.setTransform(dpr,0,0,dpr,0,0);
+    return {cx, W: cssW, H: cssH};
+  }
+
+  function drawCurve(idx){
+    const {cx, W, H} = setup("curve", 270);
+    cx.clearRect(0,0,W,H);
+    const padL = 46, padR = 150, padT = 18, padB = 28;
+    const xs = points.map(p => p.lam);
+    const x0 = xs[0], x1 = xs[xs.length-1];
+    let ymin = 1, ymax = 0;
+    for (const p of points){ const t = tot(p);
+      for (const v of Object.values(t)){ ymin = Math.min(ymin, v); ymax = Math.max(ymax, v); } }
+    ymin *= 0.92; ymax *= 1.06;
+    const X = v => padL + (v - x0)/(x1 - x0)*(W - padL - padR);
+    const Y = v => H - padB - (v - ymin)/(ymax - ymin)*(H - padT - padB);
+    cx.strokeStyle = "#e5e5e5"; cx.fillStyle = "#888"; cx.font = "10px sans-serif";
+    for (let v = 0.25; v <= ymax; v += 0.05){
+      cx.beginPath(); cx.moveTo(padL, Y(v)); cx.lineTo(W-padR, Y(v)); cx.stroke();
+      cx.textAlign = "right"; cx.fillText((v*100).toFixed(0) + "%", padL-5, Y(v)+3);
+    }
+    for (const p of points){ cx.textAlign = "center"; cx.fillText(p.lam.toFixed(2), X(p.lam), H-12); }
+    cx.fillText("λL", (padL+W-padR)/2, H-1);
+    function line(get, color, dash){
+      cx.strokeStyle = color; cx.lineWidth = 1.8; cx.setLineDash(dash);
+      cx.beginPath();
+      points.forEach((p,i) => { const x = X(p.lam), y = Y(get(tot(p))); i ? cx.lineTo(x,y) : cx.moveTo(x,y); });
+      cx.stroke(); cx.setLineDash([]);
+    }
+    line(t => t.rA, AC, []);
+    line(t => t.rB, BC, []);
+    line(t => t.gA, GC, [2,3]);
+    line(t => t.gB, GC, [2,3]);
+    line(t => t.mA, "#c8ccd4", [6,3]);
+    line(t => t.mB, "#c8ccd4", [6,3]);
+    cx.font = "10.5px sans-serif"; cx.textAlign = "left";
+    const last = tot(points[points.length-1]), mid = tot(points[2]);
+    cx.fillStyle = AC; cx.fillText("race — cluster A", W-padR+6, Y(last.rA) - 1);
+    cx.fillStyle = BC; cx.fillText("race — cluster B", W-padR+6, Y(last.rB) + 9);
+    cx.fillStyle = GC; cx.fillText("Gaussian race (A ≈ B, dotted)", X(points[2].lam) + 8, Y(mid.gA) - 7);
+    cx.fillStyle = "#9aa0b0"; cx.fillText("min variance (A ≈ B, dashed)", X(points[1].lam) + 8, Y(mid.mA) + 15);
+    // marker
+    const p = points[idx], t = tot(p);
+    cx.fillStyle = "#1a1a1a";
+    for (const v of [t.rA, t.rB]){ cx.beginPath(); cx.arc(X(p.lam), Y(v), 3.5, 0, 7); cx.fill(); }
+    cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
+    cx.fillText("combined cluster weight (5 names each) vs B's lower-tail dependence", padL, 11);
+  }
+
+  function drawBars(idx){
+    const {cx, W, H} = setup("bars", 230);
+    cx.clearRect(0,0,W,H);
+    const p = points[idx];
+    const rows = [["tail-driven race", p.wTrue], ["minimum variance (same data, covariance only)", p.wMV]];
+    const rh = (H-10)/2;
+    rows.forEach(([title, w], r) => {
+      const top = 6 + r*rh, y0 = top + rh - 26;
+      const bw = (W-16)/N;
+      let wmax = 0; for (const v of w) wmax = Math.max(wmax, v);
+      const sc = (rh - 40)/wmax;
+      cx.strokeStyle = "#ccc"; cx.beginPath(); cx.moveTo(8, y0+0.5); cx.lineTo(W-8, y0+0.5); cx.stroke();
+      for (let i = 0; i < N; i++){
+        const x = 8 + i*bw + bw*0.5;
+        cx.fillStyle = i < nA ? AC : (i < nA+nB ? BC : GC);
+        cx.globalAlpha = 0.8;
+        cx.fillRect(x - bw*0.3, y0, bw*0.6, -w[i]*sc);
+        cx.globalAlpha = 1;
+        cx.fillStyle = "#555"; cx.font = "9px sans-serif"; cx.textAlign = "center";
+        cx.fillText(names[i], x, y0 + 11);
+      }
+      cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
+      cx.fillText(title, 8, top + 9);
+    });
+  }
+
+  // ---- illustrative clouds, sampled live (A-pair vs B-pair)
+  function mulberry32(a){ return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  let rand = mulberry32(11), spare = null;
+  function randn(){
+    if (spare !== null){ const s = spare; spare = null; return s; }
+    let u = 0, v = 0;
+    while (u === 0) u = rand();
+    while (v === 0) v = rand();
+    const r = Math.sqrt(-2*Math.log(u)), t = 2*Math.PI*v;
+    spare = r*Math.sin(t); return r*Math.cos(t);
+  }
+  function gammaSample(shape){           // Marsaglia–Tsang, boosted for shape < 1
+    if (shape < 1) return gammaSample(shape+1) * Math.pow(rand(), 1/shape);
+    const d = shape - 1/3, c = 1/Math.sqrt(9*d);
+    for (;;){
+      let x, v;
+      do { x = randn(); v = 1 + c*x; } while (v <= 0);
+      v = v*v*v;
+      const u = rand();
+      if (u < 1 - 0.0331*x*x*x*x) return d*v;
+      if (Math.log(u) < 0.5*x*x + d*(1 - v + Math.log(v))) return d*v;
+    }
+  }
+  function normInv(p){                   // Acklam's approximation
+    const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00],
+          b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01],
+          c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00],
+          d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+    const pl = 0.02425;
+    let q, r;
+    if (p < pl){ q = Math.sqrt(-2*Math.log(p));
+      return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+    if (p <= 1-pl){ q = p-0.5; r = q*q;
+      return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+    q = Math.sqrt(-2*Math.log(1-p));
+    return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+  }
+  function drawCloud(idx){
+    const {cx, W, H} = setup("cloud", 300);
+    cx.clearRect(0,0,W,H);
+    const p = points[idx], theta = -1/Math.log2(p.lam), rho = p.rho;
+    rand = mulberry32(11); spare = null;   // same seeds each redraw
+    const half = (W-30)/2, s = Math.min(half, H-40)/7;  // ±3.5 sd
+    function panel(x0, title, sample, color){
+      const cxm = x0 + half/2, cym = 20 + (H-60)/2;
+      cx.strokeStyle = "#e5e5e5";
+      cx.strokeRect(x0, 20, half, H-60);
+      cx.fillStyle = color; cx.globalAlpha = 0.35;
+      for (let i = 0; i < 1800; i++){
+        const [u, v] = sample();
+        const x = cxm + u*s, y = cym - v*s;
+        if (x > x0 && x < x0+half && y > 20 && y < H-40) cx.fillRect(x, y, 1.6, 1.6);
+      }
+      cx.globalAlpha = 1;
+      // crash quadrant
+      cx.strokeStyle = "#c0392b"; cx.setLineDash([3,3]);
+      cx.strokeRect(x0, cym + s, half/2 - s, H-60 - (cym + s - 20)); cx.setLineDash([]);
+      cx.fillStyle = "#666"; cx.font = "11px sans-serif"; cx.textAlign = "left";
+      cx.fillText(title, x0, 13);
+    }
+    panel(0, `cluster A pair — Gaussian, ρ = ${rho.toFixed(2)}`, () => {
+      const z = randn(), e1 = randn(), e2 = randn();
+      const a = Math.sqrt(rho), b = Math.sqrt(1-rho);
+      return [a*z + b*e1, a*z + b*e2];
+    }, AC);
+    panel(half+30, `cluster B pair — Clayton, same ρ, λL = ${p.lam.toFixed(2)}`, () => {
+      const V = gammaSample(1/theta);
+      const u1 = Math.pow(1 - Math.log(rand())/V, -1/theta),
+            u2 = Math.pow(1 - Math.log(rand())/V, -1/theta);
+      return [normInv(Math.min(Math.max(u1,1e-9),1-1e-9)), normInv(Math.min(Math.max(u2,1e-9),1-1e-9))];
+    }, BC);
+    cx.fillStyle = "#888"; cx.font = "10px sans-serif"; cx.textAlign = "left";
+    cx.fillText("same correlation, same marginals — only the joint crash corner (dashed) differs", 0, H-6);
+  }
+
+  const lamEl = document.getElementById("lam"), lamVal = document.getElementById("lamVal"),
+        readout = document.getElementById("readout");
+  function draw(){
+    const idx = +lamEl.value, p = points[idx], t = tot(p);
+    lamVal.textContent = p.lam.toFixed(2);
+    drawCurve(idx); drawBars(idx); drawCloud(idx);
+    readout.innerHTML =
+      `At <b>λ<sub>L</sub> = ${p.lam.toFixed(2)}</b> (shared correlation ρ = ${p.rho.toFixed(2)}, ` +
+      `matched to ${p.dev.toFixed(3)}): joint crash P(all 5 &lt; −1σ) is ` +
+      `<span class="bcl">${(p.crashB*100).toFixed(1)}%</span> for B vs ` +
+      `<span class="acl">${(p.crashA*100).toFixed(1)}%</span> for A. Race: ` +
+      `<span class="acl">A ${(t.rA*100).toFixed(1)}%</span> vs ` +
+      `<span class="bcl">B ${(t.rB*100).toFixed(1)}%</span>. ` +
+      `Min variance: ${(t.mA*100).toFixed(1)}% vs ${(t.mB*100).toFixed(1)}%; ` +
+      `Gaussian race: ${(t.gA*100).toFixed(1)}% vs ${(t.gB*100).toFixed(1)}% — both blind.`;
+  }
+  lamEl.addEventListener("input", draw);
+  window.addEventListener("resize", draw);
+  draw();
+})();
+</script>
+</body>
+</html>

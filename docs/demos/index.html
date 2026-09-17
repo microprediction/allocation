@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Demos — allocation</title>
-  <meta name="description" content="Interactive demos for the allocation package: tail-sensitive Black-Litterman on the Dow, and a bowling-alley generative model of default contagion.">
+  <meta name="description" content="Interactive, in-browser demos of the allocation package's estimators — the Thurstone race and the Schur gamma coupling — plus implied correlation on the World Cup, tail-sensitive Black-Litterman, and a generative model of default contagion.">
   <style>
     :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
       --accent:#4a3aff;--border:#e2e2e2;--ink:#1f1d3d;}
@@ -27,6 +27,10 @@
     a.card p{margin:0;color:var(--muted);font-size:1rem}
     a.card .tag{display:inline-block;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;
       color:var(--faint);font-weight:600;margin-bottom:8px}
+    h2.group{font-size:1.05rem;margin:28px 0 2px;color:var(--muted);font-weight:600;
+      border-bottom:1px solid var(--border);padding-bottom:4px}
+    a.card code{background:#f3f3f7;padding:0 4px;border-radius:3px;font-size:.9em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
     footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
   </style>
 </head>
@@ -38,7 +42,7 @@
       <a href="../index.html#methods">Methods</a>
       <a href="../index.html#estimators">Estimators</a>
       <a href="../papers/index.html">Papers</a>
-      <a href="index.html">Demos</a>
+      <a href="../demos/index.html">Demos</a>
       <a href="../maps/tail-black-litterman.html">Map</a>
       <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
       <a href="https://github.com/microprediction/allocation">GitHub</a>
@@ -50,12 +54,62 @@
   <h1>Demos</h1>
   <p class="subtitle">Interactive, in-browser — they run on the page, no install.</p>
 
-  <a class="card" href="gfc/index.html">
-    <span class="tag">Essay · the 2008 crisis, in simulation</span>
-    <h2>The Global Financial Crisis</h2>
-    <p>Told through simulation by someone who built the correlation-trading tools: Sklar's theorem
-    vs the bell curve, Gaussian dependence hiding tail risk, and an interactive quadrature CDO pricer
-    that shows the "fast model" was routine engineering — not the magic the populist story needs.</p>
+  <h2 class="group">The estimators</h2>
+
+  <a class="card" href="thurstone-race/index.html">
+    <span class="tag">Thurstone portfolio · live race in the browser</span>
+    <h2>The Thurstone race: clone a stock</h2>
+    <p>Weights are the winning probabilities of a race among the assets. Add a near-duplicate of
+    a Dow name and drag its correlation: the race de-duplicates the pair continuously, equal
+    weight is blind to it, and minimum variance takes large opposite positions whose sign flips
+    under a 0.1% input change. Runs the estimator's forward pass on 131,072 common-seed
+    scenarios, live.</p>
+  </a>
+
+  <a class="card" href="schur-gamma/index.html">
+    <span class="tag">Schur-complementary · HRP to minimum variance</span>
+    <h2>One slider from HRP to minimum variance</h2>
+    <p>The Schur <code>γ</code> coupling on 28 Dow names: drag <code>γ</code> and watch the
+    weights deform continuously from HRP toward minimum variance, over a Fiedler-seriated
+    correlation heatmap. Includes the turnover cost of the dendrogram this construction
+    replaces, measured over 700 weekly rebalances.</p>
+  </a>
+
+  <a class="card" href="choice-geometry/index.html">
+    <span class="tag">Implied objective · dependence-aware entropy</span>
+    <h2>The geometry of choice</h2>
+    <p>The race maximizes ability minus an entropy that knows the correlation. Merge two of
+    three assets with a slider: softmax's triangle never moves (Luce's axiom in geometric
+    form), while the race's attainable set collapses from a triangle to a segment and its
+    maximum-entropy portfolio drifts to the two-horse limit (¼, ¼, ½). Computed live.</p>
+  </a>
+
+  <a class="card" href="tail-consistency/index.html">
+    <span class="tag">Tail consistency · beyond the second moment</span>
+    <h2>Two clusters, one covariance</h2>
+    <p>Two five-name clusters with the same correlation matrix and the same marginals — one of
+    them crashes together. Minimum variance and the Gaussian race treat them identically at
+    every slider position, provably; the race driven by the simulation itself gives the
+    crash-together cluster up to a quarter less weight.</p>
+  </a>
+
+  <a class="card" href="high-dim/index.html">
+    <span class="tag">High dimension · n/T past 1</span>
+    <h2>Five hundred assets, T days</h2>
+    <p>Shrink the estimation window on a known-truth market and watch sample minimum variance
+    pass from best-on-page (1.4× the true minimum at n/T = 0.25) to 91× at n/T = 0.99 to
+    rounding noise once the covariance is singular — while the low-rank race holds flat at
+    3.3×, long-only, no inverse taken. The race runs live in the browser.</p>
+  </a>
+
+  <h2 class="group">Dependence, tails, and 2008</h2>
+
+  <a class="card" href="world-cup/index.html">
+    <span class="tag">Implied correlation · live Kalshi markets</span>
+    <h2>Tetrachoric correlation: World Cup edition</h2>
+    <p>Spin a cloud of bivariate-normal draws until the "both reach the final" corner matches the
+    market, and you have backed out an implied correlation. Then
+    rank every pair of teams by how much their runs to the final co-move.</p>
   </a>
 
   <a class="card" href="tail-black-litterman/index.html">
@@ -68,7 +122,7 @@
 
   <a class="card" href="bowling/index.html">
     <span class="tag">Credit · default contagion</span>
-    <h2>Bowling for contagion</h2>
+    <h2>Bowling Alone: Do Copula Models Washout?</h2>
     <p>Companies are pins in a bowling rack; a shock cascades whole sectors into joint default. The
     correlation matrix settles, yet the joint-default tail blows past the Gaussian copula that
     matches every pairwise probability and marginal — the 2008 lesson, live.</p>

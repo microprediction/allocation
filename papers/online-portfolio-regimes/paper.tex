@@ -62,7 +62,11 @@ This paper measures all three at once and reports the result as a two-axis map.
 
 \section{The methods, in one breath}
 We use online estimators: a one-time \texttt{fit}, then a cheap
-\texttt{partial\_fit} each period over an exponentially-weighted covariance. They
+\texttt{partial\_fit} each period over an exponentially-weighted covariance. This
+is the setting of online learning---one decision per period against a changing
+world, judged by regret \parencite{cover1991, hazan2016}---and the Thurstone tilt
+in particular is a follow-the-perturbed-leader rule, which perturbs abilities and
+takes the winner \parencite{hannan1957, kalaivempala2005}. They
 split into two families by how they use $\widehat{\Sig}$.
 
 \paragraph{Rules that never invert the covariance (work at any size).}

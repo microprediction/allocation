@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Thurstone Portfolios: Allocation as Winning
-Probability — allocation</title>
+<title>Thurstone Portfolio Polishing: Tail-Sensitive Black-Litterman and
+Beyond — allocation</title>
 <style>
   :root{--bg:#fafafa;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;--accent:#4a3aff;--border:#e6e6e6}
   *{box-sizing:border-box}
@@ -45,52 +45,58 @@ type="text/javascript"></script>
 </head>
 <body>
 <div class="crumb">
-  <a href="../../index.html">&larr; allocation</a>
-  <a href="../index.html">papers</a>
+  <a href="../../">&larr; allocation</a>
+  <a href="../">papers</a>
   <a href="https://github.com/microprediction/allocation">GitHub</a>
 </div>
 <main>
-<h1>Thurstone Portfolios: Allocation as Winning Probability</h1>
+<h1>Thurstone Portfolio Polishing: Tail-Sensitive Black-Litterman and
+Beyond</h1>
 <p class="author">Peter Cotton</p>
-<div class="abstract"><p>We develop <em>Thurstone portfolios</em>, a
-long-only allocation scheme whose weights are the winning probabilities
-of a race among assets, read as a Thurstonian model of choice and set
-against the passive industry’s capitalization weighting and its silent
-appeal to Luce’s choice axiom. The organizing property is <em>redundancy
-consistency</em>: adding a near-duplicate asset splits its position
-between the duplicates rather than doubling the exposure—the portfolio
-cure for the red-bus/blue-bus failure of any Luce-type rule, and a
-behaviour mean–variance attains only by inverting a covariance that is
-singular exactly where the redundancy lives. Because redundancy is
-near-singularity, three properties usually treated apart are one: the
-race is robust to ill-conditioning (it samples from a correlation rather
-than inverting one), it turns over little (its weights are locally
-Lipschitz in the correlation), and it de-duplicates correlated holdings
-smoothly. One property stands apart, being no matter of conditioning:
-driven by a tail-dependent simulation the race responds to lower-tail
-co-movement no covariance can encode, so assets that crash together
-share a single position. The construction is feasible on the simplex
-without optimization, reproduces a chosen benchmark by construction,
-admits an arbitrary performance simulation so dependence beyond second
-moments can be matched, and solves an implied mean–(convex-regularizer)
-program whose penalty the simulation fixes; capitalization weighting
-appears as its degenerate, correlation-blind member. Read as reverse
-optimization it is a <em>tail-sensitive analogue of
-Black–Litterman</em>: latent abilities are backed out of a benchmark and
-re-weighted under a view on <em>dependence</em>—correlation or tail
-co-movement—in place of a view on returns, with a fast exact ability
-inverse standing in for the linear one Black–Litterman never needs. We
-prove the supporting properties (feasibility, index reproduction,
+<div class="abstract"><p>We develop <em>Thurstone portfolio
+polishing</em>: a way to take an existing allocation on the simplex—a
+capitalization index, an equal-weight book, any benchmark—and re-tilt it
+under a view on <em>dependence</em> rather than returns. Reading the
+weights as the winning probabilities of a race among assets (a
+Thurstonian model of choice), we back out the latent abilities that
+reproduce them with a fast <em>exact</em> inverse, then re-evaluate the
+race under a richer dependence law. The marquee instance is a
+<em>tail-sensitive analogue of Black–Litterman</em>: where
+Black–Litterman tilts a benchmark by a view on expected returns through
+a linear inverse of a covariance, we tilt by a view on <em>lower-tail
+co-movement</em> through a fast exact <em>nonlinear</em> inverse of a
+correlated race, inverting no covariance and solving no optimization.
+Driven by a tail-dependent simulation the polish shades down exactly the
+names that crash together beyond what their correlation can encode—a
+crash-proofing overlay we verify both in a known-truth lab and on the
+Dow. The construction’s organizing property is <em>redundancy (clone)
+consistency</em>: a near-duplicate asset splits a position rather than
+doubling it—the cure for the red-bus/blue-bus failure of any Luce-type
+rule, and the same near-singularity that simultaneously makes the polish
+robust to ill-conditioning (it samples from a correlation rather than
+inverting one), low in turnover (its weights are locally Lipschitz in
+the correlation), and a smooth de-duplicator of correlated holdings. The
+polish is feasible on the simplex without optimization, reproduces its
+benchmark by construction, admits an arbitrary performance simulation so
+dependence beyond second moments can be matched, and solves an implied
+mean–(convex-regularizer) program whose penalty the simulation fixes;
+capitalization weighting is its degenerate, correlation-blind member. We
+prove the supporting properties (feasibility, benchmark reproduction,
 redundancy and tail consistency, the implied objective, and a Lipschitz
 turnover bound) and implement the method in the <code>allocation</code>
 package, built on <code>thurstone</code>.</p></div>
 <h1 data-number="1" id="sec:intro"><span
 class="header-section-number">1</span> Introduction</h1>
-<p>We develop <em>Thurstone portfolios</em>, a long-only allocation
-scheme whose weights are the winning probabilities of a race among
-assets: each asset draws a noisy performance, and its weight is the
-probability that it comes out best. The race has a second reading as a
-Thurstonian model of choice, which we set against the passive industry’s
+<p>We develop <em>Thurstone portfolio polishing</em>: a way to take an
+existing allocation on the simplex—a capitalization index, an
+equal-weight book, any benchmark—and re-tilt it under a view on
+<em>dependence</em> rather than returns. The vehicle is a race among
+assets: each asset draws a noisy performance, and a weight is the
+probability that it comes out best. The abilities driving the race are
+backed out of the benchmark by a fast <em>exact</em> inverse, and the
+polish is what happens when those same abilities are re-raced under a
+richer dependence law. The race has a second reading as a Thurstonian
+model of choice, which we set against the passive industry’s
 capitalization weighting and its implicit appeal to Luce’s choice axiom.
 That Lucian habit is only superficially supported by the Capital Asset
 Pricing Model (CAPM): what the CAPM endorses is the efficiency of the
@@ -99,20 +105,27 @@ restricted universe actually holds (<a href="#sec:capm"
 data-reference-type="ref+Label" data-reference="sec:capm">2.1</a>).</p>
 <p>The reason to read allocation as a Thurstonian rather than a Lucian
 choice is a single property—<em>clone consistency</em>: cloning an
-option should not create value. Add a second asset that behaves almost
-exactly like one already held, and a sensible rule should <em>split</em>
-the position across the two near-duplicates and leave the rest of the
-book untouched; it must not let the duplicated exposure count twice.
-Everything else this paper advertises—robustness without inverting a
-covariance, low turnover, feasibility at scale—is downstream of meeting
-this one axiom with a smooth order-statistic race rather than a hard
-clustering or an inverse. This is the portfolio form of the
-red-bus/blue-bus problem that unseated the logit model in discrete
-choice <span class="citation" data-cites="mcfadden1974">(McFadden
-1974)</span>. A Lucian rule—capitalization weighting included—fixes the
-ratio of any two weights independently of the rest of the field, so
-inserting a near-duplicate inflates the duplicated exposure and drains
-weight from everything else (Propositions&nbsp;<a href="#prop:restriction">1</a> and <a href="#prop:redundancy">5</a>).
+option should not create value. The same axiom is named in social
+choice, where it is Tideman’s <em>independence of clones</em> <span
+class="citation" data-cites="tideman1987">(Tideman 1987)</span>. Add a
+second asset that behaves almost exactly like one already held, and a
+sensible rule should <em>split</em> the position across the two
+near-duplicates and leave the rest of the book untouched; it must not
+let the duplicated exposure count twice. Everything else this paper
+advertises—robustness without inverting a covariance, low turnover,
+feasibility at scale—is downstream of meeting this one axiom with a
+smooth order-statistic race rather than a hard clustering or an inverse.
+This is the portfolio form of the red-bus/blue-bus problem that unseated
+the logit model in discrete choice <span class="citation"
+data-cites="mcfadden1974">(McFadden 1974)</span>. The logit inherits
+that paradox from its noise: independence of irrelevant alternatives
+holds exactly when the race is driven by Gumbel errors <span
+class="citation" data-cites="yellott1977">(Yellott 1977)</span>, so a
+race under any other law escapes it by construction. A Lucian
+rule—capitalization weighting included—fixes the ratio of any two
+weights independently of the rest of the field, so inserting a
+near-duplicate inflates the duplicated exposure and drains weight from
+everything else (Propositions&nbsp;<a href="#prop:restriction">1</a> and <a href="#prop:redundancy">5</a>).
 A Thurstonian race does not: two assets that move together compete with
 <em>each other</em>, and in the limit a co-moving pair collapses to a
 single horse that holds their combined weight.</p>
@@ -1193,7 +1206,12 @@ data-cites="williams1977 mcfadden1981">(Williams 1977; McFadden
 data-reference-type="eqref"
 data-reference="eq:regularized">[eq:regularized]</a> is the
 Fenchel–Young duality for the convex <span
-class="math inline">\(G_C\)</span>. ◻</p>
+class="math inline">\(G_C\)</span> <span class="citation"
+data-cites="blondel2020">(Blondel et al. 2020)</span>; softmax and
+sparsemax are the special cases where <span
+class="math inline">\(\Omega\)</span> is Shannon entropy or the squared
+Euclidean norm <span class="citation" data-cites="martins2016">(Martins
+and Astudillo 2016)</span>. ◻</p>
 </div>
 <p>So the portfolio maximizes an ability-weighted exposure <span
 class="math inline">\(\langle\theta,p\rangle\)</span> minus a convex
@@ -1203,16 +1221,23 @@ correlation—a mean–(convex-risk) allocator whose feasible set is the
 simplex, which is why the solution is long-only and fully invested. This
 is the random-utility “social-surplus” / perturbed-optimizer
 construction <span class="citation"
-data-cites="mcfadden1981 williams1977 berthet2020">(McFadden 1981;
-Williams 1977; Berthet et al. 2020)</span>. The perturbation law indexes
-a whole <em>family of dependence-aware entropies</em>—<span
+data-cites="mcfadden1981 williams1977 berthet2020 papandreou2011">(McFadden
+1981; Williams 1977; Berthet et al. 2020; Papandreou and Yuille
+2011)</span>. The perturbation law indexes a whole <em>family of
+dependence-aware entropies</em>—<span
 class="math inline">\(\Omega_S(p)\)</span> is the cost of concentrating
 choice probability on <span class="math inline">\(p\)</span> under
-dependence <span class="math inline">\(S\)</span>. The choice is
-decisive: Gumbel noise yields <span class="math inline">\(\Omega
-=\)</span> Shannon entropy and <span class="math inline">\(w =\)</span>
-softmax, a <em>correlation-blind</em> (Lucian) allocator; Gaussian noise
-with covariance <span class="math inline">\(C\)</span> makes <span
+dependence <span class="math inline">\(S\)</span>, the information cost
+of a rationally inattentive chooser whose logit foundation is the Gumbel
+case <span class="citation"
+data-cites="matejka2015 fosgerau2020">(Matějka and McKay 2015; Fosgerau
+et al. 2020)</span>. The choice is decisive: Gumbel noise yields <span
+class="math inline">\(\Omega =\)</span> Shannon entropy and <span
+class="math inline">\(w =\)</span> softmax, a <em>correlation-blind</em>
+(Lucian) allocator—the Gumbel-softmax of the machine-learning literature
+<span class="citation" data-cites="jang2017 maddison2017">(Jang et al.
+2017; Maddison et al. 2017)</span>; Gaussian noise with covariance <span
+class="math inline">\(C\)</span> makes <span
 class="math inline">\(\Omega_C\)</span> <em>correlation-aware</em>,
 which is precisely what produces the redundancy consistency of <a
 href="#prop:redundancy" data-reference-type="ref+Label"
@@ -1222,10 +1247,12 @@ data-reference-type="ref+Label" data-reference="prop:tail">7</a>).
 Spreading across independent names is rewarded; spreading across
 comonotone names is not—the entropy knows the dependence. Finally, since
 <span class="math inline">\(w = \nabla G_C(\theta)\)</span> is the
-gradient of a convex potential, it is automatically smooth—consistent
-with <a href="#thm:smooth" data-reference-type="ref+Label"
-data-reference="thm:smooth">2</a>. (For general <span
-class="math inline">\(C\)</span> the regularizer <span
+gradient of a convex potential, it is automatically smooth—<span
+class="math inline">\(G_C\)</span> is a smoothing of the max in the
+sense of <span class="citation" data-cites="nesterov2005">Nesterov
+(2005)</span>—consistent with <a href="#thm:smooth"
+data-reference-type="ref+Label" data-reference="thm:smooth">2</a>. (For
+general <span class="math inline">\(C\)</span> the regularizer <span
 class="math inline">\(\Omega_C\)</span> has no closed form, unlike the
 entropy/softmax special case, but it provably exists and is convex,
 which is all we use.)</p>
@@ -2210,6 +2237,11 @@ Information Processing Systems (NeurIPS)</em>.
 Black, Fischer, and Robert Litterman. 1992. <span>“Global Portfolio
 Optimization.”</span> <em>Financial Analysts Journal</em> 48 (5): 28–43.
 </div>
+<div id="ref-blondel2020" class="csl-entry" role="listitem">
+Blondel, Mathieu, André F. T. Martins, and Vlad Niculae. 2020.
+<span>“Learning with <span>Fenchel-Young</span> Losses.”</span>
+<em>Journal of Machine Learning Research</em> 21 (35): 1–69.
+</div>
 <div id="ref-bradleyterry1952" class="csl-entry" role="listitem">
 Bradley, Ralph Allan, and Milton E. Terry. 1952. <span>“Rank Analysis of
 Incomplete Block Designs: I. The Method of Paired Comparisons.”</span>
@@ -2247,6 +2279,13 @@ Fan, Jianqing, Jingjin Zhang, and Ke Yu. 2012. <span>“Vast Portfolio
 Selection with Gross-Exposure Constraints.”</span> <em>Journal of the
 American Statistical Association</em> 107 (498): 592–606.
 </div>
+<div id="ref-fosgerau2020" class="csl-entry" role="listitem">
+Fosgerau, Mogens, Emerson Melo, André de Palma, and Matthew Shum. 2020.
+<span>“Discrete Choice and Rational Inattention: A General Equivalence
+Result.”</span> <em>International Economic Review</em> 61 (4): 1569–89.
+<a
+href="https://doi.org/10.1111/iere.12469">https://doi.org/10.1111/iere.12469</a>.
+</div>
 <div id="ref-harville1973" class="csl-entry" role="listitem">
 Harville, David A. 1973. <span>“Assigning Probabilities to the Outcomes
 of Multi-Entry Competitions.”</span> <em>Journal of the American
@@ -2262,6 +2301,11 @@ Jagannathan, Ravi, and Tongshu Ma. 2003. <span>“Risk Reduction in Large
 Portfolios: Why Imposing the Wrong Constraints Helps.”</span> <em>The
 Journal of Finance</em> 58 (4): 1651–83.
 </div>
+<div id="ref-jang2017" class="csl-entry" role="listitem">
+Jang, Eric, Shixiang Gu, and Ben Poole. 2017. <span>“Categorical
+Reparameterization with <span>Gumbel-Softmax</span>.”</span>
+<em>International Conference on Learning Representations (ICLR)</em>.
+</div>
 <div id="ref-ledoitwolf2004" class="csl-entry" role="listitem">
 Ledoit, Olivier, and Michael Wolf. 2004. <span>“A Well-Conditioned
 Estimator for Large-Dimensional Covariance Matrices.”</span> <em>Journal
@@ -2270,6 +2314,12 @@ of Multivariate Analysis</em> 88 (2): 365–411.
 <div id="ref-luce1959" class="csl-entry" role="listitem">
 Luce, R. Duncan. 1959. <em>Individual Choice Behavior: A Theoretical
 Analysis</em>. Wiley.
+</div>
+<div id="ref-maddison2017" class="csl-entry" role="listitem">
+Maddison, Chris J., Andriy Mnih, and Yee Whye Teh. 2017. <span>“The
+Concrete Distribution: A Continuous Relaxation of Discrete Random
+Variables.”</span> <em>International Conference on Learning
+Representations (ICLR)</em>.
 </div>
 <div id="ref-makridakis2020" class="csl-entry" role="listitem">
 Makridakis, Spyros, Evangelos Spiliotis, and Vassilios Assimakopoulos.
@@ -2280,6 +2330,18 @@ Forecasting</em> 36 (1): 54–74.
 <div id="ref-markowitz1952" class="csl-entry" role="listitem">
 Markowitz, Harry. 1952. <span>“Portfolio Selection.”</span> <em>The
 Journal of Finance</em> 7 (1): 77–91.
+</div>
+<div id="ref-martins2016" class="csl-entry" role="listitem">
+Martins, André F. T., and Ramón Fernandez Astudillo. 2016. <span>“From
+Softmax to Sparsemax: A Sparse Model of Attention and Multi-Label
+Classification.”</span> <em>Proceedings of the 33rd International
+Conference on Machine Learning (ICML), PMLR 48</em>, 1614–23.
+</div>
+<div id="ref-matejka2015" class="csl-entry" role="listitem">
+Matějka, Filip, and Alisdair McKay. 2015. <span>“Rational Inattention to
+Discrete Choices: A New Foundation for the Multinomial Logit
+Model.”</span> <em>American Economic Review</em> 105 (1): 272–98. <a
+href="https://doi.org/10.1257/aer.20130047">https://doi.org/10.1257/aer.20130047</a>.
 </div>
 <div id="ref-mcfadden1974" class="csl-entry" role="listitem">
 McFadden, Daniel. 1974. <span>“Conditional Logit Analysis of Qualitative
@@ -2295,6 +2357,18 @@ McFadden. MIT Press.
 <div id="ref-meucci2008" class="csl-entry" role="listitem">
 Meucci, Attilio. 2008. <span>“Fully Flexible Views: Theory and
 Practice.”</span> <em>Risk</em> 21 (10): 97–102.
+</div>
+<div id="ref-nesterov2005" class="csl-entry" role="listitem">
+Nesterov, Yu. 2005. <span>“Smooth Minimization of Non-Smooth
+Functions.”</span> <em>Mathematical Programming</em> 103 (1): 127–52. <a
+href="https://doi.org/10.1007/s10107-004-0552-5">https://doi.org/10.1007/s10107-004-0552-5</a>.
+</div>
+<div id="ref-papandreou2011" class="csl-entry" role="listitem">
+Papandreou, George, and Alan L. Yuille. 2011.
+<span>“Perturb-and-<span>MAP</span> Random Fields: Using Discrete
+Optimization to Learn and Sample from Energy Models.”</span> <em>2011
+International Conference on Computer Vision (ICCV)</em>, 193–200. <a
+href="https://doi.org/10.1109/ICCV.2011.6126242">https://doi.org/10.1109/ICCV.2011.6126242</a>.
 </div>
 <div id="ref-plackett1975" class="csl-entry" role="listitem">
 Plackett, R. L. 1975. <span>“The Analysis of Permutations.”</span>
@@ -2335,6 +2409,12 @@ Noise.”</span> <em>Bell System Technical Journal</em> 41 (2): 463–501.
 Thurstone, L. L. 1927. <span>“A Law of Comparative Judgment.”</span>
 <em>Psychological Review</em> 34 (4): 273–86.
 </div>
+<div id="ref-tideman1987" class="csl-entry" role="listitem">
+Tideman, T. Nicolaus. 1987. <span>“Independence of Clones as a Criterion
+for Voting Rules.”</span> <em>Social Choice and Welfare</em> 4 (3):
+185–206. <a
+href="https://doi.org/10.1007/BF00433944">https://doi.org/10.1007/BF00433944</a>.
+</div>
 <div id="ref-timmermann2006" class="csl-entry" role="listitem">
 Timmermann, Allan. 2006. <span>“Forecast Combinations.”</span> In
 <em>Handbook of Economic Forecasting</em>, vol. 1. Elsevier.
@@ -2343,6 +2423,14 @@ Timmermann, Allan. 2006. <span>“Forecast Combinations.”</span> In
 Williams, H. C. W. L. 1977. <span>“On the Formation of Travel Demand
 Models and Economic Evaluation Measures of User Benefit.”</span>
 <em>Environment and Planning A</em> 9 (3): 285–344.
+</div>
+<div id="ref-yellott1977" class="csl-entry" role="listitem">
+Yellott, John I. 1977. <span>“The Relationship Between <span
+class="nocase">Luce’s</span> Choice Axiom, <span
+class="nocase">Thurstone’s</span> Theory of Comparative Judgment, and
+the Double Exponential Distribution.”</span> <em>Journal of Mathematical
+Psychology</em> 15 (2): 109–44. <a
+href="https://doi.org/10.1016/0022-2496(77)90026-8">https://doi.org/10.1016/0022-2496(77)90026-8</a>.
 </div>
 </div>
 <section id="footnotes" class="footnotes footnotes-end-of-document"

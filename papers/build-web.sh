@@ -15,4 +15,6 @@ render() {                                      # $1 = slug
   python3 "$here/_postprocess.py" "$out/index.html"
   echo "wrote docs/papers/$slug/index.html"
 }
-render thurstone-portfolios "Thurstone Portfolios: Allocation as Winning Probability"
+render thurstone-portfolios "Thurstone Portfolio Polishing: Tail-Sensitive Black-Litterman and Beyond"
+render thurstone-credit "Winning Probabilities as Credit: Fast, Redundancy-Aware Attribution"
+render online-portfolio-regimes "When Does Portfolio Construction Work? A Map across the Number of Assets and the Cost of Trading"

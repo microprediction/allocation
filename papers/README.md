@@ -27,6 +27,7 @@ papers/
 | [repaired-hierarchical-portfolios](repaired-hierarchical-portfolios/) | Repaired Hierarchical Portfolios | draft |
 | [thurstone-credit](thurstone-credit/) | Winning Probabilities as Credit: Fast, Redundancy-Aware Attribution | draft |
 | [online-portfolio-regimes](online-portfolio-regimes/) | When Does Portfolio Construction Work? A Map across the Number of Assets and the Cost of Trading | draft |
+| [schur-nco-bridge](schur-nco-bridge/) | A Schur Bridge from Nested Clustered Optimization to Global Minimum Variance | draft |
 
 ### Portfolio papers kept in other repos
 
@@ -41,7 +42,9 @@ family is split off in [`microprediction/schur`](https://github.com/micropredict
 Both build directly on the original Schur-complementary allocation paper
 (`cotton2024schur`, arXiv:2411.05807), which this repo's papers also cite.
 This split is historical, not principled; check both locations before
-assuming you've found every portfolio paper.
+assuming you've found every portfolio paper. The reverse also holds:
+`schur-nco-bridge` lives here and is cross-listed at
+[schur.microprediction.org](https://schur.microprediction.org/papers.html).
 
 ## Starting a new paper
 
