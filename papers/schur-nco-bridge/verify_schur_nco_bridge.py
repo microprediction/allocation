@@ -13,6 +13,8 @@ The repository test suite imports this file and runs the same checks.
   check_proxy            Prop 3: V' Sigma V = K Sigma_PP K + D
   check_symmetric        R_j(c) = (1 - rho_c) lambda_O Cov(f_j, r_{-j})
   check_quotient         complements (and companion vectors) compose, so tree = flat at gamma = 1
+  check_loss             Delta_i is PSD, zero under the model, and not tracked by the raw size of R
+  check_precision_sparsity  Gaussian factorization: zero precision between J_i and assets outside I_i
 """
 import numpy as np
 
@@ -249,6 +251,54 @@ def check_quotient(rng, trials=50):
     return {"compose": err}
 
 
+def check_loss(rng, trials=50):
+    """Delta_i = (full correction) - (knot-only correction): PSD, zero under the model,
+    and not tracked by the raw size of R (delta -> 0 example)."""
+    zero = 0.0
+    min_eig = np.inf
+    for _ in range(trials):
+        for violation, sink in ((0.0, "zero"), (0.5, "eig")):
+            sigma, idx, knots, _ = _random_problem(rng, violation)
+            u = np.ones(sigma.shape[0])
+            for i, I in enumerate(idx):
+                other = [k for j, k in enumerate(knots) if j != i]
+                Qf, _ = full_pair(sigma, I, u)
+                Qc, _ = cheap_pair(sigma, I, other, 1.0, u)
+                delta = Qc - Qf
+                if violation == 0.0:
+                    zero = max(zero, np.abs(delta).max())
+                else:
+                    min_eig = min(min_eig, np.linalg.eigvalsh(delta).min())
+    # assets (x, p, m) with m = p + e, Var(e) = d^2, Cov(x, e) = c d, x uncorrelated with p
+    cc, example = 0.6, []
+    for d in (1e-1, 1e-2, 1e-3):
+        sigma = np.array([[1.0, 0.0, cc * d], [0.0, 1.0, 1.0], [cc * d, 1.0, 1.0 + d * d]])
+        R = abs(residual_R(sigma, [1, 2], 1)).max()
+        Qf, _ = full_pair(sigma, [0], np.ones(3))
+        Qc, _ = cheap_pair(sigma, [0], [1], 1.0, np.ones(3))
+        example.append((R, float((Qc - Qf)[0, 0])))
+    return {"zero_under_model": zero, "min_eig_violated": min_eig, "R_vs_loss": example, "c2": cc ** 2}
+
+
+def check_precision_sparsity(rng, trials=50):
+    """Gaussian factorization: precision is zero between J_i and everything outside I_i."""
+    out = {}
+    for name, violation in (("model", 0.0), ("violated", 0.5)):
+        worst = 0.0 if name == "model" else np.inf
+        for _ in range(trials):
+            sigma, idx, knots, _ = _random_problem(rng, violation)
+            prec = np.linalg.inv(sigma)
+            m = 0.0
+            for I in idx:
+                J = I[1:]
+                rest = [a for a in range(sigma.shape[0]) if a not in I]
+                if J:
+                    m = max(m, np.abs(prec[np.ix_(J, rest)]).max())
+            worst = max(worst, m) if name == "model" else min(worst, m)
+        out[name] = worst
+    return out
+
+
 def main():
     rng = np.random.default_rng(0)
     r = check_sufficiency(rng); print("Prop 1 sufficiency        ", r); assert r["pair"] < TOL
@@ -265,6 +315,12 @@ def main():
     r = check_proxy(rng); print("Prop 3 proxy identity     ", r); assert r["identity"] < TOL
     r = check_symmetric(rng); print("symmetric factor formula  ", r); assert r["formula"] < TOL
     r = check_quotient(rng); print("complements compose       ", r); assert r["compose"] < TOL
+    r = check_loss(rng); print("loss Delta_i              ", r)
+    assert r["zero_under_model"] < TOL and r["min_eig_violated"] > -1e-9
+    assert all(abs(loss - r["c2"]) < 1e-6 for _, loss in r["R_vs_loss"])          # loss stays at c^2
+    assert r["R_vs_loss"][-1][0] < 1e-2 * r["R_vs_loss"][0][0] * 1.0001            # while R -> 0
+    r = check_precision_sparsity(rng); print("precision sparsity        ", r)
+    assert r["model"] < 1e-8 and r["violated"] > 1e-3
     print("certificate ok")
 
 

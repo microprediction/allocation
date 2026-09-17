@@ -26,6 +26,7 @@ Variance}
 \newtheorem{proposition}{Proposition}
 \newtheorem{remark}{Remark}
 \newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
 
 \begin{document}
 \maketitle
@@ -184,31 +185,65 @@ Conditioning cluster $i$ on the other knots is the same as conditioning it
 on everything. The inverse in \eqref{eq:cheap} is $(k-1)\times(k-1)$.
 
 \begin{remark}[Relation to Vecchia approximations]
-A Vecchia approximation \parencite{vecchia1988} orders the variables and
-conditions each on a small subset of its predecessors. The conditionals are
-Schur complements, and the approximation is the choice of conditioning
-sets. The gateway model is one such choice made exact: the knots come
-first, jointly, and each cluster's remaining members are conditioned on
-their own knot alone. It is a sparser relative of the knot-based special
-cases collected by \textcite{katzfuss2021}.
-
-\Cref{prop:sufficient} is the Markov property of that graph. Given the other
-knots, a cluster is uncorrelated with every other asset outside it. The
-conditioning here is on a subset of all other variables rather than of
-predecessors, because only the blocks of $\Sigma^{-1}u$ are needed and no
-joint density is formed. When the model fails, using \eqref{eq:cheap}
-anyway is the approximation.
+A Vecchia approximation orders the variables and replaces each conditioning
+set by a small subset of the predecessors, which defines one acyclic
+approximate joint law \parencite{vecchia1988,katzfuss2021}. The conditionals
+are Schur complements. Replacing $-i$ by $P_{-i}$ in \eqref{eq:complement}
+is the same truncation of a conditioning set, but it is applied to the full
+conditional of every cluster at once. Those conditionals are mutually
+cyclic and no approximate joint law is formed, so the recipe is
+Vecchia-inspired rather than a Vecchia approximation.
 \end{remark}
 
-\begin{remark}[Testing the model and choosing knots]
-Regressing each remaining member on its own knot and the other knots, and checking
-that the other-knot coefficients vanish, does not test the model. Member
-residuals can be orthogonal to every knot and still be correlated with each
-other across clusters, and the sufficiency of the knots then fails. The
-direct diagnostic is the size of $R_j(p_j)$ in \eqref{eq:residual},
-computed from the sample covariance before any portfolio is built. The same
-quantity gives a rule for choosing knots: take $p_j$ to minimize
-$\|R_j(p)\|$ over $p\in I_j$.
+The gateway model itself does have an exact Vecchia form.
+
+\begin{corollary}[Gaussian factorization]
+\label{cor:gaussian}
+If the returns $r$ are jointly Gaussian, the gateway model holds if and only
+if
+\begin{equation}
+  f(r) \;=\; f(r_P)\,\prod_{i=1}^{k} f\big(r_{J_i}\mid r_{p_i}\big).
+  \label{eq:dag}
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Under the model the residuals $\varepsilon_i=r_{J_i}-\beta_ir_{p_i}$ are
+uncorrelated with $r_P$ and with each other, hence independent under
+Gaussianity, which gives \eqref{eq:dag}. Conversely \eqref{eq:dag} makes
+$\varepsilon_i$ independent of every asset outside $I_i$.
+\end{proof}
+
+With the knots ordered first, \eqref{eq:dag} is a block-Vecchia
+factorization, a sparser relative of the knot-based cases collected by
+\textcite{katzfuss2021}. The covariance results in this note do not need
+Gaussianity.
+
+\begin{remark}[Testing the model]
+Regressing each remaining member on its own knot and the other knots, and
+checking that the other-knot coefficients vanish, does not test the model.
+Member residuals can be orthogonal to every knot and still be correlated
+with each other across clusters, and the sufficiency of the knots then
+fails. The model holds exactly when $R_j(p_j)=0$ for every $j$, which can
+be checked from the sample covariance before any portfolio is built.
+\end{remark}
+
+\begin{remark}[Measuring the loss and choosing knots]
+The raw size of $R_j$ does not measure what is lost when the model fails. A
+residual with variance $\delta^2$ and covariance $c\delta$ with an outside
+asset has $R=c\delta\to0$, while the Schur correction it carries, $c^2$,
+does not move. The loss for cluster $i$ is the omitted correction
+\begin{equation}
+  \Delta_i \;=\; \Sigma_{i,-i}\Sigma_{-i,-i}^{-1}\Sigma_{-i,i}
+   -\Sigma_{i,P_{-i}}\Sigma_{P_{-i}P_{-i}}^{-1}\Sigma_{P_{-i},i}
+  \;\succeq\; 0,
+  \label{eq:loss}
+\end{equation}
+the part of cluster $i$ explained by the other assets beyond their knots.
+A scale-free screen for a candidate knot $p\in I_j$ is the largest canonical
+correlation between the residual of $I_j\setminus\{p\}$ on $p$ and the
+assets outside $I_j$. Both need a large inverse, but they are diagnostics
+computed once and are not part of the allocation.
 \end{remark}
 
 \begin{remark}[A symmetric factor model]
@@ -218,8 +253,9 @@ with each other and with the factors. Then
 $R_j(p)=(1-\rho_p)\,\lambda_{J_j}\Cov(f_j,r_{-j})$, where
 $\rho_p=\lambda_p^2\Var(f_j)/\sigma_p^2$ is the share of the knot's variance
 explained by the factor. The gateway model holds to the extent the knot is
-the factor. The member most aligned with the cluster's first principal
-component is then approximately the right knot.
+the factor. A knot with a high $\rho_p$ is then the natural choice, and the
+member most aligned with the cluster's first principal component
+approximates it.
 \end{remark}
 
 \section{The bridge}
@@ -376,19 +412,21 @@ leave-one-knot-out inverse per cluster, obtainable from $\Sigma_{PP}^{-1}$
 by a rank-one downdate.
 
 If the gateway model fails, \eqref{eq:cheap} approximates the full
-complement in \eqref{eq:complement}, as any Vecchia approximation does. The
-size of $R_j$ in \eqref{eq:residual} measures what is lost.
+complement in \eqref{eq:complement}, and $\Delta_i$ in \eqref{eq:loss} is
+what is lost.
 
 \section{Closing}
 
 The contribution is deliberately small.\footnote{A script next to the
 manuscript, \path{verify_schur_nco_bridge.py}, checks
-\cref{prop:sufficient,prop:bridge,prop:outer}, the remarks on diagnostics,
-on covariance-only rules and on the tree, and the symmetric-factor formula,
+\cref{prop:sufficient,prop:bridge,prop:outer}, the precision sparsity
+implied by \cref{cor:gaussian}, the remarks on diagnostics, on the loss, on
+covariance-only rules and on the tree, and the symmetric-factor formula,
 on random covariances to $10^{-10}$. It also confirms that the exactness
 claims fail when the gateway model is violated. The repository's test suite
 runs it.} The identity is block inversion, the
-restricted conditioning set is Vecchia's, and the damping is from
+truncation of the conditioning set follows Vecchia approximations, and the
+damping is from
 \textcite{cotton2024schur}. What is added is the model under which one knot
 per cluster suffices, and the bridge from NCO to the global optimum that it
 makes cheap.

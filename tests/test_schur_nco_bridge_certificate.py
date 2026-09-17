@@ -64,3 +64,16 @@ def test_symmetric_factor_residual_formula(cert, rng):
 
 def test_complements_compose(cert, rng):
     assert cert.check_quotient(rng, trials=20)["compose"] < cert.TOL
+
+
+
+def test_loss_is_psd_zero_under_model_and_not_tracked_by_R(cert, rng):
+    r = cert.check_loss(rng, trials=15)
+    assert r["zero_under_model"] < cert.TOL and r["min_eig_violated"] > -1e-9
+    assert all(abs(loss - r["c2"]) < 1e-6 for _, loss in r["R_vs_loss"])
+    assert r["R_vs_loss"][-1][0] < 0.011 * r["R_vs_loss"][0][0]
+
+
+def test_gaussian_factorization_precision_sparsity(cert, rng):
+    r = cert.check_precision_sparsity(rng, trials=15)
+    assert r["model"] < 1e-8 and r["violated"] > 1e-3
