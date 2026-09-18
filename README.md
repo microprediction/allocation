@@ -44,8 +44,8 @@ This is all MIT-licensed and anyone is welcome to take anything here.
 | Estimator | Status | Notes |
 |-----------|--------|-------|
 | `ThurstonePortfolio` | working | Ability tilt: weights are winning probabilities of a correlated race; calibrate to a benchmark under a reference correlation, tilt under the estimate; smooth common-seed transport for `partial_fit`. Built on [`thurstone`](https://github.com/microprediction/thurstone). |
-| `SchurComplementary` | working | Online Schur-complementary construction (`gamma`: HRP at 0 → min-variance as →1) over a smooth **Fiedler seriation** instead of a dendrogram, so `partial_fit` is low-turnover. |
-| `SchurBridge` | working | **One engine that nests the rest**: a partition (Fiedler cut or fixed labels), two Schur dials `gamma` (cluster on the outside) and `eta` (asset on its cluster mates), a companion vector, and HERC's budget rule. Corners: HERC, HRP, NCO, min-variance, max-diversification, tangency, inverse variance. See below. |
+| `SchurComplementary` | working | The **collapsed encoding** of the HRP bridge, matching skfolio to machine precision: HRP at `gamma=0`, *approaching* min-variance as `gamma→1` (not exactly; `SchurBridge` is the exact one). Over a smooth **Fiedler seriation** instead of a dendrogram, so `partial_fit` is low-turnover. |
+| `SchurBridge` | working | **Bridges named by their endpoints, one engine underneath**: `hrp_to_min_variance(gamma)`, `hmv_to_min_variance`, `herc_to_min_variance(gamma, eta, k)`, `nco_to_min_variance(gamma, k)`, `inverse_variance_to_min_variance(eta)`, each exact at both ends; `companion='vol'`/`'mean'` lands on maximum diversification / tangency instead. See below. |
 | `HierarchicalRiskParity` | working | Dynamic HRP — the `gamma=0` special case of the Schur construction (recursive-bisection risk parity over the Fiedler order); named for recognisability. |
 | `RiskParity` | working | Equal-risk-contribution (ERC); interior convex solution, solved by coordinate descent **warm-started from the previous weights** so updates stay smooth. |
 | `EqualWeight`, `InverseVariance` | working | Smooth baselines for benchmarking (`1/n`; `w ∝ 1/σ²`). |
@@ -58,48 +58,53 @@ Each has a river-style streaming twin for a *changing* universe — `StreamingTh
 - For the **closed-form linear allocators** (`MinimumVariance`, `MaximumDiversification`, `InverseVariance`) the allocator factor is already a smooth (rational) function of `Σ`, so weight-smoothness *is* covariance-smoothness — pair them with a smooth online covariance (the default EWMA, a shrinkage estimator, or a `precise` skater) and you're done. Caveats: keep `Σ` well-conditioned (use `shrinkage`, since `Σ⁻¹` swings near a vanishing eigenvalue) and avoid hard long-only QPs (they kink at the zero bound — the smooth long-only min-variance is `SchurComplementary` as `gamma→1`).
 - The package's distinctive work is the **other** family, where the allocator factor itself is rough no matter how smooth `Σ` is. Three sources, three primitives: sampling noise → common-seed transport (Thurstone); combinatorial ordering → Fiedler seriation (Schur/HRP); active-set kinks → keep the solution interior (ERC is interior by construction).
 
-### One engine: the Schur bridge
+### Bridges, named by their endpoints
 
-Block inversion writes the global direction `Σ⁻¹u` cluster by cluster: each
-cluster's block is a minimum-variance direction on its covariance *conditional on
-everything else*, and the cluster totals are the inverse of that conditional
-variance. The hierarchical and clustered heuristics all drop conditioning
-somewhere. `SchurBridge` puts it back by degrees, with two dials:
-
-- `gamma` conditions each cluster on the assets outside it;
-- `eta` conditions each asset on its cluster mates (`0` = inverse variance inside,
-  `1` = the cluster's minimum-variance direction; closed form, one inverse per cluster).
+Schur conditioning is a technique; what matters is what it connects. Block
+inversion writes the global direction `Σ⁻¹u` cluster by cluster: each cluster's
+block is a minimum-variance direction on its covariance *conditional on everything
+else*, with budget the inverse of that conditional variance. Every hierarchical
+or clustered heuristic drops conditioning somewhere. `SchurBridge` puts it back by
+degrees with two dials, `gamma` (cluster on the outside) and `eta` (asset on its
+cluster mates), and a bridge earns its name only if **both ends are exact**:
 
 ```python
 from allocation import SchurBridge
 
-SchurBridge(gamma=0, eta=0, n_clusters=8)                       # HERC
-SchurBridge(gamma=0, eta=1, n_clusters=8, outer="optimize")     # NCO
-SchurBridge(gamma=0.6, eta=1, n_clusters=8, outer="optimize", conditioning="knots")  # the NCO bridge
-SchurBridge(gamma=0, fitness="naive")                           # HRP over the Fiedler order
-SchurBridge(gamma=1, eta=1)                                     # minimum variance, any partition
-SchurBridge(gamma=1, eta=1, companion="vol")                    # maximum diversification
-SchurBridge(gamma=1, eta=1, companion="mean")                   # tangency
-SchurBridge(n_clusters=1, eta=0.5)                              # halfway from inverse variance to min-var
+SchurBridge.hrp_to_min_variance(gamma=0.5)                      # HRP -> min-variance, one dial
+SchurBridge.hmv_to_min_variance(gamma=0.5)                      # hierarchical min-var (Cotton 2024) -> min-variance
+SchurBridge.herc_to_min_variance(gamma=0.5, eta=0.5, n_clusters=8)   # HERC -> min-variance, the square
+SchurBridge.nco_to_min_variance(gamma=0.5, n_clusters=8)        # NCO -> min-variance
+SchurBridge.inverse_variance_to_min_variance(eta=0.5)           # inverse variance -> min-variance (Stevens' path)
+SchurBridge.hrp_to_min_variance(0.5, companion="vol")           # ... -> maximum diversification
+SchurBridge.hrp_to_min_variance(0.5, companion="mean")          # ... -> tangency
+est.endpoints_                                                  # e.g. ('HRP', 'minimum variance')
 ```
 
-Two facts make it the streaming choice. Everything after the partition is a
-closed-form, continuous function of the covariance. And at `(1, 1)` the weights do
-not depend on the partition at all, so the turnover caused by a cluster membership
-change shrinks to zero as the dials approach the optimizer (checked in
-`experiments/bridge_churn_and_scale.py`): the same dials that damp estimation
-noise damp reclustering churn. The partition itself is the smooth Fiedler order,
-bisected (`n_clusters=None`) or cut into contiguous blocks (`n_clusters=k`), or a
-fixed label vector (`clusters=`) such as sectors.
+The HRP bridge needs a split rule that moves with the dial: the variance of the
+child's `eta`-damped naive portfolio on its conditioned pair (`split='dial'`). HRP's
+own naive split (`split='hrp'`, the rule inside `SchurComplementary` and skfolio)
+starts at HRP but does not reach minimum variance; the min-variance split
+(`split='minvar'`) reaches it but starts at hierarchical minimum variance. Which
+published "Schur" is which is tabulated on the
+[taxonomy page](https://schur.microprediction.org/taxonomy.html).
 
-`conditioning` picks the conditioning set: `'tree'` composes down the bisection
-tree (exact, one half-size solve at the root), `'flat'` conditions on every
-other asset (exact, expensive), and `'knots'` conditions on one factor-mimicking
-portfolio per other cluster, which is exact when cross-cluster dependence runs
-through one latent factor per cluster and costs only cluster-sized solves.
-`long_only=True` caps `eta` at each cluster's long-only frontier, which has a
-closed form. The exact-arithmetic theory behind the corners is in the papers
-at [schur.microprediction.org](https://schur.microprediction.org).
+Two facts make the bridge the streaming choice. Everything after the partition is a
+closed-form, continuous function of the covariance. And at the far end the weights
+do not depend on the partition at all, so the turnover caused by a cluster
+membership change shrinks to zero as the dials approach it (checked in
+`experiments/bridge_churn_and_scale.py`): the dials that damp estimation noise damp
+reclustering churn. The partition is the smooth Fiedler order, bisected
+(`n_clusters=None`) or cut into contiguous blocks (`n_clusters=k`), or a fixed label
+vector (`clusters=`) such as sectors.
+
+`conditioning` picks the path: `'siblings'` composes down the bisection tree
+(exact, one half-size solve at the root), `'all'` conditions on every other asset
+(exact, expensive), and `'factor'` conditions on one factor-mimicking portfolio per
+other cluster, exact when cross-cluster dependence runs through one latent factor
+per cluster and costing only cluster-sized solves. `long_only=True` caps `eta` at
+each cluster's closed-form long-only frontier. The exact-arithmetic theory behind
+the corners is in the papers at [schur.microprediction.org](https://schur.microprediction.org).
 
 ### Very large universes (e.g. Russell 3000)
 

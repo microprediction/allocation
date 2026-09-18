@@ -263,8 +263,8 @@ class StreamingSchurBridge:
         eta: float = 1.0,
         n_clusters: int | None = None,
         clusters: dict | None = None,
-        conditioning: str = "tree",
-        fitness: str = "held",
+        conditioning: str = "siblings",
+        split: str = "dial",
         outer: str = "stack",
         companion="ones",
         long_only: bool = False,
@@ -280,7 +280,7 @@ class StreamingSchurBridge:
         self.n_clusters = n_clusters
         self.clusters = clusters
         self.conditioning = conditioning
-        self.fitness = fitness
+        self.split = split
         self.outer = outer
         self.companion = companion
         self.long_only = long_only
@@ -306,7 +306,7 @@ class StreamingSchurBridge:
         if self.clusters is not None:
             labels = np.array([str(self.clusters.get(k, f"__{k}")) for k in ids])
             leaves = [np.where(labels == g)[0] for g in np.unique(labels)]
-            if self.conditioning != "tree":
+            if self.conditioning != "siblings":
                 return leaves
             def tree(ls):
                 if len(ls) == 1:
@@ -319,7 +319,7 @@ class StreamingSchurBridge:
         self._fiedler = dict(zip(ids, v))
         leaf = 1 if self.n_clusters is None else int(np.ceil(n / max(1, int(self.n_clusters))))
         part = bisection_tree(order, leaf_size=leaf)
-        return part if self.conditioning == "tree" else tree_leaves(part)
+        return part if self.conditioning == "siblings" else tree_leaves(part)
 
     def _recompute(self, ids) -> None:
         cov = self._cov.matrix(ids)
@@ -331,7 +331,7 @@ class StreamingSchurBridge:
         part = self._partition(ids, cov)
         w = bridge_weights(
             cov, part, gamma=self.gamma, eta=self.eta, conditioning=self.conditioning,
-            fitness=self.fitness, outer=self.outer, companion=u, ridge=self.ridge,
+            split=self.split, outer=self.outer, companion=u, ridge=self.ridge,
             long_only=self.long_only,
         )
         self._weights = dict(zip(ids, w))

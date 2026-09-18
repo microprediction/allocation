@@ -1,26 +1,27 @@
-"""``SchurBridge``: the one estimator the others are corners of.
+"""``SchurBridge``: bridges named by their endpoints, one engine underneath.
 
-A partition of the assets, two damping dials, a companion vector and a budget
-rule (see :mod:`allocation._schur.bridge`). The partition comes from the smooth
-Fiedler seriation (a bisection tree, or the order cut into ``n_clusters``
-contiguous blocks) or from a fixed label vector such as sectors. Everything
-downstream of the partition is closed form and continuous in the covariance,
-and at ``(gamma, eta) = (1, 1)`` the weights do not depend on the partition at
-all, so reclustering churn is damped by the same dials that damp estimation
-noise.
+Schur conditioning is the technique. A *bridge* is what it connects: a
+heuristic at the near end and an optimizer at the far end, both exact. The
+named constructors say which:
 
-Corners, with the defaults ``conditioning='tree'``, ``fitness='held'``,
-``outer='stack'``::
+    SchurBridge.hrp_to_min_variance(gamma)
+    SchurBridge.hmv_to_min_variance(gamma)
+    SchurBridge.herc_to_min_variance(gamma, eta, n_clusters)
+    SchurBridge.nco_to_min_variance(gamma, n_clusters)
+    SchurBridge.inverse_variance_to_min_variance(eta)
 
-    SchurBridge(gamma=0, eta=0, n_clusters=k)      HERC on k clusters
-    SchurBridge(gamma=0, eta=1, n_clusters=k)      cluster min-var, inverse-variance budgets
-    SchurBridge(gamma=0, eta=1, n_clusters=k, outer='optimize')   NCO
-    SchurBridge(gamma=g, eta=1, n_clusters=k, outer='optimize', conditioning='knots')   the NCO bridge
-    SchurBridge(gamma=0, fitness='naive')          HRP over the Fiedler order
-    SchurBridge(gamma=1, eta=1)                    minimum variance (any partition)
-    SchurBridge(gamma=1, eta=1, companion='vol')   maximum diversification
-    SchurBridge(gamma=1, eta=1, companion='mean')  tangency
-    SchurBridge(n_clusters=1, eta=e)               inverse variance -> min-var along Stevens' path
+and ``companion='vol'`` or ``'mean'`` on any of them lands on maximum
+diversification or the tangency portfolio instead. ``endpoints_`` reports the
+pair for whatever settings are in force.
+
+The partition comes from the smooth Fiedler seriation (a bisection tree, or
+the order cut into ``n_clusters`` contiguous blocks) or from a fixed label
+vector such as sectors. Everything downstream of the partition is closed form
+and continuous in the covariance, and at the far end the weights do not
+depend on the partition at all, so reclustering churn is damped by the same
+dials that damp estimation noise. See :mod:`allocation._schur.bridge` for the
+split rules and paths, and the taxonomy page at schur.microprediction.org for
+which published "Schur" is which.
 """
 
 from __future__ import annotations
@@ -49,7 +50,7 @@ def _companion_vector(companion, cov, mean):
 def _partition_from_labels(labels, conditioning):
     labels = np.asarray(labels)
     ids = [np.where(labels == g)[0] for g in np.unique(labels)]
-    if conditioning == "tree":
+    if conditioning == "siblings":
         return _tree_over(ids)
     return ids
 
@@ -62,8 +63,8 @@ def _tree_over(leaves):
 
 
 class SchurBridge(BaseOnlinePortfolio):
-    """The Schur bridge on a smooth partition: HERC, HRP, NCO, min-variance,
-    maximum diversification and tangency are all settings of this estimator.
+    """A Schur bridge on a smooth partition. HERC, HRP, HMV, NCO, minimum
+    variance, maximum diversification and tangency are all settings of it.
 
     Parameters
     ----------
@@ -74,23 +75,22 @@ class SchurBridge(BaseOnlinePortfolio):
         variance inside a cluster, ``1`` the cluster's minimum-variance direction.
     n_clusters : int or None, default None
         Cut the Fiedler order into this many contiguous clusters. ``None``
-        bisects down to single assets (the HRP / Schur tree).
+        bisects down to single assets (the HRP / HMV trees).
     clusters : array (n,) of labels or None, default None
         A fixed partition (sectors, a prior clustering). Overrides seriation.
-    conditioning : {'tree', 'flat', 'knots'}, default 'tree'
-        How a cluster is conditioned on the outside: composed down the
-        bisection tree, on every other asset, or on one factor-mimicking
-        portfolio per other cluster (the scalable choice; exact under a block
-        one-factor model of cross-cluster dependence).
-    fitness : {'held', 'naive'}, default 'held'
-        Budget rule between clusters. ``'held'`` (inverse variance of what the
-        cluster holds, on its conditioned pair) is exact at ``gamma = 1``;
-        ``'naive'`` is HRP's split, exact HRP at ``gamma = 0``.
+    conditioning : {'siblings', 'all', 'factor'}, default 'siblings'
+        The path: condition a cluster on its sibling block down the tree, on
+        every other asset, or on one factor-mimicking portfolio per other
+        cluster (the scalable choice; exact under a block one-factor model).
+    split : {'dial', 'minvar', 'hrp'}, default 'dial'
+        Budget rule between siblings and clusters. ``'dial'`` starts at HRP,
+        ``'minvar'`` at hierarchical minimum variance; both are exact at the
+        far end. ``'hrp'`` is the collapsed skfolio rule, not exact there.
     outer : {'stack', 'optimize'}, default 'stack'
         Stack the clusters' inverse-fitness vectors, or run NCO's outer
         minimum-variance step over the cluster directions.
     companion : {'ones', 'vol', 'mean'} or array (n,), default 'ones'
-        The vector ``u`` of ``Sigma^{-1} u`` at full coupling.
+        The vector ``u`` of ``Sigma^{-1} u`` at the far end.
     long_only : bool, default False
         Cap ``eta`` at each cluster's long-only frontier.
     ridge : float, default 0.0
@@ -106,8 +106,8 @@ class SchurBridge(BaseOnlinePortfolio):
         eta: float = 1.0,
         n_clusters: int | None = None,
         clusters=None,
-        conditioning: str = "tree",
-        fitness: str = "held",
+        conditioning: str = "siblings",
+        split: str = "dial",
         outer: str = "stack",
         companion="ones",
         long_only: bool = False,
@@ -124,7 +124,7 @@ class SchurBridge(BaseOnlinePortfolio):
         self.n_clusters = n_clusters
         self.clusters = clusters
         self.conditioning = conditioning
-        self.fitness = fitness
+        self.split = split
         self.outer = outer
         self.companion = companion
         self.long_only = long_only
@@ -136,6 +136,52 @@ class SchurBridge(BaseOnlinePortfolio):
         self._order = None
         self._clusters = None
         self.eta_effective_ = None
+
+    # ---------------------------------------------------- named by endpoints
+    @classmethod
+    def hrp_to_min_variance(cls, gamma: float = 0.5, **kw):
+        """HRP at ``gamma = 0``, minimum variance at ``gamma = 1`` (both exact)."""
+        return cls(gamma=gamma, eta=gamma, n_clusters=None, conditioning="siblings", split="dial", **kw)
+
+    @classmethod
+    def hmv_to_min_variance(cls, gamma: float = 0.5, **kw):
+        """Hierarchical minimum variance (Cotton 2024) at ``gamma = 0``, minimum variance at ``1``."""
+        return cls(gamma=gamma, eta=1.0, n_clusters=None, conditioning="siblings", split="minvar", **kw)
+
+    @classmethod
+    def herc_to_min_variance(cls, gamma: float = 0.5, eta: float = 0.5, n_clusters: int = 8, **kw):
+        """HERC at ``(0, 0)``, minimum variance at ``(1, 1)``: the square."""
+        kw.setdefault("conditioning", "factor")
+        return cls(gamma=gamma, eta=eta, n_clusters=n_clusters, outer="stack", **kw)
+
+    @classmethod
+    def nco_to_min_variance(cls, gamma: float = 0.5, n_clusters: int = 8, **kw):
+        """NCO at ``gamma = 0``, minimum variance at ``gamma = 1``."""
+        kw.setdefault("conditioning", "factor")
+        return cls(gamma=gamma, eta=1.0, n_clusters=n_clusters, outer="optimize", **kw)
+
+    @classmethod
+    def inverse_variance_to_min_variance(cls, eta: float = 0.5, **kw):
+        """Inverse variance at ``eta = 0``, minimum variance at ``eta = 1``, along Stevens' path."""
+        return cls(gamma=0.0, eta=eta, n_clusters=1, conditioning="all", **kw)
+
+    @property
+    def endpoints_(self) -> tuple[str, str]:
+        """``(near end, far end)`` implied by the settings, as method names."""
+        far = {"ones": "minimum variance", "vol": "maximum diversification", "mean": "tangency"}.get(
+            self.companion if isinstance(self.companion, str) else "array", "Sigma^{-1} u"
+        )
+        if self.split == "hrp":
+            far += " (approximate)"
+        if self.n_clusters == 1 and self.clusters is None:
+            near = "inverse variance"
+        elif self.outer == "optimize":
+            near = "NCO"
+        elif self.n_clusters is None and self.clusters is None:
+            near = {"dial": "HRP", "minvar": "hierarchical minimum variance", "hrp": "HRP"}[self.split]
+        else:
+            near = "HERC" if self.eta == 0.0 or self.gamma == 0.0 else "cluster minimum variance"
+        return near, far
 
     # ------------------------------------------------------------ partition
     def _partition(self, cov: np.ndarray):
@@ -152,7 +198,7 @@ class SchurBridge(BaseOnlinePortfolio):
             self._order = order
             leaf = 1 if self.n_clusters is None else int(math.ceil(n / max(1, int(self.n_clusters))))
             part = bisection_tree(order, leaf_size=leaf)
-            if self.conditioning != "tree":
+            if self.conditioning != "siblings":
                 part = tree_leaves(part)
         self._clusters = tree_leaves(part) if isinstance(part, tuple) else part
         return part
@@ -163,7 +209,7 @@ class SchurBridge(BaseOnlinePortfolio):
         part = self._partition(cov)
         w, info = bridge_weights(
             cov, part, gamma=self.gamma, eta=self.eta, conditioning=self.conditioning,
-            fitness=self.fitness, outer=self.outer, companion=u, ridge=self.ridge,
+            split=self.split, outer=self.outer, companion=u, ridge=self.ridge,
             long_only=self.long_only, return_info=True,
         )
         self._weights = w

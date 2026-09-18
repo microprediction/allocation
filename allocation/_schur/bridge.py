@@ -1,25 +1,41 @@
-"""The Schur bridge in pair form: one engine that nests the package's allocators.
+"""Schur bridges in pair form: one engine, named by endpoints.
 
-Every allocator here except Thurstone and risk parity is a point in one
-recipe. Take a partition of the assets into clusters. Condition each cluster on
-the assets outside it (damped by ``gamma``), condition each asset on its cluster
-mates (damped by ``eta``), and budget each cluster by the inverse variance of
-what it holds. Block inversion says this reproduces the global direction
-``Sigma^{-1} u`` exactly at ``(gamma, eta) = (1, 1)`` for *any* partition, and the
-corners are familiar methods:
+Schur conditioning is a technique. What distinguishes the objects built with it
+is where they start, where they land, and the path between. Take a partition
+of the assets into clusters. Condition each cluster on the assets outside it
+(damped by ``gamma``), condition each asset on its cluster mates (damped by
+``eta``), and budget each cluster by the inverse of its variance. Block
+inversion says this lands on the global direction ``Sigma^{-1} u`` exactly at
+``(gamma, eta) = (1, 1)`` for *any* partition, and the near ends are the
+familiar heuristics:
 
-============================  ==========================================
-``(0, 0)``                    HERC (inverse variance inside, inverse
-                              cluster variance across)
-``(0, 1)``                    cluster min-variance with inverse-variance budgets
-``(1, 1)``                    ``Sigma^{-1} u``: min-variance (``u = 1``),
-                              max-diversification (``u = sigma``), tangency
-                              (``u = mu``)
-one cluster, ``eta``          inverse variance -> ``Sigma^{-1} u`` (Stevens' path)
-singleton clusters, ``gamma`` the same path
-bisection tree, naive fitness HRP at ``gamma = 0``; the Schur tree at ``gamma > 0``
-outer optimizer, ``eta = 1``  NCO at ``gamma = 0``; the NCO bridge at ``gamma > 0``
-============================  ==========================================
+===================================  ====================================
+near end (dials at 0)                far end (dials at 1)
+===================================  ====================================
+HRP (bisection tree, split='dial')   minimum variance
+HMV (bisection tree, split='minvar') minimum variance
+HERC (clusters, both dials)          minimum variance
+NCO (clusters, outer='optimize')     minimum variance
+inverse variance (one cluster)       minimum variance, along Stevens' path
+any of the above with u = sigma, mu  maximum diversification, tangency
+===================================  ====================================
+
+Only a rule that is exact at *both* ends deserves the plain name of a bridge.
+The split rule decides the near end on a tree:
+
+* ``'dial'``   -- the variance of the child's ``eta``-damped naive portfolio on
+  its conditioned pair. HRP exactly at the near end, exact at the far end.
+  The default.
+* ``'minvar'`` -- the child pair's minimum variance ``1 / (b^T Q^{-1} b)``.
+  Hierarchical minimum variance (Cotton 2024) at the near end, exact at the
+  far end.
+* ``'hrp'``    -- HRP's naive split, the variance of the inverse-variance
+  portfolio of the child block. HRP at the near end, *not* exact at the far
+  end. This is the rule of the collapsed skfolio encoding; kept for comparison.
+
+On a flat partition the same rule budgets the clusters: ``'dial'`` is HERC's
+rule, the variance of what the cluster holds, and ``'minvar'`` budgets by the
+cluster's minimum variance; they agree at ``eta = 1``.
 
 The objects are *pairs* ``(Q, b)``: an SPD block and its companion vector.
 Conditioning a subset ``I`` on ``J`` inside a pair, damped by ``g``::
@@ -29,22 +45,21 @@ Conditioning a subset ``I`` on ``J`` inside a pair, damped by ``g``::
 Everything is closed form and continuous in the covariance for a fixed
 partition, so a smooth covariance and a smooth partition give smooth weights.
 At ``(1, 1)`` the weights do not depend on the partition at all, so the cost of
-a membership change shrinks as the dials approach the optimizer.
+a membership change shrinks as the dials approach the far end.
 
-Three conditioning sets for the outer dial:
+The path is the conditioning set of the outer dial:
 
-* ``'flat'``  -- each cluster on every other asset (exact, one solve of size
-  ``n - |C|`` per cluster);
-* ``'tree'``  -- composed down a bisection tree, each block on its sibling
+* ``'siblings'`` -- composed down a bisection tree, each block on its sibling
   (exact at ``gamma = 1`` because Schur complements compose; a solve of half
   size at the root);
-* ``'knots'`` -- each cluster on one factor-mimicking portfolio per other
+* ``'all'``      -- each cluster on every other asset (exact; one solve of
+  size ``n - |C|`` per cluster);
+* ``'factor'``   -- each cluster on one factor-mimicking portfolio per other
   cluster (exact under a block one-factor model of cross-cluster dependence;
-  only cluster-sized solves and one ``k x k`` solve; the scalable, smooth
-  choice).
+  cluster-sized solves and one ``k x k`` solve; the scalable, smooth choice).
 
 References: Cotton (2024) arXiv:2411.05807; the NCO bridge note (SSRN 7480738);
-the HERC square note, all at schur.microprediction.org.
+the HERC square note; the taxonomy page at schur.microprediction.org.
 """
 
 from __future__ import annotations
@@ -260,30 +275,45 @@ def _leaf_vector(Q, b, eta, ridge, long_only, info):
     return leaf_direction(Q, b, e, ridge)
 
 
-def _rescale(z, Q, b, fitness):
+def _rescale(z, Q, b, split, eta, ridge=0.0):
     """Scale a child's unnormalized vector so that stacking children is the
-    inverse-fitness budget rule.
+    inverse-fitness budget rule ``w / nu`` with ``b^T w = 1``.
 
-    ``'held'``: ``z * (b^T z) / (z^T Q z)`` -- the child's cash-per-variance on
-    its own pair; equals ``Q^{-1} b`` when ``z`` already is, so the recursion is
-    exact at full coupling, and it has no singularity when ``b^T z`` crosses zero.
-    ``'naive'``: HRP's rule, ``w / nu`` with ``w = z / 1^T z`` and ``nu`` the
-    variance of the inverse-variance portfolio of the child block.
+    ``'dial'``   : ``nu`` = variance of the ``eta``-damped naive portfolio of the
+                   child pair (HRP at the near end, exact at the far end).
+    ``'minvar'`` : ``nu = 1 / (b^T Q^{-1} b)`` (hierarchical minimum variance
+                   at the near end, exact at the far end).
+    ``'hrp'``    : ``nu`` = variance of the inverse-variance portfolio of the
+                   child block (HRP at the near end, not exact at the far end).
+    The scaling is invariant to the scale of ``z`` and has no singularity when
+    ``b^T z`` crosses zero, except for ``'hrp'`` which normalizes by cash.
     """
     zQz = float(z @ Q @ z)
     if zQz <= 0.0:
         return np.zeros_like(z)
-    if fitness == "held":
-        return z * (float(b @ z) / zQz)
-    if fitness == "naive":
+    if split == "dial":
+        v = leaf_direction(Q, b, eta, ridge)
+        bv = float(b @ v)
+        vQv = float(v @ Q @ v)
+        if vQv <= 0.0 or bv == 0.0:
+            return np.zeros_like(z)
+        nu = vQv / (bv * bv)
+        bz = float(b @ z)
+        return z * (1.0 / (bz * nu)) if bz != 0.0 else np.zeros_like(z)
+    if split == "minvar":
+        q = _ridge_solve(Q, b, ridge)
+        nu = 1.0 / float(b @ q)
+        bz = float(b @ z)
+        return z * (1.0 / (bz * nu)) if bz != 0.0 else np.zeros_like(z)
+    if split == "hrp":
         s = float(z.sum())
         if abs(s) < 1e-300:
             return np.zeros_like(z)
         return (z / s) / _naive_variance(Q)
-    raise ValueError("fitness must be 'held' or 'naive'")
+    raise ValueError("split must be 'dial', 'minvar' or 'hrp'")
 
 
-def _recurse_tree(Q, b, tree, gamma, eta, ridge, fitness, long_only, info):
+def _recurse_tree(Q, b, tree, gamma, eta, ridge, split, long_only, info):
     """Unnormalized vector on the local indices of the pair, conditioning
     composed down ``tree`` (leaves are index arrays into the *local* pair)."""
     if isinstance(tree, np.ndarray):
@@ -295,9 +325,9 @@ def _recurse_tree(Q, b, tree, gamma, eta, ridge, fitness, long_only, info):
     J = np.arange(nL, n)
     QL, bL = condition_pair(Q, b, I, J, gamma, ridge)
     QR, bR = condition_pair(Q, b, J, I, gamma, ridge)
-    zL = _recurse_tree(QL, bL, _relabel(L, 0), gamma, eta, ridge, fitness, long_only, info)
-    zR = _recurse_tree(QR, bR, _relabel(R, nL), gamma, eta, ridge, fitness, long_only, info)
-    return np.concatenate([_rescale(zL, QL, bL, fitness), _rescale(zR, QR, bR, fitness)])
+    zL = _recurse_tree(QL, bL, _relabel(L, 0), gamma, eta, ridge, split, long_only, info)
+    zR = _recurse_tree(QR, bR, _relabel(R, nL), gamma, eta, ridge, split, long_only, info)
+    return np.concatenate([_rescale(zL, QL, bL, split, eta, ridge), _rescale(zR, QR, bR, split, eta, ridge)])
 
 
 def _relabel(tree, offset):
@@ -328,8 +358,8 @@ def bridge_weights(
     *,
     gamma: float = 1.0,
     eta: float = 1.0,
-    conditioning: str = "tree",
-    fitness: str = "held",
+    conditioning: str = "siblings",
+    split: str = "dial",
     outer: str = "stack",
     companion=None,
     ridge: float = 0.0,
@@ -342,20 +372,23 @@ def bridge_weights(
     ----------
     covariance : (n, n) array
     partition : list of index arrays, or a nested tuple (bisection tree) whose
-        leaves are index arrays. A tree is required for ``conditioning='tree'``;
-        for ``'flat'`` / ``'knots'`` only its leaves are used.
+        leaves are index arrays. A tree is used by ``conditioning='siblings'``
+        (one is built over the clusters if a list is given); ``'all'`` and
+        ``'factor'`` use only the leaves.
     gamma : float in [0, 1]
         Damping of each cluster's conditioning on the outside.
     eta : float in [0, 1]
         Damping of each asset's conditioning on its cluster mates.
-    conditioning : {'tree', 'flat', 'knots'}
-    fitness : {'held', 'naive'}
-        Budget rule between siblings / clusters. ``'held'`` is exact at
-        ``gamma = 1``; ``'naive'`` is HRP's inverse-variance-portfolio variance.
+    conditioning : {'siblings', 'all', 'factor'}
+        The path: the conditioning set of the outer dial (see the module docstring).
+    split : {'dial', 'minvar', 'hrp'}
+        Budget rule between siblings on a tree and between clusters on a flat
+        partition.
+        ``'dial'`` and ``'minvar'`` are exact at the far end; ``'hrp'`` is not.
     outer : {'stack', 'optimize'}
         Combine clusters by stacking their inverse-fitness vectors (HERC / the
         tree recursion) or by a minimum-variance optimizer over the cluster
-        directions (NCO's outer step; ignores ``fitness``).
+        directions (NCO's outer step; ignores ``split``).
     companion : None, 'ones', 'vol', or (n,) array
         The vector ``u``: ``None``/'ones' gives ``Sigma^{-1} 1`` at full
         coupling, ``'vol'`` gives ``Sigma^{-1} sigma`` (maximum diversification),
@@ -384,7 +417,7 @@ def bridge_weights(
     clusters = tree_leaves(partition) if is_tree else [np.asarray(c, dtype=int) for c in partition]
     info["clusters"] = clusters
 
-    if conditioning == "tree":
+    if conditioning == "siblings":
         if not is_tree:
             partition = bisection_tree(np.concatenate(clusters), leaf_size=1) if len(clusters) == n \
                 else _balanced_tree_over(clusters)
@@ -402,11 +435,11 @@ def bridge_weights(
                 D.append(col)
             w = _outer_optimize(cov, u, D)
         else:
-            zl = _recurse_tree(Q, b, local, gamma, eta, ridge, fitness, long_only, info)
+            zl = _recurse_tree(Q, b, local, gamma, eta, ridge, split, long_only, info)
             w = np.zeros(n)
             w[order] = zl
-    elif conditioning in ("flat", "knots"):
-        if conditioning == "flat":
+    elif conditioning in ("all", "factor"):
+        if conditioning == "all":
             pairs = []
             for C in clusters:
                 J = np.setdiff1d(np.arange(n), C)
@@ -422,11 +455,11 @@ def bridge_weights(
                 col[C] = zc
                 D.append(col)
             else:
-                w[C] = _rescale(zc, QC, bC, fitness)
+                w[C] = _rescale(zc, QC, bC, split, eta, ridge)
         if outer == "optimize":
             w = _outer_optimize(cov, u, D)
     else:
-        raise ValueError("conditioning must be 'tree', 'flat' or 'knots'")
+        raise ValueError("conditioning must be 'siblings', 'all' or 'factor'")
 
     s = float(w.sum())
     w = w / s if abs(s) > 1e-300 else np.full(n, 1.0 / n)
