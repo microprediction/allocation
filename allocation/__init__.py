@@ -10,6 +10,7 @@ Estimators:
 """
 
 from .base import BaseOnlinePortfolio
+from .bridge import SchurBridge
 from .baselines import EqualWeight, InverseVariance, RiskParity
 from .constraints import BoxConstrained, StreamingBoxConstrained
 from .convex import (
@@ -32,6 +33,7 @@ from .keyed import (
     StreamingMinimumVariance,
     StreamingRiskParity,
     StreamingSchur,
+    StreamingSchurBridge,
     StreamingThurstone,
 )
 from .moments import DownsideSemicovariance, EwmaCovariance
@@ -45,6 +47,7 @@ __all__ = [
     "BaseOnlinePortfolio",
     "ThurstonePortfolio",
     "SchurComplementary",
+    "SchurBridge",
     "HierarchicalRiskParity",
     "EqualWeight",
     "InverseVariance",
@@ -63,6 +66,7 @@ __all__ = [
     # streaming / river-style (changing universe)
     "StreamingThurstone",
     "StreamingSchur",
+    "StreamingSchurBridge",
     "StreamingHRP",
     "StreamingEqualWeight",
     "StreamingInverseVariance",

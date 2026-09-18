@@ -25,6 +25,7 @@ from .convex import (
     mean_variance_weights,
     min_variance_weights,
 )
+from ._schur.bridge import bisection_tree, bridge_weights, tree_leaves
 from ._schur.coupling import compute_monotonic_weights, compute_weights
 from ._schur.seriation import seriate
 from ._thurstone.ability import base_density
@@ -37,6 +38,7 @@ __all__ = [
     "KeyedEwmaCovariance",
     "StreamingThurstone",
     "StreamingSchur",
+    "StreamingSchurBridge",
     "StreamingHRP",
     "StreamingEqualWeight",
     "StreamingInverseVariance",
@@ -234,6 +236,104 @@ class StreamingSchur:
             w, _ = compute_monotonic_weights(order, cov, self.gamma, ridge=self.ridge)
         else:
             w = compute_weights(order, cov, self.gamma, ridge=self.ridge)
+        self._weights = dict(zip(ids, w))
+
+    def predict_one(self, x: dict | None = None) -> dict:
+        return dict(self._weights)
+
+    @property
+    def weights(self) -> dict:
+        return dict(self._weights)
+
+
+class StreamingSchurBridge:
+    """Streaming Schur bridge over a changing universe (river-style).
+
+    ``learn_one({asset: ret})`` / ``predict_one()``. Parameters mirror
+    :class:`allocation.SchurBridge`. The Fiedler coordinate is carried per
+    asset id so the order, and hence the contiguous clusters cut from it, stay
+    stable as names enter and leave. A ``clusters`` dict ``{id: label}`` fixes
+    the partition instead (sectors); ids without a label form their own cluster.
+    """
+
+    def __init__(
+        self,
+        *,
+        gamma: float = 0.5,
+        eta: float = 1.0,
+        n_clusters: int | None = None,
+        clusters: dict | None = None,
+        conditioning: str = "tree",
+        fitness: str = "held",
+        outer: str = "stack",
+        companion="ones",
+        long_only: bool = False,
+        ridge: float = 0.0,
+        knn: int | None = None,
+        halflife: float = 60.0,
+        min_obs: int = 20,
+    ):
+        if not (0.0 <= gamma <= 1.0 and 0.0 <= eta <= 1.0):
+            raise ValueError("gamma and eta must lie in [0, 1].")
+        self.gamma = gamma
+        self.eta = eta
+        self.n_clusters = n_clusters
+        self.clusters = clusters
+        self.conditioning = conditioning
+        self.fitness = fitness
+        self.outer = outer
+        self.companion = companion
+        self.long_only = long_only
+        self.ridge = ridge
+        self.knn = knn
+        self.halflife = halflife
+        self.min_obs = min_obs
+        self._cov = KeyedEwmaCovariance(halflife=halflife)
+        self._fiedler: dict = {}
+        self._weights: dict = {}
+        self._n = 0
+
+    def learn_one(self, x: dict) -> "StreamingSchurBridge":
+        self._cov.learn_one(x)
+        self._n += 1
+        warm = [k for k in sorted(x.keys()) if self._cov.count.get(k, 0) >= self.min_obs]
+        if len(warm) >= 2:
+            self._recompute(warm)
+        return self
+
+    def _partition(self, ids, cov):
+        n = len(ids)
+        if self.clusters is not None:
+            labels = np.array([str(self.clusters.get(k, f"__{k}")) for k in ids])
+            leaves = [np.where(labels == g)[0] for g in np.unique(labels)]
+            if self.conditioning != "tree":
+                return leaves
+            def tree(ls):
+                if len(ls) == 1:
+                    return np.asarray(ls[0], dtype=int)
+                m = len(ls) // 2
+                return (tree(ls[:m]), tree(ls[m:]))
+            return tree(leaves)
+        prev = np.array([self._fiedler.get(k, 0.0) for k in ids]) if self._fiedler else None
+        order, v = seriate(cov, previous=prev, knn=self.knn)
+        self._fiedler = dict(zip(ids, v))
+        leaf = 1 if self.n_clusters is None else int(np.ceil(n / max(1, int(self.n_clusters))))
+        part = bisection_tree(order, leaf_size=leaf)
+        return part if self.conditioning == "tree" else tree_leaves(part)
+
+    def _recompute(self, ids) -> None:
+        cov = self._cov.matrix(ids)
+        u = self.companion
+        if isinstance(u, str) and u == "mean":
+            u = np.array([self._cov.mean.get(k, 0.0) for k in ids])
+        elif isinstance(u, dict):
+            u = np.array([float(u.get(k, 0.0)) for k in ids])
+        part = self._partition(ids, cov)
+        w = bridge_weights(
+            cov, part, gamma=self.gamma, eta=self.eta, conditioning=self.conditioning,
+            fitness=self.fitness, outer=self.outer, companion=u, ridge=self.ridge,
+            long_only=self.long_only,
+        )
         self._weights = dict(zip(ids, w))
 
     def predict_one(self, x: dict | None = None) -> dict:
