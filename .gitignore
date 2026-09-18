@@ -222,6 +222,7 @@ __marimo__/
 # Demonstration / research outputs
 examples/output/
 research/output/
+experiments/data/
 *.png
 *.pdf
 !docs/**/*.png
