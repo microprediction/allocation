@@ -38,8 +38,8 @@ family is split off in [`microprediction/schur`](https://github.com/micropredict
 - `neither-end-of-the-bridge.tex` — When the Out-of-Sample-Optimal Schur
   Portfolio Lies Between HRP and Minimum Variance
 - `schur-damping-pdlp.tex` — Schur Damping for Perpetual Demand Lending Pools
-- `schur-nco-bridge.tex` — A Schur Bridge from Nested Clustered Optimization
-  to Global Minimum Variance
+- `schur-nco-bridge.tex` — Nested Clustered Optimization Is One End of a Schur
+  Bridge, and the Interior Is Sometimes Provably Better
 
 All build directly on the original Schur-complementary allocation paper
 (`cotton2024schur`, arXiv:2411.05807), which this repo's papers also cite.
