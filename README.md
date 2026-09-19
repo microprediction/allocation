@@ -94,7 +94,8 @@ closed-form, continuous function of the covariance. And at the far end the weigh
 do not depend on the partition at all, so the turnover caused by a cluster
 membership change shrinks to zero as the dials approach it (checked in
 `experiments/bridge_churn_and_scale.py`): the dials that damp estimation noise damp
-reclustering churn. The partition is the smooth Fiedler order, bisected
+reclustering churn. The partition is the Fiedler order, which changes only when two
+coordinates cross, bisected
 (`n_clusters=None`) or cut into contiguous blocks (`n_clusters=k`), or a fixed label
 vector (`clusters=`) such as sectors.
 
@@ -203,7 +204,7 @@ The two novel methods are written up as working papers.
   [`papers/thurstone-portfolios/`](papers/thurstone-portfolios), built on
   [`thurstone`](https://github.com/microprediction/thurstone).
 - **Schur-complementary allocation** — robust, inversion-light allocation along a
-  smooth Fiedler seriation; background and bibliography at
+  spectral (Fiedler) seriation; background and bibliography at
   [schur.microprediction.org](https://schur.microprediction.org).
 
 ## Status

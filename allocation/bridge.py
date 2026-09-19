@@ -14,7 +14,8 @@ and ``companion='vol'`` or ``'mean'`` on any of them lands on maximum
 diversification or the tangency portfolio instead. ``endpoints_`` reports the
 pair for whatever settings are in force.
 
-The partition comes from the smooth Fiedler seriation (a bisection tree, or
+The partition comes from the Fiedler seriation, which reorders only when two
+coordinates cross (a bisection tree, or
 the order cut into ``n_clusters`` contiguous blocks) or from a fixed label
 vector such as sectors. Everything downstream of the partition is closed form
 and continuous in the covariance, and at the far end the weights do not
@@ -63,7 +64,7 @@ def _tree_over(leaves):
 
 
 class SchurBridge(BaseOnlinePortfolio):
-    """A Schur bridge on a smooth partition. HERC, HRP, HMV, NCO, minimum
+    """A Schur bridge on a spectral or fixed partition. HERC, HRP, HMV, NCO, minimum
     variance, maximum diversification and tangency are all settings of it.
 
     Parameters

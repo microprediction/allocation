@@ -119,8 +119,8 @@
       <h3>Schur-complementary, collapsed encoding</h3>
       <p>The port that matches skfolio's <code>SchurComplementary</code> to machine precision: HRP at <code>gamma=0</code>,
       moving <em>toward</em> minimum variance as <code>gamma&rarr;1</code> when the minimum-variance portfolio is long-only, without reaching it, ordered
-      by <em>Fiedler seriation</em> instead of a dendrogram so the weights are a smooth function
-      of the covariance. Kept for parity; the exact bridge is <code>SchurBridge</code>.
+      by <em>Fiedler seriation</em> instead of a dendrogram, which reorders only when two Fiedler
+      coordinates cross (each crossing a finite jump; lower turnover is an empirical result, not a continuity theorem). Kept for parity; the exact bridge is <code>SchurBridge</code>.
       Background and bibliography at
       <a href="https://schur.microprediction.org">schur.microprediction.org</a>.</p>
     </div>
