@@ -103,10 +103,25 @@
       transport keeps streaming updates low-turnover.</p>
     </div>
     <div class="card">
-      <h3>Schur-complementary</h3>
-      <p>The Schur <code>gamma</code> coupling (HRP at 0, minimum variance toward 1), but ordered
-      by <em>Fiedler seriation</em> instead of a dendrogram &mdash; so the hierarchy, and the
-      weights, are a smooth function of the covariance. Background and bibliography at
+      <h3>Schur bridges, named by their endpoints</h3>
+      <p>One engine of which HERC, HRP, hierarchical minimum variance, NCO, minimum variance,
+      maximum diversification and tangency are corners. A partition, two Schur dials
+      (<code>gamma</code>: cluster on the outside, <code>eta</code>: asset on its cluster mates),
+      a companion vector, and an inverse-variance budget rule. A bridge earns its name only if
+      both ends are exact: <code>SchurBridge.hrp_to_min_variance(gamma)</code> is HRP at 0 and
+      minimum variance at 1, to machine precision, which no earlier variant achieved. At the far
+      end the weights do not depend on the partition, so reclustering churn is damped by the
+      same dials that damp estimation noise. Which published &ldquo;Schur&rdquo; is which:
+      <a href="https://schur.microprediction.org/taxonomy.html">the taxonomy</a>;
+      one picture: <a href="https://schur.microprediction.org/all-roads.html">all roads lead to minimum variance</a>.</p>
+    </div>
+    <div class="card">
+      <h3>Schur-complementary, collapsed encoding</h3>
+      <p>The reference implementation shared with skfolio: HRP at <code>gamma=0</code>,
+      <em>approaching</em> minimum variance as <code>gamma&rarr;1</code> without reaching it, ordered
+      by <em>Fiedler seriation</em> instead of a dendrogram so the weights are a smooth function
+      of the covariance. Kept for parity; the exact bridge is <code>SchurBridge</code>.
+      Background and bibliography at
       <a href="https://schur.microprediction.org">schur.microprediction.org</a>.</p>
     </div>
   </div>
@@ -129,7 +144,8 @@
       <thead><tr><th>Batch</th><th>Streaming</th><th>Kind</th><th>Notes</th></tr></thead>
       <tbody>
         <tr><td>ThurstonePortfolio</td><td>StreamingThurstone</td><td class="kind-novel">novel</td><td>ability tilt; common-seed transport</td></tr>
-        <tr><td>SchurComplementary</td><td>StreamingSchur</td><td class="kind-novel">novel(ish)</td><td>Schur <code>gamma</code> coupling; Fiedler seriation</td></tr>
+        <tr><td>SchurBridge</td><td>StreamingSchurBridge</td><td class="kind-novel">novel</td><td>bridges named by endpoints: <code>hrp_to_min_variance</code>, <code>hmv_to_min_variance</code>, <code>herc_to_min_variance</code>, <code>nco_to_min_variance</code>, <code>inverse_variance_to_min_variance</code>; companion <code>'vol'</code>/<code>'mean'</code>; paths <code>siblings</code>/<code>all</code>/<code>factor</code></td></tr>
+        <tr><td>SchurComplementary</td><td>StreamingSchur</td><td class="kind-novel">novel(ish)</td><td>collapsed encoding of the HRP bridge, skfolio parity; Fiedler seriation</td></tr>
         <tr><td>HierarchicalRiskParity</td><td>StreamingHRP</td><td class="kind-std">standard</td><td>HRP; the <code>gamma=0</code> case of Schur</td></tr>
         <tr><td>RiskParity</td><td>StreamingRiskParity</td><td class="kind-std">standard</td><td>equal risk contribution; interior, warm-started</td></tr>
         <tr><td>MinimumVariance</td><td>StreamingMinimumVariance</td><td class="kind-std">standard</td><td><code>&Sigma;&#8315;&sup1;1</code>; <code>shrinkage</code>; signed</td></tr>
@@ -145,9 +161,11 @@
   <h2>Usage</h2>
   <pre><code>pip install allocation
 
-from allocation import SchurComplementary, RiskParity, MinimumVariance
+from allocation import SchurBridge, SchurComplementary, RiskParity, MinimumVariance
 
-SchurComplementary(gamma=0.5).fit(returns).weights_    # novel
+SchurBridge.hrp_to_min_variance(0.5).fit(returns).weights_   # HRP -> min-variance, exact at both ends
+SchurBridge.herc_to_min_variance(0.5, 0.5, n_clusters=8).fit(returns).weights_   # the HERC square
+SchurComplementary(gamma=0.5).fit(returns).weights_    # collapsed encoding (skfolio parity)
 RiskParity().fit(returns).weights_                     # standard
 MinimumVariance(shrinkage=0.1).fit(returns).weights_
 

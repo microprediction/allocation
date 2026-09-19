@@ -130,6 +130,40 @@
       &nbsp;&middot;&nbsp;
       <a href="https://schur.microprediction.org">Background &amp; map</a></p>
   </div>
+
+  <div class="entry">
+    <h2><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7480738">Nested Clustered Optimization Is One End of a Schur Bridge, and the Interior Is Sometimes Provably Better</a>
+      <span class="by">&middot; Peter Cotton</span></h2>
+    <p class="tag">The flat-partition bridge: NCO at &gamma;=0, the global optimum at &gamma;=1.</p>
+    <p>Block inversion writes the unconstrained minimum-variance portfolio as one problem per
+    cluster on a Schur-complemented block. Conditioning each cluster on one knot from every other
+    cluster, in the manner of a Vecchia approximation, is exact under a rank-one model of
+    cross-cluster dependence. Under estimation error the optimal &gamma; can be strictly interior,
+    with exact examples. Theory lives in the schur repo; the engine here is
+    <code>SchurBridge.nco_to_min_variance</code>.</p>
+    <p class="go"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7480738">SSRN 7480738 &rarr;</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://schur.microprediction.org/schur-nco-bridge.pdf">PDF</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://schur.microprediction.org/nco-demos.html">Demos</a></p>
+  </div>
+
+  <div class="entry">
+    <h2><a href="https://schur.microprediction.org/schur-herc-square.pdf">Hierarchical Equal Risk Contribution Is a Corner of a Schur Square, and Two Dials Lead to Minimum Variance</a>
+      <span class="by">&middot; Peter Cotton</span></h2>
+    <p class="tag">HERC's budget rule is already the optimizer's; what it lacks is two Schur complements.</p>
+    <p>Damping the two complements by &gamma; and &eta; gives a square with HERC at one corner and
+    the global optimum at the opposite corner. The inner dial makes Stevens' identity a
+    one-parameter path with a closed form and an explicit long-only frontier, and on an
+    equicorrelated cluster it is the straight segment from inverse variance to cluster minimum
+    variance. Under estimation error the best point is often inside, with a sign criterion and
+    exact examples. The engine here is <code>SchurBridge.herc_to_min_variance</code>.</p>
+    <p class="go"><a href="https://schur.microprediction.org/schur-herc-square.pdf">PDF &rarr;</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://schur.microprediction.org/taxonomy.html">Which Schur is which</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://schur.microprediction.org/all-roads.html">All roads lead to minimum variance</a></p>
+  </div>
 </main>
 
 <footer>
