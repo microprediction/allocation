@@ -9,8 +9,9 @@ tree paper at schur.microprediction.org). It is kept here to match skfolio to
 machine precision. The exact bridge, HRP at one end and minimum variance at
 the other, is :class:`allocation.SchurBridge` (``hrp_to_min_variance``). Here
 the asset order comes from **Fiedler seriation** instead of agglomerative
-linkage. Because the Fiedler order is a smooth function of the covariance, the
-whole allocation is smooth -- so ``partial_fit`` over a drifting covariance gives
+linkage. The Fiedler vector is a continuous function of the covariance and the
+order changes only when two of its coordinates cross, each crossing a finite
+jump in the allocation, so ``partial_fit`` over a drifting covariance usually gives
 low-turnover updates, the same streaming property the Thurstone estimator has.
 
 The seriation sign is carried across updates so the order stays stable; the
@@ -111,14 +112,14 @@ class SchurComplementary(BaseOnlinePortfolio):
 
 
 class HierarchicalRiskParity(SchurComplementary):
-    """Dynamic HRP: recursive-bisection risk parity over a *smooth* order.
+    """Dynamic HRP: recursive-bisection risk parity over a spectral order.
 
     Classic HRP (Lopez de Prado, 2016) takes the asset order from agglomerative
     clustering, whose dendrogram reorders discontinuously as the covariance
     drifts -- a source of turnover. This estimator is exactly
     :class:`SchurComplementary` at ``gamma=0`` (no cross-block coupling, so the
     recursion is the plain inverse-variance recursive bisection of HRP), but with
-    the smooth Fiedler seriation in place of the dendrogram, so ``partial_fit``
+    the Fiedler seriation in place of the dendrogram, which reorders less often, so ``partial_fit``
     gives low-turnover updates.
 
     Provided as a named estimator for recognisability and for benchmark tables;

@@ -14,7 +14,8 @@ and ``companion='vol'`` or ``'mean'`` on any of them lands on maximum
 diversification or the tangency portfolio instead. ``endpoints_`` reports the
 pair for whatever settings are in force.
 
-The partition comes from the smooth Fiedler seriation (a bisection tree, or
+The partition comes from the Fiedler seriation, which reorders only when two
+coordinates cross (a bisection tree, or
 the order cut into ``n_clusters`` contiguous blocks) or from a fixed label
 vector such as sectors. Everything downstream of the partition is closed form
 and continuous in the covariance, and at the far end the weights do not
@@ -63,7 +64,7 @@ def _tree_over(leaves):
 
 
 class SchurBridge(BaseOnlinePortfolio):
-    """A Schur bridge on a smooth partition. HERC, HRP, HMV, NCO, minimum
+    """A Schur bridge on a spectral or fixed partition. HERC, HRP, HMV, NCO, minimum
     variance, maximum diversification and tangency are all settings of it.
 
     Parameters
@@ -150,14 +151,22 @@ class SchurBridge(BaseOnlinePortfolio):
 
     @classmethod
     def herc_to_min_variance(cls, gamma: float = 0.5, eta: float = 0.5, n_clusters: int = 8, **kw):
-        """HERC at ``(0, 0)``, minimum variance at ``(1, 1)``: the square."""
-        kw.setdefault("conditioning", "factor")
+        """HERC at ``(0, 0)``, minimum variance at ``(1, 1)``: the square.
+
+        Exact at both ends with the default sibling conditioning (or ``'all'``);
+        ``conditioning='factor'`` is cheaper and exact only under a block
+        one-factor model of cross-cluster dependence."""
+        kw.setdefault("conditioning", "siblings")
         return cls(gamma=gamma, eta=eta, n_clusters=n_clusters, outer="stack", **kw)
 
     @classmethod
     def nco_to_min_variance(cls, gamma: float = 0.5, n_clusters: int = 8, **kw):
-        """NCO at ``gamma = 0``, minimum variance at ``gamma = 1``."""
-        kw.setdefault("conditioning", "factor")
+        """NCO at ``gamma = 0``, minimum variance at ``gamma = 1``.
+
+        Exact at both ends with the default sibling conditioning (or ``'all'``);
+        ``conditioning='factor'`` is the scalable path, exact only under a block
+        one-factor model."""
+        kw.setdefault("conditioning", "siblings")
         return cls(gamma=gamma, eta=1.0, n_clusters=n_clusters, outer="optimize", **kw)
 
     @classmethod
@@ -167,11 +176,13 @@ class SchurBridge(BaseOnlinePortfolio):
 
     @property
     def endpoints_(self) -> tuple[str, str]:
-        """``(near end, far end)`` implied by the settings, as method names."""
+        """``(near end, far end)`` of the bridge implied by the settings: what the
+        dials at 0 and at 1 give, as method names. The far end is marked
+        approximate when the split or the path does not reach it exactly."""
         far = {"ones": "minimum variance", "vol": "maximum diversification", "mean": "tangency"}.get(
             self.companion if isinstance(self.companion, str) else "array", "Sigma^{-1} u"
         )
-        if self.split == "hrp":
+        if self.split == "hrp" or self.conditioning == "factor":
             far += " (approximate)"
         if self.n_clusters == 1 and self.clusters is None:
             near = "inverse variance"
@@ -180,7 +191,7 @@ class SchurBridge(BaseOnlinePortfolio):
         elif self.n_clusters is None and self.clusters is None:
             near = {"dial": "HRP", "minvar": "hierarchical minimum variance", "hrp": "HRP"}[self.split]
         else:
-            near = "HERC" if self.eta == 0.0 or self.gamma == 0.0 else "cluster minimum variance"
+            near = "HERC"
         return near, far
 
     # ------------------------------------------------------------ partition

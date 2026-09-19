@@ -313,3 +313,17 @@ def test_on_a_flat_partition_the_split_is_the_cluster_budget_rule():
     # at eta < 1 they differ: 'dial' budgets by the variance of what is held (HERC's rule)
     ws = [bridge_weights(cov, part, gamma=0.4, eta=0.5, conditioning="all", split=s) for s in ("dial", "minvar")]
     assert not _close(ws[0], ws[1], 1e-6)
+
+
+def test_named_constructors_are_exact_at_the_far_end_by_default():
+    rng = np.random.default_rng(23)
+    X = rng.standard_normal((400, 12)) @ np.diag(rng.uniform(0.5, 2.0, 12))
+    for make in (lambda: SchurBridge.herc_to_min_variance(1.0, 1.0, n_clusters=3),
+                 lambda: SchurBridge.nco_to_min_variance(1.0, n_clusters=3),
+                 lambda: SchurBridge.hmv_to_min_variance(1.0),
+                 lambda: SchurBridge.inverse_variance_to_min_variance(1.0)):
+        est = make().fit(X)
+        assert _close(est.weights_, min_variance_weights(est._cov_estimator.covariance_))
+        assert not est.endpoints_[1].endswith("(approximate)")
+    assert SchurBridge.herc_to_min_variance(0.5, 0.5, 3, conditioning="factor").endpoints_[1].endswith("(approximate)")
+    assert SchurBridge.herc_to_min_variance(1.0, 1.0, 3).endpoints_ == ("HERC", "minimum variance")
