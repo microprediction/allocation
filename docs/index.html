@@ -108,7 +108,7 @@
       maximum diversification and tangency are corners. A partition, two Schur dials
       (<code>gamma</code>: cluster on the outside, <code>eta</code>: asset on its cluster mates),
       a companion vector, and an inverse-variance budget rule. A bridge earns its name only if
-      both ends are exact: <code>SchurBridge.hrp_to_min_variance(gamma)</code> is HRP at 0 and
+      both ends are exact, which the named constructors are with their default sibling conditioning: <code>SchurBridge.hrp_to_min_variance(gamma)</code> is HRP at 0 and
       minimum variance at 1, to machine precision, which no earlier variant achieved. At the far
       end the weights do not depend on the partition, so reclustering churn is damped by the
       same dials that damp estimation noise. Which published &ldquo;Schur&rdquo; is which:
@@ -117,8 +117,8 @@
     </div>
     <div class="card">
       <h3>Schur-complementary, collapsed encoding</h3>
-      <p>The reference implementation shared with skfolio: HRP at <code>gamma=0</code>,
-      <em>approaching</em> minimum variance as <code>gamma&rarr;1</code> without reaching it, ordered
+      <p>The port that matches skfolio's <code>SchurComplementary</code> to machine precision: HRP at <code>gamma=0</code>,
+      moving <em>toward</em> minimum variance as <code>gamma&rarr;1</code> when the minimum-variance portfolio is long-only, without reaching it, ordered
       by <em>Fiedler seriation</em> instead of a dendrogram so the weights are a smooth function
       of the covariance. Kept for parity; the exact bridge is <code>SchurBridge</code>.
       Background and bibliography at
