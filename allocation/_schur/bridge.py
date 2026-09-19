@@ -426,7 +426,6 @@ def bridge_weights(
         b = u[order]
         if outer == "optimize":
             pairs = _tree_pairs(Q, b, local, gamma, ridge)
-            z = np.zeros(n)
             D = []
             for leaf, (QC, bC) in pairs:
                 zc = _leaf_vector(QC, bC, eta, ridge, long_only, info)
