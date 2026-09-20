@@ -35,10 +35,59 @@ Assets and the Cost of Trading — allocation</title>
   ol.algo{margin:0;padding-left:1.5em} ol.algo li{margin:.3em 0}
   .algo .kw{font-variant:small-caps;font-weight:600}
   .algo .cmt{color:var(--faint);font-size:.9em;margin-left:.3em}
-  .references{font-size:.92rem} .references div{margin:.4em 0}
+  h4{font-size:.99rem;margin:1.1em 0 .3em;color:#2a2a2a}
+  .runin{font-weight:600;color:#2a2a2a;margin-right:.4em}
+  /* amsthm environments. pandoc emits <div class="proposition"> etc. with the number already in a <strong>;
+     without these rules a theorem is visually identical to body text, which is the main thing that made this
+     read as a LaTeX dump rather than a paper. */
+  .theorem,.proposition,.lemma,.corollary,.definition,.remark,.example,.assumption{
+    background:#fff;border:1px solid var(--border);border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0;padding:12px 16px;margin:18px 0}
+  .remark,.example{border-left-color:#bdbdc7}
+  .theorem p,.proposition p,.lemma p,.corollary p,.definition p,.remark p,.example p{margin:.35em 0}
+  .theorem em,.proposition em,.lemma em,.corollary em,.theorem>p>em{font-style:italic}
+  .proof{margin:14px 0 18px;padding-left:14px;border-left:2px solid var(--border);color:#333;font-size:.97rem}
+  .proof p{margin:.35em 0}
+  /* pandoc already appends a QED mark (U+25FB) to the last proof paragraph -- do NOT add another */
+  /* table of contents */
+  nav#TOC{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 18px;margin:0 0 30px;font-size:.95rem}
+  nav#TOC::before{content:"Contents";display:block;font-weight:600;font-size:.9rem;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  nav#TOC ul{margin:.2em 0;padding-left:1.15em;list-style:none} nav#TOC>ul{padding-left:0}
+  nav#TOC li{margin:.15em 0} nav#TOC a{color:var(--text)} nav#TOC a:hover{color:var(--accent)}
+  nav#TOC ul ul{font-size:.93em;color:var(--muted)}
+  /* MathJax equation numbers sit right; keep long displays scrollable without clipping the tag */
+  mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;padding:2px 0}
+  /* bibliography. pandoc --citeproc emits .csl-bib-body/.csl-entry, NOT .references div, so the old rule
+     never applied and the reference list rendered as unindented body text. */
+  .references,.csl-bib-body{font-size:.92rem}
+  .csl-entry{margin:.5em 0;padding-left:1.6em;text-indent:-1.6em;color:#2f2f2f}
+  .csl-entry a{word-break:break-word}
+  .citation{white-space:nowrap}
+  /* section numbers: a little air between "3" and the title, in headings and in the contents */
+  .header-section-number{margin-right:.45em;color:var(--muted);font-weight:600}
+  nav#TOC .toc-section-number{margin-right:.5em;color:var(--faint);font-variant-numeric:tabular-nums}
+  /* footnotes */
+  .footnote-ref{font-size:.8em;vertical-align:super;line-height:0;padding:0 1px}
+  .footnotes{margin-top:34px;padding-top:12px;border-top:1px solid var(--border);
+    font-size:.9rem;color:var(--muted)}
+  .footnotes hr{display:none}
+  .footnotes ol{padding-left:1.3em} .footnotes li{margin:.35em 0}
+  .footnote-back{margin-left:.35em;font-size:.85em}
+  @media print{
+    body{background:#fff;font-size:11pt} .crumb,nav#TOC{display:none}
+    .theorem,.proposition,.lemma,.corollary,.definition,.remark{break-inside:avoid}
+    h2,h3{break-after:avoid}
+  }
   footer{max-width:760px;margin:24px auto 40px;padding:18px 24px 0;border-top:1px solid var(--border);
     color:var(--faint);font-size:.85rem} footer a{color:var(--muted)}
 </style>
+<script>
+  window.MathJax = {
+    tex: {tags: 'ams', tagSide: 'right', macros: {}},
+    options: {skipHtmlTags: ['script','noscript','style','textarea','pre','code']}
+  };
+</script>
 <script defer=""
 src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
 type="text/javascript"></script>
@@ -68,8 +117,28 @@ wins everywhere, because turnover, not estimation error, is what hurts.
 We then give the two ingredients that make the many-names corner work: a
 Woodbury inversion of a factor covariance, and a ridge-regularized
 version of the Schur coupling.</p></div>
-<h1 data-number="1" id="the-question"><span
-class="header-section-number">1</span> The question</h1>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#the-question" id="toc-the-question"><span
+class="toc-section-number">1</span> The question</a></li>
+<li><a href="#the-methods-in-one-breath"
+id="toc-the-methods-in-one-breath"><span
+class="toc-section-number">2</span> The methods, in one breath</a></li>
+<li><a href="#how-we-test" id="toc-how-we-test"><span
+class="toc-section-number">3</span> How we test</a></li>
+<li><a href="#what-the-map-shows" id="toc-what-the-map-shows"><span
+class="toc-section-number">4</span> What the map shows</a></li>
+<li><a href="#sec:wellposed" id="toc-sec:wellposed"><span
+class="toc-section-number">5</span> Making the many-names corner
+work</a></li>
+<li><a href="#what-it-all-means" id="toc-what-it-all-means"><span
+class="toc-section-number">6</span> What it all means</a></li>
+<li><a href="#conclusion" id="toc-conclusion"><span
+class="toc-section-number">7</span> Conclusion</a></li>
+</ul>
+</nav>
+<h2 data-number="1" id="the-question"><span
+class="header-section-number">1</span> The question</h2>
 <p>Most studies compare portfolio methods one against another and crown
 a winner. A practitioner faces a different question: which method should
 I run, given how many names I hold, how noisy my covariance estimate is,
@@ -97,8 +166,8 @@ not the point; net-of-cost return is.</p></li>
 </ul>
 <p>This paper measures all three at once and reports the result as a
 two-axis map.</p>
-<h1 data-number="2" id="the-methods-in-one-breath"><span
-class="header-section-number">2</span> The methods, in one breath</h1>
+<h2 data-number="2" id="the-methods-in-one-breath"><span
+class="header-section-number">2</span> The methods, in one breath</h2>
 <p>We use online estimators: a one-time <code>fit</code>, then a cheap
 <code>partial_fit</code> each period over an exponentially-weighted
 covariance. This is the setting of online learning—one decision per
@@ -109,24 +178,18 @@ which perturbs abilities and takes the winner <span class="citation"
 data-cites="hannan1957 kalaivempala2005">(Hannan 1957; Kalai and Vempala
 2005)</span>. They split into two families by how they use <span
 class="math inline">\(\widehat{\Sigma}\)</span>.</p>
-<h4 data-number="2.0.0.1"
-id="rules-that-never-invert-the-covariance-work-at-any-size."><span
-class="header-section-number">2.0.0.1</span> Rules that never invert the
-covariance (work at any size).</h4>
-<p>Equal weight; inverse-variance (<span class="math inline">\(w_i
-\propto 1/\widehat\sigma_i^2\)</span>, using only the diagonal); risk
-parity (equal risk contributions, an interior solution we solve by
-warm-started iteration) <span class="citation"
+<p><strong class="runin">Rules that never invert the covariance (work
+at any size).</strong> Equal weight; inverse-variance (<span
+class="math inline">\(w_i \propto 1/\widehat\sigma_i^2\)</span>, using
+only the diagonal); risk parity (equal risk contributions, an interior
+solution we solve by warm-started iteration) <span class="citation"
 data-cites="maillard2010">(Maillard et al. 2010)</span>; hierarchical
 risk parity (HRP), which allocates down a tree <span class="citation"
 data-cites="lopezdeprado2016">(López de Prado 2016)</span>; and the
 Thurstone tilt, which nudges a chosen benchmark and never touches <span
 class="math inline">\(\Sigma^{-1}\)</span>.</p>
-<h4 data-number="2.0.0.2"
-id="rules-that-invert-the-covariance-need-it-full-rank."><span
-class="header-section-number">2.0.0.2</span> Rules that invert the
-covariance (need it full-rank).</h4>
-<p>Minimum-variance (<span
+<p><strong class="runin">Rules that invert the covariance (need it
+full-rank).</strong> Minimum-variance (<span
 class="math inline">\(w\propto\Sigma^{-1}\mathbf 1\)</span>); maximum
 diversification <span class="citation"
 data-cites="choueifaty2008">(Choueifaty and Coignard 2008)</span>;
@@ -134,18 +197,14 @@ maximum decorrelation; and mean–variance. Each is a clean function of
 <span class="math inline">\(\Sigma\)</span>, but undefined when <span
 class="math inline">\(\Sigma\)</span> is singular—which is the normal
 state of affairs at scale.</p>
-<h4 data-number="2.0.0.3" id="the-bridge."><span
-class="header-section-number">2.0.0.3</span> The bridge.</h4>
-<p>The Schur construction <span class="citation"
+<p><strong class="runin">The
+bridge.</strong> The Schur construction <span class="citation"
 data-cites="cotton2024schur">(Cotton 2024a)</span> has a dial <span
 class="math inline">\(\gamma\)</span> that slides from HRP (<span
 class="math inline">\(\gamma{=}0\)</span>) to minimum-variance (<span
 class="math inline">\(\gamma{\to}1\)</span>).</p>
-<h4 data-number="2.0.0.4"
-id="why-turnover-is-built-in-not-bolted-on."><span
-class="header-section-number">2.0.0.4</span> Why turnover is built in,
-not bolted on.</h4>
-<p>Because <span
+<p><strong class="runin">Why
+turnover is built in, not bolted on.</strong> Because <span
 class="math inline">\(w=\mathcal{A}(\widehat\Sigma)\)</span>, weights
 jolt around whenever either factor does. For the inverting rules the
 allocator is already a smooth function of <span
@@ -154,8 +213,8 @@ smooth covariance. The harder cases are HRP and the tilt, where the
 allocator itself is jumpy—a re-sorted tree, a fresh random draw—and we
 smooth those directly (a stable spectral ordering for the tree; a fixed
 random seed reused across updates for the tilt).</p>
-<h1 data-number="3" id="how-we-test"><span
-class="header-section-number">3</span> How we test</h1>
+<h2 data-number="3" id="how-we-test"><span
+class="header-section-number">3</span> How we test</h2>
 <p>We use daily returns for the U.S. large-cap cross-section <span
 class="citation" data-cites="winningport">(Cotton 2024b)</span>; we
 redistribute no data. One trial works like this:</p>
@@ -175,11 +234,11 @@ the ranking. One more convenience: net Sharpe is just gross minus a
 cost-proportional drag, so a single run at <span
 class="math inline">\(10\)</span> bp recovers the ranking at any
 cost.</p>
-<h1 data-number="4" id="what-the-map-shows"><span
-class="header-section-number">4</span> What the map shows</h1>
-<h2 data-number="4.1" id="at-scale-trading-cost-decidesnot-skill"><span
+<h2 data-number="4" id="what-the-map-shows"><span
+class="header-section-number">4</span> What the map shows</h2>
+<h3 data-number="4.1" id="at-scale-trading-cost-decidesnot-skill"><span
 class="header-section-number">4.1</span> At scale, trading cost
-decides—not skill</h2>
+decides—not skill</h3>
 <p>On broad subsets (hundreds of names) the gross and net winners are
 different methods. Minimum-variance has the best gross Sharpe, and its
 raw skill even grows with the number of names. But it trades a lot, and
@@ -187,9 +246,9 @@ after costs it falls behind. Inverse-variance and risk parity trade
 roughly ten times less and win net. The crossover is early: about <span
 class="math inline">\(5\)</span>–<span
 class="math inline">\(10\)</span> bp.</p>
-<h2 data-number="4.2" id="the-three-regions"><span
-class="header-section-number">4.2</span> The three regions</h2>
-<p><a href="#tab:regime" data-reference-type="ref+Label"
+<h3 data-number="4.2" id="the-three-regions"><span
+class="header-section-number">4.2</span> The three regions</h3>
+<p>Table&nbsp;<a href="#tab:regime" data-reference-type="ref+Label"
 data-reference="tab:regime">1</a> is the headline: the winning method,
 by mean net Sharpe, over <span class="math inline">\(2{,}638\)</span>
 trials.</p>
@@ -300,7 +359,7 @@ The classic answer, while the covariance is still full-rank.</p></li>
 <li><p><strong>Many names, cheap trading <span
 class="math inline">\(\Rightarrow\)</span> factor
 minimum-variance.</strong> Here ordinary minimum-variance is undefined.
-The factor version (<a href="#sec:wellposed"
+The factor version (Section&nbsp;<a href="#sec:wellposed"
 data-reference-type="ref+label" data-reference="sec:wellposed">5</a>)
 not only fills the gap, it wins outright, and its lead grows with the
 number of names.</p></li>
@@ -313,9 +372,9 @@ wins.</p></li>
 <p>The novel coupling and tilt are competitive in the middle but rarely
 top the mean; their value is staying robust and well-defined at scale,
 not setting the net-Sharpe record.</p>
-<h2 data-number="4.3" id="how-to-set-the-schur-dial-gamma"><span
+<h3 data-number="4.3" id="how-to-set-the-schur-dial-gamma"><span
 class="header-section-number">4.3</span> How to set the Schur dial <span
-class="math inline">\(\gamma\)</span></h2>
+class="math inline">\(\gamma\)</span></h3>
 <p>Restricting to cases where the construction is well-defined, a middle
 setting of <span class="math inline">\(\gamma\)</span> does beat HRP on
 raw skill—the best is near <span
@@ -330,8 +389,8 @@ class="math inline">\(2\)</span> bp. The rule of thumb: pick <span
 class="math inline">\(\gamma\)</span> to maximise <span
 class="math inline">\(\text{skill}(\gamma)-\text{cost}\times\text{turnover}(\gamma)\)</span>,
 which at realistic costs means keep it near zero.</p>
-<h2 data-number="4.4" id="do-the-shorts-pay-no."><span
-class="header-section-number">4.4</span> Do the shorts pay? No.</h2>
+<h3 data-number="4.4" id="do-the-shorts-pay-no."><span
+class="header-section-number">4.4</span> Do the shorts pay? No.</h3>
 <p>The winning rules in the first two regions (minimum-variance and its
 factor version) allow short positions. Are those shorts earning their
 place, or are they just noise from inverting a noisy covariance? We test
@@ -355,15 +414,12 @@ class="math inline">\(0.2\)</span> or more.</p></li>
 version of the same idea does as well or better after costs. This is
 consistent with the map, where the long-only inverse-variance rule
 already wins once trading is not free.</p>
-<h1 data-number="5" id="sec:wellposed"><span
+<h2 data-number="5" id="sec:wellposed"><span
 class="header-section-number">5</span> Making the many-names corner
-work</h1>
+work</h2>
 <p>Two small fixes are what let the high-dimension column exist.</p>
-<h4 data-number="5.0.0.1"
-id="factor-minimum-variance-a-stable-inverse."><span
-class="header-section-number">5.0.0.1</span> Factor minimum-variance (a
-stable inverse).</h4>
-<p>Model the covariance as a few factors plus noise, <span
+<p><strong class="runin">Factor minimum-variance (a stable
+inverse).</strong> Model the covariance as a few factors plus noise, <span
 class="math inline">\(\Sigma= BB^\top +
 \mathop{\mathrm{diag}}(\psi)\)</span> with <span
 class="math inline">\(B\in\mathbb{R}^{n\times k}\)</span>. Its inverse
@@ -376,27 +432,23 @@ D^{-1},
 class="math inline">\(O(nk^2)\)</span>. Keep the noise term <span
 class="math inline">\(\psi\)</span> above a small floor and the inverse
 always exists, no matter how many names. That single change turns
-“minimum-variance is undefined” into the winner of <a href="#tab:regime"
+“minimum-variance is undefined” into the winner of Table&nbsp;<a href="#tab:regime"
 data-reference-type="ref+label" data-reference="tab:regime">1</a>.</p>
-<h4 data-number="5.0.0.2" id="ridge-schur-a-stable-coupling."><span
-class="header-section-number">5.0.0.2</span> Ridge Schur (a stable
-coupling).</h4>
-<p>The Schur dial needs to invert one block using another; at scale that
-other block is singular. Add a small ridge to that solve. It restores
+<p><strong class="runin">Ridge Schur (a stable coupling).</strong> The
+Schur dial needs to invert one block using another; at scale that other
+block is singular. Add a small ridge to that solve. It restores
 well-posedness and is self-correcting: when a block is poorly estimated
 the ridge dominates, the coupling fades, and Schur slides safely back
 toward HRP (a large ridge reproduces <span
 class="math inline">\(\gamma{=}0\)</span> exactly).</p>
-<h4 data-number="5.0.0.3" id="scaling-the-tilt."><span
-class="header-section-number">5.0.0.3</span> Scaling the tilt.</h4>
-<p>The tilt’s naive cost is <span
-class="math inline">\(O(Mn^2)+O(n^3)\)</span>. Writing its correlation
-in the same factor form makes a sample cost only <span
+<p><strong class="runin">Scaling the tilt.</strong> The tilt’s naive
+cost is <span class="math inline">\(O(Mn^2)+O(n^3)\)</span>. Writing its
+correlation in the same factor form makes a sample cost only <span
 class="math inline">\(O(Mnk)\)</span>, so the benchmark-anchored,
 no-inverse tilt runs at about <span class="math inline">\(0.4\)</span> s
 per rebalance on <span class="math inline">\(3{,}000\)</span> names.</p>
-<h1 data-number="6" id="what-it-all-means"><span
-class="header-section-number">6</span> What it all means</h1>
+<h2 data-number="6" id="what-it-all-means"><span
+class="header-section-number">6</span> What it all means</h2>
 <p>One idea ties the map together. In high dimension you can only
 reliably estimate simple structure: a diagonal, a few factors, or a
 tree. The methods that survive are exactly the ones that use only
@@ -416,8 +468,8 @@ hard to beat net of cost <span class="citation"
 data-cites="demiguel2009">(DeMiguel et al. 2009)</span>: the one place
 it is beaten is the cheap-trading, many-names corner, and the thing that
 beats it is a factor optimizer, not a dense one.</p>
-<h1 data-number="7" id="conclusion"><span
-class="header-section-number">7</span> Conclusion</h1>
+<h2 data-number="7" id="conclusion"><span
+class="header-section-number">7</span> Conclusion</h2>
 <p>“Is this method good?” is the wrong question; “when is it good?” is
 the useful one. Across the number of names and the cost of trading, the
 answer is a map with three regions—dense minimum-variance, factor
@@ -436,7 +488,7 @@ Diversification.”</span> <em>Journal of Portfolio Management</em> 35
 </div>
 <div id="ref-cotton2024schur" class="csl-entry" role="listitem">
 Cotton, Peter. 2024a. <em>Schur Complementary Allocation: A Unification
-of Hierarchical and Optimization-Based Portfolio Construction</em>. <a
+of Hierarchical Risk Parity and Minimum Variance Portfolios</em>. <a
 href="https://arxiv.org/abs/2411.05807">https://arxiv.org/abs/2411.05807</a>.
 </div>
 <div id="ref-winningport" class="csl-entry" role="listitem">

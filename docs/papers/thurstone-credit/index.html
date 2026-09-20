@@ -35,10 +35,59 @@ Attribution — allocation</title>
   ol.algo{margin:0;padding-left:1.5em} ol.algo li{margin:.3em 0}
   .algo .kw{font-variant:small-caps;font-weight:600}
   .algo .cmt{color:var(--faint);font-size:.9em;margin-left:.3em}
-  .references{font-size:.92rem} .references div{margin:.4em 0}
+  h4{font-size:.99rem;margin:1.1em 0 .3em;color:#2a2a2a}
+  .runin{font-weight:600;color:#2a2a2a;margin-right:.4em}
+  /* amsthm environments. pandoc emits <div class="proposition"> etc. with the number already in a <strong>;
+     without these rules a theorem is visually identical to body text, which is the main thing that made this
+     read as a LaTeX dump rather than a paper. */
+  .theorem,.proposition,.lemma,.corollary,.definition,.remark,.example,.assumption{
+    background:#fff;border:1px solid var(--border);border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0;padding:12px 16px;margin:18px 0}
+  .remark,.example{border-left-color:#bdbdc7}
+  .theorem p,.proposition p,.lemma p,.corollary p,.definition p,.remark p,.example p{margin:.35em 0}
+  .theorem em,.proposition em,.lemma em,.corollary em,.theorem>p>em{font-style:italic}
+  .proof{margin:14px 0 18px;padding-left:14px;border-left:2px solid var(--border);color:#333;font-size:.97rem}
+  .proof p{margin:.35em 0}
+  /* pandoc already appends a QED mark (U+25FB) to the last proof paragraph -- do NOT add another */
+  /* table of contents */
+  nav#TOC{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 18px;margin:0 0 30px;font-size:.95rem}
+  nav#TOC::before{content:"Contents";display:block;font-weight:600;font-size:.9rem;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  nav#TOC ul{margin:.2em 0;padding-left:1.15em;list-style:none} nav#TOC>ul{padding-left:0}
+  nav#TOC li{margin:.15em 0} nav#TOC a{color:var(--text)} nav#TOC a:hover{color:var(--accent)}
+  nav#TOC ul ul{font-size:.93em;color:var(--muted)}
+  /* MathJax equation numbers sit right; keep long displays scrollable without clipping the tag */
+  mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;padding:2px 0}
+  /* bibliography. pandoc --citeproc emits .csl-bib-body/.csl-entry, NOT .references div, so the old rule
+     never applied and the reference list rendered as unindented body text. */
+  .references,.csl-bib-body{font-size:.92rem}
+  .csl-entry{margin:.5em 0;padding-left:1.6em;text-indent:-1.6em;color:#2f2f2f}
+  .csl-entry a{word-break:break-word}
+  .citation{white-space:nowrap}
+  /* section numbers: a little air between "3" and the title, in headings and in the contents */
+  .header-section-number{margin-right:.45em;color:var(--muted);font-weight:600}
+  nav#TOC .toc-section-number{margin-right:.5em;color:var(--faint);font-variant-numeric:tabular-nums}
+  /* footnotes */
+  .footnote-ref{font-size:.8em;vertical-align:super;line-height:0;padding:0 1px}
+  .footnotes{margin-top:34px;padding-top:12px;border-top:1px solid var(--border);
+    font-size:.9rem;color:var(--muted)}
+  .footnotes hr{display:none}
+  .footnotes ol{padding-left:1.3em} .footnotes li{margin:.35em 0}
+  .footnote-back{margin-left:.35em;font-size:.85em}
+  @media print{
+    body{background:#fff;font-size:11pt} .crumb,nav#TOC{display:none}
+    .theorem,.proposition,.lemma,.corollary,.definition,.remark{break-inside:avoid}
+    h2,h3{break-after:avoid}
+  }
   footer{max-width:760px;margin:24px auto 40px;padding:18px 24px 0;border-top:1px solid var(--border);
     color:var(--faint);font-size:.85rem} footer a{color:var(--muted)}
 </style>
+<script>
+  window.MathJax = {
+    tex: {tags: 'ams', tagSide: 'right', macros: {}},
+    options: {skipHtmlTags: ['script','noscript','style','textarea','pre','code']}
+  };
+</script>
 <script defer=""
 src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
 type="text/javascript"></script>
@@ -78,8 +127,28 @@ the <em>calibrated</em> equal-ability race rather than of raw scores,
 and we demonstrate the rule on forecast combination and feature
 attribution. This develops the credit reading of the construction in the
 companion paper on Thurstone portfolios.</p></div>
-<h1 data-number="1" id="sec:intro"><span
-class="header-section-number">1</span> Introduction</h1>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#sec:intro" id="toc-sec:intro"><span
+class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#sec:rule" id="toc-sec:rule"><span
+class="toc-section-number">2</span> The credit rule</a></li>
+<li><a href="#sec:shapley" id="toc-sec:shapley"><span
+class="toc-section-number">3</span> Relationship to the Shapley value: a
+contrast, not a substitute</a></li>
+<li><a href="#sec:complexity" id="toc-sec:complexity"><span
+class="toc-section-number">4</span> Computational complexity</a></li>
+<li><a href="#sec:redundancy" id="toc-sec:redundancy"><span
+class="toc-section-number">5</span> Redundancy, and the calibration
+condition</a></li>
+<li><a href="#sec:apps" id="toc-sec:apps"><span
+class="toc-section-number">6</span> Applications</a></li>
+<li><a href="#sec:discussion" id="toc-sec:discussion"><span
+class="toc-section-number">7</span> Discussion</a></li>
+</ul>
+</nav>
+<h2 data-number="1" id="sec:intro"><span
+class="header-section-number">1</span> Introduction</h2>
 <p>Attributing credit for a collective outcome among contributors that
 overlap is an old problem with a canonical answer, the Shapley value
 <span class="citation" data-cites="shapley1953">(Shapley 1953)</span>,
@@ -112,14 +181,12 @@ convention of the <code>thurstone</code> package and <span
 class="citation" data-cites="cotton2021">Cotton (2021)</span>: <span
 class="math inline">\(\theta_i\)</span> is a <em>strength</em>, the
 negated score, so the lowest-score contributor is the <span
-class="math inline">\(\mathop{\mathrm{arg\,max}}\)</span> winner in <a
-href="#eq:winprob" data-reference-type="eqref"
-data-reference="eq:winprob">[eq:winprob]</a>; in the loss-based
-applications of <a href="#sec:apps" data-reference-type="ref+Label"
+class="math inline">\(\mathop{\mathrm{arg\,max}}\)</span> winner in \(\eqref{eq:winprob}\); in the loss-based
+applications of Section&nbsp;<a href="#sec:apps" data-reference-type="ref+Label"
 data-reference="sec:apps">6</a> the score is a loss and the lowest-loss
 contributor wins. This is the Thurstonian choice probability, and <span
 class="math inline">\(w = W_S(\theta)\)</span> is the gradient of an
-expected-maximum potential (<a href="#sec:rule"
+expected-maximum potential (Section&nbsp;<a href="#sec:rule"
 data-reference-type="ref+Label" data-reference="sec:rule">2</a>). Read
 as credit it has three things going for it at once. It is
 redundancy-aware by construction: two contributors that move together
@@ -136,7 +203,7 @@ expected-maximum potential whose <em>diagonal integral</em> is an
 Aumann–Shapley value <span class="citation"
 data-cites="owen1972 aumannshapley1974">(Owen 1972; Aumann and Shapley
 1974)</span>, but it is not itself the Shapley value of the membership
-game (<a href="#sec:shapley" data-reference-type="ref+Label"
+game (Section&nbsp;<a href="#sec:shapley" data-reference-type="ref+Label"
 data-reference="sec:shapley">3</a>); (ii) the computational separation,
 <span class="math inline">\(O(Mn)\)</span> versus <span
 class="math inline">\(O(2^n)\)</span>, quantified (<a
@@ -144,13 +211,13 @@ href="#sec:complexity" data-reference-type="ref+Label"
 data-reference="sec:complexity">4</a>); and (iii) the clarification that
 the headline redundancy property—an <em>even</em> split among
 near-duplicates—belongs to the <em>calibrated</em> equal-ability race,
-not to raw contribution scores (<a href="#sec:redundancy"
+not to raw contribution scores (Section&nbsp;<a href="#sec:redundancy"
 data-reference-type="ref+Label" data-reference="sec:redundancy">5</a>).
 We close with two applications, forecast combination and feature
-attribution (<a href="#sec:apps" data-reference-type="ref+Label"
+attribution (Section&nbsp;<a href="#sec:apps" data-reference-type="ref+Label"
 data-reference="sec:apps">6</a>).</p>
-<h1 data-number="2" id="sec:rule"><span
-class="header-section-number">2</span> The credit rule</h1>
+<h2 data-number="2" id="sec:rule"><span
+class="header-section-number">2</span> The credit rule</h2>
 <p>Let <span class="math inline">\(S\)</span> be a centered joint law on
 <span class="math inline">\(\mathbb{R}^n\)</span> (the
 <em>simulation</em>) and define the expected-maximum potential and its
@@ -168,9 +235,7 @@ class="math inline">\(S\)</span> is continuous and the usual
 dominated-differentiation conditions hold, the maximizer is a.s. unique,
 <span class="math inline">\(G_S\)</span> is differentiable, and <span
 class="math inline">\(\nabla_i G_S(\theta) = \mathbb{P}(i =
-\mathop{\mathrm{arg\,max}}_j X_j) = w_i\)</span>, recovering <a
-href="#eq:winprob" data-reference-type="eqref"
-data-reference="eq:winprob">[eq:winprob]</a> (the Williams–Daly–Zachary
+\mathop{\mathrm{arg\,max}}_j X_j) = w_i\)</span>, recovering \(\eqref{eq:winprob}\) (the Williams–Daly–Zachary
 / perturbed-maximum identity <span class="citation"
 data-cites="williams1977 mcfadden1981 berthet2020">(Williams 1977;
 McFadden 1981; Berthet et al. 2020)</span>); for Gaussian <span
@@ -181,8 +246,7 @@ class="math inline">\(G_S(\theta + c\mathbf 1) = G_S(\theta) +
 c\)</span>, gradients and Jacobians live on the tangent space <span
 class="math inline">\(T\Delta = \{v : \mathbf 1^\top v =
 0\}\)</span>.</p>
-<p>To use <a href="#eq:winprob" data-reference-type="eqref"
-data-reference="eq:winprob">[eq:winprob]</a> as an attribution we must
+<p>To use \(\eqref{eq:winprob}\) as an attribution we must
 fix the abilities. Given a <em>benchmark</em> <span
 class="math inline">\(w^0 \in \operatorname{int}\Delta\)</span> of
 marginal credits and a reference law <span
@@ -213,12 +277,11 @@ re-evaluated under a dependence-rich law <span
 class="math inline">\(S_1\)</span>. With <span class="math inline">\(S_1
 = S_0\)</span> the benchmark is reproduced; with <span
 class="math inline">\(S_1\)</span> carrying the contributors’ empirical
-dependence, <a href="#eq:tilt" data-reference-type="eqref"
-data-reference="eq:tilt">[eq:tilt]</a> re-weights the benchmark for
+dependence, \(\eqref{eq:tilt}\) re-weights the benchmark for
 redundancy.</p>
-<h1 data-number="3" id="sec:shapley"><span
+<h2 data-number="3" id="sec:shapley"><span
 class="header-section-number">3</span> Relationship to the Shapley
-value: a contrast, not a substitute</h1>
+value: a contrast, not a substitute</h2>
 <p>The winning probability is naturally compared to the Shapley value,
 and the relationship is real but easy to overstate, because the two are
 credit in different <em>units</em>. The winning probabilities are
@@ -268,9 +331,7 @@ class="math inline">\(\theta\)</span>) is <span
 class="math inline">\(\mathrm{AS}\)</span>; <span
 class="math inline">\(w\)</span> is the endpoint gradient, not the
 integral.</em></p></li>
-<li><p><em><em>Membership Shapley.</em> The Shapley value of <a
-href="#eq:game" data-reference-type="eqref"
-data-reference="eq:game">[eq:game]</a> is, by Owen’s multilinear
+<li><p><em><em>Membership Shapley.</em> The Shapley value of \(\eqref{eq:game}\) is, by Owen’s multilinear
 extension <span class="citation" data-cites="owen1972">(Owen
 1972)</span>, the diagonal integral over a random coalition <span
 class="math inline">\(T\)</span> of the marginal <span
@@ -361,16 +422,15 @@ probability share, not the Shapley efficiency or null-player axioms,
 which concern a payoff value of <span class="math inline">\(v\)</span>.
 Trading the linearity that pins down the Shapley value is what lets the
 credit be a cheap, differentiable gradient.</p>
-<h1 data-number="4" id="sec:complexity"><span
-class="header-section-number">4</span> Computational complexity</h1>
+<h2 data-number="4" id="sec:complexity"><span
+class="header-section-number">4</span> Computational complexity</h2>
 <p>The practical case for the winning probability as credit is its cost,
 stated against the right baseline. For a <em>generic</em> black-box
 cooperative game, exact Shapley enumerates <span
 class="math inline">\(2^n\)</span> coalitions, and the usual recourse is
 permutation sampling, <span class="math inline">\(O(RMn)\)</span> at
 <span class="math inline">\(O(1/\sqrt R)\)</span> error. But the
-expected-maximum game <a href="#eq:game" data-reference-type="eqref"
-data-reference="eq:game">[eq:game]</a> is not black-box: on an empirical
+expected-maximum game \(\eqref{eq:game}\) is not black-box: on an empirical
 sample <span class="math inline">\(X^{(1)},\dots,X^{(M)}\)</span> the
 max-game Shapley value has order-statistic structure and can be computed
 in about <span class="math inline">\(O(Mn\log n)\)</span> without
@@ -390,9 +450,9 @@ simulation law</em> defined by the <span
 class="math inline">\(M\)</span> draws; for the population law it
 carries the usual <span class="math inline">\(O(M^{-1/2})\)</span>
 Monte-Carlo error.</p>
-<h1 data-number="5" id="sec:redundancy"><span
+<h2 data-number="5" id="sec:redundancy"><span
 class="header-section-number">5</span> Redundancy, and the calibration
-condition</h1>
+condition</h2>
 <p>The reason to prefer this credit rule over a correlation-blind one is
 redundancy.</p>
 <div id="prop:redundancy" class="proposition">
@@ -408,55 +468,47 @@ credit equals that of one contributor.</em></p>
 does not follow for an arbitrary vector of scores fed through <span
 class="math inline">\(\mathop{\mathrm{arg\,max}}\)</span>: if
 near-duplicates carry slightly unequal scores, the largest wins almost
-every draw and the split is winner-take-all. The fix is calibration <a
-href="#eq:calib" data-reference-type="eqref"
-data-reference="eq:calib">[eq:calib]</a>: set the benchmark <span
+every draw and the split is winner-take-all. The fix is calibration \(\eqref{eq:calib}\): set the benchmark <span
 class="math inline">\(w^0\)</span> to the contributors’
 <em>marginal</em> credit—equal across genuine duplicates—then tilt under
 their empirical dependence, so the pair is de-duplicated and split
 evenly. The price is that the de-duplicated weight redistributes in part
 to weak contributors; spreading credit and concentrating it cannot both
 be exact.</p>
-<h1 data-number="6" id="sec:apps"><span
-class="header-section-number">6</span> Applications</h1>
-<h4 data-number="6.0.0.1" id="forecast-combination."><span
-class="header-section-number">6.0.0.1</span> Forecast combination.</h4>
-<p>Supplying the race with the base forecasters’ per-period
-<em>losses</em> <span class="math inline">\(L_{k,t}\)</span> (so the
-lowest-loss forecaster wins) yields combination weights that are a
-redundancy-aware credit split over models. On the M4 competition this is
-a promising but inconclusive direction (the companion paper reports that
-study): in the small-sample regime it is competitive with, and the most
-stable member of, the combination family, but we claim no out-of-sample
-superiority. The performance variable must be a loss, not a signed
-error, or the “winner” is merely the most negatively biased
-forecaster.</p>
-<h4 data-number="6.0.0.2" id="feature-attribution."><span
-class="header-section-number">6.0.0.2</span> Feature attribution.</h4>
-<p>For model interpretability the contributors are features and the
-credit is a redundancy-aware importance. Raw contribution scores give a
-quick screen but are winner-take-all among correlated features; the
-calibrated race delivers the even split that correlated-feature
-attribution wants, far more cheaply than a coalition-based method.
-Unlike SHAP it returns a share of wins rather than an additive
-decomposition of a single prediction—a global importance, not a local
-explanation.</p>
-<h4 data-number="6.0.0.3" id="variable-selection."><span
-class="header-section-number">6.0.0.3</span> Variable selection.</h4>
-<p>Thresholded, the same importance is a selection rule, and the natural
-competitor for <em>stable</em> selection under collinearity is stability
-selection <span class="citation"
-data-cites="meinshausen2010">(Meinshausen and Bühlmann 2010)</span>,
-which ranks features by lasso selection frequency over subsamples. On
-collinear designs the calibrated race is the more stable of the two:
-across data resamples its per-duplicate credit varies several-fold less
-than both a single lasso (which picks one copy and flips) and stability
-selection, while splitting redundant features evenly—and it does so in
-one pass rather than a bag of lasso fits. The costs are a softer
-signal/noise contrast, since some credit leaks to weak features, and a
-higher per-call price than a single fit.</p>
-<h1 data-number="7" id="sec:discussion"><span
-class="header-section-number">7</span> Discussion</h1>
+<h2 data-number="6" id="sec:apps"><span
+class="header-section-number">6</span> Applications</h2>
+<p><strong class="runin">Forecast combination.</strong> Supplying the
+race with the base forecasters’ per-period <em>losses</em> <span
+class="math inline">\(L_{k,t}\)</span> (so the lowest-loss forecaster
+wins) yields combination weights that are a redundancy-aware credit
+split over models. On the M4 competition this is a promising but
+inconclusive direction (the companion paper reports that study): in the
+small-sample regime it is competitive with, and the most stable member
+of, the combination family, but we claim no out-of-sample superiority.
+The performance variable must be a loss, not a signed error, or the
+“winner” is merely the most negatively biased forecaster.</p>
+<p><strong class="runin">Feature attribution.</strong> For model
+interpretability the contributors are features and the credit is a
+redundancy-aware importance. Raw contribution scores give a quick screen
+but are winner-take-all among correlated features; the calibrated race
+delivers the even split that correlated-feature attribution wants, far
+more cheaply than a coalition-based method. Unlike SHAP it returns a
+share of wins rather than an additive decomposition of a single
+prediction—a global importance, not a local explanation.</p>
+<p><strong class="runin">Variable selection.</strong> Thresholded, the
+same importance is a selection rule, and the natural competitor for
+<em>stable</em> selection under collinearity is stability selection
+<span class="citation" data-cites="meinshausen2010">(Meinshausen and
+Bühlmann 2010)</span>, which ranks features by lasso selection frequency
+over subsamples. On collinear designs the calibrated race is the more
+stable of the two: across data resamples its per-duplicate credit varies
+several-fold less than both a single lasso (which picks one copy and
+flips) and stability selection, while splitting redundant features
+evenly—and it does so in one pass rather than a bag of lasso fits. The
+costs are a softer signal/noise contrast, since some credit leaks to
+weak features, and a higher per-call price than a single fit.</p>
+<h2 data-number="7" id="sec:discussion"><span
+class="header-section-number">7</span> Discussion</h2>
 <p>The winning probability is a fast, differentiable, online,
 redundancy-aware credit rule, useful where redundancy-aware credit is
 wanted and a coalition-by-coalition computation is too expensive. It is
@@ -474,11 +526,11 @@ do I rely on now?”—the full-field endpoint question is the operational
 one, and it is the one the race answers. Its redundancy guarantee is
 exact for the calibrated equal-ability race, which is the construction
 to use; raw scores give only a winner-take-all screen. Its axiomatic
-standing is settled by <a href="#prop:axioms"
+standing is settled by Proposition&nbsp;<a href="#prop:axioms"
 data-reference-type="ref+Label" data-reference="prop:axioms">2</a>: it
 keeps efficiency, symmetry, and the null-player property, trading away
 only additivity. As a variable-selection rule it is the stable,
-redundancy-aware option of <a href="#sec:apps"
+redundancy-aware option of Section&nbsp;<a href="#sec:apps"
 data-reference-type="ref+Label" data-reference="sec:apps">6</a>. Its
 choice-sensitivity Jacobian <span class="math inline">\(\nabla_\theta
 w\)</span> turns out to be well-conditioned even when the covariance is
