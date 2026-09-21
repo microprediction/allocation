@@ -36,17 +36,40 @@ class EwmaCovariance:
         return X[None, :] if X.ndim == 1 else X
 
     def partial_fit(self, X, y=None) -> "EwmaCovariance":
+        """Update on one row or a whole block.
+
+        The covariance recursion unrolls exactly. After ``T`` rows,
+
+            cov_T = r^T cov_0 + alpha * sum_t r^(T-1-t) dev_t dev_t'
+
+        with ``r = 1 - alpha``, so the block case is one weighted matmul rather
+        than ``T`` rank-one outer products. The running mean still needs a scan,
+        but that is O(T n) against the covariance's O(T n^2), so it is not the
+        cost. Results are identical to the row-at-a-time recursion.
+        """
         alpha = _halflife_to_alpha(self.halflife)
-        for x in self._rows(X):
-            if self._mean is None:
-                n = len(x)
-                self._mean = x.copy()
-                self._cov = np.zeros((n, n), dtype=float)
-            else:
-                self._mean = (1 - alpha) * self._mean + alpha * x
-            dev = x - self._mean
-            self._cov = (1 - alpha) * self._cov + alpha * np.outer(dev, dev)
-            self.n_samples_ += 1
+        rows = self._rows(X)
+        if rows.size == 0:
+            return self
+        r = 1.0 - alpha
+        T, n = rows.shape
+
+        fresh = self._mean is None
+        if fresh:
+            self._mean = rows[0].copy()
+            self._cov = np.zeros((n, n), dtype=float)
+
+        devs = np.empty((T, n), dtype=float)
+        m = self._mean
+        for t in range(T):
+            if not (fresh and t == 0):
+                m = r * m + alpha * rows[t]
+            devs[t] = rows[t] - m
+        self._mean = m
+
+        w = alpha * r ** np.arange(T - 1, -1, -1)
+        self._cov = (r ** T) * self._cov + devs.T @ (w[:, None] * devs)
+        self.n_samples_ += T
         return self
 
     def fit(self, X, y=None) -> "EwmaCovariance":

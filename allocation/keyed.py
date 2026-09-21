@@ -28,7 +28,6 @@ from .convex import (
 from ._schur.bridge import bisection_tree, bridge_weights, tree_leaves
 from ._schur.coupling import compute_monotonic_weights, compute_weights
 from ._schur.seriation import seriate
-from ._thurstone.ability import base_density
 from ._thurstone.calibrate import calibrate_diagonal, calibrate_one_factor
 from ._thurstone.covariance import market_betas, one_factor_corr
 from ._thurstone.diagonal import diagonal_portfolio
@@ -131,7 +130,6 @@ class StreamingThurstone:
         self._cov = KeyedEwmaCovariance(halflife=halflife)
         self._seed_bank: dict = {}
         self._weights: dict = {}
-        self._base = base_density()
         self._n = 0
 
     # --------------------------------------------------------- seed bank
@@ -166,7 +164,7 @@ class StreamingThurstone:
         if self.calib == "market":
             betas = market_betas(cov, weights=tgt)
             C_calib = one_factor_corr(betas)
-            ability = calibrate_one_factor(tgt, betas, base=self._base, n_quad=self.n_quad)
+            ability = calibrate_one_factor(tgt, betas, n_quad=self.n_quad)
         else:
             C_calib = np.eye(len(ids))
             ability = calibrate_diagonal(tgt)

@@ -19,7 +19,7 @@ from __future__ import annotations
 import numpy as np
 import winning
 
-from .ability import base_density, state_price_implied_ability
+from .ability import state_price_implied_ability
 
 __all__ = [
     "winprobs_one_factor",
@@ -35,7 +35,7 @@ def _normalize(w: np.ndarray) -> np.ndarray:
 
 
 def winprobs_one_factor(
-    ability, betas, *, base: object = None, n_quad: int = 16
+    ability, betas, *, n_quad: int = 16
 ) -> np.ndarray:
     """Winning probabilities under a one-factor race, by quadrature.
 
@@ -55,19 +55,18 @@ def winprobs_one_factor(
     return _normalize(np.clip(np.asarray(p, dtype=float), 0.0, None))
 
 
-def calibrate_diagonal(target, *, base: object = None, n_iter: int = 4) -> np.ndarray:
+def calibrate_diagonal(target, *, n_iter: int = 4) -> np.ndarray:
     """Abilities reproducing ``target`` under an independent field (flavour i).
 
     Exact inverse via ``winning.calibrate_abilities``.
     """
-    return state_price_implied_ability(_normalize(target), base=base, n_iter=n_iter)
+    return state_price_implied_ability(_normalize(target), n_iter=n_iter)
 
 
 def calibrate_one_factor(
     target,
     betas,
     *,
-    base: object = None,
     n_quad: int = 16,
     n_iter: int = 60,
     step: float = 0.5,

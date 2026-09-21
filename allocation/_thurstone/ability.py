@@ -19,16 +19,10 @@ import numpy as np
 import winning
 
 __all__ = [
-    "base_density",
     "state_price_implied_ability",
     "ability_implied_state_prices",
 ]
 
-
-def base_density(*_args, **_kwargs):
-    """Retained for compatibility. ``winning`` carries its own base law, so
-    there is no density object to construct; callers pass nothing."""
-    return None
 
 
 def _as_probabilities(p) -> np.ndarray:
@@ -40,7 +34,7 @@ def _as_probabilities(p) -> np.ndarray:
 
 
 def state_price_implied_ability(
-    weights, *, base=None, n_iter: int = 4, floor: float = 1e-12
+    weights, *, n_iter: int = 4, floor: float = 1e-12
 ) -> np.ndarray:
     """Invert weights (as winning probabilities) to abilities, up to a constant.
 
@@ -56,6 +50,6 @@ def state_price_implied_ability(
     return np.asarray(winning.calibrate_abilities(w), dtype=float)
 
 
-def ability_implied_state_prices(ability, *, base=None) -> np.ndarray:
+def ability_implied_state_prices(ability) -> np.ndarray:
     """Forward map: abilities to winning probabilities (the field's state prices)."""
     return _as_probabilities(winning.race_probabilities(np.asarray(ability, dtype=float)))

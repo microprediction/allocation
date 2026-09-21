@@ -16,7 +16,6 @@ from __future__ import annotations
 import numpy as np
 
 from .base import BaseOnlinePortfolio
-from ._thurstone.ability import base_density
 from ._thurstone.calibrate import calibrate_diagonal, calibrate_one_factor
 from ._thurstone.covariance import cov_to_corr, factor_decompose, market_betas, one_factor_corr
 from ._thurstone.diagonal import diagonal_portfolio
@@ -156,7 +155,6 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         if self.sampler == "student_t" and not self.nu > 0:
             raise ValueError("nu must be > 0 for the student_t sampler.")
         n = cov.shape[0]
-        base = base_density()
         tgt = self._resolve_target(cov)
         self._target_w = tgt
 
@@ -168,7 +166,7 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
             b = market_betas(cov, weights=tgt)
             self._betas = b
             self._C_calib = one_factor_corr(b)
-            self._ability = calibrate_one_factor(tgt, b, base=base, n_quad=self.n_quad)
+            self._ability = calibrate_one_factor(tgt, b, n_quad=self.n_quad)
         else:
             raise ValueError(f"unknown calib {self.calib!r} (use 'diagonal' or 'market')")
 
