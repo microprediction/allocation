@@ -1,12 +1,14 @@
-"""Fiedler (spectral) seriation -- a smooth ordering of assets.
+"""Fiedler (spectral) seriation -- an ordering that changes only at coordinate crossings.
 
 Standard HRP/Schur take the asset order from agglomerative clustering, whose
 dendrogram reorders discontinuously as the covariance drifts -- the source of
 turnover. We replace it with the Fiedler vector (the eigenvector of the second
 smallest Laplacian eigenvalue of the similarity graph): it varies *continuously*
 with the covariance, so the order changes only when two assets' Fiedler
-coordinates cross. Feeding this order into the Schur recursion makes the whole
-allocation a smooth function of the covariance.
+coordinates cross. Each crossing changes a bisection and moves the allocation by a
+finite amount, so the allocation is piecewise continuous in the covariance, not
+continuous; what the spectral order buys is fewer reorderings than a dendrogram,
+and the lower turnover is an empirical result.
 
 Scale: the similarity graph can be sparsified to k nearest neighbours so the
 Fiedler vector is a single eigenpair of a sparse Laplacian (the dense ``eigh``

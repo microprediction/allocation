@@ -44,14 +44,14 @@ This is all MIT-licensed and anyone is welcome to take anything here.
 | Estimator | Status | Notes |
 |-----------|--------|-------|
 | `ThurstonePortfolio` | working | Ability tilt: weights are winning probabilities of a correlated race; calibrate to a benchmark under a reference correlation, tilt under the estimate; smooth common-seed transport for `partial_fit`. Built on [`thurstone`](https://github.com/microprediction/thurstone). |
-| `SchurComplementary` | working | The **collapsed encoding** of the HRP bridge, matching skfolio to machine precision: HRP at `gamma=0`, *approaching* min-variance as `gamma→1` (not exactly; `SchurBridge` is the exact one). Over a smooth **Fiedler seriation** instead of a dendrogram, so `partial_fit` is low-turnover. |
-| `SchurBridge` | working | **Bridges named by their endpoints, one engine underneath**: `hrp_to_min_variance(gamma)`, `hmv_to_min_variance`, `herc_to_min_variance(gamma, eta, k)`, `nco_to_min_variance(gamma, k)`, `inverse_variance_to_min_variance(eta)`, each exact at both ends; `companion='vol'`/`'mean'` lands on maximum diversification / tangency instead. See below. |
+| `SchurComplementary` | working | The **collapsed encoding** of the HRP bridge, matching skfolio to machine precision: HRP at `gamma=0`, moving *toward* min-variance as `gamma→1` when the min-variance portfolio is long-only, without reaching it (`SchurBridge` is the exact one). Over a smooth **Fiedler seriation** instead of a dendrogram, so `partial_fit` is low-turnover. |
+| `SchurBridge` | working | **Bridges named by their endpoints, one engine underneath**: `hrp_to_min_variance(gamma)`, `hmv_to_min_variance`, `herc_to_min_variance(gamma, eta, n_clusters)`, `nco_to_min_variance(gamma, n_clusters)`, `inverse_variance_to_min_variance(eta)`, each exact at both ends with the default sibling conditioning; `companion='vol'`/`'mean'` lands on maximum diversification / tangency instead. See below. |
 | `HierarchicalRiskParity` | working | Dynamic HRP — the `gamma=0` special case of the Schur construction (recursive-bisection risk parity over the Fiedler order); named for recognisability. |
 | `RiskParity` | working | Equal-risk-contribution (ERC); interior convex solution, solved by coordinate descent **warm-started from the previous weights** so updates stay smooth. |
 | `EqualWeight`, `InverseVariance` | working | Smooth baselines for benchmarking (`1/n`; `w ∝ 1/σ²`). |
 | `MinimumVariance`, `MaximumDiversification` | working | Closed-form `Σ⁻¹1` / `Σ⁻¹σ` with optional `shrinkage` for conditioning. Unconstrained (signed) so they stay smooth — a long-only QP would kink. |
 
-Each has a river-style streaming twin for a *changing* universe — `StreamingThurstone`, `StreamingSchur`, `StreamingSchurBridge`, `StreamingHRP`, `StreamingRiskParity`, `StreamingEqualWeight`, `StreamingInverseVariance`, `StreamingMinimumVariance`, `StreamingMaximumDiversification` — with `learn_one({id: ret})` / `predict_one() → {id: weight}`.
+Each has a river-style streaming twin for a *changing* universe — `StreamingThurstone`, `StreamingSchur`, `StreamingSchurBridge`, `StreamingHRP`, `StreamingRiskParity`, `StreamingEqualWeight`, `StreamingInverseVariance`, `StreamingMinimumVariance`, `StreamingMaximumDiversification`, `StreamingMaximumDecorrelation`, `StreamingMeanVariance` — with `learn_one({id: ret})` / `predict_one() → {id: weight}`.
 
 **On smoothness.** Each method is written so that `partial_fit` over a drifting covariance moves weights only as much as the covariance moved. It helps to see `weights = allocator(cov_estimator(data))` as a product of two factors:
 
@@ -94,7 +94,8 @@ closed-form, continuous function of the covariance. And at the far end the weigh
 do not depend on the partition at all, so the turnover caused by a cluster
 membership change shrinks to zero as the dials approach it (checked in
 `experiments/bridge_churn_and_scale.py`): the dials that damp estimation noise damp
-reclustering churn. The partition is the smooth Fiedler order, bisected
+reclustering churn. The partition is the Fiedler order, which changes only when two
+coordinates cross, bisected
 (`n_clusters=None`) or cut into contiguous blocks (`n_clusters=k`), or a fixed label
 vector (`clusters=`) such as sectors.
 
@@ -102,7 +103,8 @@ vector (`clusters=`) such as sectors.
 (exact, one half-size solve at the root), `'all'` conditions on every other asset
 (exact, expensive), and `'factor'` conditions on one factor-mimicking portfolio per
 other cluster, exact when cross-cluster dependence runs through one latent factor
-per cluster and costing only cluster-sized solves. `long_only=True` caps `eta` at
+per cluster and costing only cluster-sized solves; on a generic covariance it is
+approximate at the far end, so the named constructors default to `'siblings'`. `long_only=True` caps `eta` at
 each cluster's closed-form long-only frontier. The exact-arithmetic theory behind
 the corners is in the papers at [schur.microprediction.org](https://schur.microprediction.org).
 
@@ -202,7 +204,7 @@ The two novel methods are written up as working papers.
   [`papers/thurstone-portfolios/`](papers/thurstone-portfolios), built on
   [`thurstone`](https://github.com/microprediction/thurstone).
 - **Schur-complementary allocation** — robust, inversion-light allocation along a
-  smooth Fiedler seriation; background and bibliography at
+  spectral (Fiedler) seriation; background and bibliography at
   [schur.microprediction.org](https://schur.microprediction.org).
 
 ## Status

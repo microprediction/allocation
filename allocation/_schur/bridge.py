@@ -43,7 +43,8 @@ Conditioning a subset ``I`` on ``J`` inside a pair, damped by ``g``::
     Q_I <- Q_II - g Q_IJ Q_JJ^{-1} Q_JI,    b_I <- b_I - g Q_IJ Q_JJ^{-1} b_J
 
 Everything is closed form and continuous in the covariance for a fixed
-partition, so a smooth covariance and a smooth partition give smooth weights.
+partition; a change of partition, at a Fiedler coordinate crossing, moves the weights by
+a finite amount that vanishes at ``(1, 1)``.
 At ``(1, 1)`` the weights do not depend on the partition at all, so the cost of
 a membership change shrinks as the dials approach the far end.
 
@@ -176,8 +177,8 @@ def tree_leaves(tree) -> list:
 def contiguous_partition(order, n_clusters: int) -> list:
     """Cut a seriation ``order`` into ``n_clusters`` contiguous blocks of near-equal size.
 
-    Membership changes only when two assets cross in the order, which is the
-    same smoothness the Fiedler order gives the bisection tree.
+    Membership changes only when two assets cross in the order, the same events
+    at which the bisection tree reorders.
     """
     order = np.asarray(order, dtype=int)
     k = max(1, min(int(n_clusters), len(order)))
