@@ -169,7 +169,7 @@ class StreamingThurstone:
             ability = calibrate_one_factor(tgt, betas, base=self._base, n_quad=self.n_quad)
         else:
             C_calib = np.eye(len(ids))
-            ability = calibrate_diagonal(tgt, base=self._base)
+            ability = calibrate_diagonal(tgt)
         C_tilt = blend_correlation(C_calib, cov, self.phi)
         w = transport_weights(ability, C_tilt, self._seeds(ids))
         self._weights = dict(zip(ids, w))

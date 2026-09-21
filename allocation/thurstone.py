@@ -163,7 +163,7 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         if self.calib == "diagonal":
             self._betas = np.zeros(n)
             self._C_calib = np.eye(n)
-            self._ability = calibrate_diagonal(tgt, base=base)
+            self._ability = calibrate_diagonal(tgt)
         elif self.calib == "market":
             b = market_betas(cov, weights=tgt)
             self._betas = b
