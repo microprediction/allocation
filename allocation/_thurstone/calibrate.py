@@ -46,7 +46,10 @@ def winprobs_one_factor(
     """
     a = np.asarray(ability, dtype=float)
     b = np.clip(np.asarray(betas, dtype=float), -0.999, 0.999)
-    p = winning.race_probabilities(a, V=b)
+    # V is a column of loadings and D the idiosyncratic variances; passing V
+    # alone leaves D at its default and inflates the total variance, which is
+    # a silent 6e-2 error against the model this function documents.
+    p = winning.race_probabilities(a, V=b.reshape(-1, 1), D=1.0 - b ** 2)
     if isinstance(p, tuple):
         p = p[0]
     return _normalize(np.clip(np.asarray(p, dtype=float), 0.0, None))
@@ -79,5 +82,7 @@ def calibrate_one_factor(
     """
     target = _normalize(target)
     b = np.clip(np.asarray(betas, dtype=float), -0.999, 0.999)
-    a = np.asarray(winning.calibrate_abilities(target, V=b), dtype=float)
+    a = np.asarray(
+        winning.calibrate_abilities(target, V=b.reshape(-1, 1), D=1.0 - b ** 2),
+        dtype=float)
     return a - np.median(a)

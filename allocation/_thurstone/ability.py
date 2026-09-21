@@ -39,10 +39,21 @@ def _as_probabilities(p) -> np.ndarray:
     return p / s if s > 0 else np.full(len(p), 1.0 / len(p))
 
 
-def state_price_implied_ability(weights, *, base=None, n_iter: int = 4) -> np.ndarray:
-    """Invert weights (as winning probabilities) to abilities, up to a constant."""
-    return np.asarray(
-        winning.calibrate_abilities(np.asarray(weights, dtype=float)), dtype=float)
+def state_price_implied_ability(
+    weights, *, base=None, n_iter: int = 4, floor: float = 1e-12
+) -> np.ndarray:
+    """Invert weights (as winning probabilities) to abilities, up to a constant.
+
+    A zero weight has no finite inverse, and ``winning`` raises on one rather
+    than inventing a value. Portfolio weights with exact zeros are ordinary, so
+    they are floored first; the result is then a one-sided bound on the floored
+    contrasts. The lattice calibrator this replaced returned a grid-edge
+    constant instead, which was junk that never announced itself.
+    """
+    w = np.asarray(weights, dtype=float)
+    if (w <= 0).any():
+        w = np.maximum(w, floor)
+    return np.asarray(winning.calibrate_abilities(w), dtype=float)
 
 
 def ability_implied_state_prices(ability, *, base=None) -> np.ndarray:
