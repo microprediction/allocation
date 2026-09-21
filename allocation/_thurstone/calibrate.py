@@ -3,7 +3,7 @@
 Two engines, selected by the structure of the reference correlation ``C_calib``:
 
 * **diagonal** (independent field) -- the exact lattice inverse from
-  :mod:`thurstone`. Cheap; this is flavour (i).
+  ``winning``. Cheap; this is flavour (i).
 * **one-factor** -- a single common factor with per-asset loadings ``betas``.
   Conditional on the factor the assets are independent, so the race is evaluated
   by Gauss--Hermite quadrature over the factor (``winprobs_one_factor``); the
@@ -17,7 +17,7 @@ means a **stronger** competitor (higher winning probability).
 from __future__ import annotations
 
 import numpy as np
-from thurstone import Density, Race
+import winning
 
 from .ability import base_density, state_price_implied_ability
 
@@ -35,7 +35,7 @@ def _normalize(w: np.ndarray) -> np.ndarray:
 
 
 def winprobs_one_factor(
-    ability, betas, *, base: Density | None = None, n_quad: int = 16
+    ability, betas, *, base: object = None, n_quad: int = 16
 ) -> np.ndarray:
     """Winning probabilities under a one-factor race, by quadrature.
 
@@ -44,30 +44,18 @@ def winprobs_one_factor(
     is independent, so the exact lattice race applies; we integrate over ``z``
     with Gauss--Hermite (probabilists') quadrature.
     """
-    base = base if base is not None else base_density()
-    lat = base.lattice
     a = np.asarray(ability, dtype=float)
     b = np.clip(np.asarray(betas, dtype=float), -0.999, 0.999)
-    s = np.sqrt(np.clip(1.0 - b ** 2, 1e-6, 1.0))
-
-    nodes, qw = np.polynomial.hermite_e.hermegauss(n_quad)
-    qw = qw / np.sqrt(2.0 * np.pi)  # so weights sum to 1
-
-    n = len(a)
-    acc = np.zeros(n, dtype=float)
-    for z, w in zip(nodes, qw):
-        densities = [
-            Density.skew_normal(lat, loc=float(a[i] + b[i] * z), scale=float(s[i]), a=0.0)
-            for i in range(n)
-        ]
-        acc += w * np.asarray(Race(densities).state_prices(), dtype=float)
-    return _normalize(np.clip(acc, 0.0, None))
+    p = winning.race_probabilities(a, V=b)
+    if isinstance(p, tuple):
+        p = p[0]
+    return _normalize(np.clip(np.asarray(p, dtype=float), 0.0, None))
 
 
-def calibrate_diagonal(target, *, base: Density | None = None, n_iter: int = 4) -> np.ndarray:
+def calibrate_diagonal(target, *, base: object = None, n_iter: int = 4) -> np.ndarray:
     """Abilities reproducing ``target`` under an independent field (flavour i).
 
-    Exact lattice inverse via the :mod:`thurstone` calibrator.
+    Exact inverse via ``winning.calibrate_abilities``.
     """
     return state_price_implied_ability(_normalize(target), base=base, n_iter=n_iter)
 
@@ -76,7 +64,7 @@ def calibrate_one_factor(
     target,
     betas,
     *,
-    base: Density | None = None,
+    base: object = None,
     n_quad: int = 16,
     n_iter: int = 60,
     step: float = 0.5,
@@ -84,22 +72,12 @@ def calibrate_one_factor(
 ) -> np.ndarray:
     """Abilities reproducing ``target`` under a one-factor race (flavour ii).
 
-    Damped fixed-point on the quadrature forward map. Because winning
-    probability is monotone *decreasing* in ability (min wins), we nudge
-    ``a_i`` up when the model over-prices asset ``i`` and down when it
-    under-prices it, on a log scale, re-centering each step (abilities are only
-    identified up to a constant).
+    Solved directly by ``winning.calibrate_abilities`` with the factor loading
+    passed as ``V``, replacing a damped fixed point on a quadrature forward map
+    that left about three percent of error at its tolerance. Abilities are only
+    identified up to a constant, so the result is re-centred.
     """
     target = _normalize(target)
-    base = base if base is not None else base_density()
-    log_t = np.log(np.clip(target, 1e-12, None))
-
-    a = calibrate_diagonal(target, base=base)  # warm start (independent inverse)
-    for _ in range(n_iter):
-        p = winprobs_one_factor(a, betas, base=base, n_quad=n_quad)
-        if np.max(np.abs(p - target)) < tol:
-            break
-        log_p = np.log(np.clip(p, 1e-12, None))
-        a = a + step * (log_p - log_t)  # p decreasing in a -> this is a descent step
-        a = a - np.median(a)
-    return a
+    b = np.clip(np.asarray(betas, dtype=float), -0.999, 0.999)
+    a = np.asarray(winning.calibrate_abilities(target, V=b), dtype=float)
+    return a - np.median(a)

@@ -24,18 +24,17 @@ cd benchmark && python run.py 60 regime
 
 ## Costs
 
-The Thurstone race is not the expensive part, which I had wrong. A fit is
-about 1.4 seconds at forty assets and 1.5 at a hundred, and the path budget is
-nearly free: going from 4,096 paths to 262,144 costs 30% more time, not 64
-times more. The cost is the ability calibration, which is roughly constant in
-the number of paths.
+The Thurstone race is cheap now. Every configuration is 0.02 to 0.07 seconds a
+fit at forty to a hundred assets, including the market calibration, which used
+to be the one setting to avoid. The path budget is nearly free, so use a large
+one: the harness runs at 65,536 paths.
 
-Two consequences. Use a large path budget, because the Monte Carlo noise in the
-weights falls as one over the square root of paths and costs almost nothing to
-reduce; the harness runs at 65,536. And avoid `calib="market"`, which is the
-one genuinely slow setting at 12.9 seconds a fit at forty assets and 100
-seconds at a hundred. The studies are slow because of the number of fits, not
-the paths.
+That was not true until the calibration was routed through `winning`'s front
+door. It had been going through a deprecated alias to the density-agnostic
+engine, which the compiled kernels do not touch, and a fit cost about 1.4
+seconds with the market calibration at 12.9 seconds at forty assets and 100
+seconds at a hundred. The tilt studies below were sized against those numbers
+and are now far faster than their labels suggest.
 
 | study | what it establishes | cost |
 |---|---|---|
@@ -47,9 +46,9 @@ the paths.
 | `taper_beats_hrp.py` | HRP sits at the dominated corner of a two-parameter family containing it | ~10 min |
 | `nco_taper.py` | NCO tracks the shrinkage frontier and HRP does not | ~8 min |
 | `confound.py`, `rank_deficient.py`, `robust.py`, `shrinkage_beats_hrp.py` | the comparisons now covered by `benchmark/run.py`; kept because `RESULTS.md` quotes their numbers | 2-15 min |
-| `thurstone_paired.py` | the tilt is neutral on a stationary market | ~15 min |
-| `tail_test.py` | the tilt on a regime market, scored on variance and shortfall | ~20 min |
-| `tilt_confirm.py`, `tilt_replicate.py`, `tilt_highdata.py` | three seeds; the tilt is worth nothing at T/n=0.1 and 13% of variance at T/n=5 | ~25 min each |
+| `thurstone_paired.py` | the tilt is neutral on a stationary market | ~1 min |
+| `tail_test.py` | the tilt on a regime market, scored on variance and shortfall | ~2 min |
+| `tilt_confirm.py`, `tilt_replicate.py`, `tilt_highdata.py` | three seeds; the tilt is worth nothing at T/n=0.1 and 13% of variance at T/n=5 | ~1 min each |
 | `mhp.py` | the multi-hypothesis ensemble method, implemented and benchmarked | ~5 min |
 | `nonelliptical.py` | that a market can separate tail risk from variance, now also in `benchmark/markets.py` | ~1 min |
 
