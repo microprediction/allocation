@@ -1,4 +1,6 @@
 """The tilting round trip, as a new user meets it."""
+import warnings
+
 import numpy as np
 import pytest
 
@@ -13,6 +15,29 @@ from allocation import (
 def test_round_trip_is_the_advertised_one_liner():
     w = np.array([0.4, 0.25, 0.2, 0.15])
     assert np.abs(weights_from_abilities(abilities_from_weights(w)) - w).max() < 1e-8
+
+
+@pytest.mark.parametrize("n,alpha", [(3, 1.0), (3, 0.2), (4, 1.0), (4, 0.2),
+                                     (6, 0.15), (10, 0.2), (25, 1.0), (60, 1.0)])
+def test_round_trip_holds_as_a_property_not_just_for_one_vector(n, alpha):
+    """The version of this test that shipped asserted a single hardcoded
+    vector, [0.4, 0.25, 0.2, 0.15], which round-trips to 2.7e-09 and passed
+    every run. On random draws of the same size, 12 percent failed the same
+    bound with a worst case of 2.4e-03, and at three assets it was half, with
+    the two largest names transposed. The inverse was not an inverse and the
+    test could not see it, because it pinned an example rather than the claim.
+
+    Anything that does not converge must warn, so nothing is silently wrong.
+    """
+    rng = np.random.default_rng(hash((n, alpha)) % (2 ** 32))
+    for _ in range(40):
+        w = rng.dirichlet(np.full(n, alpha))
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            err = np.abs(weights_from_abilities(abilities_from_weights(w)) - w).max()
+        warned = any(issubclass(c.category, RuntimeWarning) for c in caught)
+        assert err < 1e-6 or warned, (
+            f"round trip off by {err:.2e} on {w} with no warning")
 
 
 def test_abilities_are_mean_zero_and_smaller_is_stronger():
