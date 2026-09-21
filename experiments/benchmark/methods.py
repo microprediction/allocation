@@ -77,6 +77,21 @@ def _clustered_taper(phi=0.5, k=5):
     return run
 
 
+def _multi_hypothesis(eps=0.0):
+    """Rodriguez Dominguez, Shahzad and Hong (2025), arXiv:2501.03919.
+    Implemented in studies/mhp.py; registered here so it is benchmarked on the
+    same markets and the same protocol as everything else."""
+    import os, sys
+    d = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "studies")
+    if d not in sys.path:
+        sys.path.insert(0, d)
+
+    def run(X):
+        from mhp import mhp_weights
+        return mhp_weights(X, eps=eps)
+    return run
+
+
 def registry(include_slow=True):
     M = [
         Method("equal weight", _pkg("EqualWeight"), True, "package"),
@@ -93,6 +108,7 @@ def registry(include_slow=True):
         Method("min-var long-only", _sample_min_var_long_only, True, "reference"),
         Method("min-var Ledoit-Wolf", _ledoit_wolf_min_var, True, "reference"),
         Method("clustered taper 0.5", _clustered_taper(0.5), True, "reference"),
+        Method("multi-hypothesis", _multi_hypothesis(0.0), True, "outside"),
     ]
     if include_slow:
         M.append(Method("Thurstone", _pkg("ThurstonePortfolio", n_paths=4096),

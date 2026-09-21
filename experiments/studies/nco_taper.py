@@ -13,20 +13,12 @@ block-diagonal estimate, phi = 1 is the raw estimate. Where does NCO sit?
 import numpy as np
 import cvxpy as cp
 from scipy.cluster.hierarchy import fcluster
+from _markets import blocks, one_factor, wishart
 from confound import hrp, min_var, tree
 
 n = 40
 
-def blocks(rng):
-    C = np.full((n, n), 0.15)
-    for b in range(5):
-        s = slice(b*8, (b+1)*8); C[s, s] = 0.7
-    np.fill_diagonal(C, 1.0)
-    v = np.exp(rng.normal(0, .4, n)); return v[:, None]*C*v[None, :]
 
-def one_factor(rng):
-    beta = rng.normal(1.0, .4, n); idio = np.exp(rng.normal(0, .5, n))
-    return np.outer(beta, beta)*0.04 + np.diag(idio**2)
 
 _cache = {}
 def mv_lo(S):

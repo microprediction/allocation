@@ -13,21 +13,13 @@ better.
 """
 import numpy as np
 import cvxpy as cp
+from _markets import blocks, one_factor, wishart
 from confound import hrp, min_var, tree, quasi_diag
 from decompose import lca_depth
 
 n = 40
 
-def blocks(rng):
-    C = np.full((n, n), 0.15)
-    for b in range(5):
-        s = slice(b*8, (b+1)*8); C[s, s] = 0.7
-    np.fill_diagonal(C, 1.0)
-    v = np.exp(rng.normal(0, .4, n)); return v[:, None]*C*v[None, :]
 
-def one_factor(rng):
-    beta = rng.normal(1.0, .4, n); idio = np.exp(rng.normal(0, .5, n))
-    return np.outer(beta, beta)*0.04 + np.diag(idio**2)
 
 _w = cp.Variable(n); _P = cp.Parameter((n, n), PSD=True)
 _prob = cp.Problem(cp.Minimize(cp.quad_form(_w, _P)), [cp.sum(_w) == 1, _w >= 0])
