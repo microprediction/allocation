@@ -40,3 +40,32 @@ def test_zero_weights_give_finite_abilities():
     a = state_price_implied_ability(np.array([0.4, 0.3, 0.3, 0.0, 0.0]))
     assert np.isfinite(a).all()
     assert a[3] > a[0] and a[4] > a[0]      # min-wins: zero weight is the weakest
+
+
+def test_ewma_block_updates_match_the_row_recursion():
+    """The vectorised covariance unrolls a recursion, so the r**T carry-over
+    between blocks is the part most likely to be off by one. Every split must
+    reproduce the row-at-a-time answer exactly."""
+    from allocation.moments import EwmaCovariance, _halflife_to_alpha
+
+    def row_by_row(X, hl=60.0):
+        a = _halflife_to_alpha(hl)
+        m = C = None
+        for x in X:
+            if m is None:
+                m, C = x.copy(), np.zeros((len(x),) * 2)
+            else:
+                m = (1 - a) * m + a * x
+            d = x - m
+            C = (1 - a) * C + a * np.outer(d, d)
+        return m, 0.5 * (C + C.T)
+
+    X = np.random.default_rng(0).normal(size=(50, 6))
+    mr, Cr = row_by_row(X)
+    for split in (1, 7, 25, 49):
+        e = EwmaCovariance()
+        e.partial_fit(X[:split])
+        e.partial_fit(X[split:])
+        assert np.abs(e.mean_ - mr).max() < 1e-12
+        assert np.abs(e.covariance_ - Cr).max() < 1e-12
+        assert e.n_samples_ == 50
