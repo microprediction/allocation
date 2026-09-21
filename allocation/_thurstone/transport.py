@@ -84,8 +84,16 @@ def gaussian_sampler(ability: np.ndarray, corr: np.ndarray, seeds: np.ndarray) -
     return np.asarray(ability, dtype=float) + seeds @ symmetric_sqrt(np.asarray(corr, dtype=float))
 
 
-def _t_scale(seeds_chi2: np.ndarray, nu: float) -> np.ndarray:
+def _t_scale(seeds_chi2: np.ndarray, nu: float, *, unit_variance: bool = True) -> np.ndarray:
     """Per-path Student-t mixing scale ``sqrt(W / nu)``, ``W ~ chi^2_nu``.
+
+    With ``unit_variance`` the scale also carries ``sqrt(nu / (nu - 2))``, so
+    the resulting race has unit variance rather than ``nu / (nu - 2)``. That
+    matters because the abilities were calibrated against a unit-variance
+    race: without it the t race carries a bias that does not shrink with the
+    path budget, so ``phi = 0`` never recovers its own benchmark.
+    ``transport_weights_lowrank_blockt`` already applied this; the dense and
+    low-rank paths did not, which is what made the three inconsistent.
 
     Dividing a correlated Gaussian draw by this column turns it into a
     multivariate Student-t with ``nu`` degrees of freedom: fat marginal tails
@@ -93,7 +101,13 @@ def _t_scale(seeds_chi2: np.ndarray, nu: float) -> np.ndarray:
     assets co-move in the extreme). ``seeds_chi2`` is a fixed ``(M,)`` ensemble,
     so the t-race is as smooth in the correlation as the Gaussian one.
     """
-    return np.sqrt(np.asarray(seeds_chi2, dtype=float) / float(nu))[:, None]
+    scale = np.sqrt(np.asarray(seeds_chi2, dtype=float) / float(nu))[:, None]
+    if unit_variance and nu > 2:
+        # the draw is DIVIDED by this, so inflating the divisor shrinks the
+        # variance from nu/(nu-2) to 1, matching the block-t path which
+        # multiplies the draw by sqrt((nu-2)/nu) instead
+        scale = scale * np.sqrt(nu / (nu - 2.0))
+    return scale
 
 
 def symmetric_sqrt(C: np.ndarray) -> np.ndarray:
@@ -108,12 +122,22 @@ def symmetric_sqrt(C: np.ndarray) -> np.ndarray:
 
 
 def blend_correlation(C_calib: np.ndarray, cov: np.ndarray, phi: float) -> np.ndarray:
-    """Tilt correlation ``C_tilt = nearest_corr((1-phi) C_calib + phi corr(cov))``.
+    """Tilt correlation ``C_tilt = nearest_corr((1-phi) corr(C_calib) + phi corr(cov))``.
 
-    ``phi = 0`` recovers the reference (and so reproduces the target); ``phi = 1``
-    uses the full estimated correlation.
+    ``phi = 0`` recovers the reference and ``phi = 1`` the estimate. Both
+    arguments are converted to correlations first, so the dial interpolates
+    correlations and the function is symmetric in how it treats them.
+
+    It previously converted only the second argument. Every internal caller
+    passes a correlation first, an identity or a one-factor matrix, so the
+    endpoints were right and the error lived only in the interior of the dial:
+    on a covariance with unit-scale mismatch the midpoint was off by 0.068.
+    Both endpoints being correct is what let it survive, since
+    ``nearest_correlation`` renormalises the diagonal at ``phi = 0`` and the
+    second argument was already converted at ``phi = 1``.
     """
-    Ct = (1.0 - phi) * np.asarray(C_calib, dtype=float) + phi * cov_to_corr(cov)
+    A = cov_to_corr(np.asarray(C_calib, dtype=float))
+    Ct = (1.0 - phi) * A + phi * cov_to_corr(cov)
     return nearest_correlation(Ct)
 
 

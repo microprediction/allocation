@@ -54,13 +54,28 @@ def evaluate(methods, market_factory, ratios, draws, n=40, oos=80_000,
     return to_arr(var), to_arr(es), labels
 
 
+def _wilson(p, n, z=1.96):
+    """A 95% interval that stays informative at 0 and 1.
+
+    The Wald form ``sqrt(p(1-p)/n)`` collapses to exactly zero when a method
+    wins every draw or none, so the least informative cells printed perfect
+    certainty, which is the opposite of this module's stated rule.
+    """
+    if n == 0:
+        return 0.0, 1.0
+    d = 1.0 + z * z / n
+    centre = (p + z * z / (2 * n)) / d
+    half = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / d
+    return max(centre - half, 0.0), min(centre + half, 1.0)
+
+
 def summarise(scores, methods, ratios, reference, metric_name):
     """Median ratio to the reference, paired win rate with its standard error,
     and coverage. Printed rather than returned, since this is a report."""
     ref = reference
     print(f"\n{metric_name}: median ratio to '{ref}', paired win rate "
-          f"(standard error), coverage\n")
-    head = f"{'method':24s}{'long-only':>11s}" + "".join(f"{('T/n=' + str(r)):>26s}"
+          f"[95% Wilson], coverage\n")
+    head = f"{'method':24s}{'long-only':>11s}" + "".join(f"{('T/n=' + str(r)):>28s}"
                                                         for r in ratios)
     print(head)
     for m in methods:
@@ -72,13 +87,15 @@ def summarise(scores, methods, ratios, reference, metric_name):
             ok = np.isfinite(x) & np.isfinite(y)
             cov = ok.mean()
             if ok.sum() < 2:
-                cells.append("      no fit          ")
+                cells.append("        no fit            ")
                 continue
             med = np.median(x[ok] / y[ok])
-            win = float(np.mean(x[ok] < y[ok]))
-            se = (win * (1 - win) / ok.sum()) ** 0.5
-            cells.append(f"{med:7.3f} {win:4.0%}+/-{se:3.0%} {cov:4.0%}")
+            # ties count as half a win; scoring them as losses makes two
+            # identical methods read as total defeat
+            win = float(np.mean(x[ok] < y[ok]) + 0.5 * np.mean(x[ok] == y[ok]))
+            lo, hi = _wilson(win, int(ok.sum()))
+            cells.append(f"{med:7.3f} {win:4.0%}[{lo:.0%},{hi:.0%}] {cov:4.0%}")
         print(f"{m.name:24s}{('yes' if m.long_only else 'no'):>11s}"
-              + "".join(f"{c:>26s}" for c in cells))
+              + "".join(f"{c:>28s}" for c in cells))
     print(f"\n  reference '{ref}' median level: "
           + "  ".join(f"T/n={r}: {np.nanmedian(scores[r][ref]):.4f}" for r in ratios))

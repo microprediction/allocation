@@ -32,14 +32,53 @@ def test_zero_weights_do_not_raise_and_stay_finite():
     assert np.isfinite(a).all() and a[3] == a.max()
 
 
-@pytest.mark.parametrize("sampler", ["gaussian", "student_t"])
-def test_tilt_recovers_the_benchmark_at_phi_zero(sampler):
-    """Only up to the race's Monte Carlo error, which is the honest contract."""
+def test_gaussian_tilt_recovers_the_benchmark_and_improves_with_paths():
+    """The Monte Carlo error should fall like 1/sqrt(paths), not sit on a floor."""
     w = np.array([0.4, 0.25, 0.2, 0.15])
-    C = np.eye(4)
-    out = tilt_weights(w, C, phi=0.0, sampler=sampler, n_paths=1 << 16)
-    assert np.abs(out - w).max() < 0.02
-    assert abs(out.sum() - 1.0) < 1e-12
+    err = {m: np.abs(tilt_weights(w, np.eye(4), phi=0.0, n_paths=m) - w).max()
+           for m in (1 << 14, 1 << 18)}
+    assert err[1 << 18] < 0.5 * err[1 << 14]
+    assert err[1 << 18] < 3e-3
+
+
+def test_student_t_tilt_does_not_recover_the_benchmark():
+    """Deliberate: abilities are calibrated so a GAUSSIAN race reproduces the
+    benchmark, and a t race at those abilities is a different law rather than a
+    noisy version of the same one. The offset does not shrink with paths, so a
+    caller must read t results against the t race at phi=0, not the benchmark.
+    """
+    w = np.array([0.4, 0.25, 0.2, 0.15])
+    big = np.abs(tilt_weights(w, np.eye(4), phi=0.0, sampler="student_t",
+                              n_paths=1 << 18) - w).max()
+    assert big > 5e-3
+    assert abs(tilt_weights(w, np.eye(4), phi=0.0, sampler="student_t").sum() - 1.0) < 1e-12
+
+
+def test_t_race_has_unit_variance():
+    """Without the renormalisation the t race carries variance nu/(nu-2), while
+    the abilities were calibrated against a unit-variance race."""
+    from allocation._thurstone.transport import _t_scale
+    rng = np.random.default_rng(0)
+    nu, M = 7.0, 200_000
+    X = rng.normal(size=(M, 3)) / _t_scale(rng.chisquare(nu, M), nu)
+    assert abs(X.var(0).mean() - 1.0) < 0.02
+
+
+def test_rejects_weights_it_cannot_invert():
+    for bad in (np.array([0.4, 0.3, np.nan, 0.1]),
+                np.array([0.6, 0.6, -0.2, 0.0]),
+                np.zeros(4)):
+        with pytest.raises(ValueError):
+            tilt_weights(bad, np.eye(4))
+
+
+def test_blend_correlation_interpolates_in_the_interior():
+    """Both arguments must be converted to correlations. Converting only the
+    second leaves both endpoints right and the interior wrong."""
+    A = np.array([[4.0, 1.2], [1.2, 1.0]])      # correlation 0.6
+    B = np.array([[1.0, 0.8], [0.8, 1.0]])      # correlation 0.8
+    for phi in (0.0, 0.25, 0.5, 0.75, 1.0):
+        assert abs(blend_correlation(A, B, phi)[0, 1] - (0.6 + 0.2 * phi)) < 1e-9
 
 
 def test_tilt_moves_the_benchmark_and_survives_a_singular_covariance():

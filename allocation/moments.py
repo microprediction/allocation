@@ -44,8 +44,11 @@ class EwmaCovariance:
 
         with ``r = 1 - alpha``, so the block case is one weighted matmul rather
         than ``T`` rank-one outer products. The running mean still needs a scan,
-        but that is O(T n) against the covariance's O(T n^2), so it is not the
-        cost. Results are identical to the row-at-a-time recursion.
+        but that is O(T n) against the covariance's O(T n^2). Which of the two
+        dominates depends on the shape: at T=10000, n=50 the scan is most of
+        the time and the matmul is a fraction of it, and they cross over near
+        n=700. Results agree with the row-at-a-time recursion to about 2e-15,
+        which is reassociation rather than a different answer.
         """
         alpha = _halflife_to_alpha(self.halflife)
         rows = self._rows(X)
@@ -67,8 +70,13 @@ class EwmaCovariance:
             devs[t] = rows[t] - m
         self._mean = m
 
-        w = alpha * r ** np.arange(T - 1, -1, -1)
-        self._cov = (r ** T) * self._cov + devs.T @ (w[:, None] * devs)
+        # fold the weights into the deviations in place. The obvious
+        # devs.T @ (w[:, None] * devs) allocates a second T x n array, which at
+        # T=100000, n=500 is 807 MB of peak against 6 MB for the old row loop.
+        # Half-weighting each side is algebraically identical, halves the peak,
+        # is faster, and makes the product exactly symmetric.
+        devs *= (np.sqrt(alpha) * r ** (0.5 * np.arange(T - 1, -1, -1)))[:, None]
+        self._cov = (r ** T) * self._cov + devs.T @ devs
         self.n_samples_ += T
         return self
 
@@ -126,18 +134,36 @@ class DownsideSemicovariance:
         return X[None, :] if X.ndim == 1 else X
 
     def partial_fit(self, X, y=None) -> "DownsideSemicovariance":
+        """Same unrolling as :class:`EwmaCovariance`, with a different deviation.
+
+        This class is documented as a drop-in for the covariance estimator, so
+        leaving it on the row-at-a-time path would mean anyone taking that
+        advice loses the speedup.
+        """
         alpha = _halflife_to_alpha(self.halflife)
-        for x in self._rows(X):
-            if self._mean is None:
-                n = len(x)
-                self._mean = x.copy()
-                self._semicov = np.zeros((n, n), dtype=float)
-            else:
-                self._mean = (1 - alpha) * self._mean + alpha * x
-            tau = self._mean if self.threshold is None else self.threshold
-            d = np.minimum(x - tau, 0.0)  # downside-only deviations
-            self._semicov = (1 - alpha) * self._semicov + alpha * np.outer(d, d)
-            self.n_samples_ += 1
+        rows = self._rows(X)
+        if rows.size == 0:
+            return self
+        r = 1.0 - alpha
+        T, n = rows.shape
+
+        fresh = self._mean is None
+        if fresh:
+            self._mean = rows[0].copy()
+            self._semicov = np.zeros((n, n), dtype=float)
+
+        devs = np.empty((T, n), dtype=float)
+        m = self._mean
+        for t in range(T):
+            if not (fresh and t == 0):
+                m = r * m + alpha * rows[t]
+            tau = m if self.threshold is None else self.threshold
+            devs[t] = np.minimum(rows[t] - tau, 0.0)   # downside-only
+        self._mean = m
+
+        devs *= (np.sqrt(alpha) * r ** (0.5 * np.arange(T - 1, -1, -1)))[:, None]
+        self._semicov = (r ** T) * self._semicov + devs.T @ devs
+        self.n_samples_ += T
         return self
 
     def fit(self, X, y=None) -> "DownsideSemicovariance":

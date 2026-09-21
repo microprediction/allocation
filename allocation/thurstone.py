@@ -74,8 +74,6 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         Gaussian sampler.
     n_paths : int, default 16384
         Monte-Carlo seed budget (rounded up to a power of two).
-    n_quad : int, default 16
-        Gauss--Hermite nodes for one-factor calibration.
     factors : int or None, default None
         If set, run the tilt with a ``k``-factor (low-rank) correlation and the
         ``O(M n k)`` transport instead of the dense ``O(M n^2) + O(n^3)`` one --
@@ -100,7 +98,6 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         sampler: str = "gaussian",
         nu: float = 7.0,
         n_paths: int = 1 << 14,
-        n_quad: int = 16,
         factors: int | None = None,
         seed: int = 42,
         covariance_estimator=None,
@@ -113,7 +110,6 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         self.sampler = sampler
         self.nu = nu
         self.n_paths = n_paths
-        self.n_quad = n_quad
         self.factors = factors
         self.seed = seed
         # persistent state set in _cold_start
@@ -166,7 +162,7 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
             b = market_betas(cov, weights=tgt)
             self._betas = b
             self._C_calib = one_factor_corr(b)
-            self._ability = calibrate_one_factor(tgt, b, n_quad=self.n_quad)
+            self._ability = calibrate_one_factor(tgt, b)
         else:
             raise ValueError(f"unknown calib {self.calib!r} (use 'diagonal' or 'market')")
 

@@ -18,11 +18,18 @@ hand it, then re-runs that race under the estimated correlation, damped by
 under the full estimate. Nothing is inverted at any point, so the whole dial is
 available where a covariance matrix is singular.
 
-The race is simulated, so ``phi = 0`` recovers the benchmark only to about
-``1/sqrt(n_paths)``, not exactly. That is the honest reading of every number
-this returns. Paths are cheap, so raise ``n_paths`` if the effect you are
-measuring is small: the default of 65536 puts the recovery error near 0.004 in
-total variation and quadrupling the budget halves it.
+The race is simulated, so with the Gaussian sampler ``phi = 0`` recovers the
+benchmark only to about ``1/sqrt(n_paths)``, not exactly. Paths are cheap, so
+raise ``n_paths`` if the effect you are measuring is small: the default of
+65536 puts the recovery error near 0.002 and quadrupling the budget halves it.
+
+With ``sampler='student_t'`` there is an additional offset of a percent or two
+that does **not** shrink with the path budget. The abilities are calibrated so
+a *Gaussian* race reproduces the benchmark, and a t race at the same abilities
+is a different law rather than a noisy version of the same one, so it lands
+somewhere else by construction. Both races are normalised to unit variance, so
+this is a shape difference and not a scale error. Read the t results as
+relative to the t race at ``phi = 0``, not to the benchmark.
 
 Two conventions worth knowing, because both are easy to trip over.
 
@@ -47,10 +54,8 @@ from ._thurstone.ability import (
     ability_implied_state_prices as _weights_from_abilities,
     state_price_implied_ability as _abilities_from_weights,
 )
-from ._thurstone.covariance import cov_to_corr
 from ._thurstone.transport import (
     blend_correlation,
-    race_weights,
     transport_weights,
     transport_weights_t,
 )
@@ -103,7 +108,9 @@ def tilt_weights(
     variance or a hierarchical portfolio. ``cov`` is an estimated covariance.
     ``phi`` says how far to trust it: ``0`` recovers ``weights`` and ``1``
     races under the full estimated correlation. Recovery at ``phi = 0`` is up
-    to the race's Monte Carlo error, about ``1/sqrt(n_paths)``.
+    to the race's Monte Carlo error, about ``1/sqrt(n_paths)``, and for
+    ``sampler='student_t'`` there is a further offset that does not shrink
+    with paths, because the reference law and the tilt law differ.
 
     The race is driven by a fixed seed ensemble, so the result moves smoothly in
     ``cov`` and successive calls at nearby covariances give nearby portfolios.
@@ -115,7 +122,17 @@ def tilt_weights(
     """
     if not 0.0 <= phi <= 1.0:
         raise ValueError("phi must lie in [0, 1].")
+    if sampler not in ("gaussian", "student_t"):
+        raise ValueError(f"unknown sampler {sampler!r} (use 'gaussian' or 'student_t')")
+    if sampler == "student_t" and not nu > 2:
+        raise ValueError("nu must exceed 2 for the t race to have finite variance")
     w = np.asarray(weights, dtype=float)
+    if not np.isfinite(w).all():
+        raise ValueError("weights must be finite")
+    if (w < 0).any():
+        raise ValueError("weights must be non-negative; a short has no winning probability")
+    if not w.sum() > 0:
+        raise ValueError("weights must not be all zero")
     n = len(w)
     ability = abilities_from_weights(w)
     C_tilt = blend_correlation(np.eye(n), np.asarray(cov, dtype=float), float(phi))
@@ -125,8 +142,4 @@ def tilt_weights(
     seeds = rng.standard_normal((m, n))
     if sampler == "gaussian":
         return transport_weights(ability, C_tilt, seeds)
-    if sampler == "student_t":
-        if not nu > 0:
-            raise ValueError("nu must be > 0 for the student_t sampler")
-        return transport_weights_t(ability, C_tilt, seeds, rng.chisquare(nu, m), nu)
-    raise ValueError(f"unknown sampler {sampler!r} (use 'gaussian' or 'student_t')")
+    return transport_weights_t(ability, C_tilt, seeds, rng.chisquare(nu, m), nu)

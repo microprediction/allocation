@@ -113,7 +113,6 @@ class StreamingThurstone:
         calib: str = "diagonal",
         phi: float = 1.0,
         n_paths: int = 1 << 12,
-        n_quad: int = 16,
         halflife: float = 60.0,
         seed: int = 42,
         min_obs: int = 20,
@@ -123,7 +122,6 @@ class StreamingThurstone:
         self.calib = calib
         self.phi = phi
         self.n_paths = 1 << int(np.ceil(np.log2(max(int(n_paths), 2))))
-        self.n_quad = n_quad
         self.halflife = halflife
         self.seed = seed
         self.min_obs = min_obs
@@ -164,7 +162,7 @@ class StreamingThurstone:
         if self.calib == "market":
             betas = market_betas(cov, weights=tgt)
             C_calib = one_factor_corr(betas)
-            ability = calibrate_one_factor(tgt, betas, n_quad=self.n_quad)
+            ability = calibrate_one_factor(tgt, betas)
         else:
             C_calib = np.eye(len(ids))
             ability = calibrate_diagonal(tgt)

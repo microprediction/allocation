@@ -9,7 +9,7 @@ description = "Online (streaming) portfolio construction: scikit-learn / skfolio
 authors = [{name = "Peter Cotton", email = "peter.cotton@microprediction.com"}]
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.23",
     "winning>=1.5.0",

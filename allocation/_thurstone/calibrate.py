@@ -35,14 +35,15 @@ def _normalize(w: np.ndarray) -> np.ndarray:
 
 
 def winprobs_one_factor(
-    ability, betas, *, n_quad: int = 16
+    ability, betas
 ) -> np.ndarray:
     """Winning probabilities under a one-factor race, by quadrature.
 
     Model: ``X_i = a_i + b_i Z + sqrt(1 - b_i^2) eps_i`` with ``Z ~ N(0,1)`` the
     common factor and ``eps_i`` independent. Conditional on ``Z = z`` the field
-    is independent, so the exact lattice race applies; we integrate over ``z``
-    with Gauss--Hermite (probabilists') quadrature.
+    is independent, so the exact lattice race applies; the race is evaluated by
+    ``winning`` with the loadings as ``V`` and the idiosyncratic variances as
+    ``D``.
     """
     a = np.asarray(ability, dtype=float)
     b = np.clip(np.asarray(betas, dtype=float), -0.999, 0.999)
@@ -55,23 +56,15 @@ def winprobs_one_factor(
     return _normalize(np.clip(np.asarray(p, dtype=float), 0.0, None))
 
 
-def calibrate_diagonal(target, *, n_iter: int = 4) -> np.ndarray:
+def calibrate_diagonal(target) -> np.ndarray:
     """Abilities reproducing ``target`` under an independent field (flavour i).
 
     Exact inverse via ``winning.calibrate_abilities``.
     """
-    return state_price_implied_ability(_normalize(target), n_iter=n_iter)
+    return state_price_implied_ability(_normalize(target))
 
 
-def calibrate_one_factor(
-    target,
-    betas,
-    *,
-    n_quad: int = 16,
-    n_iter: int = 60,
-    step: float = 0.5,
-    tol: float = 1e-4,
-) -> np.ndarray:
+def calibrate_one_factor(target, betas) -> np.ndarray:
     """Abilities reproducing ``target`` under a one-factor race (flavour ii).
 
     Solved directly by ``winning.calibrate_abilities`` with the factor loading
@@ -81,7 +74,12 @@ def calibrate_one_factor(
     """
     target = _normalize(target)
     b = np.clip(np.asarray(betas, dtype=float), -0.999, 0.999)
+    # the same floor the independent flavour applies; winning raises on a
+    # zero target by design, and a benchmark with one zero-weight name is
+    # ordinary, so both flavours must agree rather than differ by a string
     a = np.asarray(
-        winning.calibrate_abilities(target, V=b.reshape(-1, 1), D=1.0 - b ** 2),
+        winning.calibrate_abilities(
+            np.maximum(target, 1e-12), V=b.reshape(-1, 1), D=1.0 - b ** 2,
+            target_floor=1e-12),
         dtype=float)
     return a - np.median(a)
