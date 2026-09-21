@@ -224,6 +224,9 @@ examples/output/
 research/output/
 *.png
 *.pdf
+# ...but the PUBLISHED papers are PDFs, so the site needs them tracked. Build artifacts under
+# papers/<slug>/ stay ignored; only what build.sh copies into docs/ is committed.
+!docs/papers/*/paper.pdf
 !docs/**/*.png
 # keep figures used by the papers (override the blanket *.png ignore)
 !papers/**/figures/*.png

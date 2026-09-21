@@ -24,6 +24,27 @@ build_one() {
   # Run from the paper's own directory so ../refs.bib, ../shared, and figures/
   # resolve correctly.
   ( cd "$(dirname "$tex")" && tectonic --synctex --keep-logs "$(basename "$tex")" )
+  publish "$(dirname "$tex")"
+}
+
+# Papers are LaTeX and ship as PDFs. If a paper has a docs/ directory it is published on the
+# site, so copy the freshly built PDF there and leave index.html as a redirect, which keeps
+# older inbound links (.../<slug>/index.html) working instead of 404ing.
+publish() {
+  local slug="$1" dest="../docs/papers/$1"
+  [[ -d "$dest" ]] || return 0
+  cp "$slug/paper.pdf" "$dest/paper.pdf"
+  cat > "$dest/index.html" <<HTML
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>$slug</title>
+<link rel="canonical" href="paper.pdf">
+<meta http-equiv="refresh" content="0; url=paper.pdf">
+</head><body>
+<p>This paper is a PDF built from LaTeX: <a href="paper.pdf">paper.pdf</a>.</p>
+</body></html>
+HTML
+  echo "   published -> docs/papers/$slug/paper.pdf"
 }
 
 if [[ $# -ge 1 ]]; then
