@@ -84,6 +84,25 @@ def gaussian_sampler(ability: np.ndarray, corr: np.ndarray, seeds: np.ndarray) -
     return np.asarray(ability, dtype=float) + seeds @ symmetric_sqrt(np.asarray(corr, dtype=float))
 
 
+DEFAULT_PATHS = 1 << 16
+"""Shared Monte Carlo budget.
+
+The race's weight error falls as one over the square root of this and costs
+almost nothing to raise: 4096 to 262144 paths is about 30 percent more time,
+because the cost is the calibration rather than the race. Three classes
+previously defaulted to 4096, 16384 and 65536, so the same portfolio computed
+through the function and through the estimator differed.
+"""
+
+
+def path_budget(n_paths: int) -> int:
+    """Round a requested budget up to a power of two, as the samplers need."""
+    n_paths = int(n_paths)
+    if n_paths < 2:
+        raise ValueError("n_paths must be at least 2")
+    return 1 << int(np.ceil(np.log2(n_paths)))
+
+
 def _t_scale(seeds_chi2: np.ndarray, nu: float, *, unit_variance: bool = True) -> np.ndarray:
     """Per-path Student-t mixing scale ``sqrt(W / nu)``, ``W ~ chi^2_nu``.
 

@@ -20,6 +20,8 @@ from ._thurstone.calibrate import calibrate_diagonal, calibrate_one_factor
 from ._thurstone.covariance import cov_to_corr, factor_decompose, market_betas, one_factor_corr
 from ._thurstone.diagonal import diagonal_portfolio
 from ._thurstone.transport import (
+    DEFAULT_PATHS,
+    path_budget,
     blend_correlation,
     race_weights,
     transport_weights,
@@ -31,8 +33,6 @@ from ._thurstone.transport import (
 __all__ = ["ThurstonePortfolio"]
 
 
-def _pow2(n: int) -> int:
-    return 1 << int(np.ceil(np.log2(max(int(n), 2))))
 
 
 def _normalize(w) -> np.ndarray:
@@ -72,7 +72,7 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         Degrees of freedom for ``sampler="student_t"`` (must be > 0; smaller is
         heavier-tailed, ``nu -> inf`` recovers the Gaussian race). Ignored for the
         Gaussian sampler.
-    n_paths : int, default 16384
+    n_paths : int, default 65536
         Monte-Carlo seed budget (rounded up to a power of two).
     factors : int or None, default None
         If set, run the tilt with a ``k``-factor (low-rank) correlation and the
@@ -97,7 +97,7 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         phi: float = 1.0,
         sampler: str = "gaussian",
         nu: float = 7.0,
-        n_paths: int = 1 << 14,
+        n_paths: int = DEFAULT_PATHS,
         factors: int | None = None,
         seed: int = 42,
         covariance_estimator=None,
@@ -166,7 +166,7 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         else:
             raise ValueError(f"unknown calib {self.calib!r} (use 'diagonal' or 'market')")
 
-        m = _pow2(self.n_paths)
+        m = path_budget(self.n_paths)
         rng = np.random.default_rng(self.seed)
         if self.factors:
             k = min(int(self.factors), n)

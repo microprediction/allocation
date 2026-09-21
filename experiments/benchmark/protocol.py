@@ -20,11 +20,23 @@ some point:
 import numpy as np
 
 
+class _Failed(Exception):
+    """A method that legitimately could not produce a portfolio."""
+
+
 def evaluate(methods, market_factory, ratios, draws, n=40, oos=80_000,
              seed=0, progress=None):
-    """Returns per-(ratio, method) arrays of variance, shortfall and coverage."""
+    """Returns per-(ratio, method) arrays of variance, shortfall and coverage.
+
+    Distinguishes three outcomes rather than two: a portfolio, a legitimate
+    no-fit, and a silent fallback. The third is the one this harness exists to
+    catch, and detecting it by exception alone does not.
+    """
+    from collections import Counter, defaultdict
     rng = np.random.default_rng(seed)
     keys = [m.name for m in methods]
+    fallbacks = {r: Counter() for r in ratios}
+    errors = {r: defaultdict(Counter) for r in ratios}
     var = {r: {k: [] for k in keys} for r in ratios}
     es = {r: {k: [] for k in keys} for r in ratios}
     labels = []
@@ -40,16 +52,37 @@ def evaluate(methods, market_factory, ratios, draws, n=40, oos=80_000,
                 try:
                     w = np.asarray(m.fn(X), dtype=float)
                     if not np.isfinite(w).all():
-                        raise ValueError("non-finite weights")
+                        raise _Failed("non-finite weights")
+                    # A method that cannot fit and returns a plausible fallback
+                    # rather than raising is the case this harness exists to
+                    # catch. SchurBridge returns exactly 1/n on a singular
+                    # covariance, which reads as a result. Equal weight is the
+                    # one method allowed to be equal weight.
+                    if (m.name != "equal weight"
+                            and np.abs(w - 1.0 / len(w)).max() < 1e-12):
+                        fallbacks[r][m.name] += 1
+                        raise _Failed("returned exactly equal weight")
                     p = panel @ w
                     q = np.quantile(p, 0.05)
                     var[r][m.name].append(float(w @ Sig @ w))
                     es[r][m.name].append(float(-p[p <= q].mean()))
-                except Exception:
+                except _Failed:
+                    var[r][m.name].append(np.nan)
+                    es[r][m.name].append(np.nan)
+                except Exception as exc:               # a real bug, not a no-fit
+                    errors[r][m.name][type(exc).__name__] += 1
                     var[r][m.name].append(np.nan)
                     es[r][m.name].append(np.nan)
         if progress and (i + 1) % progress == 0:
             print(f"  ...{i + 1}/{draws}", flush=True)
+    for r in ratios:
+        for name, cnt in sorted(fallbacks[r].items()):
+            print(f"  NOTE  {name} returned exactly equal weight in {cnt} of "
+                  f"{draws} draws at T/n={r}; scored as no-fit, not as a result")
+        for name, kinds in sorted(errors[r].items()):
+            for kind, cnt in kinds.items():
+                print(f"  NOTE  {name} raised {kind} in {cnt} of {draws} draws "
+                      f"at T/n={r}; that is a bug or a missing import, not a no-fit")
     to_arr = lambda d: {r: {k: np.asarray(v) for k, v in dd.items()} for r, dd in d.items()}
     return to_arr(var), to_arr(es), labels
 

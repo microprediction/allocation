@@ -31,7 +31,12 @@ from ._schur.seriation import seriate
 from ._thurstone.calibrate import calibrate_diagonal, calibrate_one_factor
 from ._thurstone.covariance import market_betas, one_factor_corr
 from ._thurstone.diagonal import diagonal_portfolio
-from ._thurstone.transport import blend_correlation, transport_weights
+from ._thurstone.transport import (
+    DEFAULT_PATHS,
+    blend_correlation,
+    path_budget,
+    transport_weights,
+)
 
 __all__ = [
     "KeyedEwmaCovariance",
@@ -112,7 +117,7 @@ class StreamingThurstone:
         *,
         calib: str = "diagonal",
         phi: float = 1.0,
-        n_paths: int = 1 << 12,
+        n_paths: int = DEFAULT_PATHS,
         halflife: float = 60.0,
         seed: int = 42,
         min_obs: int = 20,
@@ -121,7 +126,7 @@ class StreamingThurstone:
             raise ValueError("phi must lie in [0, 1].")
         self.calib = calib
         self.phi = phi
-        self.n_paths = 1 << int(np.ceil(np.log2(max(int(n_paths), 2))))
+        self.n_paths = path_budget(n_paths)
         self.halflife = halflife
         self.seed = seed
         self.min_obs = min_obs

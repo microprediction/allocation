@@ -55,7 +55,9 @@ from ._thurstone.ability import (
     state_price_implied_ability as _abilities_from_weights,
 )
 from ._thurstone.transport import (
+    DEFAULT_PATHS,
     blend_correlation,
+    path_budget,
     transport_weights,
     transport_weights_t,
 )
@@ -99,7 +101,7 @@ def tilt_weights(
     phi: float = 1.0,
     sampler: str = "gaussian",
     nu: float = 7.0,
-    n_paths: int = 1 << 16,
+    n_paths: int = DEFAULT_PATHS,
     seed: int = 42,
 ) -> np.ndarray:
     """Tilt a benchmark portfolio by racing it under an estimated correlation.
@@ -137,7 +139,7 @@ def tilt_weights(
     ability = abilities_from_weights(w)
     C_tilt = blend_correlation(np.eye(n), np.asarray(cov, dtype=float), float(phi))
 
-    m = 1 << int(np.ceil(np.log2(max(int(n_paths), 2))))
+    m = path_budget(n_paths)
     rng = np.random.default_rng(seed)
     seeds = rng.standard_normal((m, n))
     if sampler == "gaussian":

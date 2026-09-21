@@ -38,8 +38,13 @@ def _ledoit_wolf_min_var(X):
 def _min_var_long_only(S):
     import cvxpy as cp
     m = S.shape[0]
+    # A relative floor, because an absolute 1e-10 is not enough to make a
+    # tapered or badly scaled matrix pass cvxpy's PSD check: the harness caught
+    # this method raising DCPError on its own inputs.
     ev, V = np.linalg.eigh((S + S.T) / 2)
-    P = V @ np.diag(np.maximum(ev, 1e-10)) @ V.T
+    floor = max(float(ev.max()), 1.0) * 1e-9
+    P = V @ np.diag(np.maximum(ev, floor)) @ V.T
+    P = (P + P.T) / 2
     w = cp.Variable(m)
     cp.Problem(cp.Minimize(cp.quad_form(w, P)), [cp.sum(w) == 1, w >= 0]).solve(
         solver=cp.CLARABEL)
