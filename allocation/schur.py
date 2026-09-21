@@ -1,8 +1,14 @@
-"""Schur-complementary portfolio as an online estimator.
+"""Schur-complementary portfolio as an online estimator: the collapsed encoding.
 
-Your Schur Complementary allocation (the ``gamma`` cross-block coupling that
-interpolates HRP at ``gamma=0`` and minimum variance as ``gamma->1``), but with
-the asset order coming from **Fiedler seriation** instead of agglomerative
+This is the HRP-to-minimum-variance bridge in the *collapsed* encoding of the
+reference implementations (``precise``, skfolio): each block is replaced by a
+single matrix ``(I - gamma B D^{-1} M)^{-1} A^c(gamma)``, symmetrized, and the
+split is HRP's naive rule. It is HRP exactly at ``gamma = 0`` and *approaches*
+minimum variance as ``gamma -> 1`` without reaching it in general (see the
+tree paper at schur.microprediction.org). It is kept here to match skfolio to
+machine precision. The exact bridge, HRP at one end and minimum variance at
+the other, is :class:`allocation.SchurBridge` (``hrp_to_min_variance``). Here
+the asset order comes from **Fiedler seriation** instead of agglomerative
 linkage. Because the Fiedler order is a smooth function of the covariance, the
 whole allocation is smooth -- so ``partial_fit`` over a drifting covariance gives
 low-turnover updates, the same streaming property the Thurstone estimator has.
@@ -29,7 +35,8 @@ class SchurComplementary(BaseOnlinePortfolio):
     Parameters
     ----------
     gamma : float in [0, 1], default 0.5
-        Cross-block coupling. 0 = HRP (block-diagonal); ->1 = minimum variance.
+        Cross-block coupling. 0 = HRP (block-diagonal); ->1 approaches minimum
+        variance (not exactly; use :class:`SchurBridge` for the exact far end).
     knn : int or None, default None
         If set, sparsify the similarity graph to k nearest neighbours (for scale).
     prior : array (n, n) or None, default None
