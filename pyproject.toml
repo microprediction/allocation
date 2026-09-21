@@ -13,6 +13,7 @@ requires-python = ">=3.9"
 dependencies = [
     "numpy>=1.23",
     "thurstone>=0.1.0",
+    "winning>=1.1.0",
 ]
 
 [project.optional-dependencies]
