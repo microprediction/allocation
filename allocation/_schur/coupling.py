@@ -204,6 +204,22 @@ def compute_monotonic_weights(
         risk = np.inf if w is None else float(w @ cov @ w.T)
         return risk, w
 
+    def safe_endpoint():
+        """The gamma=0 portfolio, forced positive definite.
+
+        Every fallback below returns this. Computing it with force_spd=False,
+        as the search does, yields None on a rank-deficient covariance, and the
+        None then propagated out of fit() and left the weights unset, so the
+        accessor blamed the caller for never fitting. The max_gamma == 0 branch
+        above already used force_spd=True; the fallbacks did not.
+        """
+        w0 = compute_weights(order, cov, 0.0, force_spd=True, ridge=ridge)
+        if w0 is None:
+            raise ValueError(
+                "the hierarchical endpoint could not be computed for this "
+                "covariance; it may be degenerate beyond the ridge in use")
+        return w0
+
     n = int(np.ceil(max_gamma / step)) + 1
     gammas = np.linspace(0.0, max_gamma, n)
     variances = np.full(n, np.nan)
@@ -219,11 +235,11 @@ def compute_monotonic_weights(
             try:
                 return _binary_search(objective, lo, gammas[i], lo_var, tol)
             except RuntimeError:
-                return weights_0, 0.0
+                return (weights_0 if weights_0 is not None else safe_endpoint()), 0.0
     # monotonically decreasing up to max_gamma
     if variance <= objective(max_gamma - tol)[0]:
-        return weights, max_gamma
+        return (weights if weights is not None else safe_endpoint()), max_gamma
     try:
         return _binary_search(objective, gammas[-2], max_gamma, variances[-2], tol)
     except RuntimeError:
-        return weights, max_gamma
+        return (weights if weights is not None else safe_endpoint()), max_gamma
