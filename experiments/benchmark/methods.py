@@ -111,6 +111,6 @@ def registry(include_slow=True):
         Method("multi-hypothesis", _multi_hypothesis(0.0), True, "outside"),
     ]
     if include_slow:
-        M.append(Method("Thurstone", _pkg("ThurstonePortfolio", n_paths=4096),
+        M.append(Method("Thurstone", _pkg("ThurstonePortfolio", n_paths=65536),
                         True, "package"))
     return M

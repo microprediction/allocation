@@ -24,10 +24,18 @@ cd benchmark && python run.py 60 regime
 
 ## Costs
 
-Anything touching the Thurstone race is slow, because it is a Monte Carlo over
-a fixed seed ensemble and the path budget has to exceed the effect being
-measured. At 16384 paths a fit is about five seconds at forty assets. The
-market calibration is about twelve seconds a fit and is not used in any sweep.
+The Thurstone race is not the expensive part, which I had wrong. A fit is
+about 1.4 seconds at forty assets and 1.5 at a hundred, and the path budget is
+nearly free: going from 4,096 paths to 262,144 costs 30% more time, not 64
+times more. The cost is the ability calibration, which is roughly constant in
+the number of paths.
+
+Two consequences. Use a large path budget, because the Monte Carlo noise in the
+weights falls as one over the square root of paths and costs almost nothing to
+reduce; the harness runs at 65,536. And avoid `calib="market"`, which is the
+one genuinely slow setting at 12.9 seconds a fit at forty assets and 100
+seconds at a hundred. The studies are slow because of the number of fits, not
+the paths.
 
 | study | what it establishes | cost |
 |---|---|---|

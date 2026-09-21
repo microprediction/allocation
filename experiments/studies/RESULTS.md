@@ -228,6 +228,11 @@ switching. This is a scope limit, not a footnote.
 1. Thurstone at 4096 paths, n=100: phi=0 fidelity gap 0.118 L1 against effects
    of 2-4%. Noise-dominated. Gap scales as 1/sqrt(paths), constant 4.3 (n=40),
    7.8 (n=100), so Monte Carlo error not a calibration fault.
+   SELF-INFLICTED: the path budget is nearly free. 4,096 to 262,144 paths costs
+   30% more time, not 64 times more, because the cost is the ability
+   calibration and not the race. Running at 262,144 would have put the gap near
+   0.015 and the paired design would not have been necessary. Check what a knob
+   actually costs before economising on it.
 2. Tail test on multivariate t: elliptical, so ES ratio came out as exactly
    sqrt(variance ratio) and the tail column was a relabelling of the variance
    column. Could not test tail skill in principle.
