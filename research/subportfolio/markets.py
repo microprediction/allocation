@@ -197,6 +197,10 @@ class MidMarket:
         self.n = n
         self.parent, self.weight_source = cap_weights(rng, n)
         self.m = self.Sigma @ self.parent
+        # Sectors are contiguous index ranges, which is where random_structure
+        # puts its blocks; cap weights were shuffled so size is independent.
+        self.sectors = 10
+        self.sector = np.arange(n) * self.sectors // n
         self.chol = np.linalg.cholesky(
             self.Sigma + 1e-12 * np.eye(n) * np.trace(self.Sigma) / n)
 

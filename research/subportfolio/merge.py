@@ -73,11 +73,15 @@ def main():
         print("WARNING: shards were not all built by the same environment.")
     print()
 
-    print(f"{'method':26s}{'sharpe':>11s}{'x proportional':>17s}{'beats it':>10s}")
+    # Sharpe differences in bps of excess return at an index volatility of 16%,
+    # so "small" has a number: the bar is 25 to 50 bps.
+    VOL = 0.16
+    print(f"{'method':26s}{'sharpe':>9s}{'x prop':>9s}{'bps vs prop':>13s}{'beats it':>10s}")
     for k in order:
         x = res[k]
+        bps = "" if k == "proportional" else f"{1e4 * VOL * np.median(x - base):+12.0f}"
         note = "" if k == "proportional" else f"{np.mean(x > base):9.0%}"
-        print(f"{k:26s}{np.median(x):11.4f}{np.median(x / base):17.3f}{note}")
+        print(f"{k:26s}{np.median(x):9.4f}{np.median(x / base):9.3f}{bps:>13s}{note}")
 
 
 if __name__ == "__main__":
