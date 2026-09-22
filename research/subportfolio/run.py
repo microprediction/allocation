@@ -29,8 +29,9 @@ import numpy as np
 import winning
 
 from markets import MARKETS
-from rules import (long_only_min_var, factor_correlation, proportional, race,
-                   flattened, estimate_and_solve)
+from rules import (long_only_min_var, factor_correlation, factor_covariance,
+                   proportional, race, flattened, black_litterman,
+                   estimate_and_solve)
 
 PREMISE_TOL = 1e-5      # mid draws land near 3e-07, index near 1e-14
 
@@ -75,6 +76,9 @@ def one_draw(args, g):
             row[f"race+factor T={T}"] = var(race(mk.parent, idx, V=V, D=D))
         if T in set(est_Ts):
             row[f"estimate+solve T={T}"] = var(estimate_and_solve(X, idx))
+            sd, Vc, Dc = factor_covariance(X, args.k)
+            row[f"black-litterman T={T}"] = var(
+                black_litterman(mk.parent, idx, sd, Vc, Dc))
     return row
 
 

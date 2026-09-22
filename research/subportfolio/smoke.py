@@ -11,7 +11,7 @@ import numpy as np
 from markets import (MidMarket, IndexMarket, effective_fraction,
                      REAL_EFFN_FRACTION)
 from rules import (long_only_min_var, factor_correlation, proportional, race,
-                   flattened, estimate_and_solve)
+                   flattened, black_litterman, estimate_and_solve)
 
 FAILS = []
 
@@ -106,6 +106,21 @@ def main():
     check("round trip on the sub-field is the identity",
           np.abs(back - pw).sum() < 1e-6,
           f"L1 {np.abs(back - pw).sum():.2e} (this is the trap, not the method)")
+
+    print("\nBlack-Litterman on the true covariance is the oracle")
+    Sg = mid.Sigma
+    sdv = np.sqrt(np.diag(Sg))
+    Cc = Sg / np.outer(sdv, sdv)
+    evc, Qc = np.linalg.eigh((Cc + Cc.T) / 2)
+    Vx = Qc * np.sqrt(np.maximum(evc, 0))
+    Dx = np.maximum(1.0 - (Vx ** 2).sum(1), 0)
+    mid_sub = np.sort(np.random.default_rng(11).choice(mid.n, 40, replace=False))
+    bl = black_litterman(mid.parent, mid_sub, sdv, Vx, Dx)
+    orc = long_only_min_var(mid.block(mid_sub))
+    check("BL with the true covariance reproduces the oracle",
+          np.abs(bl - orc).sum() < 1e-8,
+          f"L1 {np.abs(bl - orc).sum():.2e} (so its gap from the oracle is "
+          "entirely the covariance estimate)")
 
     print("\nthe oracle really is optimal")
     Ssm = small.block(sub)

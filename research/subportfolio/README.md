@@ -41,25 +41,15 @@ weight redistributes depends on how the survivors co-move.
 
 ## What would falsify the result
 
-Proportional is the wrong null, and using it was the study's second defect.
+The null is `flattened`, not `proportional`. An independent race is
+`w_prop^0.75` renormalized to within three percent in L1: with no correlation,
+nothing encodes which survivor a departed name resembled, so all the race can
+do is de-concentrate. A rule that beats proportional but not `flattened` has
+shown nothing.
 
-An independent race is a power transform of proportional restriction and
-almost nothing else: fitting `w ~ w_prop^a` to its output gives `a` between
-0.75 and 0.81 with an L1 residual of 0.006 to 0.012, against a deviation from
-proportional of 0.21 to 0.36. With no correlation anywhere, a departed name's
-weight cannot flow toward whichever survivor it most resembled, because
-nothing encodes resemblance. All the race can do is de-concentrate.
-
-Measured against proportional, the independent race wins 72 percent of draws
-and looks like a result. Measured against `flattened`, which is
-`w_prop^0.75` renormalized, it wins 12 of 25 at p = 1.000. Any claim for the
-race has to clear the `flattened` row. On the 25 draws run so far only
-`race+factor` at T=20 does, by 3.6 percent at p = 0.015, which is one of three
-tests and weakens as T grows, so it is not established.
-
-The `race differs from proportional` check in `smoke.py` is therefore
-necessary and nowhere near sufficient: it passes at L1 0.31 while the whole
-0.31 is the power transform.
+The `race differs from proportional` check in `smoke.py` is necessary and
+nowhere near sufficient, since the whole of that difference is the power
+transform. The `race is close to flattened proportional` check is what pins it.
 
 The premise is separately falsifiable and separately checked. If the parent
 were not exactly optimal for the parent universe, every comparison here would
@@ -80,12 +70,8 @@ launch.sh     fan across cores and merge
 results/      committed outputs
 ```
 
-`markets.py` carries the part worth reading. A long-only minimum-variance
-parent is fine at a few hundred names but is the wrong model of an index: at
-five thousand names a single factor is so diversifiable that the optimum holds
-about eighty of them. So the index market is built the other way round. Cap
-weights come first, from a power law, and the covariance is then chosen to
-make them optimal:
+`markets.py` carries the part worth reading. Cap weights come first and the
+covariance is chosen to make them optimal:
 
 ```
 Sigma = 11' + eps Q M Q',   u = w / ||w||,   Q = I - u u'

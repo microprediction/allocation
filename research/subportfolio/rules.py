@@ -60,10 +60,12 @@ def factor_correlation(X, k):
     sd = Xc.std(0, ddof=1)
     sd[sd == 0] = 1.0
     Z = Xc / sd
-    R = (Z.T @ Z) / (len(Z) - 1)
-    ev, U = np.linalg.eigh((R + R.T) / 2)
-    i = np.argsort(ev)[::-1][:k]
-    V = U[:, i] * np.sqrt(np.clip(ev[i], 0.0, None))
+    # Top-k eigenpairs of Z'Z/(T-1) without forming it. At index scale the
+    # correlation is 5000x5000 and rank T, so the SVD of the T x n panel gives
+    # the same vectors for a thousandth of the work.
+    _, sv, Wt = np.linalg.svd(Z, full_matrices=False)
+    ev = (sv[:k] ** 2) / (len(Z) - 1)
+    V = Wt[:k].T * np.sqrt(np.clip(ev, 0.0, None))
     D = np.clip(1.0 - (V ** 2).sum(1), 1e-6, None)
     sc = np.sqrt((V ** 2).sum(1) + D)
     return sd ** 2, V / sc[:, None], D / sc ** 2
@@ -75,23 +77,12 @@ def proportional(parent, idx):
 
 
 def flattened(parent, idx, alpha=0.75):
-    """Proportional restriction, flattened toward equal weight. The real null.
+    """Proportional restriction flattened toward equal weight. The null.
 
-    An INDEPENDENT race is this and almost nothing else. Fitting w ~ w_prop^a
-    to the independent race's output gives a = 0.75 to 0.81 with an L1 residual
-    of 0.006 to 0.012, against a deviation from proportional of 0.21 to 0.36:
-    about ninety-seven percent of what the race does to a restricted book is a
-    power transform.
-
-    That is not a surprise on reflection. With no correlation anywhere, a
-    departed name's weight cannot flow toward whichever survivor it most
-    resembled, because nothing encodes resemblance. All the race can do is bend
-    the weights, and the bend is de-concentration.
-
-    So proportional is the wrong null. Measured against it the independent race
-    wins 72% of draws and looks like a result; measured against this it wins 12
-    of 25 at p = 1.000 and is not distinguishable from one line of arithmetic.
-    Any claim for the race has to clear THIS row, not the proportional one.
+    An independent race is this to within three percent in L1, since with no
+    correlation nothing encodes which survivor a departed name resembled and
+    all the race can do is de-concentrate. Any claim for the race is measured
+    against this row, not against proportional.
     """
     w = proportional(parent, idx) ** alpha
     return w / w.sum()
@@ -106,6 +97,49 @@ def race(parent, idx, V=None, D=None):
     p = winning.race_probabilities(a[idx], **sub)
     p = np.asarray(p[0] if isinstance(p, tuple) else p, float)
     return p / p.sum()
+
+
+def factor_covariance(X, k):
+    """A k-factor covariance of X, as (sd, V, D) with V V' + diag(D) the correlation."""
+    sd2, V, D = factor_correlation(X, k)
+    return np.sqrt(sd2), V, D
+
+
+def black_litterman(parent, idx, sd, V, D):
+    """Reverse-optimize the parent, restrict the implied returns, re-optimize.
+
+    Black-Litterman with no views. The parent is taken as the equilibrium book,
+    so the implied excess returns are Pi = Sigma w up to risk aversion, which
+    cancels under the budget constraint. Restricting Pi and re-solving is the
+    linear answer to the same question the race answers non-linearly, and it is
+    given the same inputs: the parent weights and a k-factor covariance fitted
+    on the parent universe.
+
+    Exact where the race is not: if the covariance is the true one, Sigma w is
+    constant on the support of an optimal parent, so Pi restricted is constant
+    and the solution is the minimum-variance portfolio of the sub-block. The
+    gap from the oracle is therefore entirely the covariance estimate.
+    """
+    y = sd * np.asarray(parent, float)
+    Pi = sd * (V @ (V.T @ y) + D * y)
+    Vi, Di, si = V[idx], D[idx], sd[idx]
+    S = np.outer(si, si) * (Vi @ Vi.T + np.diag(Di))
+    S = (S + S.T) / 2
+    m = len(idx)
+    ev, Q = np.linalg.eigh(S)
+    S = Q @ np.diag(np.maximum(ev, 1e-10)) @ Q.T
+    p_sub = Pi[idx]
+    if not np.any(p_sub > 0):
+        return np.full(m, 1.0 / m)
+    w = cp.Variable(m)
+    prob = cp.Problem(cp.Minimize(cp.quad_form(w, cp.psd_wrap(S))),
+                      [p_sub @ w == 1, w >= 0])
+    prob.solve(solver=cp.CLARABEL)
+    if w.value is None:
+        return np.full(m, 1.0 / m)
+    x = np.maximum(np.asarray(w.value, float), 0.0)
+    t = x.sum()
+    return x / t if t > 0 else np.full(m, 1.0 / m)
 
 
 def estimate_and_solve(X, idx):
