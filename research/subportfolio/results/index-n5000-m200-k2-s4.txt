@@ -5,23 +5,23 @@ premise: the parent is the exact optimum of the true covariance to 2.1e-15 relat
 markets: implied one-factor; parent holds 122 effective names.
 built by: winning 1.5.0 (/Users/petercotton/github/allocation/allocation-py312/lib/python3.12/site-packages/winning), numpy 2.4.6, python 3.12.13
 
-method                       variance  vs proportional  beats it
-equal weight                  1.77808            1.053      33%
-proportional                  1.68898            1.000
-flattened                     1.69202            1.002      33%
-race                          1.69625            1.004      33%
-race+factor T=52              1.66117            0.979      67%
-race+factor T=104             1.66388            0.985      67%
-black-litterman T=26          1.17524            0.683     100%
-black-litterman T=52          1.16451            0.684     100%
-black-litterman T=78          1.13151            0.670     100%
-black-litterman T=104         1.13387            0.668     100%
-black-litterman T=156         1.11646            0.661     100%
-black-litterman T=260         1.11601            0.661     100%
-estimate+solve T=26           1.63168            1.003      33%
-estimate+solve T=52           1.48340            0.875     100%
-estimate+solve T=78           1.38150            0.823     100%
-estimate+solve T=104          1.33894            0.805     100%
-estimate+solve T=156          1.28357            0.760     100%
-estimate+solve T=260          1.25527            0.743     100%
-oracle                        1.10418            0.654     100%
+method                         sharpe   x proportional  beats it
+equal weight                   1.7781            1.053      67%
+proportional                   1.6890            1.000
+flattened                      1.6920            1.002      67%
+race                           1.6962            1.004      67%
+race+factor T=52               1.6612            0.979      33%
+race+factor T=104              1.6639            0.985      33%
+black-litterman T=26           1.1752            0.683       0%
+black-litterman T=52           1.1645            0.684       0%
+black-litterman T=78           1.1315            0.670       0%
+black-litterman T=104          1.1339            0.668       0%
+black-litterman T=156          1.1165            0.661       0%
+black-litterman T=260          1.1160            0.661       0%
+estimate+solve T=26            1.6317            1.003      67%
+estimate+solve T=52            1.4834            0.875       0%
+estimate+solve T=78            1.3815            0.823       0%
+estimate+solve T=104           1.3389            0.805       0%
+estimate+solve T=156           1.2836            0.760       0%
+estimate+solve T=260           1.2553            0.743       0%
+oracle                         1.1042            0.654       0%

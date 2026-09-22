@@ -36,6 +36,22 @@ from rules import (long_only_min_var, long_only_max_sharpe, factor_correlation,
 PREMISE_TOL = 1e-9      # the premise holds by construction; this catches bugs
 
 
+def sub_universe(mk, rng, m, how):
+    """The survivors. `random` is m names drawn uniformly. `sector` takes whole
+    sectors, in a random order, until at least m names are in hand, then keeps
+    the first m: a sector sub-index. Random sub-universes lose little
+    diversification and have little at stake; sector ones are what index
+    providers actually build."""
+    if how == "random":
+        return np.sort(rng.choice(mk.n, m, replace=False))
+    take = []
+    for s in rng.permutation(mk.sectors):
+        take.extend(np.flatnonzero(mk.sector == s).tolist())
+        if len(take) >= m:
+            break
+    return np.sort(np.array(take[:m]))
+
+
 def one_draw(args, g):
     """Run global draw index g. Returns a dict of method -> variance."""
     rng = np.random.default_rng([args.seed, g])
@@ -46,7 +62,7 @@ def one_draw(args, g):
     if resid > PREMISE_TOL:
         return {"draw": g, "skipped": "premise", "premise_residual": resid}
 
-    idx = np.sort(rng.choice(args.n, args.m, replace=False))
+    idx = sub_universe(mk, rng, args.m, args.subset)
     Sub = mk.block(idx)
     m_S = mk.m[idx]
     ev = np.linalg.eigvalsh(Sub)
@@ -96,6 +112,8 @@ def main():
     p.add_argument("--draws", type=int, default=25)
     p.add_argument("--seed", type=int, default=12)
     p.add_argument("--k", type=int, default=3, help="factors in the estimated correlation")
+    p.add_argument("--subset", choices=["random", "sector"], default="random",
+                   help="how the sub-universe is chosen")
     p.add_argument("--Ts", type=int, nargs="+", default=[20, 40, 100],
                    help="panel lengths for race+factor (the expensive rule)")
     p.add_argument("--Ts-est", type=int, nargs="+", default=None,
@@ -109,7 +127,7 @@ def main():
 
     if not 0 <= a.shard < a.shards:
         p.error("--shard must be in [0, --shards)")
-    tag = a.tag or f"{a.scale}-n{a.n}-m{a.m}-k{a.k}-s{a.seed}"
+    tag = a.tag or f"{a.scale}-{a.subset}-n{a.n}-m{a.m}-k{a.k}-s{a.seed}"
     mine = [g for g in range(a.draws) if g % a.shards == a.shard]
     Path(a.out).mkdir(parents=True, exist_ok=True)
     dest = Path(a.out) / f"{tag}-shard{a.shard}of{a.shards}.json"
