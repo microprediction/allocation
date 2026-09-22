@@ -1,0 +1,170 @@
+\documentclass[11pt]{article}
+
+\input{../shared/preamble.tex}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{cleveref}
+
+\title{A Tilt Is Worth What the Correlation Is Worth}
+\author{Peter Cotton}
+\date{September 21, 2026}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\one}{\mathbf{1}}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A long-only portfolio and a vector of latent abilities are the same object in
+two charts: calibrate abilities so a race reproduces the portfolio, and the
+portfolio is recovered by running the race. Re-running it under an estimated
+correlation, damped by a parameter, tilts any benchmark without inverting
+anything, so the whole dial is available where a covariance matrix is
+singular. We measure what the dial is worth. It is worth nothing when the
+correlation is noise and thirteen percent of variance when it is not: at a
+tenth of an observation per asset a full tilt costs nineteen percent, and at
+five observations per asset it saves thirteen, with the optimum walking
+monotonically between. The effect replicates across three seeds and is
+strongest where it is most significant, but it appears only on a market whose
+covariance switches regime and is flat on a stationary one, which locates its
+value in structure that no single covariance can hold. A tail-aware race,
+which the construction admits and which the tilt is often motivated by, is
+consistently worse than the Gaussian one on both variance and shortfall.
+\end{abstract}
+
+\section{The two charts}
+
+Let $w$ be a long-only portfolio on the simplex interior. Treating its weights
+as the winning probabilities of a race among assets, there is a vector of
+latent abilities that reproduces them, and running the race at those
+abilities returns the weights. Smaller ability means stronger, because the
+winner is the minimum performance.
+
+The two maps are inverse to each other, and a user can check it in one line.
+Over random draws from three to sixty assets the round trip is accurate to
+about $10^{-9}$, with one qualification stated in \cref{sec:scope}.
+
+Nothing about that is a portfolio construction yet. It becomes one when the
+race is re-run under a different dependence. Calibrate the abilities against a
+reference correlation, blend that reference toward an estimated correlation by
+a parameter $\phi$, and race again. At $\phi = 0$ the benchmark comes back. At
+$\phi = 1$ the race runs under the full estimate. Nothing is inverted at any
+point.
+
+The construction therefore has the shape of a bridge, with a heuristic
+benchmark at one end and a dependence-aware portfolio at the other, reached
+without a matrix inverse. The question this paper answers is what the dial is
+worth, and where.
+
+\section{What the dial is worth}
+
+The benchmark tilted is hierarchical risk parity, chosen because the tilt then
+repairs a rule rather than competing with one. Measurements are paired under
+common random numbers: the race at $\phi$ is compared against the same race at
+$\phi = 0$ on the same fixed seed ensemble, so the simulation noise cancels
+and what remains is the effect of the dial.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrl}
+\toprule
+$T/n$ & variance ratio & win rate & status \\
+\midrule
+0.10 & 1.19 & 27\% & tilting hurts \\
+0.30 & 0.97 to 1.01 & 48 to 63\% & borderline \\
+1.00 & 0.98 & 60 to 67\% & modest, replicates \\
+2.00 & 0.90 to 0.92 & 82 to 84\% & replicated to a quarter of a standard error \\
+5.00 & 0.87 & 88\% & strongest, one run \\
+\bottomrule
+\end{tabular}
+\caption{Full tilt against no tilt, paired, forty assets, three seeds.}
+\label{tab:dial}
+\end{table}
+
+The curve is monotone in coverage and that is the result. The dial behaves as
+a trust parameter should: with four observations for forty assets the
+estimated correlation is close to noise, tilting toward it costs nineteen
+percent, and the correct setting is near zero. With five observations per
+asset the same tilt saves thirteen percent of variance and four percent of
+expected shortfall in roughly nine draws out of ten.
+
+Expected shortfall follows the same shape rather than a different one. It is
+neutral at parity, where the first run's 70 percent fell to 50 on
+replication, and reaches 80 to 84 percent once there is real data.
+
+\section{It needs something to express}
+
+The same paired test on a stationary Gaussian market is flat: ratios between
+0.99 and 1.01 with win rates from 47 to 53 percent at three tenths coverage.
+The gains in \cref{tab:dial} come from a market whose covariance switches, a
+calm structure plus a crash regime firing eight percent of the time with an
+independent dependence structure over a permuted labelling.
+
+That difference is the mechanism. The race is a non-linear functional of the
+correlation, so it can express dependence that no single covariance matrix
+holds. On a market that really is one Gaussian it has nothing to express, and
+it does not pretend otherwise.
+
+\section{The tail-aware race does not earn its keep}
+
+The construction admits a Student-$t$ race, with fat marginals and genuine
+tail dependence, and that is often the motivation for preferring a race to a
+solve. It does not help.
+
+On the crash market, scored on the same out-of-sample panel, the Gaussian
+tilt beats the $t$ tilt at every sample ratio and on both objectives. At three
+tenths coverage the Gaussian half-tilt realizes 0.979 of the benchmark's
+variance against 1.016 for the $t$, and 0.995 of its shortfall against 1.009.
+
+The market is not the reason. A multivariate $t$ market is elliptical, so
+expected shortfall is proportional to standard deviation there and a tail
+metric is the variance metric relabelled; the market used here is
+non-elliptical by construction, with shortfall varying seventeen percent
+relative to standard deviation across portfolios where the elliptical case
+varies one percent.
+
+\section{Scope}\label{sec:scope}
+
+Three limits.
+
+The round trip is not exact everywhere. The solver used for the inverse enters
+a limit cycle on small, highly concentrated fields, and neither more
+iterations, a tighter tolerance nor finer quadrature moves it. A damped
+refinement clears the catastrophic cases, and what remains announces itself
+rather than returning a wrong answer quietly. On four hundred concentrated
+six-asset draws, fifteen warn and none is wrong in silence.
+
+The strongest cell has one run behind it. Everything at two observations per
+asset and below is replicated across seeds, and the replication was worth
+running: it pulled all four shared cells down and eliminated one outright,
+though every one of them passed a two-sigma check. The five-observation row
+has not had that treatment.
+
+The markets are simulated. The population covariance has to be known for
+realized risk to be exact and for the elliptical check to be possible at all.
+
+\section{Closing}
+
+The dial is worth measuring because its answer is not constant. Tilting a
+benchmark toward an estimated correlation is harmful when the estimate is
+noise, valuable when it is not, and the crossover is at roughly a third of an
+observation per asset on these markets. That is the behaviour a trust
+parameter should have, and it is the same shape as the coupling parameter of
+the Schur-complementary family \parencite{cotton2024schur}, reached by a
+construction that never inverts a matrix.
+
+Two results point away from the obvious extensions. The tilt is flat on a
+stationary market, so it is not a general-purpose improvement but a way to act
+on structure a covariance cannot hold. And the tail-aware race, which is the
+natural thing to reach for next, is worse than the Gaussian one even on a tail
+metric and even on a market with real asymmetric tail dependence.
+
+\printbibliography
+
+\end{document}

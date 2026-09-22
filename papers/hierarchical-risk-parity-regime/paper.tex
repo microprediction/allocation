@@ -1,0 +1,233 @@
+\documentclass[11pt]{article}
+
+\input{../shared/preamble.tex}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{cleveref}
+
+\title{Hierarchical Risk Parity Has No Regime of Advantage}
+\author{Peter Cotton}
+\date{September 21, 2026}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\one}{\mathbf{1}}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Hierarchical risk parity is defended on the regime where the sample
+covariance cannot be inverted. We test that defence on its own terms, with
+the population covariance known by construction so realized risk is exact,
+and find no interval of sample size where the method is the right answer.
+Below a tenth of an observation per asset it is beaten by inverse-variance
+weighting, which inverts nothing either and consults no tree. Above parity it
+is beaten by any regularised optimizer, in 78 percent of five hundred
+randomly drawn dependence structures, and by long-only minimum variance on
+the raw sample covariance in 76 percent, so the no-short-sale constraint
+alone closes the gap. We also show that no shrinkage class small enough to be
+interpretable can reproduce the method, by a counting argument confirmed at
+three universe sizes, and that nested clustered optimization on the same
+clusters tracks the shrinkage frontier while hierarchical risk parity does
+not, which locates the cost in the inverse-variance split rather than in the
+hierarchy.
+\end{abstract}
+
+\section{Introduction}
+
+The case for hierarchical risk parity \parencite{lopezdeprado2016} rests on a comparison. The method is
+set against mean-variance optimization on a raw sample covariance, it wins,
+and the win is attributed to the allocation rule. Two things make that
+comparison hard to read. The rule and the covariance estimate are varied
+together, and the benchmark is an optimizer at its worst.
+
+This paper fixes both and asks whether an interval of sample size survives in
+which the hierarchical rule is the right choice. The population covariance is
+known by construction throughout, so realized risk is $w^\top \Sigma w$
+exactly rather than a backtest estimate, and every method sees the identical
+sample on every draw. Where an optimizer appears it is long-only, so a
+comparison against a long-only heuristic does not measure the constraint.
+
+The answer is that no such interval exists. The window closes from both
+sides, and for different reasons at each end.
+
+\section{No parsimonious shrinkage reproduces the rule}
+
+A natural way to read a heuristic allocator is as an optimizer fed a modified
+covariance. That reading is always available and carries no information.
+
+\begin{proposition}[Every portfolio is a minimum-variance portfolio]
+\label{prop:implied}
+Let $w \in \R^n$ satisfy $\one^\top w = 1$. Put $u = w/\|w\|$,
+$Q = I - uu^\top$, and $\Sigma' = \one\one^\top + \varepsilon\,QMQ^\top$ for
+any $\varepsilon > 0$ and symmetric positive definite $M$. Then
+$\Sigma' \succ 0$ and $\Sigma' w = \one$, so $w$ is the global
+minimum-variance portfolio of $\Sigma'$.
+\end{proposition}
+
+Long-short portfolios are included, and the construction asks nothing of $w$
+beyond a unit budget. The question with content is therefore not whether an
+implied covariance exists but whether one exists in a class small enough to
+mean something.
+
+Class size settles that before any data is seen. A family with $k$ parameters
+traces at most a $k$-dimensional set of weight vectors at a fixed sample
+covariance, and the weight vector has $n-1$ free coordinates, so for
+$k < n-1$ the family generically misses. \Cref{tab:cliff} confirms the
+threshold empirically, fitting a taper $S \circ (1 + B\theta)$ for a random
+orthonormal basis $B$ of $k$ directions, with $\theta$ refitted for every
+market.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+\toprule
+assets & last $k$ that misses & its $L^1$ & first $k$ that fits & its $L^1$ \\
+\midrule
+16 & 15 & $1.2\times 10^{-2}$ & 16 & $3.1\times 10^{-10}$ \\
+24 & 22 & $9.6\times 10^{-3}$ & 23 & $2.0\times 10^{-7}$ \\
+40 & 38 & $1.1\times 10^{-2}$ & 39 & $1.9\times 10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\caption{The cliff sits at $n-1$ and tracks it, dropping four to eight orders
+of magnitude in one step.}
+\label{tab:cliff}
+\end{table}
+
+So the failure of any particular small family is a counting fact rather than
+a failure of search. Among named families the closest is near-diagonal: a
+two-parameter taper that keeps about half the correlation between assets
+pairing at the finest split and none above it, leaving a fifth of the
+portfolio misplaced. Shrinkage toward constant correlation, which is the best
+estimator in that comparison, is the furthest from the rule.
+
+A control confirms the miss is informative rather than generic. Fitted to a
+portfolio that genuinely is minimum variance on a diagonally shrunk
+covariance, the diagonal family recovers it exactly; fitted to the
+hierarchical rule it misses by 0.22.
+
+\section{The window closes from above}
+
+\Cref{tab:robust} reports five hundred randomly drawn structures. The family,
+the number and sizes of clusters, correlation levels, extra common factors,
+volatility dispersion, the universe size, the sample ratio and the tail
+weight are all resampled per draw. The shrinkage is a single fixed setting,
+never tuned.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lrr}
+\toprule
+comparison & wins & median variance ratio \\
+\midrule
+fixed taper beats HRP & 78\% & 0.740 \\
+nested clustered optimization beats HRP & 77\% & 0.738 \\
+long-only minimum variance on the raw sample beats HRP & 76\% & 0.726 \\
+fixed taper beats nested clustered optimization & 43\% & 1.005 \\
+\bottomrule
+\end{tabular}
+\caption{Five hundred randomised dependence structures.}
+\label{tab:robust}
+\end{table}
+
+The third row is the one to dwell on. An optimizer whose only regularisation
+is the long-only constraint, which is shrinkage in the sense of
+\textcite{jagannathanma2003}, beats the hierarchical rule three times in four.
+
+The advantage holds in every structural family and is strongest where the
+method's own assumption is true: 89 percent on blocks with factors, 88
+percent on blocks, 83 percent on a nested hierarchy, 81 on equicorrelation,
+71 on a pure factor market and 60 on an unstructured one.
+
+\section{The window closes from below}
+
+\Cref{tab:deep} continues into the rank-deficient corner, which is the case
+the method is usually defended on.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrrr}
+\toprule
+$T/n$ & Ledoit--Wolf & $\phi=0.5$ taper & block diagonal & NCO & inverse variance \\
+\midrule
+0.10 & 50\% / 1.002 & 46\% / 1.033 & 49\% / 1.006 & 36\% / 1.171 & 59\% / 0.958 \\
+0.20 & 47\% / 1.027 & 45\% / 1.052 & 45\% / 1.049 & 44\% / 1.094 & 52\% / 0.996 \\
+0.30 & 54\% / 0.974 & 54\% / 0.930 & 55\% / 0.954 & 55\% / 0.920 & 44\% / 1.015 \\
+0.50 & 65\% / 0.879 & 63\% / 0.811 & 63\% / 0.861 & 64\% / 0.804 & 40\% / 1.018 \\
+1.00 & 77\% / 0.754 & 75\% / 0.680 & 75\% / 0.687 & 75\% / 0.666 & 35\% / 1.040 \\
+\bottomrule
+\end{tabular}
+\caption{Share of draws beating the hierarchical rule, and the median ratio
+of variance to its own. Universes of forty and one hundred assets.}
+\label{tab:deep}
+\end{table}
+
+The method has a genuine regime, and it is narrower than advertised. At a
+tenth of an observation per asset it edges the taper by three percent and
+nested clustered optimization by seventeen, because that method still has to
+invert its cluster blocks and cannot.
+
+The last column withdraws it. In the same corner, inverse-variance weighting
+beats the hierarchical rule in 59 percent of draws and is four percent better
+at the median. That rule inverts nothing either, consults no tree, and is
+four lines of code. So at the point of maximum rank deficiency the hierarchy
+earns nothing over the crudest construction that shares its one structural
+advantage, and by $T/n = 0.3$ inverse variance has fallen behind while
+everything else has passed.
+
+\section{The hierarchy is not what fails}
+
+Nested clustered optimization runs the same clustering and solves minimum
+variance at both levels. On five blocks at ten observations per asset the
+hierarchical rule realizes 0.1661 and it realizes 0.0892. The one-parameter
+taper that dominates the first, winning every draw by a factor of about two,
+beats the second in 70 percent of draws by six parts in ten thousand.
+
+One sits on the shrinkage frontier and the other does not, from the same tree
+and the same estimate. What separates them is the split rule, and the
+inverse-variance split is what the hierarchical method spends its structure
+on.
+
+\section{Scope}
+
+Two limits bound the reading above, and the second is not a footnote.
+
+The comparisons are simulated. The population covariance has to be known for
+realized risk to be exact, which is the property that makes the question
+answerable at all, and it is bought by giving up real data.
+
+More importantly, the dominance of a shrunk estimate is a property of a
+stationary market. On a regime-switching market, where a crash regime fires
+eight percent of the time with an independent dependence structure over a
+permuted labelling, Ledoit--Wolf minimum variance is 1.21 times the
+hierarchical rule's variance at a tenth coverage and 1.10 at three tenths.
+Shrinking toward a single target cannot represent two dependence structures.
+The claim that a simple shrinkage rule dominates holds where the covariance
+is fixed and reverses where it switches.
+
+\section{Closing}
+
+There is no interval of sample size on which hierarchical risk parity is the
+right answer. Below roughly a fifth of an observation per asset, not
+inverting is what helps, and inverse-variance weighting does that better.
+Above it, inverting properly is what helps, and any regularised optimizer
+does that better, including one whose only regularisation is a constraint
+most practitioners impose anyway. Between the two the method is beaten from
+both directions at once.
+
+The counting argument explains why the usual defences are hard to check. No
+shrinkage class small enough to be interpretable can reproduce the rule, so
+there is no compact estimator-side statement of what it does, and the
+comparison has to be made on out-of-sample risk with the truth known. Once it
+is, the hierarchy turns out not to be the problem: the same clustering with a
+proper solve at both levels tracks the frontier. The cost is in the split.
+
+\printbibliography
+
+\end{document}
