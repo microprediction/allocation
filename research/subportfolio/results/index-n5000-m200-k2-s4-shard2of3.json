@@ -1,0 +1,67 @@
+{
+ "config": {
+  "scale": "index",
+  "n": 5000,
+  "m": 200,
+  "draws": 500,
+  "seed": 4,
+  "k": 2,
+  "Ts": [
+   52,
+   104
+  ],
+  "Ts_est": [
+   26,
+   52,
+   78,
+   104,
+   156,
+   260
+  ],
+  "shard": 2,
+  "shards": 3,
+  "out": "results",
+  "tag": "index-n5000-m200-k2-s4"
+ },
+ "rows": [
+  {
+   "draw": 2,
+   "family": "implied one-factor",
+   "premise_residual": 2.1094237467877974e-15,
+   "min_eig": 0.47744832776261414,
+   "parent_effective_n": 68.23880615281006,
+   "equal weight": 1.7517968860979036,
+   "proportional": 1.6270702818161917,
+   "flattened": 1.6525434060275992,
+   "race": 1.66053608923242,
+   "oracle": 1.1176711656904414,
+   "estimate+solve T=26": 1.6316799907433013,
+   "black-litterman T=26": 1.1752377458868088,
+   "race+factor T=52": 1.6611693407597699,
+   "estimate+solve T=52": 1.4242954332029463,
+   "black-litterman T=52": 1.1838149019978337,
+   "estimate+solve T=78": 1.3814956776035232,
+   "black-litterman T=78": 1.1512299815207252,
+   "race+factor T=104": 1.658180997025224,
+   "estimate+solve T=104": 1.3103690920927349,
+   "black-litterman T=104": 1.1532052417385203,
+   "estimate+solve T=156": 1.4001328810961418,
+   "black-litterman T=156": 1.1475487177483268,
+   "estimate+solve T=260": 1.2747721904300966,
+   "black-litterman T=260": 1.1335986999945737
+  }
+ ],
+ "elapsed_seconds": 4431.466212749481,
+ "host": "Mac",
+ "python": "3.12.13",
+ "numpy": "2.4.6",
+ "winning": "1.5.0",
+ "winning_path": "/Users/petercotton/github/allocation/allocation-py312/lib/python3.12/site-packages/winning",
+ "threads": {
+  "OMP_NUM_THREADS": "1",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "VECLIB_MAXIMUM_THREADS": "1",
+  "RAYON_NUM_THREADS": "4"
+ }
+}

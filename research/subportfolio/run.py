@@ -1,9 +1,9 @@
 """Sharded runner. One draw is one independent unit of work.
 
 Each draw builds a market, takes a random sub-universe, applies every rule,
-and scores realized variance against the TRUE sub-covariance. There is no
-backtest and no estimation in the scoring, so a difference between rules is a
-difference between rules.
+and scores the Sharpe ratio against the TRUE sub-covariance and the market's
+own implied returns. There is no backtest and no estimation in the scoring, so
+a difference between rules is a difference between rules.
 
 Sharding is by global draw index, and every draw seeds itself from
 (seed, draw_index). A draw therefore produces the same numbers whether it ran
@@ -29,11 +29,11 @@ import numpy as np
 import winning
 
 from markets import MARKETS
-from rules import (long_only_min_var, factor_correlation, factor_covariance,
-                   proportional, race, flattened, black_litterman,
-                   estimate_and_solve)
+from rules import (long_only_min_var, long_only_max_sharpe, factor_correlation,
+                   factor_covariance, proportional, race, flattened,
+                   black_litterman, estimate_and_solve)
 
-PREMISE_TOL = 1e-5      # mid draws land near 3e-07, index near 1e-14
+PREMISE_TOL = 1e-9      # the premise holds by construction; this catches bugs
 
 
 def one_draw(args, g):
@@ -48,17 +48,22 @@ def one_draw(args, g):
 
     idx = np.sort(rng.choice(args.n, args.m, replace=False))
     Sub = mk.block(idx)
+    m_S = mk.m[idx]
     ev = np.linalg.eigvalsh(Sub)
-    var = lambda w: float(np.asarray(w, float) @ Sub @ np.asarray(w, float))
 
-    row = {"draw": g, "family": mk.family, "premise_residual": resid,
+    def score(w):
+        w = np.asarray(w, float)
+        return float(w @ m_S) / float(np.sqrt(w @ Sub @ w))
+
+    row = {"draw": g, "family": mk.family, "objective": "sharpe",
+           "premise_residual": resid,
            "min_eig": float(ev.min()), "parent_effective_n":
            float(1.0 / np.sum(mk.parent ** 2))}
-    row["equal weight"] = var(np.full(args.m, 1.0 / args.m))
-    row["proportional"] = var(proportional(mk.parent, idx))
-    row["flattened"] = var(flattened(mk.parent, idx))
-    row["race"] = var(race(mk.parent, idx))
-    row["oracle"] = var(long_only_min_var(Sub))
+    row["equal weight"] = score(np.full(args.m, 1.0 / args.m))
+    row["proportional"] = score(proportional(mk.parent, idx))
+    row["flattened"] = score(flattened(mk.parent, idx))
+    row["race"] = score(race(mk.parent, idx))
+    row["oracle"] = score(long_only_max_sharpe(Sub, m_S))
 
     # Two T grids, because the two rules cost three orders of magnitude apart.
     # race+factor calibrates under a k-factor correlation, which is 68 core-
@@ -73,11 +78,11 @@ def one_draw(args, g):
         X = mk.panel(rng, T)
         if T in set(args.Ts):
             _, V, D = factor_correlation(X, args.k)
-            row[f"race+factor T={T}"] = var(race(mk.parent, idx, V=V, D=D))
+            row[f"race+factor T={T}"] = score(race(mk.parent, idx, V=V, D=D))
         if T in set(est_Ts):
-            row[f"estimate+solve T={T}"] = var(estimate_and_solve(X, idx))
+            row[f"estimate+solve T={T}"] = score(estimate_and_solve(X, idx))
             sd, Vc, Dc = factor_covariance(X, args.k)
-            row[f"black-litterman T={T}"] = var(
+            row[f"black-litterman T={T}"] = score(
                 black_litterman(mk.parent, idx, sd, Vc, Dc))
     return row
 

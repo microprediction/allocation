@@ -1,29 +1,34 @@
-"""The two markets, and the check that each one makes the premise exactly true.
+"""The two markets. In both, the parent is the tangency portfolio.
 
-The premise under test is CAPM's: the parent portfolio is optimal for the
-parent universe. If that only holds approximately then the experiment measures
-the approximation instead of the restriction rules, so both constructions
-verify it and `run.py` refuses to score a draw that fails.
+CAPM's claim is that the market portfolio is mean-variance efficient: for some
+vector of expected excess returns m, the cap-weighted book w maximises Sharpe
+ratio over the whole universe. Given a covariance Sigma and a long-only w that
+is exactly the statement
 
-`mid` draws a dependence structure from one of six families and pairs it with a
-cap-weighted parent. A real index holds every name it lists, so the parent is
-never a corner solution and every weight is strictly positive.
+    Sigma w = c m,   c > 0,
 
-`index` is the same premise at index scale and never forms a dense matrix. Both
-markets put the cap weights first and choose the covariance to make them
-optimal:
+so m is defined by the market rather than drawn: m = Sigma w, the returns the
+market has to expect for its own weights to be optimal. Nothing ties Sigma to
+w. The covariance is drawn to look like equities and the cap weights to look
+like an index, independently, and the premise holds by definition.
 
-    Sigma = 11' + eps Q M Q',    u = w / ||w||,    Q = I - u u'
+Restricting to a sub-universe S is where it stops being trivial. The optimum
+there is
 
-which is positive definite and has w as its exact minimum-variance portfolio.
-Since w >= 0 the long-only constraint is inactive, so w is also the long-only
-optimum. This is the positive-definite branch of the implied-covariance
-identity; the minimal rank-two correction reproduces w as well but is not
-positive definite, which is why it is not used here.
+    w_S* ~ Sigma_SS^{-1} m_S = w_S + Sigma_SS^{-1} Sigma_{S,S^c} w_{S^c},
 
-Nothing is formed densely in the index case. Sigma[i,j] = 1 + eps (M_ij
-- u_i (Mu)_j - (Mu)_i u_j + (u'Mu) u_i u_j), and M is one-factor, so any block
-costs O(n) to assemble and the parent check is O(n) too.
+proportional restriction plus the departed names' weight projected onto the
+survivors they co-moved with. That second term depends on who left and how
+they were correlated with who stayed, which is the whole content of the
+question. Under a minimum-variance premise (m constant) it vanishes and the
+optimum is a function of the survivors alone.
+
+`mid` draws a dependence structure from one of six families. `index` is a
+sector market at index scale and is never formed densely: a market factor
+with heterogeneous betas, two signed style factors, fifty sectors of unequal size
+each with its own loading, and idiosyncratic noise. Its spectrum is one large
+eigenvalue and a long tail, which is what equities look like and what a
+k-factor estimate cannot capture.
 """
 from functools import lru_cache
 from pathlib import Path
@@ -31,31 +36,20 @@ from pathlib import Path
 import numpy as np
 
 
-def premise_residual(w, Sw):
-    """How far w is from being the long-only minimum-variance portfolio.
+def premise_residual(w, Sw, m):
+    """How far w is from the long-only maximum-Sharpe portfolio of (Sigma, m).
 
-    The KKT conditions for min w'S w subject to 1'w = 1, w >= 0 are
-
-        (S w)_i = c  wherever w_i > 0,      (S w)_i >= c  everywhere,
-
-    with c = w'S w. Stating it that way needs a rule for which weights count
-    as held, and a solver leaves a numerical tail just above zero: at a
-    threshold of 1e-10 a 120-name draw looks like it holds all 120 and the
-    spread reads 11, while the true support is 13 names and the spread there
-    is 3e-07. So we use the threshold-free form instead. Complementary
-    slackness says w_i ((S w)_i - c) = 0 for every i, which weights each
-    departure by how much is actually held, and dual feasibility says no
-    (S w)_i falls below c. The residual returned is the larger of the two,
-    relative to c.
+    KKT: Sigma w / (w'Sigma w) = m / (w'm) wherever w > 0, with >= elsewhere.
+    Every parent here holds every name, so only the equality applies. Returned
+    relative to the scale of m.
     """
-    c = float(w @ Sw)
-    gap = float(np.max(w * np.abs(Sw - c))) / abs(c)
-    infeas = max(0.0, float(c - Sw.min())) / abs(c)
-    return max(gap, infeas)
+    lhs = Sw / float(w @ Sw)
+    rhs = m / float(w @ m)
+    return float(np.max(np.abs(lhs - rhs)) / np.max(np.abs(rhs)))
 
 
 # --------------------------------------------------------------------------
-# the cap-weight profile, and the identity that makes it optimal
+# the cap-weight profile
 # --------------------------------------------------------------------------
 
 # The cap-weight profile comes from a real index: the 129 month-end
@@ -134,22 +128,9 @@ def effective_fraction(w):
     return float(1.0 / np.sum(np.asarray(w, float) ** 2) / len(w))
 
 
-def implied_covariance(w, M, eps):
-    """Sigma = 11' + eps Q M Q', which has ``w`` as its exact optimum.
-
-    Q = I - u u' with u = w / ||w|| annihilates w, so Sigma w = 1 exactly and
-    w is the minimum-variance portfolio of Sigma. Since w > 0 the long-only
-    constraint is inactive and it is the long-only optimum too. Positive
-    definite for any positive semi-definite M.
-    """
-    u = w / np.linalg.norm(w)
-    Qm = M - np.outer(u, u @ M) - np.outer(M @ u, u) + float(u @ M @ u) * np.outer(u, u)
-    S = 1.0 + eps * Qm
-    return (S + S.T) / 2
-
 
 # --------------------------------------------------------------------------
-# mid scale: a random dependence structure, cap-weighted parent
+# mid scale: a random dependence structure
 # --------------------------------------------------------------------------
 
 def random_structure(rng, n):
@@ -206,23 +187,16 @@ def random_structure(rng, n):
 
 
 class MidMarket:
-    """Dense. Parent is cap weights, exactly optimal by construction.
-
-    The dependence structure is drawn from one of six families and used as the
-    ``M`` of the implied-covariance identity, so the families still separate
-    the draws while the parent stays a plausible index. ``solver`` is accepted
-    and unused: the parent is no longer solved for, and the oracle does its own
-    solving in run.py.
-    """
+    """Dense. A random dependence structure with a cap-weighted tangency parent."""
 
     scale = "mid"
 
-    def __init__(self, rng, n, solver=None, eps=10.0):
+    def __init__(self, rng, n, solver=None):
         M, self.family = random_structure(rng, n)
-        M = M / np.mean(np.diag(M))          # so eps means the same thing across families
+        self.Sigma = M / np.mean(np.diag(M))
         self.n = n
         self.parent, self.weight_source = cap_weights(rng, n)
-        self.Sigma = implied_covariance(self.parent, M, eps)
+        self.m = self.Sigma @ self.parent
         self.chol = np.linalg.cholesky(
             self.Sigma + 1e-12 * np.eye(n) * np.trace(self.Sigma) / n)
 
@@ -237,65 +211,82 @@ class MidMarket:
         return self.Sigma @ w
 
     def premise_residual(self):
-        return premise_residual(self.parent, self.sigma_times(self.parent))
+        return premise_residual(self.parent, self.sigma_times(self.parent), self.m)
 
 
 # --------------------------------------------------------------------------
-# index scale: cap weights first, covariance chosen to make them optimal
+# index scale: a sector market, never dense
 # --------------------------------------------------------------------------
 
 class IndexMarket:
-    """Never dense. Parent is cap weights, exactly optimal by construction.
+    """Never dense. Market factor, two style factors, fifty sectors, idiosyncratic.
 
-    Calibrated to the S&P 500 panel in experiments/data, 2014-2024:
+        Sigma_ij = b_i b_j + e_i e_j + e2_i e2_j + c_i c_j [same sector] + d_i [i = j]
 
-        pairwise correlation   mean 0.35, sd 0.12
-        first eigenvalue       36% of variance
-        log volatility         sd 0.30
+    with every name at unit variance before the volatility scale s_i, so the
+    correlation is the same expression without d. Calibrated to
+    the S&P 500 panel in experiments/data, 2014-2024:
 
-    which this reproduces at mean 0.33, sd 0.11, 35% and 0.27.
+                                real    market
+        pairwise correlation    0.347   0.34
+        dispersion              0.120   0.12
+        first eigenvalue        36.2%   36%
+        second eigenvalue        4.8%    5%
+        log volatility sd       0.30    0.30
+
+    Sector sizes are drawn from a Dirichlet so a few sectors are large, which
+    is where the eigenvalue tail comes from. Every block, product and panel is
+    O(n) or O(n + m^2); Sigma itself is never formed.
     """
 
     scale = "index"
 
-    def __init__(self, rng, n, solver=None, eps=4.0, tail=1.3):
-        b = rng.uniform(0.10, 0.75, n)
-        s = np.exp(rng.normal(0.0, 0.35, n))
-        self.v, self.d = b * s, (1.0 - b ** 2) * s ** 2
+    def __init__(self, rng, n, solver=None, sectors=50, tail=1.3):
+        self.n, self.family, self.sectors = n, "sector market", sectors
+        s = np.exp(rng.normal(0.0, 0.30, n))
+        b = rng.uniform(0.35, 0.78, n)                    # market beta
+        e = rng.uniform(-0.38, 0.38, n)        # signed style loading
+        e2 = rng.uniform(-0.32, 0.32, n)                  # a second one, for PC3
+        c = rng.uniform(0.25, 0.45, n)                    # sector loading
+        # unequal sectors: a Dirichlet with concentration 1 gives a few large
+        sizes = rng.dirichlet(np.ones(sectors))
+        self.sector = rng.choice(sectors, size=n, p=sizes)
+        self.b, self.e, self.e2, self.c = b * s, e * s, e2 * s, c * s
+        self.d = np.maximum(1.0 - b ** 2 - e ** 2 - e2 ** 2 - c ** 2, 0.05) * s ** 2
         cap = rng.pareto(tail, n) + 1.0
         self.parent = cap / cap.sum()
-        self.u = self.parent / np.linalg.norm(self.parent)
-        self.Mu = self.v * (self.v @ self.u) + self.d * self.u
-        self.uMu = float(self.u @ self.Mu)
-        self.eps, self.n, self.family = eps, n, "implied one-factor"
+        self.m = self.sigma_times(self.parent)
+
+    def _same(self, idx):
+        g = self.sector[idx]
+        return (g[:, None] == g[None, :]).astype(float)
 
     def block(self, idx):
-        """Sigma[idx, idx] in O(n + m^2), without forming Sigma."""
-        vs, us, ms = self.v[idx], self.u[idx], self.Mu[idx]
-        M = np.outer(vs, vs) + np.diag(self.d[idx])
-        C = (M - np.outer(us, ms) - np.outer(ms, us)
-             + self.uMu * np.outer(us, us))
-        S = 1.0 + self.eps * C
+        """Sigma[idx, idx] in O(m^2)."""
+        bs, es, e2s, cs = self.b[idx], self.e[idx], self.e2[idx], self.c[idx]
+        S = (np.outer(bs, bs) + np.outer(es, es) + np.outer(e2s, e2s)
+             + np.outer(cs, cs) * self._same(idx) + np.diag(self.d[idx]))
         return (S + S.T) / 2
 
     def panel(self, rng, T):
-        """T observations from the true Sigma, in O(T n)."""
-        g = rng.normal(size=T)                                  # the 11' part
-        f = rng.normal(size=T)
-        Z = f[:, None] * self.v + rng.normal(size=(T, self.n)) * np.sqrt(self.d)
-        Z = Z - np.outer(Z @ self.u, self.u)                    # Q M Q'
-        return g[:, None] + np.sqrt(self.eps) * Z
+        """T observations from the true Sigma, in O(T (n + sectors))."""
+        f_m = rng.normal(size=T)
+        f_e = rng.normal(size=T)
+        f_e2 = rng.normal(size=T)
+        f_g = rng.normal(size=(T, self.sectors))
+        return (np.outer(f_m, self.b) + np.outer(f_e, self.e) + np.outer(f_e2, self.e2)
+                + f_g[:, self.sector] * self.c
+                + rng.normal(size=(T, self.n)) * np.sqrt(self.d))
 
     def sigma_times(self, w):
-        """Sigma w in O(n), without forming Sigma."""
-        Mw = self.v * (self.v @ w) + self.d * w
-        uw = float(self.u @ w)
-        return (np.full_like(w, float(np.ones_like(w) @ w))
-                + self.eps * (Mw - self.u * float(self.u @ Mw)
-                              - self.Mu * uw + self.uMu * self.u * uw))
+        """Sigma w in O(n + sectors)."""
+        cw = np.bincount(self.sector, weights=self.c * w, minlength=self.sectors)
+        return (self.b * float(self.b @ w) + self.e * float(self.e @ w)
+                + self.e2 * float(self.e2 @ w)
+                + self.c * cw[self.sector] + self.d * w)
 
     def premise_residual(self):
-        return premise_residual(self.parent, self.sigma_times(self.parent))
+        return premise_residual(self.parent, self.sigma_times(self.parent), self.m)
 
 
 MARKETS = {"mid": MidMarket, "index": IndexMarket}

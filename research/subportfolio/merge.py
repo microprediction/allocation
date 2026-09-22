@@ -2,9 +2,9 @@
 
     python merge.py --tag index-n5000-m200-k2-s4
 
-Reports the median ratio to proportional restriction, since proportional is
-what index providers actually do, along with the share of draws on which each
-rule beats it. The share is the robustness claim and the ratio is the size of
+Reports each rule's median Sharpe ratio, its median ratio to proportional
+restriction, since proportional is what index providers actually do, and the
+share of draws on which it beats it. Higher is better throughout. The share is the robustness claim and the ratio is the size of
 the effect; a rule that wins narrowly on most draws and loses badly on a few
 is a different animal from one that wins big on half, so both are printed.
 """
@@ -73,11 +73,11 @@ def main():
         print("WARNING: shards were not all built by the same environment.")
     print()
 
-    print(f"{'method':26s}{'variance':>11s}{'vs proportional':>17s}{'beats it':>10s}")
+    print(f"{'method':26s}{'sharpe':>11s}{'x proportional':>17s}{'beats it':>10s}")
     for k in order:
         x = res[k]
-        note = "" if k == "proportional" else f"{np.mean(x < base):9.0%}"
-        print(f"{k:26s}{np.median(x):11.5f}{np.median(x / base):17.3f}{note}")
+        note = "" if k == "proportional" else f"{np.mean(x > base):9.0%}"
+        print(f"{k:26s}{np.median(x):11.4f}{np.median(x / base):17.3f}{note}")
 
 
 if __name__ == "__main__":

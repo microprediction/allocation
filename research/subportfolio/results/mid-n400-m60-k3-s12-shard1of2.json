@@ -1,0 +1,78 @@
+{
+ "config": {
+  "scale": "mid",
+  "n": 400,
+  "m": 60,
+  "draws": 500,
+  "seed": 12,
+  "k": 3,
+  "Ts": [
+   20,
+   40,
+   100
+  ],
+  "Ts_est": [
+   15,
+   20,
+   30,
+   40,
+   60,
+   80,
+   100,
+   150,
+   250
+  ],
+  "shard": 1,
+  "shards": 2,
+  "out": "results",
+  "tag": "mid-n400-m60-k3-s12"
+ },
+ "rows": [
+  {
+   "draw": 1,
+   "family": "nested",
+   "premise_residual": 1.776356839400251e-15,
+   "min_eig": 2.595127109710437,
+   "parent_effective_n": 56.096269591208255,
+   "equal weight": 2.7610850948684114,
+   "proportional": 2.5111468637208736,
+   "flattened": 2.5077112367111214,
+   "race": 2.5074144199362802,
+   "oracle": 2.0967776436243595,
+   "estimate+solve T=15": 3.0635528905460063,
+   "black-litterman T=15": 5.6247945294944195,
+   "race+factor T=20": 2.503655894756979,
+   "estimate+solve T=20": 3.294640591970392,
+   "black-litterman T=20": 2.7308519817447783,
+   "estimate+solve T=30": 2.992657970548812,
+   "black-litterman T=30": 2.6078249065199914,
+   "race+factor T=40": 2.428858610999183,
+   "estimate+solve T=40": 2.5159354069886817,
+   "black-litterman T=40": 2.5641239847089805,
+   "estimate+solve T=60": 2.8250496149166238,
+   "black-litterman T=60": 2.662110334050627,
+   "estimate+solve T=80": 2.633072973079485,
+   "black-litterman T=80": 2.557285877609922,
+   "race+factor T=100": 2.4803090765788665,
+   "estimate+solve T=100": 2.299317178232083,
+   "black-litterman T=100": 2.6934091220318663,
+   "estimate+solve T=150": 2.3807268501506016,
+   "black-litterman T=150": 2.56011611073081,
+   "estimate+solve T=250": 2.2163694068208244,
+   "black-litterman T=250": 2.5654846530851962
+  }
+ ],
+ "elapsed_seconds": 1196.9951350688934,
+ "host": "Mac",
+ "python": "3.12.13",
+ "numpy": "2.4.6",
+ "winning": "1.5.0",
+ "winning_path": "/Users/petercotton/github/allocation/allocation-py312/lib/python3.12/site-packages/winning",
+ "threads": {
+  "OMP_NUM_THREADS": "1",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "VECLIB_MAXIMUM_THREADS": "1",
+  "RAYON_NUM_THREADS": "3"
+ }
+}
