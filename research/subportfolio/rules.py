@@ -74,6 +74,29 @@ def proportional(parent, idx):
     return w / w.sum()
 
 
+def flattened(parent, idx, alpha=0.75):
+    """Proportional restriction, flattened toward equal weight. The real null.
+
+    An INDEPENDENT race is this and almost nothing else. Fitting w ~ w_prop^a
+    to the independent race's output gives a = 0.75 to 0.81 with an L1 residual
+    of 0.006 to 0.012, against a deviation from proportional of 0.21 to 0.36:
+    about ninety-seven percent of what the race does to a restricted book is a
+    power transform.
+
+    That is not a surprise on reflection. With no correlation anywhere, a
+    departed name's weight cannot flow toward whichever survivor it most
+    resembled, because nothing encodes resemblance. All the race can do is bend
+    the weights, and the bend is de-concentration.
+
+    So proportional is the wrong null. Measured against it the independent race
+    wins 72% of draws and looks like a result; measured against this it wins 12
+    of 25 at p = 1.000 and is not distinguishable from one line of arithmetic.
+    Any claim for the race has to clear THIS row, not the proportional one.
+    """
+    w = proportional(parent, idx) ** alpha
+    return w / w.sum()
+
+
 def race(parent, idx, V=None, D=None):
     """Calibrate on the parent field, then race among the survivors."""
     kw = {k: val for k, val in (("V", V), ("D", D)) if val is not None}

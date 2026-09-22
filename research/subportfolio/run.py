@@ -30,7 +30,7 @@ import winning
 
 from markets import MARKETS
 from rules import (long_only_min_var, factor_correlation, proportional, race,
-                   estimate_and_solve)
+                   flattened, estimate_and_solve)
 
 PREMISE_TOL = 1e-5      # mid draws land near 3e-07, index near 1e-14
 
@@ -55,6 +55,7 @@ def one_draw(args, g):
            float(1.0 / np.sum(mk.parent ** 2))}
     row["equal weight"] = var(np.full(args.m, 1.0 / args.m))
     row["proportional"] = var(proportional(mk.parent, idx))
+    row["flattened"] = var(flattened(mk.parent, idx))
     row["race"] = var(race(mk.parent, idx))
     row["oracle"] = var(long_only_min_var(Sub))
 

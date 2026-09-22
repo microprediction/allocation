@@ -46,7 +46,7 @@ def main():
     rows = [r for r in rows if not r.get("skipped")]
     Ts = cfg["Ts"]
     est_Ts = cfg.get("Ts_est") or Ts
-    order = (["equal weight", "proportional", "race"]
+    order = (["equal weight", "proportional", "flattened", "race"]
              + [f"race+factor T={t}" for t in Ts]
              + [f"estimate+solve T={t}" for t in est_Ts]
              + ["oracle"])
