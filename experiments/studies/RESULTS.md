@@ -328,3 +328,56 @@ switching. This is a scope limit, not a footnote.
 3. First crash market pushed all correlations uniformly toward 1: spread only
    1.009 against 1.004 for multivariate t, so still effectively elliptical.
    Fixed by giving the crash regime its own independent structure.
+
+
+## 10. CORRECTION to 7 and 8: the race is a diversification operator
+
+Earlier sections concluded the tilt only helps on a regime-switching market.
+That was the wrong reading. The benchmark tilted in those tests was HRP, which
+already discounts correlated names, so there was little correlation left to
+act on. What governs the gain is how much correlation the BENCHMARK ignores.
+
+One race, one correlation, three starting points. One-factor market with
+heterogeneous variances, n=120, long-only optimum solved with cvxpy:
+
+| benchmark                  | before  | after race | change |
+|----------------------------|---------|------------|--------|
+| equal weight               | 0.32059 | 0.16882    | -47.3% |
+| inverse variance           | 0.12494 | 0.06148    | -50.8% |
+| long-only minimum variance | 0.02705 | 0.02709    |  +0.1% |
+
+It halves the variance of benchmarks that ignore correlation and is nearly a
+FIXED POINT on the optimum. Direction check: raced weights correlate -0.996
+with factor loading against -0.989 for long-only min-var, and the race captures
+84% of the variance reduction available between equal weight and the optimum.
+
+This explains the n=5000 negative result: HRP is the best construction at that
+size, so the race was being asked to improve on the ceiling.
+
+Also corrected: the race is now evaluated by QUADRATURE, not simulated. At
+phi=0 it reproduces the benchmark to 1e-10 in 0.1s where the simulation needed
+65536 paths and 2.6 GB to reach 0.2. Simulation resolution tracks paths PER
+ASSET; at n=5000 with 4096 paths there is less than one path per asset and the
+returned book differs from its own input by 82%. Two dial sweeps reported
+earlier in this file were measuring that noise.
+
+Scripts: the benchmark comparison is inline above; `residual_tilt.py` holds the
+verifiable construction with the phi=0 identity asserted.
+
+## 11. Four attempts that failed the same way
+
+Tilting toward the covariance HRP discards is a good idea and I got it wrong
+three times before measuring it. Every failure was the same: the abilities were
+calibrated under one law and the phi=0 race run under another, so zero on the
+dial was already a tilt and the curve was measured from the wrong origin.
+
+1. Calibrated under independence, raced under the full correlation.
+2. Approximated the target by its top-3 eigenvectors, which are the GLOBAL
+   factors, so the tilt deleted the block structure instead of adding to it.
+3. Kept the blocks in the race but still calibrated under independence; phi=0
+   came out at 1.0018 rather than 1.0000 and I read past it.
+4. A literal `if False else Z` left in the factor split, so group loadings were
+   fitted to data still containing the global factors.
+
+THE CHECK: phi=0 must reproduce the benchmark to ~1e-10. Assert it and exit if
+it fails, before reading any other number.

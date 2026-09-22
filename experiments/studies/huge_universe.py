@@ -12,6 +12,7 @@ genuine hierarchical structure for a clustering method to find.
 """
 import time
 import numpy as np
+from allocation.thurstone import ThurstonePortfolio
 from scipy.cluster.hierarchy import linkage, leaves_list, fcluster
 from scipy.spatial.distance import squareform
 
@@ -114,11 +115,20 @@ def run(n=5000, T=104, draws=30, n_clusters=50, seed=7):
         t_hrp = time.time() - t0
         v = X.var(0, ddof=1); v[v == 0] = 1e-12
         iv = (1.0 / v) / np.sum(1.0 / v)
+        # The race's low-rank path is the one construction here designed for
+        # this size: O(M n k) with no inverse anywhere. Tilting HRP asks
+        # whether the best method at this scale can be improved on.
+        def race(target):
+            return np.asarray(
+                ThurstonePortfolio(target=target, factors=3, n_paths=4096,
+                                   phi=1.0).fit(X).weights_, dtype=float)
         res = {
             "equal weight": np.full(n, 1.0 / n),
             "inverse variance": iv,
             "HRP": w_hrp,
             "block min-var": block_min_var(X, labels),
+            "race, tilting diagonal": race("diagonal"),
+            "race, tilting HRP": race(w_hrp),
         }
         for k, w in res.items():
             out.setdefault(k, []).append(true_risk(w, B, d))
@@ -135,18 +145,20 @@ if __name__ == "__main__":
     print(f"n = {n}, T = {T}, T/n = {T/n:.3f}\n")
     out = run(n=n, T=T, draws=int(sys.argv[3]) if len(sys.argv) > 3 else 30)
     hrp = np.asarray(out["HRP"])
-    print(f"\n{'method':20s}{'median true variance':>22s}{'ratio to HRP':>15s}{'beats HRP':>12s}")
-    for k in ("equal weight", "inverse variance", "HRP", "block min-var"):
+    print(f"\n{'method':24s}{'median true variance':>22s}{'ratio to HRP':>15s}{'beats HRP':>12s}")
+    for k in ("equal weight", "inverse variance", "HRP", "block min-var",
+              "race, tilting diagonal", "race, tilting HRP"):
         x = np.asarray(out[k])
-        print(f"{k:20s}{np.median(x):22.5f}{np.median(x/hrp):15.3f}"
+        print(f"{k:24s}{np.median(x):22.5f}{np.median(x/hrp):15.3f}"
               f"{np.mean(x < hrp):11.0%}")
     def wilson(p, nn, z=1.96):
         d = 1 + z*z/nn; c = (p + z*z/(2*nn))/d
         h = z*((p*(1-p)/nn + z*z/(4*nn*nn))**0.5)/d
         return max(c-h,0), min(c+h,1)
     print()
-    for k in ("equal weight", "inverse variance", "block min-var"):
+    for k in ("equal weight", "inverse variance", "block min-var",
+              "race, tilting diagonal", "race, tilting HRP"):
         x = np.asarray(out[k]); w = float(np.mean(x < hrp))
         lo, hi = wilson(w, len(x))
-        print(f"  {k:20s} beats HRP {w:.0%}  95% [{lo:.0%}, {hi:.0%}]  n={len(x)}")
+        print(f"  {k:24s} beats HRP {w:.0%}  95% [{lo:.0%}, {hi:.0%}]  n={len(x)}")
     print(f"\nHRP linkage and recursion: {np.median(out['_hrp_seconds']):.1f}s per fit")
