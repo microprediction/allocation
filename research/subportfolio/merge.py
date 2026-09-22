@@ -48,6 +48,7 @@ def main():
     est_Ts = cfg.get("Ts_est") or Ts
     order = (["equal weight", "proportional", "flattened", "race"]
              + [f"race+factor T={t}" for t in Ts]
+             + [f"black-litterman T={t}" for t in est_Ts]
              + [f"estimate+solve T={t}" for t in est_Ts]
              + ["oracle"])
     order = [k for k in order if all(k in r for r in rows)]

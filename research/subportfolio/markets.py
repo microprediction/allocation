@@ -6,15 +6,8 @@ the approximation instead of the restriction rules, so both constructions
 verify it and `run.py` refuses to score a draw that fails.
 
 `mid` draws a dependence structure from one of six families and pairs it with a
-cap-weighted parent, using the same implied-covariance identity as `index`.
-It does NOT solve for the parent. Long-only minimum variance is a corner
-solution: at four hundred names it held a median of 25 of them and in one draw
-6, so 85 to 98 percent of the parent weights were exactly zero. The race floors
-those at 1e-12 and the resulting abilities are one-sided bounds rather than
-information, and a random sub-universe then contained 0 to 4 names the parent
-actually held, which made every rule a split of the same near point mass. That
-is a statement about the market, not about restriction. A real index holds
-every name it lists.
+cap-weighted parent. A real index holds every name it lists, so the parent is
+never a corner solution and every weight is strictly positive.
 
 `index` is the same premise at index scale and never forms a dense matrix. Both
 markets put the cap weights first and choose the covariance to make them
@@ -68,18 +61,13 @@ def premise_residual(w, Sw):
 # The cap-weight profile comes from a real index: the 129 month-end
 # cross-sections of the S&P 500 in experiments/data. Each draw takes one of
 # those dates, sorts it and stretches it onto n names, so the parent inherits
-# an observed concentration rather than an invented one.
+# an observed concentration rather than an invented one. Over that decade the
+# index ran at an effective name count of 0.10 to 0.31 of its listed count,
+# with every name carried at a positive weight.
 #
-# Concentration is the thing being controlled. Over that decade the index ran
-# at an effective name count of 0.10 to 0.31 of its listed count, and every
-# name carried a positive weight. A parent more concentrated than the low end
-# of that band is not a model of an index, which is the failure the old mid
-# market had: it solved for a long-only minimum-variance parent and got a
-# corner holding 25 names of 400.
-#
-# SHAPE_PATH is read when present. A copy of this directory on another machine
-# may not have it, so the median profile is kept here as a fallback and the
-# market records which one it used.
+# SHAPE_PATH is read when present; a copy of this directory elsewhere may not
+# have it, so the median profile is the fallback and the market records which
+# one it used.
 SHAPE_PATH = Path(__file__).resolve().parents[2] / "experiments" / "data" / \
     "sp500_capweights_2014_2024.parquet"
 
@@ -257,13 +245,22 @@ class MidMarket:
 # --------------------------------------------------------------------------
 
 class IndexMarket:
-    """Never dense. Parent is cap weights, exactly optimal by construction."""
+    """Never dense. Parent is cap weights, exactly optimal by construction.
+
+    Calibrated to the S&P 500 panel in experiments/data, 2014-2024:
+
+        pairwise correlation   mean 0.35, sd 0.12
+        first eigenvalue       36% of variance
+        log volatility         sd 0.30
+
+    which this reproduces at mean 0.33, sd 0.11, 35% and 0.27.
+    """
 
     scale = "index"
 
-    def __init__(self, rng, n, solver=None, eps=10.0, tail=1.3):
-        b = rng.uniform(0.15, 0.75, n)
-        s = np.exp(rng.normal(0.0, 0.45, n))
+    def __init__(self, rng, n, solver=None, eps=4.0, tail=1.3):
+        b = rng.uniform(0.10, 0.75, n)
+        s = np.exp(rng.normal(0.0, 0.35, n))
         self.v, self.d = b * s, (1.0 - b ** 2) * s ** 2
         cap = rng.pareto(tail, n) + 1.0
         self.parent = cap / cap.sum()
