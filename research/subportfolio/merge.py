@@ -76,6 +76,29 @@ def main():
         note = "" if k == "proportional" else f"{np.mean(x < base):9.0%}"
         print(f"{k:26s}{np.median(x):11.5f}{np.median(x / base):17.3f}{note}")
 
+    # Calibration either converged or the row above is the last iterate of a
+    # failed solve, which winning returns after a warning (winning #149). A
+    # concentrated parent is where that happens, so the concentration is
+    # printed beside it.
+    calib = [k for k in rows[0] if k.startswith("calib ")]
+    if calib:
+        print()
+        held = np.array([r["parent_names_held"] for r in rows])
+        top = np.array([r["parent_top_weight"] for r in rows])
+        print(f"parent concentration: holds {np.median(held):.0f} names "
+              f"(min {held.min()}), top weight {np.median(top):.3f} "
+              f"(max {top.max():.3f})")
+        for k in calib:
+            ok = np.mean([r[k]["converged"] for r in rows])
+            it = np.median([r[k]["iterations"] for r in rows])
+            worst = max(r[k]["residual"] for r in rows)
+            flag = "" if ok == 1.0 else "   <-- SOME ROWS ARE NOT RESULTS"
+            print(f"  {k[6:]:24s} converged {ok:6.0%}, median {it:3.0f} "
+                  f"iterations, worst residual {worst:.1e}{flag}")
+        if any(np.mean([r[k]["converged"] for r in rows]) < 1.0 for k in calib):
+            print("\nA failed calibration returns its last iterate, so the "
+                  "affected rows are not measurements of the method.")
+
 
 if __name__ == "__main__":
     main()

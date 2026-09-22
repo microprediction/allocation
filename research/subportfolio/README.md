@@ -161,9 +161,34 @@ for the independent race. On a laptop the `mid` study takes roughly two
 minutes per draw, or about 50 minutes for 25 draws, which is why this moved
 here.
 
-To budget: **seconds per draw is about `19 * f(k) * n / 200 * (1 + 2 * |Ts|)`**,
-where `f(k)` is the table above. Per core. Draws are independent, so wall
-clock is that divided by the number of workers.
+That table is not enough to budget from, because the cost per forward pass
+varies about fourfold between draws at identical `n` and `k`. Measured, one
+three-factor calibration at `n=400`:
+
+| draw | names held | top weight | iterations | seconds |
+|---|---|---|---|---|
+| mid 0 | 6 of 400 | 0.482 | 29 | 49 |
+| mid 16 | 141 of 400 | 0.078 | 37 | 246 |
+| index | 400 of 400 | 0.090 | 23 | 90 |
+
+Two things that table settles. Iteration counts are stable at 23 to 37 and
+every one of those converged, so the spread is the integral rather than the
+solver. And concentration does not drive it: the draw holding six names was
+the fastest of the three.
+
+So budget from the worst case rather than the mean. **Seconds per draw is
+about `6.6 * n / 400 * f(k) / f(3) * (1 + |Ts|) * iterations`**, with
+iterations near 30. For the index study at `n=5000`, `k=2`, two panel lengths,
+that is roughly three to four minutes per draw per core, or about fifteen
+minutes of wall clock for 256 draws on 64 workers.
+
+Record what you get. Every shard carries the iteration count and residual for
+each calibration, and `merge.py` prints the convergence rate beside the
+parent's concentration. `winning.calibrate_abilities` returns its last iterate
+after a warning when it fails
+([winning#149](https://github.com/microprediction/winning/issues/149)), so a
+row from a failed solve is not a measurement of the method and the merged
+table says so explicitly.
 
 Two consequences worth knowing before choosing sizes. Raising `k` from 2 to 3
 costs an order of magnitude and is the first thing to cut if the run is too

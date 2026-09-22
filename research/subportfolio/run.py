@@ -55,13 +55,18 @@ def one_draw(args, g):
            float(1.0 / np.sum(mk.parent ** 2))}
     row["equal weight"] = var(np.full(args.m, 1.0 / args.m))
     row["proportional"] = var(proportional(mk.parent, idx))
-    row["race"] = var(race(mk.parent, idx))
+    w, info = race(mk.parent, idx)
+    row["race"], row["calib race"] = var(w), info
     row["oracle"] = var(long_only_min_var(Sub))
+    row["parent_top_weight"] = float(mk.parent.max())
+    row["parent_names_held"] = int((mk.parent > 1e-8 * mk.parent.max()).sum())
 
     for T in args.Ts:
         X = mk.panel(rng, T)
         _, V, D = factor_correlation(X, args.k)
-        row[f"race+factor T={T}"] = var(race(mk.parent, idx, V=V, D=D))
+        w, info = race(mk.parent, idx, V=V, D=D)
+        row[f"race+factor T={T}"] = var(w)
+        row[f"calib race+factor T={T}"] = info
         row[f"estimate+solve T={T}"] = var(estimate_and_solve(X, idx))
     return row
 

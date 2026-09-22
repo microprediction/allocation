@@ -75,14 +75,27 @@ def proportional(parent, idx):
 
 
 def race(parent, idx, V=None, D=None):
-    """Calibrate on the parent field, then race among the survivors."""
+    """Calibrate on the parent field, then race among the survivors.
+
+    Returns the weights and the calibration diagnostics. The diagnostics are
+    not optional decoration. `calibrate_abilities` returns its last iterate
+    after a warning when it fails to converge, and it fails exactly where this
+    study puts it: a field in which a few names carry nearly all the mass
+    (winning issue #149). A long-only minimum-variance parent is that field,
+    holding on the order of fifteen names out of four hundred. A run that does
+    not record convergence cannot tell a result from a non-result, so every
+    draw carries the residual and the iteration count.
+    """
     kw = {k: val for k, val in (("V", V), ("D", D)) if val is not None}
-    a = np.asarray(winning.calibrate_abilities(
-        np.maximum(parent, 1e-12), target_floor=1e-12, **kw), float)
+    a, info = winning.calibrate_abilities(
+        np.maximum(parent, 1e-12), target_floor=1e-12, return_info=True, **kw)
+    a = np.asarray(a, float)
     sub = {k: val[idx] for k, val in kw.items()}
     p = winning.race_probabilities(a[idx], **sub)
     p = np.asarray(p[0] if isinstance(p, tuple) else p, float)
-    return p / p.sum()
+    return p / p.sum(), {"converged": bool(info["converged"]),
+                         "residual": float(info["max_log_residual"]),
+                         "iterations": int(info["iterations"])}
 
 
 def estimate_and_solve(X, idx):
