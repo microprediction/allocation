@@ -31,6 +31,7 @@ CATALOGUE = {
     "shrinkage_beats_hrp":([], "slow",  "Ledoit-Wolf long-only against HRP"),
     "nco_taper":          ([], "slow",  "NCO tracks the shrinkage frontier, HRP does not"),
     "taper_beats_hrp":    ([], "slow",  "HRP sits at the dominated corner"),
+    "nested_best_case":   ([], "slow",  "HRP on a clean hierarchy, its best case"),
     "mhp":                (["40", "0.3"], "slow", "the multi-hypothesis method, benchmarked"),
     "thurstone_paired":   ([], "verylong", "the tilt is neutral on a stationary market"),
     "tail_test":          ([], "verylong", "the tilt on a regime market, both objectives"),

@@ -43,6 +43,7 @@ and are now far faster than their labels suggest.
 | `closest.py`, `what_shrinkage.py` | which named shrinkage comes closest to HRP, and that the answer is near-diagonal | ~3 min |
 | `decompose.py` | HRP's gap to minimum variance split into information discarded and rule applied | ~1 min |
 | `bridge_distortion.py`, `psd_gamma.py` | distortion falls monotonically along the coupling dial; where the implied covariance enters the PSD cone | ~2 min |
+| `nested_best_case.py` | HRP on a clean nested hierarchy, its best case, where it loses by a factor of two | ~4 min |
 | `taper_beats_hrp.py` | HRP sits at the dominated corner of a two-parameter family containing it | ~10 min |
 | `nco_taper.py` | NCO tracks the shrinkage frontier and HRP does not | ~8 min |
 | `confound.py`, `rank_deficient.py`, `robust.py`, `shrinkage_beats_hrp.py` | the comparisons now covered by `benchmark/run.py`; kept because `RESULTS.md` quotes their numbers | 2-15 min |

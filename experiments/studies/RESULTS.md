@@ -215,6 +215,33 @@ CONCLUSION: the tilt is worth nothing when the correlation is noise, and worth
 walks from 0 to 1 as coverage grows. That is the same shape as the Schur
 coupling and the same shape as the taper.
 
+## 6b. HRP's best case: a market that really is a nested hierarchy
+
+The obvious objection to sections 5 and 6 is that they aggregate structural
+families, and HRP assumes a hierarchy. Clean dyadic nesting, n=64, correlation
+rising at all four levels, 120 draws. Cell = share beating HRP / median ratio.
+
+| T/n  | inv var     | Ledoit-Wolf | taper 0.5   | NCO         | taper, TRUE tree |
+|------|-------------|-------------|-------------|-------------|------------------|
+| 0.10 | 85% / 0.870 | 15% / 1.323 | 36% / 1.197 | 22% / 1.342 | 63% / 0.918      |
+| 0.25 | 68% / 0.968 | 36% / 1.072 | 97% / 0.739 | 93% / 0.733 | 100% / 0.650     |
+| 0.50 | 52% / 0.999 | 92% / 0.823 | 100% / 0.588| 100% / 0.575| 100% / 0.562     |
+| 1.00 | 22% / 1.016 | 100% / 0.657| 100% / 0.550| 100% / 0.548| 100% / 0.542     |
+| 2.00 | 11% / 1.021 | 100% / 0.560| 100% / 0.527| 100% / 0.522| 100% / 0.521     |
+| 10.0 |  2% / 1.026 | 100% / 0.497| 100% / 0.503| 100% / 0.502| 100% / 0.503     |
+
+The objection sharpens the finding rather than rescuing the method. Past
+T/n=0.25 it loses essentially every draw by a FACTOR OF TWO: at T/n=10 it is
+0.1350 against 0.0671. Below that the inverting methods do lose and inverse
+variance wins instead, 85% of draws.
+
+The decisive column is the one that does not move. Over a hundredfold increase
+in sample size HRP improves 24% (0.1778 -> 0.1350) while its rivals improve
+56% (0.1538 -> 0.0671). A method that barely learns from data is not
+recovering a hierarchy from it, whatever hierarchy is present.
+
+Script: `nested_best_case.py`.
+
 ## 9. Scope limit on section 5
 
 Ledoit-Wolf min-var, which beat HRP in 76% of stationary structures, is 1.21x
