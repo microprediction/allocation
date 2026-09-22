@@ -275,6 +275,35 @@ members were ordered.
 
 Script: `seriation_value.py`.
 
+## 6d. THE BOUNDING RESULT: 5000 assets, two years of weekly data
+
+Everything else here runs at n=40 to 100, which is where a known-truth
+simulation is cheap. The regime a large-universe manager faces is the
+opposite. Factor market with 50 group factors so realized risk is exact
+without forming the covariance. 30 draws each, T=104 throughout.
+
+| assets | T/n   | inv var beats HRP | 95% Wilson  |
+|--------|-------|-------------------|-------------|
+| 500    | 0.208 | 83%               | [66%, 93%]  |
+| 2000   | 0.052 | 47%               | [30%, 64%]  |
+| 5000   | 0.021 | 10%               | [3%, 26%]   |
+
+At n=5000 HRP is the BEST method tested: 0.00487 against 0.00504 inverse
+variance, 0.00549 clustered optimizer, 0.00563 equal weight, winning every
+draw against the last two.
+
+**This reverses the headline of sections 5 and 6 and bounds every other result
+in this file.** The deciding variable is the NUMBER OF ASSETS, not T/n: at
+T/n=0.1 with n=40 HRP loses; at T/n=0.021 with n=5000 it wins. Crossover near
+n=2000.
+
+Conjectured mechanism, NOT isolated: inverse variance is exposed to the worst
+of n independent variance estimates, which degrades as n grows at fixed T,
+while the top levels of the bisection consume aggregates over thousands of
+names that are well determined from 104 observations.
+
+Script: `huge_universe.py`.
+
 ## 9. Scope limit on section 5
 
 Ledoit-Wolf min-var, which beat HRP in 76% of stationary structures, is 1.21x

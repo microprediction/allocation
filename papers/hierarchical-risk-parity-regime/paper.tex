@@ -6,7 +6,7 @@
 \usepackage{booktabs}
 \usepackage{cleveref}
 
-\title{Hierarchical Risk Parity Has No Regime of Advantage}
+\title{Where Hierarchical Risk Parity Earns Its Keep}
 \author{Peter Cotton}
 \date{September 21, 2026}
 
@@ -54,8 +54,61 @@ exactly rather than a backtest estimate, and every method sees the identical
 sample on every draw. Where an optimizer appears it is long-only, so a
 comparison against a long-only heuristic does not measure the constraint.
 
-The answer is that no such interval exists. The window closes from both
-sides, and for different reasons at each end.
+The answer depends on a variable the literature does not usually vary. At the
+universe sizes where such a study is normally run, tens to hundreds of names,
+no such interval exists and the window closes from both sides. At five
+thousand names it opens, and the method becomes the best thing available.
+\Cref{sec:huge} reports that case first, because it bounds everything after
+it.
+
+\section{Five thousand assets and two years of weekly data}
+\label{sec:huge}
+
+Everything above runs at forty to a hundred assets, which is where a
+simulation with a known population covariance is cheap. The regime a
+large-universe manager faces is the opposite: five thousand names and about a
+hundred weekly observations, a ratio of $0.021$, fifty times more
+rank-deficient than the most extreme case considered so far.
+
+At that size most of the comparison set does not exist. Nothing can be
+inverted whole, so the only optimizer available is one that inverts inside
+clusters small enough to be determined and combines them. The market is a
+factor model with fifty group factors, which lets realized risk be evaluated
+exactly without ever forming the covariance.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+\toprule
+assets & $T/n$ & inverse variance beats HRP & 95\% interval \\
+\midrule
+500  & 0.208 & 83\% & [66\%, 93\%] \\
+2000 & 0.052 & 47\% & [30\%, 64\%] \\
+5000 & 0.021 & 10\% & [3\%, 26\%] \\
+\bottomrule
+\end{tabular}
+\caption{Two years of weekly data throughout, thirty draws at each size.}
+\label{tab:huge}
+\end{table}
+
+The ordering reverses. At five thousand assets the hierarchical rule realizes
+$0.00487$ against $0.00504$ for inverse variance, $0.00549$ for the clustered
+optimizer and $0.00563$ for equal weight, winning every draw against the last
+two. It is the best method tested, and this is the first setting in this paper
+where that is true.
+
+The variable that moves is the number of assets rather than the ratio. At
+$T/n = 0.1$ with forty assets the rule loses; at $T/n = 0.021$ with five
+thousand it wins, and the crossover sits near two thousand. A plausible
+mechanism is that inverse variance is exposed to the worst of $n$ independent
+variance estimates, which degrades as $n$ grows at fixed $T$, while the top
+levels of the bisection consume aggregates over thousands of names that are
+well determined from a hundred observations. We have not isolated that
+mechanism and state it as a conjecture.
+
+This bounds every other result here. The conclusions below hold at the sizes
+at which they were measured, tens to hundreds of assets, and reverse by the
+time a universe reaches a few thousand.
 
 \section{No parsimonious shrinkage reproduces the rule}
 
@@ -303,13 +356,21 @@ is fixed and reverses where it switches.
 
 \section{Closing}
 
-There is no interval of sample size on which hierarchical risk parity is the
-right answer. Below roughly a fifth of an observation per asset, not
-inverting is what helps, and inverse-variance weighting does that better.
-Above it, inverting properly is what helps, and any regularised optimizer
-does that better, including one whose only regularisation is a constraint
-most practitioners impose anyway. Between the two the method is beaten from
-both directions at once.
+Hierarchical risk parity earns its keep at large universe size and not below
+it. At five thousand names with two years of weekly data it is the best
+method we can run. At five hundred, with the same history, it is beaten by
+inverse-variance weighting in eighty-three percent of draws, and at tens of
+names it is beaten from both directions at once: by inverse variance where
+nothing can be inverted, and by any regularised optimizer where something
+can, including one whose only regularisation is a constraint most
+practitioners impose anyway.
+
+That the deciding variable is the number of assets rather than the ratio of
+observations to them is the part we did not expect, and it is the part most
+worth pursuing. It also means a study run at the sizes convenient for
+simulation will reach the opposite conclusion from one run at the size a
+large-universe manager cares about, which may account for some of the
+disagreement in the literature.
 
 The counting argument explains why the usual defences are hard to check. No
 shrinkage class small enough to be interpretable can reproduce the rule, so
