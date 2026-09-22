@@ -224,6 +224,53 @@ percent, while its rivals improve from 0.1538 to 0.0671, fifty-six percent. A
 method that barely learns from data cannot be recovering a hierarchy from it,
 whatever hierarchy is present.
 
+\section{The seriation works; the split rule cannot use it}
+
+The method has two ideas, and a critique has to say which one it lands on.
+Quasi-diagonalization reorders assets so that similar ones sit adjacent, by
+hierarchical clustering. Recursive bisection then splits capital down that
+order by inverse variance. The first is the more original contribution and the
+evidence so far has not separated them.
+
+Holding each half fixed and varying the other separates them cleanly. On the
+nested market the true order is known, so the ordering the linkage recovers,
+a random ordering and the truth can all be compared, and the same clustering
+can be handed to a different consumer.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrr}
+\toprule
+$T/n$ & seriation, inside the recursion & the same grouping, inside a taper \\
+\midrule
+0.25 & 1.018 & 0.896 \\
+0.50 & 1.013 & 0.922 \\
+1.00 & 1.000 & 0.947 \\
+2.00 & 0.991 & 0.949 \\
+5.00 & 0.991 & 0.952 \\
+10.0 & 0.993 & 0.958 \\
+\bottomrule
+\end{tabular}
+\caption{Ratio of realized variance to the same construction on a random
+ordering or a random grouping. Below one is an improvement.}
+\label{tab:seriation}
+\end{table}
+
+Inside the recursion the ordering is worth nothing. Hierarchical risk parity
+on its own seriation is within two percent of the same rule on a \emph{random}
+permutation at every sample size, and at light sampling it is slightly worse.
+Handing it the true order does not help either.
+
+Handed to a taper, the identical clustering is worth four to ten percent, and
+the true grouping is better still. So the ordering carries real information
+about the market and the recursion cannot spend it.
+
+That is the sharpest form of this paper's claim. The seriation is not the
+problem and deserves its reputation. The inverse-variance split is what makes
+the information inert, because the variance of an inverse-variance
+sub-portfolio barely depends on how its members were ordered, so a better
+ordering changes the budget it produces hardly at all.
+
 \section{The hierarchy is not what fails}
 
 Nested clustered optimization runs the same clustering and solves minimum

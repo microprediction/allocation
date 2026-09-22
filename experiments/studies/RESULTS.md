@@ -242,6 +242,39 @@ recovering a hierarchy from it, whatever hierarchy is present.
 
 Script: `nested_best_case.py`.
 
+## 6c. The seriation works; the split rule cannot use it
+
+HRP has two ideas: quasi-diagonalization (reorder so similar assets are
+adjacent) and recursive inverse-variance bisection down that order. Hold each
+fixed, vary the other. Clean nested market so the TRUE order is known.
+
+Ratio of realized variance to the same construction on a RANDOM ordering or
+grouping; below 1 is an improvement:
+
+| T/n  | seriation inside the recursion | same grouping inside a taper |
+|------|--------------------------------|------------------------------|
+| 0.25 | 1.018                          | 0.896                        |
+| 0.50 | 1.013                          | 0.922                        |
+| 1.00 | 1.000                          | 0.947                        |
+| 2.00 | 0.991                          | 0.949                        |
+| 5.00 | 0.991                          | 0.952                        |
+| 10.0 | 0.993                          | 0.958                        |
+
+Inside the recursion the ordering is worth NOTHING: HRP on its own seriation
+is within 2% of HRP on a random permutation at every sample size, and slightly
+worse at light sampling. Handing it the TRUE order does not help either.
+
+Handed to a taper the identical clustering is worth 4-10%, and the true
+grouping is better still. The ordering carries real information; the recursion
+cannot spend it.
+
+This is the sharpest form of the thesis. The seriation is not the problem. The
+inverse-variance split is what makes the information inert, because the
+variance of an inverse-variance sub-portfolio barely depends on how its
+members were ordered.
+
+Script: `seriation_value.py`.
+
 ## 9. Scope limit on section 5
 
 Ledoit-Wolf min-var, which beat HRP in 76% of stationary structures, is 1.21x

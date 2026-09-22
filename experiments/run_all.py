@@ -32,6 +32,7 @@ CATALOGUE = {
     "nco_taper":          ([], "slow",  "NCO tracks the shrinkage frontier, HRP does not"),
     "taper_beats_hrp":    ([], "slow",  "HRP sits at the dominated corner"),
     "nested_best_case":   ([], "slow",  "HRP on a clean hierarchy, its best case"),
+    "seriation_value":    ([], "slow",  "the seriation works, the split rule cannot use it"),
     "mhp":                (["40", "0.3"], "slow", "the multi-hypothesis method, benchmarked"),
     "thurstone_paired":   ([], "verylong", "the tilt is neutral on a stationary market"),
     "tail_test":          ([], "verylong", "the tilt on a regime market, both objectives"),
