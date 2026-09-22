@@ -11,7 +11,7 @@ import numpy as np
 from markets import (MidMarket, IndexMarket, effective_fraction,
                      REAL_EFFN_FRACTION)
 from rules import (long_only_min_var, factor_correlation, proportional, race,
-                   estimate_and_solve)
+                   flattened, estimate_and_solve)
 
 FAILS = []
 
@@ -89,6 +89,14 @@ def main():
     l1 = np.abs(r - pw).sum()
     check("race differs from proportional", l1 > 1e-3, f"L1 {l1:.4f}")
     check("race is a portfolio", abs(r.sum() - 1) < 1e-9 and r.min() >= 0)
+
+    print("\nthe independent race is a power transform, so it needs a better null")
+    fl = flattened(small.parent, sub)
+    check("race is close to flattened proportional",
+          np.abs(r - fl).sum() < 0.2 * l1,
+          f"L1(race, flattened) {np.abs(r - fl).sum():.4f} vs "
+          f"L1(race, proportional) {l1:.4f} "
+          "-- this is why proportional is the wrong null")
 
     print("\ncalibrating on the restricted field would return the input")
     a = np.asarray(__import__("winning").calibrate_abilities(

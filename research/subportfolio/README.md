@@ -25,6 +25,7 @@ whether that is better, and whether it needs any data to be better.
 |---|---|---|
 | equal weight | nothing | a floor, not a candidate |
 | proportional | the parent weights | Luce, IIA |
+| flattened | the parent weights | nothing; `w_prop^0.75`, the null the race must clear |
 | race | the parent weights | Thurstone, independent field |
 | race + factor | those plus a `k`-factor correlation, `k(n+1)` numbers | Thurstone, correlated field |
 | estimate + solve | a full sub-covariance, `m(m+1)/2` numbers | the estimate is trustworthy |
@@ -40,12 +41,25 @@ weight redistributes depends on how the survivors co-move.
 
 ## What would falsify the result
 
-If the race matched proportional restriction to within the draw-to-draw
-spread, there would be nothing here: Thurstone and Luce would be
-indistinguishable for this purpose and the extra machinery would be
-unjustified. The `race differs from proportional` check in `smoke.py` is the
-minimal version of that test, and a merged run where the `beats it` column
-sits near 50 percent with a ratio near 1.000 is the honest negative.
+Proportional is the wrong null, and using it was the study's second defect.
+
+An independent race is a power transform of proportional restriction and
+almost nothing else: fitting `w ~ w_prop^a` to its output gives `a` between
+0.75 and 0.81 with an L1 residual of 0.006 to 0.012, against a deviation from
+proportional of 0.21 to 0.36. With no correlation anywhere, a departed name's
+weight cannot flow toward whichever survivor it most resembled, because
+nothing encodes resemblance. All the race can do is de-concentrate.
+
+Measured against proportional, the independent race wins 72 percent of draws
+and looks like a result. Measured against `flattened`, which is
+`w_prop^0.75` renormalized, it wins 12 of 25 at p = 1.000. Any claim for the
+race has to clear the `flattened` row. On the 25 draws run so far only
+`race+factor` at T=20 does, by 3.6 percent at p = 0.015, which is one of three
+tests and weakens as T grows, so it is not established.
+
+The `race differs from proportional` check in `smoke.py` is therefore
+necessary and nowhere near sufficient: it passes at L1 0.31 while the whole
+0.31 is the power transform.
 
 The premise is separately falsifiable and separately checked. If the parent
 were not exactly optimal for the parent universe, every comparison here would
