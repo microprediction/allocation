@@ -17,7 +17,7 @@ cluster, named noise, the absorbed mass w0, and the copy spread (1 = even split)
 import warnings, numpy as np
 warnings.filterwarnings("ignore")
 from numpy.random import default_rng
-from allocation._thurstone.calibrate import calibrate_diagonal, base_density
+from allocation._thurstone.calibrate import calibrate_diagonal
 from allocation._thurstone.transport import transport_weights
 
 rng = default_rng(0)
@@ -28,7 +28,7 @@ X = np.hstack([sig, rng.standard_normal((N, n_noise))]); y = 3.0 * x + 0.5 * rng
 nf = X.shape[1]; sig_idx = list(range(K + 1)); noise_idx = list(range(K + 1, nf))
 
 uni = np.array([np.corrcoef(X[:, i], y)[0, 1] ** 2 for i in range(nf)])
-theta = calibrate_diagonal(uni / uni.sum(), base=base_density())   # smaller ability = stronger
+theta = calibrate_diagonal(uni / uni.sum())   # smaller ability = stronger
 Cc = np.corrcoef(X.T)
 M = 1 << 14
 a_sig, a_noise = theta[sig_idx].mean(), theta[noise_idx].mean()    # strong (small) vs weak (large)

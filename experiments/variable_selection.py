@@ -20,7 +20,7 @@ import time, warnings, numpy as np
 warnings.filterwarnings("ignore")
 from numpy.random import default_rng
 from sklearn.linear_model import LassoCV, Lasso
-from allocation._thurstone.calibrate import calibrate_diagonal, base_density
+from allocation._thurstone.calibrate import calibrate_diagonal
 from allocation._thurstone.transport import transport_weights
 
 N, K, n_noise, B = 300, 4, 16, 80
@@ -50,7 +50,7 @@ def stability_imp(X, y, g):
 
 def race_imp(X, y):
     uni = np.array([np.corrcoef(X[:, i], y)[0, 1] ** 2 for i in range(nf)])
-    theta = calibrate_diagonal(uni / uni.sum(), base=base_density())
+    theta = calibrate_diagonal(uni / uni.sum())
     seeds = default_rng(7).standard_normal((1 << 13, nf))
     return np.asarray(transport_weights(theta, np.corrcoef(X.T), seeds))
 

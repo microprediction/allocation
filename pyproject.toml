@@ -9,14 +9,14 @@ description = "Online (streaming) portfolio construction: scikit-learn / skfolio
 authors = [{name = "Peter Cotton", email = "peter.cotton@microprediction.com"}]
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.23",
-    "thurstone>=0.1.0",
-    "winning>=1.1.0",
+    "winning>=1.5.0",
 ]
 
 [project.optional-dependencies]
+fast = ["winning[fast]>=1.5.0"]   # compiled fastrace kernels
 scale = ["scipy>=1.10"]        # sparse/iterative Fiedler solver for large universes
 skfolio = ["skfolio>=0.5"]
 test = ["pytest>=7.0", "scipy>=1.10"]

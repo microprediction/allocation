@@ -234,3 +234,5 @@ experiments/data/
 
 # macOS
 .DS_Store
+experiments/output/
+__pycache__/

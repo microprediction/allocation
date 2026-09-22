@@ -39,10 +39,20 @@ from .keyed import (
 from .moments import DownsideSemicovariance, EwmaCovariance
 from .schur import HierarchicalRiskParity, SchurComplementary
 from .thurstone import ThurstonePortfolio
+from .tilt import (
+    abilities_from_weights,
+    blend_correlation,
+    tilt_weights,
+    weights_from_abilities,
+)
 
 __version__ = "0.0.1"
 
 __all__ = [
+    "abilities_from_weights",
+    "weights_from_abilities",
+    "tilt_weights",
+    "blend_correlation",
     # batch / skfolio-style
     "BaseOnlinePortfolio",
     "ThurstonePortfolio",

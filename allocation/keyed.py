@@ -28,11 +28,15 @@ from .convex import (
 from ._schur.bridge import bisection_tree, bridge_weights, tree_leaves
 from ._schur.coupling import compute_monotonic_weights, compute_weights
 from ._schur.seriation import seriate
-from ._thurstone.ability import base_density
 from ._thurstone.calibrate import calibrate_diagonal, calibrate_one_factor
 from ._thurstone.covariance import market_betas, one_factor_corr
 from ._thurstone.diagonal import diagonal_portfolio
-from ._thurstone.transport import blend_correlation, transport_weights
+from ._thurstone.transport import (
+    DEFAULT_PATHS,
+    blend_correlation,
+    path_budget,
+    transport_weights,
+)
 
 __all__ = [
     "KeyedEwmaCovariance",
@@ -113,8 +117,7 @@ class StreamingThurstone:
         *,
         calib: str = "diagonal",
         phi: float = 1.0,
-        n_paths: int = 1 << 12,
-        n_quad: int = 16,
+        n_paths: int = DEFAULT_PATHS,
         halflife: float = 60.0,
         seed: int = 42,
         min_obs: int = 20,
@@ -123,15 +126,13 @@ class StreamingThurstone:
             raise ValueError("phi must lie in [0, 1].")
         self.calib = calib
         self.phi = phi
-        self.n_paths = 1 << int(np.ceil(np.log2(max(int(n_paths), 2))))
-        self.n_quad = n_quad
+        self.n_paths = path_budget(n_paths)
         self.halflife = halflife
         self.seed = seed
         self.min_obs = min_obs
         self._cov = KeyedEwmaCovariance(halflife=halflife)
         self._seed_bank: dict = {}
         self._weights: dict = {}
-        self._base = base_density()
         self._n = 0
 
     # --------------------------------------------------------- seed bank
@@ -166,10 +167,10 @@ class StreamingThurstone:
         if self.calib == "market":
             betas = market_betas(cov, weights=tgt)
             C_calib = one_factor_corr(betas)
-            ability = calibrate_one_factor(tgt, betas, base=self._base, n_quad=self.n_quad)
+            ability = calibrate_one_factor(tgt, betas)
         else:
             C_calib = np.eye(len(ids))
-            ability = calibrate_diagonal(tgt, base=self._base)
+            ability = calibrate_diagonal(tgt)
         C_tilt = blend_correlation(C_calib, cov, self.phi)
         w = transport_weights(ability, C_tilt, self._seeds(ids))
         self._weights = dict(zip(ids, w))

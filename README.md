@@ -43,7 +43,7 @@ This is all MIT-licensed and anyone is welcome to take anything here.
 
 | Estimator | Status | Notes |
 |-----------|--------|-------|
-| `ThurstonePortfolio` | working | Ability tilt: weights are winning probabilities of a correlated race; calibrate to a benchmark under a reference correlation, tilt under the estimate; smooth common-seed transport for `partial_fit`. Built on [`thurstone`](https://github.com/microprediction/thurstone). |
+| `ThurstonePortfolio` | working | Ability tilt: weights are winning probabilities of a correlated race; calibrate to a benchmark under a reference correlation, tilt under the estimate; smooth common-seed transport for `partial_fit`. Calibration and racing run through [`winning`](https://github.com/microprediction/winning). |
 | `SchurComplementary` | working | The **collapsed encoding** of the HRP bridge, matching skfolio to machine precision: HRP at `gamma=0`, moving *toward* min-variance as `gamma→1` when the min-variance portfolio is long-only, without reaching it (`SchurBridge` is the exact one). Over a smooth **Fiedler seriation** instead of a dendrogram, so `partial_fit` is low-turnover. |
 | `SchurBridge` | working | **Bridges named by their endpoints, one engine underneath**: `hrp_to_min_variance(gamma)`, `hmv_to_min_variance`, `herc_to_min_variance(gamma, eta, n_clusters)`, `nco_to_min_variance(gamma, n_clusters)`, `inverse_variance_to_min_variance(eta)`, each exact at both ends with the default sibling conditioning; `companion='vol'`/`'mean'` lands on maximum diversification / tangency instead. See below. |
 | `HierarchicalRiskParity` | working | Dynamic HRP — the `gamma=0` special case of the Schur construction (recursive-bisection risk parity over the Fiedler order); named for recognisability. |
@@ -180,7 +180,7 @@ allocation/
   baselines.py   # EqualWeight / InverseVariance / RiskParity (ERC)
   convex.py      # MinimumVariance / MaximumDiversification (closed-form, signed)
   thurstone.py   # ThurstonePortfolio
-  _thurstone/    # calibration + transport engine
+  _thurstone/    # calibration + transport (thin over winning)
   schur.py       # SchurComplementary / HierarchicalRiskParity
   bridge.py      # SchurBridge: the pair-form engine the other allocators are corners of
   _schur/        # Fiedler seriation + Schur coupling engine + the bridge (pairs, dials, knots)
