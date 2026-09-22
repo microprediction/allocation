@@ -19,10 +19,12 @@ def load(out, tag):
     files = sorted(Path(out).glob(f"{tag}-shard*of*.json"))
     if not files:
         raise SystemExit(f"no shards matching {tag} under {out}/")
-    cfg, rows, seen = None, [], set()
+    cfg, rows, seen, env = None, [], set(), set()
     for f in files:
         blob = json.loads(f.read_text())
         cfg = cfg or blob["config"]
+        env.add((blob.get("winning", "?"), blob.get("winning_path", "?"),
+                 blob.get("numpy", "?"), blob.get("python", "?")))
         for r in blob["rows"]:
             if r["draw"] in seen:
                 continue
@@ -30,7 +32,7 @@ def load(out, tag):
             rows.append(r)
     expected = set(range(cfg["draws"]))
     missing = sorted(expected - seen)
-    return cfg, rows, files, missing
+    return cfg, rows, files, missing, sorted(env)
 
 
 def main():
@@ -38,7 +40,7 @@ def main():
     p.add_argument("--out", default="results")
     p.add_argument("--tag", required=True)
     a = p.parse_args()
-    cfg, rows, files, missing = load(a.out, a.tag)
+    cfg, rows, files, missing, env = load(a.out, a.tag)
 
     skipped = [r for r in rows if r.get("skipped")]
     rows = [r for r in rows if not r.get("skipped")]
@@ -61,7 +63,12 @@ def main():
           f"to {worst:.1e} relative, worst draw.")
     print(f"markets: {', '.join(sorted({r['family'] for r in rows}))}; "
           f"parent holds {np.median([r['parent_effective_n'] for r in rows]):.0f} "
-          f"effective names.\n")
+          f"effective names.")
+    for win, path, npv, pyv in env:
+        print(f"built by: winning {win} ({path}), numpy {npv}, python {pyv}")
+    if len(env) > 1:
+        print("WARNING: shards were not all built by the same environment.")
+    print()
 
     print(f"{'method':26s}{'variance':>11s}{'vs proportional':>17s}{'beats it':>10s}")
     for k in order:

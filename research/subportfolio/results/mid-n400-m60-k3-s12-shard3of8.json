@@ -1,0 +1,82 @@
+{
+ "config": {
+  "scale": "mid",
+  "n": 400,
+  "m": 60,
+  "draws": 25,
+  "seed": 12,
+  "k": 3,
+  "Ts": [
+   20,
+   40,
+   100
+  ],
+  "shard": 3,
+  "shards": 8,
+  "out": "results",
+  "tag": "mid-n400-m60-k3-s12"
+ },
+ "rows": [
+  {
+   "draw": 3,
+   "family": "equicorr",
+   "premise_residual": 3.3697252260196645e-08,
+   "min_eig": 0.3113825719058635,
+   "parent_effective_n": 24.112057030565754,
+   "equal weight": 0.21001717847654305,
+   "proportional": 0.19272015188366912,
+   "race": 0.16599252202739354,
+   "oracle": 0.13672088290144507,
+   "race+factor T=20": 0.1591888850066911,
+   "estimate+solve T=20": 0.19109187999887328,
+   "race+factor T=40": 0.16612305506430944,
+   "estimate+solve T=40": 0.18464389766627487,
+   "race+factor T=100": 0.1666270801273703,
+   "estimate+solve T=100": 0.16675522201017084
+  },
+  {
+   "draw": 11,
+   "family": "wishart",
+   "premise_residual": 5.386462043845568e-07,
+   "min_eig": 0.023333882341758476,
+   "parent_effective_n": 73.61374950667889,
+   "equal weight": 0.03099182921503425,
+   "proportional": 0.004581401949098615,
+   "race": 0.005533807709672937,
+   "oracle": 0.0039023286295578772,
+   "race+factor T=20": 0.005628556066260034,
+   "estimate+solve T=20": 0.02306932957694726,
+   "race+factor T=40": 0.005463735548253939,
+   "estimate+solve T=40": 0.01541515406518566,
+   "race+factor T=100": 0.005553643471847451,
+   "estimate+solve T=100": 0.005979733038378333
+  },
+  {
+   "draw": 19,
+   "family": "blocks",
+   "premise_residual": 3.726762800265717e-08,
+   "min_eig": 0.29968498236034,
+   "parent_effective_n": 29.919345303945164,
+   "equal weight": 0.25869954819086527,
+   "proportional": 0.2242586463358121,
+   "race": 0.20079508828755155,
+   "oracle": 0.13590625956307154,
+   "race+factor T=20": 0.1945771408198924,
+   "estimate+solve T=20": 0.19283274587425975,
+   "race+factor T=40": 0.1939346398156957,
+   "estimate+solve T=40": 0.16912476983069613,
+   "race+factor T=100": 0.19481703206985662,
+   "estimate+solve T=100": 0.1718654371399748
+  }
+ ],
+ "elapsed_seconds": 1161.2235279083252,
+ "host": "Mac",
+ "python": "3.12.9",
+ "numpy": "2.4.6",
+ "threads": {
+  "OMP_NUM_THREADS": "1",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "VECLIB_MAXIMUM_THREADS": "1"
+ }
+}

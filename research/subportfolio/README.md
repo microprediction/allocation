@@ -90,10 +90,28 @@ used. Nothing is ever formed densely, so blocks and the premise check are
 On a new machine:
 
 ```bash
+git clone https://github.com/microprediction/allocation
+cd allocation/research/subportfolio
 pip install -r requirements.txt
-python smoke.py                 # under a minute, must print 0 failures
+python smoke.py                 # 15s, must print 0 failures
 python check_sharding.py        # a few minutes, must print all identical
 ```
+
+Nothing outside this directory is imported, so copying the directory alone
+works too. Python 3.10 or later.
+
+Check which `winning` you actually got, because the installed version is not
+evidence of which one runs:
+
+```bash
+python -c "import winning, os; print(winning.__version__, os.path.dirname(winning.__file__))"
+```
+
+On the machine this was written, `pip show winning` reported 1.2.0 from
+site-packages while the import resolved to a git checkout at 1.5.0. Every
+shard therefore records the version and the path it loaded, `merge.py` prints
+them, and it warns if the shards were not all built by the same environment.
+The numbers committed under `results/` came from winning 1.5.0.
 
 `check_sharding.py` is worth running once on any new machine. It runs the same
 six draws as one shard and as three and demands the recorded numbers agree

@@ -26,6 +26,7 @@ import time
 from pathlib import Path
 
 import numpy as np
+import winning
 
 from markets import MARKETS
 from rules import (long_only_min_var, factor_correlation, proportional, race,
@@ -100,6 +101,12 @@ def main():
            "elapsed_seconds": time.time() - t0,
            "host": platform.node(), "python": platform.python_version(),
            "numpy": np.__version__,
+           # which winning actually produced these numbers, not which one pip
+           # reports. On the machine this was written, pip showed 1.2.0 from
+           # site-packages while the import resolved to a git checkout at
+           # 1.5.0, so the installed version is not evidence of anything.
+           "winning": getattr(winning, "__version__", "unknown"),
+           "winning_path": os.path.dirname(winning.__file__),
            "threads": {k: os.environ.get(k) for k in
                        ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS",
                         "MKL_NUM_THREADS", "VECLIB_MAXIMUM_THREADS")}}

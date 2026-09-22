@@ -1,0 +1,82 @@
+{
+ "config": {
+  "scale": "mid",
+  "n": 400,
+  "m": 60,
+  "draws": 25,
+  "seed": 12,
+  "k": 3,
+  "Ts": [
+   20,
+   40,
+   100
+  ],
+  "shard": 1,
+  "shards": 8,
+  "out": "results",
+  "tag": "mid-n400-m60-k3-s12"
+ },
+ "rows": [
+  {
+   "draw": 1,
+   "family": "nested",
+   "premise_residual": 2.9888106925650946e-09,
+   "min_eig": 0.2563814360474988,
+   "parent_effective_n": 22.680671211830468,
+   "equal weight": 0.20986200874519606,
+   "proportional": 0.22778601364105963,
+   "race": 0.21692506366345438,
+   "oracle": 0.1545087672549468,
+   "race+factor T=20": 0.21846144099602224,
+   "estimate+solve T=20": 0.3003671371524634,
+   "race+factor T=40": 0.2069198702867093,
+   "estimate+solve T=40": 0.2042983547363671,
+   "race+factor T=100": 0.2126987942939068,
+   "estimate+solve T=100": 0.19396905044777907
+  },
+  {
+   "draw": 9,
+   "family": "blocks+factor",
+   "premise_residual": 3.3018478062760047e-07,
+   "min_eig": 0.008474209043486244,
+   "parent_effective_n": 5.747503907220524,
+   "equal weight": 0.317323063994975,
+   "proportional": 0.026791520188019044,
+   "race": 0.02813165401099247,
+   "oracle": 0.02300773626447853,
+   "race+factor T=20": 0.02839036734131402,
+   "estimate+solve T=20": 0.033157626347335135,
+   "race+factor T=40": 0.027355782840567385,
+   "estimate+solve T=40": 0.039981842911689706,
+   "race+factor T=100": 0.031922406256106525,
+   "estimate+solve T=100": 0.024320387799092517
+  },
+  {
+   "draw": 17,
+   "family": "nested",
+   "premise_residual": 2.3756941049309232e-08,
+   "min_eig": 0.0067335332874400786,
+   "parent_effective_n": 5.274764806849857,
+   "equal weight": 0.23201207601466328,
+   "proportional": 0.012791668924834217,
+   "race": 0.01277625314989422,
+   "oracle": 0.011054302891117434,
+   "race+factor T=20": 0.012779753858155626,
+   "estimate+solve T=20": 0.01818657061468964,
+   "race+factor T=40": 0.012777217336644732,
+   "estimate+solve T=40": 0.014851058417656111,
+   "race+factor T=100": 0.012771850252026679,
+   "estimate+solve T=100": 0.011908165667029014
+  }
+ ],
+ "elapsed_seconds": 3080.2205817699432,
+ "host": "Mac",
+ "python": "3.12.9",
+ "numpy": "2.4.6",
+ "threads": {
+  "OMP_NUM_THREADS": "1",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "VECLIB_MAXIMUM_THREADS": "1"
+ }
+}
