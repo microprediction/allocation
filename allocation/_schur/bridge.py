@@ -65,6 +65,8 @@ the HERC square note; the taxonomy page at schur.microprediction.org.
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 
 __all__ = [
@@ -462,8 +464,29 @@ def bridge_weights(
         raise ValueError("conditioning must be 'siblings', 'all' or 'factor'")
 
     s = float(w.sum())
-    w = w / s if abs(s) > 1e-300 else np.full(n, 1.0 / n)
-    return (w, info) if return_info else w
+    if abs(s) > 1e-300:
+        w = w / s
+        degenerate = False
+    else:
+        # The recursion produced a zero-sum book, which happens on a singular
+        # covariance. Returning equal weight quietly made a failure read as a
+        # result: in a comparison the bridge appeared to match equal weight at
+        # low sample sizes, which is a wrong conclusion about the method rather
+        # than a visible failure. It is still returned, because a portfolio is
+        # more useful than an exception here, but it is now announced and the
+        # caller can read `degenerate` from the info dict.
+        w = np.full(n, 1.0 / n)
+        degenerate = True
+        warnings.warn(
+            "the Schur recursion produced a zero-sum portfolio, which means the "
+            "covariance is degenerate at this gamma; returning equal weight. "
+            "Pass return_info=True and read info['degenerate'] to detect this.",
+            RuntimeWarning, stacklevel=2)
+    if return_info:
+        info = dict(info or {})
+        info["degenerate"] = degenerate
+        return w, info
+    return w
 
 
 def _balanced_tree_over(clusters):
