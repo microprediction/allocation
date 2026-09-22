@@ -101,5 +101,5 @@ rebalancing is frequent, or turnover is the binding cost.
 
 - GitHub: <https://github.com/microprediction/allocation>
 - Papers: <https://allocation.microprediction.org/papers/>
-- Built on [`thurstone`](https://github.com/microprediction/thurstone); Schur
+- Calibration runs through [`winning`](https://github.com/microprediction/winning); Schur
   background at <https://schur.microprediction.org>.

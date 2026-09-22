@@ -65,3 +65,44 @@ def test_factor_mode_runs_on_large_universe():
     w = ThurstonePortfolio(calib="diagonal", factors=4, n_paths=1 << 12).fit(X).weights_
     assert w.shape == (300,)
     assert abs(float(w.sum()) - 1.0) < 1e-6 and np.all(w >= -1e-9)
+
+
+def test_low_rank_tilt_preserves_the_zero_confidence_anchor():
+    """At phi=0 the tilt must return the benchmark, low-rank or not.
+
+    Issue #57. The low-rank path used to blend the correlations and then factor
+    the blend. At phi=0 that means factoring the calibration reference, and for
+    calib="diagonal" the reference is the identity, whose eigendecomposition has
+    no distinguished leading direction. Truncating it to k factors and restoring
+    the diagonal invented correlation out of an arbitrary basis: an equal target
+    came back spread from 0.110 to 0.149 instead of 0.125.
+
+    The blend is formed in factor space now, where two k-factor correlations
+    combine exactly into one of rank 2k, so both endpoints are reproduced with
+    no eigendecomposition of the blend anywhere.
+    """
+    X = np.random.default_rng(42).normal(size=(120, 8))
+    for calib in ("diagonal", "market"):
+        dense = ThurstonePortfolio(target="equal", calib=calib, phi=0,
+                                   factors=None, n_paths=2 ** 18).fit(X)
+        low = ThurstonePortfolio(target="equal", calib=calib, phi=0,
+                                 factors=3, n_paths=2 ** 18).fit(X)
+        w = np.asarray(low.weights_, float)
+        assert np.abs(w - 0.125).max() < 5e-3, (calib, w)
+        assert (np.abs(w - 0.125).max()
+                <= np.abs(np.asarray(dense.weights_, float) - 0.125).max() + 2e-3)
+
+
+def test_full_rank_tilt_matches_the_dense_race():
+    """At k = n the low-rank path is not an approximation and must agree.
+
+    This separates the anchor from rank truncation. A gap at k < n is the
+    documented approximation; a gap at k = n would be a defect.
+    """
+    Y = (np.random.default_rng(7).normal(size=(300, 8))
+         @ np.linalg.cholesky(np.eye(8) * 0.4 + 0.6).T)
+    dense = ThurstonePortfolio(target="equal", calib="diagonal", phi=1.0,
+                               factors=None, n_paths=2 ** 18).fit(Y).weights_
+    full = ThurstonePortfolio(target="equal", calib="diagonal", phi=1.0,
+                              factors=8, n_paths=2 ** 18).fit(Y).weights_
+    assert np.abs(np.asarray(full, float) - np.asarray(dense, float)).max() < 5e-3

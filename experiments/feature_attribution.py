@@ -23,7 +23,7 @@ from numpy.random import default_rng
 from sklearn.linear_model import Ridge
 from sklearn.inspection import permutation_importance
 import shap
-from allocation._thurstone.calibrate import calibrate_diagonal, base_density
+from allocation._thurstone.calibrate import calibrate_diagonal
 from allocation._thurstone.transport import transport_weights
 
 rng = default_rng(0)
@@ -55,7 +55,7 @@ imp["race (raw argmax)"], tm["race (raw argmax)"] = timed(race)
 def race_calibrated():
     uni = np.array([np.corrcoef(X[:, i], y)[0, 1] ** 2 for i in range(nf)])  # marginal strength
     w0 = uni / uni.sum()                                  # benchmark on the simplex
-    theta = calibrate_diagonal(w0, base=base_density())   # abilities: indep race -> w0
+    theta = calibrate_diagonal(w0)   # abilities: indep race -> w0
     Cc = np.corrcoef(X.T)                                 # tilt = feature correlation
     seeds = default_rng(7).standard_normal((1 << 14, nf))
     return np.asarray(transport_weights(theta, Cc, seeds))
@@ -93,7 +93,7 @@ print("the redundancy-even-split, the headline property, at a modest, still-chea
 # leak (Prop: concentration) while the even split among copies survives.
 print("\ntemperature beta on the calibrated strengths (leak control, redundancy preserved):")
 uni = np.array([np.corrcoef(X[:, i], y)[0, 1] ** 2 for i in range(nf)])
-theta = calibrate_diagonal(uni / uni.sum(), base=base_density())
+theta = calibrate_diagonal(uni / uni.sum())
 Cc = np.corrcoef(X.T); seeds = default_rng(7).standard_normal((1 << 14, nf))
 print(f"  {'beta':>6}{'signal':>9}{'noise':>8}{'copy spread':>13}")
 for b in [0.5, 1.0, 2.0, 4.0]:

@@ -1,0 +1,5 @@
+numpy>=1.24
+scipy>=1.10
+cvxpy>=1.4
+clarabel>=0.6
+winning>=1.5.0
