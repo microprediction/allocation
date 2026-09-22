@@ -33,6 +33,12 @@ cd "$(dirname "$0")"
 #   PYTHON=../../allocation-py312/bin/python ./launch.sh mid
 PY="${PYTHON:-python}"
 
+# Keep the machine awake for the whole run. An overnight study on a laptop
+# that idles out at 2am is a wasted night, and the shards only checkpoint
+# while they are running.
+CAFF=""
+command -v caffeinate >/dev/null 2>&1 && CAFF="caffeinate -ims"
+
 SCALE="${1:-mid}"
 # Leave headroom. Taking every core makes the machine unusable for whoever is
 # sitting at it, and the last few workers buy very little: the draws are
@@ -65,7 +71,7 @@ echo "checking the install before spending anything long"
 mkdir -p results logs
 echo "$TAG: $DRAWS draws over $WORKERS workers"
 for ((i = 0; i < WORKERS; i++)); do
-  "$PY" run.py --scale "$SCALE" --n "$N" --m "$M" --k "$K" --seed "$SEED" \
+  $CAFF "$PY" run.py --scale "$SCALE" --n "$N" --m "$M" --k "$K" --seed "$SEED" \
     --draws "$DRAWS" --Ts $TS --Ts-est $TS_EST \
     --shard "$i" --shards "$WORKERS" --tag "$TAG" \
     > "logs/${TAG}-shard${i}.log" 2>&1 &

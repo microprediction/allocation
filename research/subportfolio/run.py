@@ -110,20 +110,8 @@ def main():
     dest = Path(a.out) / f"{tag}-shard{a.shard}of{a.shards}.json"
 
     rows, t0 = [], time.time()
-    for j, g in enumerate(mine):
-        td = time.time()
-        rows.append(one_draw(a, g))
-        print(f"  shard {a.shard}/{a.shards}  draw {g}  "
-              f"({j + 1}/{len(mine)})  {time.time() - td:.1f}s", flush=True)
-
-    out = {"config": vars(a), "rows": rows,
-           "elapsed_seconds": time.time() - t0,
-           "host": platform.node(), "python": platform.python_version(),
+    env = {"host": platform.node(), "python": platform.python_version(),
            "numpy": np.__version__,
-           # which winning actually produced these numbers, not which one pip
-           # reports. On the machine this was written, pip showed 1.2.0 from
-           # site-packages while the import resolved to a git checkout at
-           # 1.5.0, so the installed version is not evidence of anything.
            "winning": getattr(winning, "__version__", "unknown"),
            "winning_path": os.path.dirname(winning.__file__),
            "threads": {k: os.environ.get(k) for k in
@@ -132,8 +120,30 @@ def main():
                         # fastrace links rayon and reads only this one; none
                         # of the BLAS variables above reach the race kernel.
                         "RAYON_NUM_THREADS")}}
-    dest.write_text(json.dumps(out, indent=1, default=str))
-    print(f"\nwrote {dest}  ({len(rows)} draws, {out['elapsed_seconds']:.0f}s)")
+
+    def checkpoint():
+        """Write the shard atomically, so a stopped run keeps what it had.
+
+        Written after every draw. A plain write truncates first, so a process
+        killed mid-write would lose every draw before it as well; the rename is
+        atomic on POSIX, and the file is always either the previous complete
+        snapshot or the new one.
+        """
+        blob = dict(config=vars(a), rows=rows,
+                    elapsed_seconds=time.time() - t0, **env)
+        tmp = dest.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(blob, indent=1, default=str))
+        os.replace(tmp, dest)
+
+    for j, g in enumerate(mine):
+        td = time.time()
+        rows.append(one_draw(a, g))
+        checkpoint()
+        print(f"  shard {a.shard}/{a.shards}  draw {g}  "
+              f"({j + 1}/{len(mine)})  {time.time() - td:.1f}s", flush=True)
+
+    checkpoint()
+    print(f"\nwrote {dest}  ({len(rows)} draws, {time.time() - t0:.0f}s)")
 
 
 if __name__ == "__main__":
