@@ -25,11 +25,10 @@ papers/
 |------|-------|--------|
 | [thurstone-portfolios](thurstone-portfolios/) | Thurstone Portfolios: Long-Only Allocation by Inverting Winning Probabilities | draft |
 | [thurstone-rc](thurstone-rc/) | Thurstone Portfolios, five-page Rapid Communication draft for Frontiers of Mathematical Finance | draft |
-| [repaired-hierarchical-portfolios](repaired-hierarchical-portfolios/) | Repaired Hierarchical Portfolios | draft |
 | [thurstone-credit](thurstone-credit/) | Winning Probabilities as Credit: Fast, Redundancy-Aware Attribution | draft |
 | [online-portfolio-regimes](online-portfolio-regimes/) | When Does Portfolio Construction Work? A Map across the Number of Assets and the Cost of Trading | draft |
 | [hierarchical-risk-parity-regime](hierarchical-risk-parity-regime/) | Where Hierarchical Risk Parity Earns Its Keep | draft |
-| [tilt-trust-parameter](tilt-trust-parameter/) | A Tilt Is Worth What the Correlation Is Worth | draft |
+| [tilt-trust-parameter](tilt-trust-parameter/) | A Tilt Is Worth What the Correlation Is Worth (merges the former repaired-hierarchical-portfolios) | draft |
 
 ### Portfolio papers kept in other repos
 
