@@ -57,7 +57,7 @@ case "$SCALE" in
   *) echo "usage: $0 [mid|index]" >&2; exit 2 ;;
 esac
 
-TAG="${SCALE}-n${N}-m${M}-k${K}-s${SEED}"
+TAG="${SCALE}-sharpe-n${N}-m${M}-k${K}-s${SEED}"
 THREADS="${THREADS:-$(( WORKERS > 0 ? (NCPU - RESERVE) / WORKERS : 1 ))}"
 [ "$THREADS" -lt 1 ] && THREADS=1
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \

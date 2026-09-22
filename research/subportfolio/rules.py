@@ -50,6 +50,30 @@ def long_only_min_var(C):
     return x / x.sum()
 
 
+def long_only_max_sharpe(C, mu):
+    """Long-only maximum Sharpe ratio for covariance C and expected returns mu.
+
+    Minimise w'Cw subject to mu'w = 1 and w >= 0, then rescale to the budget.
+    The problem is rebuilt on every call for the same reason as
+    long_only_min_var: a cached cvxpy Problem carries solver state between
+    solves and breaks the sharding invariance.
+    """
+    m = C.shape[0]
+    mu = np.asarray(mu, float)
+    if m == 1 or not np.any(mu > 0):
+        return np.full(m, 1.0 / m)
+    ev, V = np.linalg.eigh((C + C.T) / 2)
+    P = V @ np.diag(np.maximum(ev, 1e-10)) @ V.T
+    w = cp.Variable(m)
+    cp.Problem(cp.Minimize(cp.quad_form(w, cp.psd_wrap(P))),
+               [mu @ w == 1, w >= 0]).solve(solver=cp.CLARABEL)
+    if w.value is None:
+        return np.full(m, 1.0 / m)
+    x = np.maximum(np.asarray(w.value, float), 0.0)
+    t = x.sum()
+    return x / t if t > 0 else np.full(m, 1.0 / m)
+
+
 def factor_correlation(X, k):
     """A k-factor form of the CORRELATION of X, with unit diagonal.
 
@@ -108,38 +132,23 @@ def factor_covariance(X, k):
 def black_litterman(parent, idx, sd, V, D):
     """Reverse-optimize the parent, restrict the implied returns, re-optimize.
 
-    Black-Litterman with no views. The parent is taken as the equilibrium book,
-    so the implied excess returns are Pi = Sigma w up to risk aversion, which
-    cancels under the budget constraint. Restricting Pi and re-solving is the
-    linear answer to the same question the race answers non-linearly, and it is
-    given the same inputs: the parent weights and a k-factor covariance fitted
-    on the parent universe.
+    Black-Litterman with no views. The parent is the equilibrium book, so its
+    implied excess returns are Pi = Sigma w up to the risk aversion, which
+    cancels under the budget. Restricting Pi to the survivors and solving the
+    long-only maximum-Sharpe problem under the same covariance estimate is the
+    linear answer to the question the race answers non-linearly, and it gets
+    the same inputs: the parent weights and a k-factor covariance fitted on
+    the parent universe.
 
-    Exact where the race is not: if the covariance is the true one, Sigma w is
-    constant on the support of an optimal parent, so Pi restricted is constant
-    and the solution is the minimum-variance portfolio of the sub-block. The
-    gap from the oracle is therefore entirely the covariance estimate.
+    Given the true covariance it is the oracle exactly, since then Pi is the
+    market's own m. Its gap from the oracle is therefore the covariance
+    estimate and nothing else.
     """
     y = sd * np.asarray(parent, float)
     Pi = sd * (V @ (V.T @ y) + D * y)
     Vi, Di, si = V[idx], D[idx], sd[idx]
     S = np.outer(si, si) * (Vi @ Vi.T + np.diag(Di))
-    S = (S + S.T) / 2
-    m = len(idx)
-    ev, Q = np.linalg.eigh(S)
-    S = Q @ np.diag(np.maximum(ev, 1e-10)) @ Q.T
-    p_sub = Pi[idx]
-    if not np.any(p_sub > 0):
-        return np.full(m, 1.0 / m)
-    w = cp.Variable(m)
-    prob = cp.Problem(cp.Minimize(cp.quad_form(w, cp.psd_wrap(S))),
-                      [p_sub @ w == 1, w >= 0])
-    prob.solve(solver=cp.CLARABEL)
-    if w.value is None:
-        return np.full(m, 1.0 / m)
-    x = np.maximum(np.asarray(w.value, float), 0.0)
-    t = x.sum()
-    return x / t if t > 0 else np.full(m, 1.0 / m)
+    return long_only_max_sharpe((S + S.T) / 2, Pi[idx])
 
 
 def estimate_and_solve(X, idx):

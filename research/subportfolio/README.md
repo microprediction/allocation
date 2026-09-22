@@ -2,10 +2,21 @@
 
 ## The question
 
-CAPM says the cap-weighted market portfolio is optimal for the whole universe.
-It says nothing of the kind about a sector, a screen, an exclusion list or any
-other sub-universe, and the usual argument runs the other way: cap-weighting a
-subset is generally far from optimal.
+CAPM says the cap-weighted market portfolio is the tangency portfolio for the
+whole universe: for the returns the market expects, no book has a higher
+Sharpe ratio. It says nothing of the kind about a sector, a screen, an
+exclusion list or any other sub-universe, and the usual argument runs the
+other way: cap-weighting a subset is generally far from optimal.
+
+The premise is taken literally. The market's expected excess returns are
+whatever makes its own weights optimal, m = Sigma w, and every rule is scored
+by the Sharpe ratio it achieves against the true sub-covariance and those
+returns. On a sub-universe the optimum is
+
+    w_S* ~ Sigma_SS^{-1} m_S = w_S + Sigma_SS^{-1} Sigma_{S,S^c} w_{S^c},
+
+proportional restriction plus the departed names' weight projected onto the
+survivors they co-moved with. That second term is the whole question.
 
 So an index holder who wants a sub-portfolio needs a rule. The rule in
 universal use is proportional restriction, which is to say renormalise the
@@ -28,8 +39,9 @@ whether that is better, and whether it needs any data to be better.
 | flattened | the parent weights | nothing; `w_prop^0.75`, the null the race must clear |
 | race | the parent weights | Thurstone, independent field |
 | race + factor | those plus a `k`-factor correlation, `k(n+1)` numbers | Thurstone, correlated field |
-| estimate + solve | a full sub-covariance, `m(m+1)/2` numbers | the estimate is trustworthy |
-| oracle | the true sub-covariance | unavailable |
+| black-litterman | the parent weights plus the `k`-factor covariance | CAPM; the estimate is trustworthy |
+| estimate + solve | a full sub-covariance, `m(m+1)/2` numbers | ignore the market; minimise variance |
+| oracle | the true sub-covariance and the market's returns | unavailable |
 
 Volatility is deliberately absent from the middle three. An optimal parent
 already holds less of a volatile name, so the abilities calibrated from the
@@ -70,20 +82,14 @@ launch.sh     fan across cores and merge
 results/      committed outputs
 ```
 
-`markets.py` carries the part worth reading. Cap weights come first and the
-covariance is chosen to make them optimal:
-
-```
-Sigma = 11' + eps Q M Q',   u = w / ||w||,   Q = I - u u'
-```
-
-which is positive definite and has `w` as its exact minimum-variance
-portfolio, verified to 1e-14. Since `w >= 0` the long-only constraint is
-inactive, so `w` is the long-only optimum too. That is the positive-definite
-branch of the implied-covariance identity; the minimal rank-two correction
-reproduces `w` as well but is not positive definite, which is why it is not
-used. Nothing is ever formed densely, so blocks and the premise check are
-`O(n)`.
+`markets.py` carries the part worth reading. The covariance and the cap
+weights are drawn independently, the covariance to look like equities and the
+weights to look like an index, and the market's expected returns are then
+`m = Sigma w`. The index market is a sector market: a market factor with
+heterogeneous betas, two signed style factors, fifty sectors of unequal size
+and idiosyncratic noise, so its spectrum is one large eigenvalue and a long
+tail rather than anything a `k`-factor estimate can capture. Nothing is ever
+formed densely; blocks, products and panels are `O(n)` or `O(n + m^2)`.
 
 ## Running it
 

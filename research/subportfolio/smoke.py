@@ -10,8 +10,9 @@ import numpy as np
 
 from markets import (MidMarket, IndexMarket, effective_fraction,
                      REAL_EFFN_FRACTION)
-from rules import (long_only_min_var, factor_correlation, proportional, race,
-                   flattened, black_litterman, estimate_and_solve)
+from rules import (long_only_min_var, long_only_max_sharpe, factor_correlation,
+                   proportional, race, flattened, black_litterman,
+                   estimate_and_solve)
 
 FAILS = []
 
@@ -26,7 +27,7 @@ def main():
     t0 = time.time()
     rng = np.random.default_rng(0)
 
-    print("\npremise: the parent is the exact optimum of the true covariance")
+    print("\npremise: the parent is the tangency portfolio of (Sigma, m)")
     mid = MidMarket(rng, 120, solver=long_only_min_var)
     check("mid parent stationary", mid.premise_residual() < 1e-6,
           f"residual {mid.premise_residual():.1e}")
@@ -68,6 +69,10 @@ def main():
     check("index block positive definite", ev.min() > 0, f"min eig {ev.min():.2e}")
     check("index correlations plausible", 0.1 < off.mean() < 0.5,
           f"mean {off.mean():.2f}, range {off.min():.2f} to {off.max():.2f}")
+    evc = np.linalg.eigvalsh(R)[::-1] / len(idx)
+    check("index market is not low rank", evc[0] < 0.45 and evc[2:].sum() > 0.45,
+          f"PC1 {evc[0]:.0%}, PC2 {evc[1]:.1%}, everything past PC2 {evc[2:].sum():.0%}"
+          " -- a k-factor estimate cannot capture this")
 
     print("\npanel: the simulated data really comes from that covariance")
     X = idx_mk.panel(np.random.default_rng(2), 40000)[:, idx]
@@ -116,19 +121,25 @@ def main():
     Dx = np.maximum(1.0 - (Vx ** 2).sum(1), 0)
     mid_sub = np.sort(np.random.default_rng(11).choice(mid.n, 40, replace=False))
     bl = black_litterman(mid.parent, mid_sub, sdv, Vx, Dx)
-    orc = long_only_min_var(mid.block(mid_sub))
+    orc = long_only_max_sharpe(mid.block(mid_sub), mid.m[mid_sub])
     check("BL with the true covariance reproduces the oracle",
-          np.abs(bl - orc).sum() < 1e-8,
+          np.abs(bl - orc).sum() < 1e-6,
           f"L1 {np.abs(bl - orc).sum():.2e} (so its gap from the oracle is "
           "entirely the covariance estimate)")
 
-    print("\nthe oracle really is optimal")
+    print("\nrestriction is not renormalisation")
     Ssm = small.block(sub)
-    w = long_only_min_var(Ssm)
-    v = lambda x: float(x @ Ssm @ x)
-    others = [v(pw), v(r), v(np.full(40, 1 / 40))]
-    check("oracle beats every candidate", all(v(w) <= o + 1e-10 for o in others),
-          f"oracle {v(w):.5f} vs best other {min(others):.5f}")
+    msm = small.m[sub]
+    w = long_only_max_sharpe(Ssm, msm)
+    gap = np.abs(w - pw).sum()
+    check("the sub-universe optimum differs from proportional", gap > 0.05,
+          f"L1 {gap:.3f}: the departed names' weight does not just rescale")
+
+    print("\nthe oracle really is optimal")
+    sh = lambda x: float(x @ msm) / float(np.sqrt(x @ Ssm @ x))
+    others = [sh(pw), sh(r), sh(fl), sh(np.full(40, 1 / 40))]
+    check("oracle beats every candidate", all(sh(w) >= o - 1e-10 for o in others),
+          f"oracle sharpe {sh(w):.4f} vs best other {max(others):.4f}")
 
     print(f"\n{len(FAILS)} failures, {time.time() - t0:.0f}s")
     return 1 if FAILS else 0
