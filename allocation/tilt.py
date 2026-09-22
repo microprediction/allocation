@@ -54,6 +54,8 @@ from ._thurstone.ability import (
     ability_implied_state_prices as _weights_from_abilities,
     state_price_implied_ability as _abilities_from_weights,
 )
+import winning
+
 from ._thurstone.transport import (
     DEFAULT_PATHS,
     blend_correlation,
@@ -103,6 +105,7 @@ def tilt_weights(
     nu: float = 7.0,
     n_paths: int = DEFAULT_PATHS,
     seed: int = 42,
+    factors: int = 3,
 ) -> np.ndarray:
     """Tilt a benchmark portfolio by racing it under an estimated correlation.
 
@@ -118,12 +121,24 @@ def tilt_weights(
     ``cov`` and successive calls at nearby covariances give nearby portfolios.
     No matrix is inverted, so ``cov`` may be singular.
 
+    ``sampler='exact'`` evaluates the race by quadrature instead of simulating
+    it, which is what the default should probably be: it reproduces the
+    benchmark at ``phi = 0`` to about ``1e-10`` rather than to
+    ``1/sqrt(n_paths)``, uses no seed ensemble and no memory, and at five
+    thousand assets is a hundred times faster than the path budget the
+    simulation needs to be usable at all. It approximates the estimated
+    correlation by ``factors`` factors, which is exact when the market has that
+    many and is the only approximation in the path.
+
     ``sampler='student_t'`` runs a multivariate-t race with ``nu`` degrees of
     freedom, giving fat marginal tails and tail dependence rather than a
-    function of the correlation alone.
+    function of the correlation alone. There is no quadrature equivalent, so
+    that one is simulated.
     """
     if not 0.0 <= phi <= 1.0:
         raise ValueError("phi must lie in [0, 1].")
+    if sampler == "exact":
+        return _tilt_exact(weights, cov, phi, factors=factors)
     if sampler not in ("gaussian", "student_t"):
         raise ValueError(f"unknown sampler {sampler!r} (use 'gaussian' or 'student_t')")
     if sampler == "student_t" and not nu > 2:
@@ -145,3 +160,56 @@ def tilt_weights(
     if sampler == "gaussian":
         return transport_weights(ability, C_tilt, seeds)
     return transport_weights_t(ability, C_tilt, seeds, rng.chisquare(nu, m), nu)
+
+
+def _factor_form(cov, k):
+    """A ``k``-factor correlation ``VV' + diag(D)`` with unit diagonal."""
+    C = np.asarray(cov, dtype=float)
+    d = np.sqrt(np.clip(np.diag(C), 1e-300, None))
+    R = C / np.outer(d, d)
+    ev, U = np.linalg.eigh((R + R.T) / 2)
+    idx = np.argsort(ev)[::-1][:k]
+    V = U[:, idx] * np.sqrt(np.clip(ev[idx], 0.0, None))
+    D = np.clip(1.0 - (V ** 2).sum(1), 1e-6, None)
+    scale = np.sqrt((V ** 2).sum(1) + D)
+    return V / scale[:, None], D / scale ** 2
+
+
+def _tilt_exact(weights, cov, phi, *, factors=3):
+    """The tilt by quadrature rather than simulation.
+
+    Blending a reference identity toward a factor correlation keeps the result
+    inside the factor family exactly:
+
+        (1-phi) I + phi (VV' + diag(D))
+            = (sqrt(phi) V)(sqrt(phi) V)' + diag((1-phi) + phi D)
+
+    so every point of the dial is an exact race with no approximation beyond
+    the factor count, and ``phi = 0`` is the identity, which returns the
+    benchmark.
+    """
+    w = np.asarray(weights, dtype=float)
+    if not np.isfinite(w).all():
+        raise ValueError("weights must be finite")
+    if (w < 0).any():
+        raise ValueError("weights must be non-negative")
+    if not w.sum() > 0:
+        raise ValueError("weights must not be all zero")
+    w = w / w.sum()
+
+    ability = abilities_from_weights(w)
+    if phi == 0.0:
+        return _normalise(winning.race_probabilities(ability))
+    V, D = _factor_form(cov, min(int(factors), len(w) - 1))
+    return _normalise(winning.race_probabilities(
+        ability, V=np.sqrt(phi) * V, D=(1.0 - phi) + phi * D))
+
+
+def _normalise(p):
+    if isinstance(p, tuple):
+        p = p[0]
+    p = np.clip(np.asarray(p, dtype=float), 0.0, None)
+    s = p.sum()
+    if not s > 0:
+        raise ValueError("the race returned an all-zero field")
+    return p / s

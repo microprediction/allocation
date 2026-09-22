@@ -123,3 +123,46 @@ def test_blend_correlation_is_the_dial():
 def test_phi_outside_the_unit_interval_raises():
     with pytest.raises(ValueError):
         tilt_weights(np.full(3, 1 / 3), np.eye(3), phi=1.5)
+
+
+def test_exact_tilt_reproduces_the_benchmark_to_machine_precision():
+    """Quadrature, not simulation. The whole seed-ensemble apparatus exists
+    because the transport simulates a race that winning evaluates exactly, and
+    at phi = 0 the difference is nine orders of magnitude."""
+    rng = np.random.default_rng(1)
+    n = 120
+    V = rng.normal(0, 0.4, (n, 3))
+    C = V @ V.T + np.diag(np.maximum(1 - (V ** 2).sum(1), 0.05))
+    d = np.sqrt(np.diag(C))
+    C = C / np.outer(d, d)
+    w = rng.dirichlet(np.full(n, 3.0))
+    assert np.abs(tilt_weights(w, C, phi=0.0, sampler="exact") - w).sum() < 1e-8
+
+
+def test_exact_and_simulated_agree_on_the_tilt_itself():
+    """They should differ only by the simulation's noise, so the exact answer
+    must sit near the simulated one at an interior phi."""
+    rng = np.random.default_rng(1)
+    n = 120
+    V = rng.normal(0, 0.4, (n, 3))
+    C = V @ V.T + np.diag(np.maximum(1 - (V ** 2).sum(1), 0.05))
+    d = np.sqrt(np.diag(C))
+    C = C / np.outer(d, d)
+    w = rng.dirichlet(np.full(n, 3.0))
+    e = tilt_weights(w, C, phi=1.0, sampler="exact")
+    g = tilt_weights(w, C, phi=1.0, sampler="gaussian", n_paths=1 << 16)
+    assert np.abs(np.abs(e - w).sum() - np.abs(g - w).sum()) < 0.05
+
+
+def test_exact_tilt_needs_no_paths_and_no_memory():
+    """The point of it: a universe where the seed ensemble would not fit."""
+    rng = np.random.default_rng(2)
+    n = 3000
+    V = rng.normal(0, 0.4, (n, 2))
+    D = np.maximum(1 - (V ** 2).sum(1), 0.05)
+    s = np.sqrt((V ** 2).sum(1) + D)
+    V, D = V / s[:, None], D / s ** 2
+    C = V @ V.T + np.diag(D)          # a real covariance, but never inverted
+    w = rng.dirichlet(np.full(n, 3.0))
+    out = tilt_weights(w, C, phi=0.0, sampler="exact")
+    assert np.abs(out - w).sum() < 1e-6
