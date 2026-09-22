@@ -8,7 +8,8 @@ import time
 
 import numpy as np
 
-from markets import MidMarket, IndexMarket
+from markets import (MidMarket, IndexMarket, effective_fraction,
+                     REAL_EFFN_FRACTION)
 from rules import (long_only_min_var, factor_correlation, proportional, race,
                    estimate_and_solve)
 
@@ -34,6 +35,28 @@ def main():
           f"residual {idx_mk.premise_residual():.1e}")
     check("index parent long only", idx_mk.parent.min() >= 0,
           f"min weight {idx_mk.parent.min():.1e}")
+
+    print("\nthe parent is an index, not a corner solution")
+    lo, hi = REAL_EFFN_FRACTION
+    for label, mk, n in (("mid", mid, 120), ("index", idx_mk, 5000)):
+        w = mk.parent
+        check(f"{label} parent holds every name", w.min() > 0,
+              f"min weight {w.min():.1e}, {100 * np.mean(w > 1e-8):.0f}% held")
+    # The old mid market solved for a long-only minimum-variance parent, which
+    # is a corner: 25 names of 400, and one draw held 6. The race floors the
+    # rest at 1e-12, so their abilities were one-sided bounds and not
+    # information, and a random sub-universe held 0 to 4 of the 60. Every rule
+    # was then splitting the same near point mass, which is why race came out
+    # at 0.999 of proportional. Concentration is a premise here, so it is
+    # checked rather than assumed.
+    fr = [effective_fraction(MidMarket(np.random.default_rng([12, g]), 400).parent)
+          for g in range(6)]
+    check("mid parent no more concentrated than the real index",
+          min(fr) >= lo, f"effective fraction {min(fr):.3f} to {max(fr):.3f}, "
+                         f"real index {lo:.2f} to {hi:.2f}")
+    check("index parent no more concentrated than the real index",
+          effective_fraction(idx_mk.parent) * 5000 > 40,
+          f"{1 / np.sum(idx_mk.parent ** 2):.0f} effective names of 5000")
 
     print("\nmarket: the blocks are usable covariances")
     idx = np.sort(np.random.default_rng(1).choice(5000, 200, replace=False))

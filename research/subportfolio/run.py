@@ -58,11 +58,22 @@ def one_draw(args, g):
     row["race"] = var(race(mk.parent, idx))
     row["oracle"] = var(long_only_min_var(Sub))
 
-    for T in args.Ts:
+    # Two T grids, because the two rules cost three orders of magnitude apart.
+    # race+factor calibrates under a k-factor correlation, which is 68 core-
+    # seconds at k=3 and n=400, so it stays on a coarse grid. estimate+solve is
+    # a cvxpy solve at 0.12s, and `race` never sees the panel at all and is
+    # therefore constant in T. The question the fine grid answers -- how little
+    # data it takes before estimating beats believing the parent -- is a flat
+    # line against a cheap curve, so resolving it well costs nearly nothing.
+    # One panel per T, shared by both rules, so the comparison stays paired.
+    est_Ts = args.Ts_est or args.Ts
+    for T in sorted(set(args.Ts) | set(est_Ts)):
         X = mk.panel(rng, T)
-        _, V, D = factor_correlation(X, args.k)
-        row[f"race+factor T={T}"] = var(race(mk.parent, idx, V=V, D=D))
-        row[f"estimate+solve T={T}"] = var(estimate_and_solve(X, idx))
+        if T in set(args.Ts):
+            _, V, D = factor_correlation(X, args.k)
+            row[f"race+factor T={T}"] = var(race(mk.parent, idx, V=V, D=D))
+        if T in set(est_Ts):
+            row[f"estimate+solve T={T}"] = var(estimate_and_solve(X, idx))
     return row
 
 
@@ -76,7 +87,10 @@ def main():
     p.add_argument("--seed", type=int, default=12)
     p.add_argument("--k", type=int, default=3, help="factors in the estimated correlation")
     p.add_argument("--Ts", type=int, nargs="+", default=[20, 40, 100],
-                   help="panel lengths for the rules that use data")
+                   help="panel lengths for race+factor (the expensive rule)")
+    p.add_argument("--Ts-est", type=int, nargs="+", default=None,
+                   help="panel lengths for estimate+solve; defaults to --Ts. "
+                        "Cheap, so use a fine grid to locate the crossover.")
     p.add_argument("--shard", type=int, default=0)
     p.add_argument("--shards", type=int, default=1)
     p.add_argument("--out", default="results")
@@ -109,7 +123,10 @@ def main():
            "winning_path": os.path.dirname(winning.__file__),
            "threads": {k: os.environ.get(k) for k in
                        ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS",
-                        "MKL_NUM_THREADS", "VECLIB_MAXIMUM_THREADS")}}
+                        "MKL_NUM_THREADS", "VECLIB_MAXIMUM_THREADS",
+                        # fastrace links rayon and reads only this one; none
+                        # of the BLAS variables above reach the race kernel.
+                        "RAYON_NUM_THREADS")}}
     dest.write_text(json.dumps(out, indent=1, default=str))
     print(f"\nwrote {dest}  ({len(rows)} draws, {out['elapsed_seconds']:.0f}s)")
 

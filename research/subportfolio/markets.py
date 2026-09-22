@@ -5,15 +5,20 @@ parent universe. If that only holds approximately then the experiment measures
 the approximation instead of the restriction rules, so both constructions
 verify it and `run.py` refuses to score a draw that fails.
 
-`mid` is the ordinary direction. Draw a covariance from one of six families,
-solve its long-only minimum-variance portfolio, and call that the parent. Good
-to a few hundred names.
+`mid` draws a dependence structure from one of six families and pairs it with a
+cap-weighted parent, using the same implied-covariance identity as `index`.
+It does NOT solve for the parent. Long-only minimum variance is a corner
+solution: at four hundred names it held a median of 25 of them and in one draw
+6, so 85 to 98 percent of the parent weights were exactly zero. The race floors
+those at 1e-12 and the resulting abilities are one-sided bounds rather than
+information, and a random sub-universe then contained 0 to 4 names the parent
+actually held, which made every rule a split of the same near point mass. That
+is a statement about the market, not about restriction. A real index holds
+every name it lists.
 
-`index` is the same premise at index scale, built the other way round. A
-long-only minimum-variance parent is the wrong model of an index: at five
-thousand names a single factor is so diversifiable that the optimum holds
-about eighty of them. So the cap weights come first, from a power law, and the
-covariance is then chosen to make them optimal:
+`index` is the same premise at index scale and never forms a dense matrix. Both
+markets put the cap weights first and choose the covariance to make them
+optimal:
 
     Sigma = 11' + eps Q M Q',    u = w / ||w||,    Q = I - u u'
 
@@ -27,6 +32,9 @@ Nothing is formed densely in the index case. Sigma[i,j] = 1 + eps (M_ij
 - u_i (Mu)_j - (Mu)_i u_j + (u'Mu) u_i u_j), and M is one-factor, so any block
 costs O(n) to assemble and the parent check is O(n) too.
 """
+from functools import lru_cache
+from pathlib import Path
+
 import numpy as np
 
 
@@ -54,7 +62,106 @@ def premise_residual(w, Sw):
 
 
 # --------------------------------------------------------------------------
-# mid scale: a random dependence structure, parent = its long-only optimum
+# the cap-weight profile, and the identity that makes it optimal
+# --------------------------------------------------------------------------
+
+# The cap-weight profile comes from a real index: the 129 month-end
+# cross-sections of the S&P 500 in experiments/data. Each draw takes one of
+# those dates, sorts it and stretches it onto n names, so the parent inherits
+# an observed concentration rather than an invented one.
+#
+# Concentration is the thing being controlled. Over that decade the index ran
+# at an effective name count of 0.10 to 0.31 of its listed count, and every
+# name carried a positive weight. A parent more concentrated than the low end
+# of that band is not a model of an index, which is the failure the old mid
+# market had: it solved for a long-only minimum-variance parent and got a
+# corner holding 25 names of 400.
+#
+# SHAPE_PATH is read when present. A copy of this directory on another machine
+# may not have it, so the median profile is kept here as a fallback and the
+# market records which one it used.
+SHAPE_PATH = Path(__file__).resolve().parents[2] / "experiments" / "data" / \
+    "sp500_capweights_2014_2024.parquet"
+
+FALLBACK_Q = np.array([0.000, 0.002, 0.005, 0.010, 0.020, 0.050, 0.100, 0.200,
+                       0.300, 0.400, 0.500, 0.600, 0.700, 0.800, 0.900, 0.950,
+                       0.990, 1.000])
+FALLBACK_LOGW = np.array([3.008, 2.949, 2.710, 2.084, 1.801, 1.327, 0.800,
+                          0.158, -0.257, -0.568, -0.840, -1.087, -1.304,
+                          -1.532, -1.854, -2.094, -2.558, -3.350])
+
+REAL_EFFN_FRACTION = (0.10, 0.31)   # measured over the same panel
+
+
+@lru_cache(maxsize=1)
+def real_shapes():
+    """Sorted log cap-weight profiles, one per month-end, relative to 1/n.
+
+    Returns a list of (quantile, log weight) pairs, or None if the panel is
+    not reachable from here.
+    """
+    try:
+        import pandas as pd
+        df = pd.read_parquet(SHAPE_PATH)
+    except Exception:
+        return None
+    out = []
+    for d in df.index:
+        w = df.loc[d].dropna().to_numpy(dtype=float)
+        if len(w) < 50:
+            continue
+        w = np.sort(w / w.sum())[::-1]
+        out.append(((np.arange(len(w)) + 0.5) / len(w),
+                    np.log(w) - np.log(1.0 / len(w))))
+    return out or None
+
+
+def cap_weights(rng, n):
+    """A cap-weight vector with the sorted shape of one real index date.
+
+    Every name gets a positive weight, which is the property that matters: an
+    index holds what it lists. The order is shuffled, so size carries no
+    information about where a name sits in the dependence structure. Making the
+    largest names also the most correlated is a modelling claim, and not one
+    this study needs.
+
+    Returns the weights and the source, so a draw can record which it used.
+    """
+    shapes = real_shapes()
+    q = (np.arange(n) + 0.5) / n
+    if shapes is None:
+        logw = np.interp(q, FALLBACK_Q, FALLBACK_LOGW)
+        src = "median profile (panel not found)"
+    else:
+        qe, le = shapes[int(rng.integers(len(shapes)))]
+        logw = np.interp(q, qe, le)
+        src = "sp500 month-end"
+    w = np.exp(logw)
+    w = w / w.sum()
+    return w[rng.permutation(n)], src
+
+
+def effective_fraction(w):
+    """Effective name count as a fraction of the listed count."""
+    return float(1.0 / np.sum(np.asarray(w, float) ** 2) / len(w))
+
+
+def implied_covariance(w, M, eps):
+    """Sigma = 11' + eps Q M Q', which has ``w`` as its exact optimum.
+
+    Q = I - u u' with u = w / ||w|| annihilates w, so Sigma w = 1 exactly and
+    w is the minimum-variance portfolio of Sigma. Since w > 0 the long-only
+    constraint is inactive and it is the long-only optimum too. Positive
+    definite for any positive semi-definite M.
+    """
+    u = w / np.linalg.norm(w)
+    Qm = M - np.outer(u, u @ M) - np.outer(M @ u, u) + float(u @ M @ u) * np.outer(u, u)
+    S = 1.0 + eps * Qm
+    return (S + S.T) / 2
+
+
+# --------------------------------------------------------------------------
+# mid scale: a random dependence structure, cap-weighted parent
 # --------------------------------------------------------------------------
 
 def random_structure(rng, n):
@@ -111,14 +218,23 @@ def random_structure(rng, n):
 
 
 class MidMarket:
-    """Dense. Parent is the long-only minimum-variance portfolio of Sigma."""
+    """Dense. Parent is cap weights, exactly optimal by construction.
+
+    The dependence structure is drawn from one of six families and used as the
+    ``M`` of the implied-covariance identity, so the families still separate
+    the draws while the parent stays a plausible index. ``solver`` is accepted
+    and unused: the parent is no longer solved for, and the oracle does its own
+    solving in run.py.
+    """
 
     scale = "mid"
 
-    def __init__(self, rng, n, solver):
-        self.Sigma, self.family = random_structure(rng, n)
+    def __init__(self, rng, n, solver=None, eps=10.0):
+        M, self.family = random_structure(rng, n)
+        M = M / np.mean(np.diag(M))          # so eps means the same thing across families
         self.n = n
-        self.parent = solver(self.Sigma)
+        self.parent, self.weight_source = cap_weights(rng, n)
+        self.Sigma = implied_covariance(self.parent, M, eps)
         self.chol = np.linalg.cholesky(
             self.Sigma + 1e-12 * np.eye(n) * np.trace(self.Sigma) / n)
 

@@ -45,10 +45,12 @@ def main():
     skipped = [r for r in rows if r.get("skipped")]
     rows = [r for r in rows if not r.get("skipped")]
     Ts = cfg["Ts"]
+    est_Ts = cfg.get("Ts_est") or Ts
     order = (["equal weight", "proportional", "race"]
-             + [x for t in Ts for x in (f"race+factor T={t}",
-                                        f"estimate+solve T={t}")]
+             + [f"race+factor T={t}" for t in Ts]
+             + [f"estimate+solve T={t}" for t in est_Ts]
              + ["oracle"])
+    order = [k for k in order if all(k in r for r in rows)]
     res = {k: np.array([r[k] for r in rows]) for k in order}
     base = res["proportional"]
 
