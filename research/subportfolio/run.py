@@ -115,6 +115,20 @@ def main():
     dest = Path(a.out) / f"{tag}-shard{a.shard}of{a.shards}.json"
 
     rows, t0 = [], time.time()
+    # Resume. A shard file that already exists is a partial run of this same
+    # shard, so its draws are kept and skipped, not recomputed and not
+    # overwritten. Restarting with the same shard count is then free.
+    if dest.exists():
+        try:
+            rows = [r for r in json.loads(dest.read_text())["rows"]
+                    if r["draw"] in set(mine)]
+        except (ValueError, KeyError):
+            rows = []
+        done = {r["draw"] for r in rows}
+        mine = [g for g in mine if g not in done]
+        if done:
+            print(f"  shard {a.shard}/{a.shards}: resuming, {len(done)} draws "
+                  f"already on disk, {len(mine)} to go", flush=True)
     env = {"host": platform.node(), "python": platform.python_version(),
            "numpy": np.__version__,
            "winning": getattr(winning, "__version__", "unknown"),
