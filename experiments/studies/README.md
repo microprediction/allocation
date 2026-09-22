@@ -60,3 +60,19 @@ elliptical. Each produced a clean-looking table that meant nothing.
 `robust.py` is a few minutes. The Thurstone scripts are 15 to 40 minutes each,
 dominated by the race at 16384 paths. `calib="market"` costs about 12 seconds a
 fit at these sizes and is not used in any sweep.
+
+## Sub-portfolio restriction
+
+Four studies here ask how to form a sub-portfolio from a parent, and they are
+the exploratory record rather than the answer.
+
+| script | what it answers |
+|---|---|
+| `restriction.py` | can a race predict what an allocator does on a subset? |
+| `restriction_block.py` | the same with the seriation held fixed and a whole block dropped |
+| `market_restriction.py` | leveraging a market-found optimum onto sub-universes |
+| `transport_vs_estimate.py` | transport the parent optimum, or estimate the sub-covariance? |
+
+The scaled version lives in `research/subportfolio/`, which is where the
+five-thousand-name runs and the committed results are. It is self-contained
+and does not import from here.
