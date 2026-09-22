@@ -28,9 +28,9 @@ papers/
 | [repaired-hierarchical-portfolios](repaired-hierarchical-portfolios/) | Repaired Hierarchical Portfolios | draft |
 | [thurstone-credit](thurstone-credit/) | Winning Probabilities as Credit: Fast, Redundancy-Aware Attribution | draft |
 | [online-portfolio-regimes](online-portfolio-regimes/) | When Does Portfolio Construction Work? A Map across the Number of Assets and the Cost of Trading | draft |
+| [hierarchical-risk-parity-regime](hierarchical-risk-parity-regime/) | Where Hierarchical Risk Parity Earns Its Keep | draft |
+| [tilt-trust-parameter](tilt-trust-parameter/) | A Tilt Is Worth What the Correlation Is Worth | draft |
 
-| [`hierarchical-risk-parity-regime`](hierarchical-risk-parity-regime) | No interval of sample size where HRP is the right answer: inverse variance beats it where it cannot invert, any regularised optimizer beats it elsewhere, and NCO on the same clusters tracks the frontier. |
-| [`tilt-trust-parameter`](tilt-trust-parameter) | The race tilt's dial is a trust parameter: worth -19% of variance at T/n=0.1 and +13% at T/n=5, flat on a stationary market, and the tail-aware race loses to the Gaussian one. |
 ### Portfolio papers kept in other repos
 
 Not every portfolio-construction paper lives here. The Schur-complementary

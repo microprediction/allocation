@@ -22,21 +22,27 @@
 \maketitle
 
 \begin{abstract}
-Hierarchical risk parity is defended on the regime where the sample
-covariance cannot be inverted. We test that defence on its own terms, with
-the population covariance known by construction so realized risk is exact,
-and find no interval of sample size where the method is the right answer.
-Below a tenth of an observation per asset it is beaten by inverse-variance
-weighting, which inverts nothing either and consults no tree. Above parity it
-is beaten by any regularised optimizer, in 78 percent of five hundred
-randomly drawn dependence structures, and by long-only minimum variance on
-the raw sample covariance in 76 percent, so the no-short-sale constraint
-alone closes the gap. We also show that no shrinkage class small enough to be
-interpretable can reproduce the method, by a counting argument confirmed at
-three universe sizes, and that nested clustered optimization on the same
-clusters tracks the shrinkage frontier while hierarchical risk parity does
-not, which locates the cost in the inverse-variance split rather than in the
-hierarchy.
+Hierarchical risk parity earns its keep at large universe size and not below
+it. We test it with the population covariance known by construction, so
+realized risk is exact rather than estimated. At five thousand names with two
+years of weekly data it is the best method we can run, beating
+inverse-variance weighting in 90 percent of draws and every optimizer that
+remains feasible at that rank in all of them. At five hundred names on the
+same history it loses to inverse variance in 83 percent. The crossover sits
+near two thousand, so the deciding variable is the number of assets and not
+the ratio of observations to them. A study run at the sizes convenient for
+simulation therefore reaches the opposite conclusion from one run at the size
+a large-universe manager cares about. Below that scale the method has no
+interval of advantage: it is beaten by inverse variance where nothing can be
+inverted, by any regularised optimizer where something can, in 78 percent of
+five hundred randomly drawn dependence structures, and by long-only minimum
+variance on the raw sample covariance in 76 percent, so the no-short-sale
+constraint alone closes the gap. We also show that no shrinkage class small
+enough to be interpretable can reproduce the rule, by a counting argument
+confirmed at three universe sizes, and that nested clustered optimization on
+the same clusters tracks the shrinkage frontier while hierarchical risk
+parity does not, which locates the cost in the inverse-variance split rather
+than in the hierarchy.
 \end{abstract}
 
 \section{Introduction}
@@ -175,14 +181,15 @@ never tuned.
 
 \begin{table}[ht]
 \centering
+\small
 \begin{tabular}{lrr}
 \toprule
-comparison & wins & median variance ratio \\
+comparison & wins & median ratio \\
 \midrule
 fixed taper beats HRP & 78\% & 0.740 \\
-nested clustered optimization beats HRP & 77\% & 0.738 \\
-long-only minimum variance on the raw sample beats HRP & 76\% & 0.726 \\
-fixed taper beats nested clustered optimization & 43\% & 1.005 \\
+NCO beats HRP & 77\% & 0.738 \\
+long-only min var, raw sample, beats HRP & 76\% & 0.726 \\
+fixed taper beats NCO & 43\% & 1.005 \\
 \bottomrule
 \end{tabular}
 \caption{Five hundred randomised dependence structures.}
@@ -205,9 +212,10 @@ the method is usually defended on.
 
 \begin{table}[ht]
 \centering
+\small
 \begin{tabular}{rrrrrr}
 \toprule
-$T/n$ & Ledoit--Wolf & $\phi=0.5$ taper & block diagonal & NCO & inverse variance \\
+$T/n$ & Ledoit--Wolf & taper & block diag. & NCO & inv. variance \\
 \midrule
 0.10 & 50\% / 1.002 & 46\% / 1.033 & 49\% / 1.006 & 36\% / 1.171 & 59\% / 0.958 \\
 0.20 & 47\% / 1.027 & 45\% / 1.052 & 45\% / 1.049 & 44\% / 1.094 & 52\% / 0.996 \\
@@ -246,9 +254,10 @@ grouping rather than an estimated one.
 
 \begin{table}[ht]
 \centering
+\footnotesize
 \begin{tabular}{rrrrrr}
 \toprule
-$T/n$ & inverse variance & Ledoit--Wolf & taper & NCO & taper, true tree \\
+$T/n$ & inv. var & Ledoit--Wolf & taper & NCO & taper, true tree \\
 \midrule
 0.10 & 85\% / 0.870 & 15\% / 1.323 & 36\% / 1.197 & 22\% / 1.342 & 63\% / 0.918 \\
 0.25 & 68\% / 0.968 & 36\% / 1.072 & 97\% / 0.739 & 93\% / 0.733 & 100\% / 0.650 \\

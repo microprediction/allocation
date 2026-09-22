@@ -45,38 +45,84 @@ motivated by, is consistently worse than the Gaussian one on both variance and
 shortfall.
 \end{abstract}
 
-\section{The two charts}
+\section{A portfolio is a vector of abilities}
 
-Let $w$ be a long-only portfolio on the simplex interior. Treating its weights
-as the winning probabilities of a race among assets, there is a vector of
-latent abilities that reproduces them, and running the race at those
-abilities returns the weights. Smaller ability means stronger, because the
-winner is the minimum performance.
+Let $w$ be a long-only portfolio, $w_i > 0$ and $\sum_i w_i = 1$. Give asset
+$i$ a latent performance
+\begin{equation}
+  X_i \;=\; a_i + \varepsilon_i, \qquad \varepsilon \sim N(0, R),
+  \label{eq:race}
+\end{equation}
+and say that asset $i$ \emph{wins} when its performance is the smallest of the
+field. Smaller ability is stronger, which is the min-wins convention of the
+underlying package. Winning probabilities are then a map from abilities to the
+interior of the simplex,
+\begin{equation}
+  \rho_R(a)_i \;=\; \Pr\bigl( X_i < X_j \ \text{ for all } j \neq i \bigr).
+  \label{eq:racemap}
+\end{equation}
 
-The two maps are inverse to each other, and a user can check it in one line.
-Over random draws from three to sixty assets the round trip is accurate to
-about $10^{-9}$, with one qualification stated in \cref{sec:scope}.
+Calibration is the inverse of that map. Given a portfolio $w$ and a
+correlation $R$, there is an ability vector with $\rho_R(a) = w$, unique once
+it is centred, since \cref{eq:racemap} is invariant to adding a constant to
+every $a_i$. So a long-only portfolio and a vector of abilities are the same
+object written in two charts. Over random draws from three to sixty assets the
+round trip is accurate to about $10^{-9}$, with one qualification stated in
+\cref{sec:scope}.
 
-The race is evaluated exactly, by quadrature over the field, rather than
-simulated. That is not a detail. A simulated race assigns weight by counting
-wins, so its resolution tracks paths per asset: at five thousand names and
-four thousand paths there is less than one path per asset, most names never
-win once, and the returned book differs from its own input by eighty-two
-percent. Quadrature reproduces the benchmark at zero damping to $10^{-10}$ in a
-tenth of a second, where the simulation needs sixty-five thousand paths and
-2.6 gigabytes to reach $0.2$.
+Nothing so far is a portfolio construction. It becomes one when the race is
+re-run under a different dependence. Take an estimated correlation $\hat R$,
+damp it toward the identity by a parameter $\phi \in [0,1]$, and race the same
+abilities again:
+\begin{equation}
+  R(\phi) \;=\; (1-\phi) I + \phi \hat R,
+  \qquad
+  w(\phi) \;=\; \rho_{R(\phi)}\bigl( a \bigr),
+  \qquad
+  \rho_{R(0)}(a) = w .
+  \label{eq:tilt}
+\end{equation}
+The abilities are calibrated at $R(0) = I$, which is the same law the race is
+run under at $\phi = 0$, so $w(0)$ returns the benchmark exactly. At $\phi = 1$
+the race runs under the full estimate. No matrix is inverted at any point, so
+the whole dial is available where a covariance is singular.
 
-Nothing about that is a portfolio construction yet. It becomes one when the
-race is re-run under a different dependence. Calibrate the abilities against a
-reference correlation, blend that reference toward an estimated correlation by
-a parameter $\phi$, and race again. At $\phi = 0$ the benchmark comes back. At
-$\phi = 1$ the race runs under the full estimate. Nothing is inverted at any
-point.
+\begin{remark}
+That $\phi = 0$ must reproduce the benchmark is worth stating as a check rather
+than as a property. Calibrating under one law and racing at $\phi = 0$ under
+another leaves zero on the dial already tilted, so the curve is measured from
+the wrong origin and every number on it is wrong by an amount that does not
+announce itself. Four attempts at this construction failed that way before one
+did not. Assert the identity to $10^{-10}$ before reading anything else.
+\end{remark}
 
-The construction therefore has the shape of a bridge, with a heuristic
-benchmark at one end and a dependence-aware portfolio at the other, reached
-without a matrix inverse. The question this paper answers is what the dial is
-worth, and where.
+When $\hat R$ is given in $k$-factor form the damping stays inside that family,
+because
+\begin{equation}
+  (1-\phi) I + \phi \bigl( V V^\top + \operatorname{diag}(D) \bigr)
+  \;=\;
+  \bigl( \sqrt{\phi}\, V \bigr)\bigl( \sqrt{\phi}\, V \bigr)^\top
+  + \operatorname{diag}\bigl( (1-\phi)\one + \phi D \bigr),
+  \label{eq:blend}
+\end{equation}
+so every point of the dial is itself an exact $k$-factor race and no
+approximation is introduced by the blend.
+
+\paragraph{Evaluating the race.} \Cref{eq:racemap} can be computed two ways and
+the difference matters. Quadrature over the field evaluates it directly. A
+simulation assigns weight by counting wins, so its resolution tracks paths
+\emph{per asset}: at five thousand names and four thousand paths there is less
+than one path per asset, most names never win once, and the returned book
+differs from its own input by eighty-two percent. Quadrature reproduces the
+benchmark at $\phi = 0$ to $10^{-10}$ in a tenth of a second, where the
+simulation needs sixty-five thousand paths and 2.6 gigabytes to reach $0.2$.
+
+The two are used for different things here, and we say which throughout.
+\Cref{tab:benchmark} and the direction checks are quadrature. The dial sweep in
+\cref{tab:dial} is the simulated race at forty assets and sixteen thousand
+paths, four hundred paths per asset, measured under common random numbers so
+that the residual noise cancels in the pairing. The Student-$t$ race of
+\cref{sec:tails} has no quadrature equivalent and is simulated throughout.
 
 \section{What the dial is worth depends on what you hand it}
 
@@ -121,37 +167,36 @@ At that size the hierarchical rule is the best construction available, so the
 race is being asked to improve on the ceiling and every move is away from it.
 The operator is not failing there; it has nothing to add.
 
-\section{And on whether the correlation deserves trust}
+\section{And on whether the estimate deserves trust}
 
 The benchmark tilted is hierarchical risk parity, chosen because the tilt then
-repairs a rule rather than competing with one. Measurements are paired under
-common random numbers: the race at $\phi$ is compared against the same race at
-$\phi = 0$ on the same fixed seed ensemble, so the simulation noise cancels
-and what remains is the effect of the dial.
+repairs a rule rather than competing with one. The race at $\phi$ is compared
+against the same race at $\phi = 0$ on the same seed ensemble, so what remains
+is the effect of the dial and not the resolution of the simulation.
 
 \begin{table}[ht]
 \centering
 \begin{tabular}{rrrl}
 \toprule
-$T/n$ & variance ratio & win rate & status \\
+$T/n$ & variance ratio & tilt wins & \\
 \midrule
 0.10 & 1.19 & 27\% & tilting hurts \\
 0.30 & 0.97 to 1.01 & 48 to 63\% & borderline \\
 1.00 & 0.98 & 60 to 67\% & modest, replicates \\
-2.00 & 0.90 to 0.92 & 82 to 84\% & replicated to a quarter of a standard error \\
+2.00 & 0.90 to 0.92 & 82 to 84\% & replicated to $0.25$ s.e. \\
 5.00 & 0.87 & 88\% & strongest, one run \\
 \bottomrule
 \end{tabular}
-\caption{Full tilt against no tilt, paired, forty assets, three seeds.}
+\caption{Full tilt against no tilt, paired on the same seed ensemble, forty assets, three seeds. The ratio is the variance at $\phi = 1$ over the variance at $\phi = 0$, so below one is an improvement.}
 \label{tab:dial}
 \end{table}
 
-The curve is monotone in coverage and that is the result. The dial behaves as
-a trust parameter should: with four observations for forty assets the
-estimated correlation is close to noise, tilting toward it costs nineteen
-percent, and the correct setting is near zero. With five observations per
-asset the same tilt saves thirteen percent of variance and four percent of
-expected shortfall in roughly nine draws out of ten.
+The curve is monotone in coverage and that is the result. Coverage is $T/n$
+throughout, observations per asset. At $T/n = 0.1$, four observations for forty
+assets, the estimated correlation is close to noise: tilting toward it costs
+nineteen percent and the correct setting is near zero. At $T/n = 5$ the same
+tilt saves thirteen percent of variance and four percent of expected shortfall
+in roughly nine draws out of ten.
 
 Expected shortfall follows the same shape rather than a different one. It is
 neutral at parity, where the first run's 70 percent fell to 50 on
@@ -179,7 +224,7 @@ deserves trust. A benchmark with nothing left to fix gives nothing at any
 coverage, and an untrustworthy estimate costs regardless of how much room the
 benchmark has.
 
-\section{The tail-aware race does not earn its keep}
+\section{The tail-aware race does not earn its keep}\label{sec:tails}
 
 The construction admits a Student-$t$ race, with fat marginals and genuine
 tail dependence, and that is often the motivation for preferring a race to a

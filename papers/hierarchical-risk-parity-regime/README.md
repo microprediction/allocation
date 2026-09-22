@@ -1,4 +1,4 @@
-# Hierarchical Risk Parity Has No Regime of Advantage
+# Where Hierarchical Risk Parity Earns Its Keep
 
 Finds that hierarchical risk parity earns its keep at large universe size and
 not below it. At five thousand assets with two years of weekly data it is the
