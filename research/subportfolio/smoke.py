@@ -35,6 +35,19 @@ def main():
     check("index parent long only", idx_mk.parent.min() >= 0,
           f"min weight {idx_mk.parent.min():.1e}")
 
+    print("\nan efficient parent is never sparse")
+    # No actual investment universe has an efficient portfolio concentrated in
+    # a handful of names. A market whose own optimum is sparse is telling you
+    # the market is wrong, not that the optimum is. Measured on generic random
+    # covariances the long-only minimum-variance portfolio comes back at 2 and
+    # 3 effective names out of 300 and 600, with 66 and 56 percent in one name,
+    # which is why this study's index market is built around a diffuse parent
+    # rather than by solving a covariance drawn first.
+    e_parent = 1.0 / float(np.sum(idx_mk.parent ** 2))
+    check("index parent is diffuse", e_parent > 0.02 * len(idx_mk.parent),
+          f"{e_parent:.0f} effective names of {len(idx_mk.parent)}, "
+          f"top weight {idx_mk.parent.max():.3f}")
+
     print("\nmarket: the blocks are usable covariances")
     idx = np.sort(np.random.default_rng(1).choice(5000, 200, replace=False))
     S = idx_mk.block(idx)

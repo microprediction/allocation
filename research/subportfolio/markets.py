@@ -151,8 +151,8 @@ class IndexMarket:
 
     scale = "index"
 
-    def __init__(self, rng, n, solver=None, eps=None, tail=1.3, rank=1,
-                 decay=0.6, target_corr=0.27):
+    def __init__(self, rng, n, solver=None, eps=None, tail=None, rank=1,
+                 decay=0.6, target_corr=0.27, target_eff=0.06):
         s = np.exp(rng.normal(0.0, 0.45, n))
         # rank loadings with geometrically decaying strength, so the factors
         # are ordered and separated rather than exchangeable
@@ -172,14 +172,48 @@ class IndexMarket:
         # honest as the rank changes, because spreading the same communality
         # over more factors lowers the average correlation at a fixed eps.
         # At eps=10 a rank-3 market averages 0.10, which is not a market.
-        cap = rng.pareto(tail, n) + 1.0
-        self.parent = cap / cap.sum()
+        self.parent = self._caps(rng, n, tail, target_eff)
         self.u = self.parent / np.linalg.norm(self.parent)
         self.Mu = self._M_times(self.u)
         self.uMu = float(self.u @ self.Mu)
         self.n = n
         self.eps = eps if eps is not None else self._solve_eps(rng, target_corr)
         self.family = f"implied rank-{rank}"
+
+    @staticmethod
+    def _caps(rng, n, tail, target_eff):
+        """Index weights with a controlled effective breadth.
+
+        An efficient parent is never sparse. No actual investment universe has
+        its market portfolio concentrated in a handful of names: a broad index
+        carries an effective count of some percent of its members, and the
+        S&P 500's is around a fifth.
+
+        A Pareto tail does not deliver that reliably. At tail 1.3 the effective
+        count of a 5000-name draw ranged from 80 to 399, so the concentration
+        of the parent, which is the quantity every restriction rule is
+        competing against, was being set by the luck of the draw. A lognormal
+        with its dispersion solved per draw holds it fixed instead.
+        """
+        if tail is not None:                       # explicit Pareto, for replication
+            cap = rng.pareto(tail, n) + 1.0
+            return cap / cap.sum()
+        z = rng.normal(size=n)
+        target = target_eff * n
+
+        def at(sig):
+            w = np.exp(sig * z)
+            w /= w.sum()
+            return w, 1.0 / float(np.sum(w ** 2))
+
+        lo, hi = 1e-3, 6.0
+        for _ in range(60):
+            mid = 0.5 * (lo + hi)
+            if at(mid)[1] > target:
+                lo = mid
+            else:
+                hi = mid
+        return at(0.5 * (lo + hi))[0]
 
     def _M_times(self, x):
         return self.V @ (self.V.T @ x) + self.d * x
