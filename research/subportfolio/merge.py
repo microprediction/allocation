@@ -50,6 +50,7 @@ def main():
              + [f"race+factor T={t}" for t in Ts]
              + [f"race avoid-worst-10% T={t}" for t in Ts]
              + [f"race+sectors T={t}" for t in Ts]
+             + ["race+sectors (true structure)"]
              + [f"race+tail T={t}" for t in Ts]
              + [f"black-litterman T={t}" for t in est_Ts]
              + [f"BL tail T={t}" for t in est_Ts]

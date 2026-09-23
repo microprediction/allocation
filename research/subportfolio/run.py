@@ -92,6 +92,18 @@ def one_draw(args, g):
     row["flattened"] = score(flattened(mk.parent, idx), "flattened")
     row["race"] = score(race(mk.parent, idx), "race")
     row["oracle"] = score(long_only_max_sharpe(Sub, m_S), "oracle")
+    if hasattr(mk, "b"):
+        # the race under the TRUE sector structure: a bound on what a
+        # sector-aware race could do if its loadings were known, so the gap to
+        # the estimated version is estimation loss and not the chart
+        vol = np.sqrt(mk.b ** 2 + mk.e ** 2 + mk.e2 ** 2 + mk.c ** 2 + mk.d)
+        name = "race+sectors (true structure)"
+        try:
+            row[name] = score(race_sectors(mk.parent, idx, mk.sector, mk.b / vol,
+                                           mk.c / vol, mk.d / vol ** 2), name)
+        except ValueError as err:
+            row[name] = row_es["es95 " + name] = row_es["starr " + name] = float("nan")
+            row.setdefault("failed", []).append(f"{name}: {err}")
     row["tail oracle"] = score(long_only_min_cvar(scen, m_S), "tail oracle")
 
     # Two T grids, because the two rules cost three orders of magnitude apart.
