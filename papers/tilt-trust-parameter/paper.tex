@@ -110,30 +110,34 @@ hierarchical weights as a benchmark, calibrate under a reconstruction of
 under the fuller dependence on hand. If the reconstruction is reasonable, the
 repair adds back specifically what was discarded, and nothing more.
 
-The paper's contribution is fourfold. First, a constructive object for ``the
-dependence a hierarchical bisection actually consulted'': a nested factor
-model with one latent factor per retained internal split of the same
-median-bisection tree HRP/Schur already build, so it drops directly into the
-$k$-factor calibration engine of \textcite{cotton2026factorprobit} with no new
-machinery. Second, a known-truth simulation (correlated pins that cascade in
-physically clustered groups, producing genuine tail contagion a covariance
-cannot see) on which the repair is tested against plain HRP and Schur, across
-the amount of tree retained, across Schur's own $\gamma$, and across sample
-sizes small enough that the covariance is honestly noisy rather than known.
+The paper makes five claims. First, that racing a benchmark under a
+different dependence law is a diversification operator, and that two
+independent things govern what it is worth: how much correlation the benchmark
+already accounts for, which bounds what is available, and whether the
+estimated correlation deserves trust, which the damping expresses.
+\Cref{sec:benchmark,sec:dial} establish each on its own. Second, that the race
+can be evaluated exactly, by quadrature rather than simulation, so the
+identity at zero tilt holds to $10^{-10}$ and is a check to assert rather than
+a property to assume. Third, a constructive object for ``the dependence a
+hierarchical bisection actually consulted'': a nested factor model with one
+latent factor per retained split of the same median-bisection tree HRP and
+Schur build, which drops into the $k$-factor calibration engine of
+\textcite{cotton2026factorprobit} with no new machinery and makes hierarchical
+portfolios the leading application. Fourth, the evidence: a known-truth
+contagious market on which the tilt is tested against plain HRP and Schur
+across the amount of tree retained, Schur's $\gamma$ and the sample size, and
+a replication across $12{,}000$ random trials on S\&P~500 and REIT
+sub-portfolios varying every choice the tilt does not control. Most of the
+gain is the race's own reallocation rather than correlation recovery, and the
+largest tilt, calibrated against an independent reference, is the best
+setting on real data.
 
-Third, a replication on real markets: the same comparison across $12{,}000$
-random trials on S\&P~500 and REIT sub-portfolios, varying every choice the
-repair itself does not control (estimation window, covariance estimator,
-sub-portfolio, $\gamma$). It confirms that correlation completion
-generalizes, and it sharpens rather than reverses the synthetic-market
-finding that most of the gain is a race-reallocation effect, not correlation
-recovery per se. Fourth, an honest accounting of what worked and what did
-not. Correlation completion helped substantially and survived every
-robustness check we ran. A sharper test of whether genuine tail dependence
-adds value \emph{beyond} correlation completion did not confirm the
-hypothesis on the synthetic market, and on real data the same test splits
-cleanly by universe (\Cref{sec:realmarket}): a modest win on one, a net
-loss on the other.
+Fifth, what did not work. A tail-aware Student-$t$ race is worse than the
+Gaussian one on both variance and shortfall, on a market built to have
+asymmetric tail dependence. The operator is not a fixed point of itself and
+should be applied once. And every comparison here is one-shot: the one result
+re-checked under a walk-forward protocol kept its turnover cost and lost most
+of its edge, which \cref{sec:scope} takes up.
 
 \section{Background}
 
