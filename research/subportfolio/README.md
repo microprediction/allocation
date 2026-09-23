@@ -62,6 +62,7 @@ run.py        sharded runner, one JSON per shard
 merge.py      combine shards, print the table
 smoke.py      twelve property checks, under a minute
 check_sharding.py  proves a result does not depend on how work was split
+rank_wall.py  does the restriction need the rank it cannot afford?
 launch.sh     fan across cores and merge
 results/      committed outputs
 ```
@@ -144,16 +145,10 @@ is visible rather than silently reducing the sample.
 ## Sizing the run
 
 Cost is dominated by one thing: calibrating abilities under a `k`-factor
-correlation. `winning`'s factor race is exponential in `k` and linear in `n`,
-which is filed as [winning#156](https://github.com/microprediction/winning/issues/156).
-Measured on one core, forward race at `n=200`, `points=257`:
-
-| k | seconds |
-|---|---|
-| 1 | 0.019 |
-| 2 | 0.059 |
-| 3 | 0.714 |
-| 4 | 6.151 |
+correlation. The rank dependence is set out under "What the rank actually
+costs" below; it rises to a peak at rank four and then plateaus, and the
+plateau is a flat constant rather than a curse of dimensionality. The `n`
+dependence is linear.
 
 Calibration converges in about 19 iterations and costs that many forward
 passes, so a three-factor calibration on 400 names is 26 seconds against 0.03
@@ -161,7 +156,7 @@ for the independent race. On a laptop the `mid` study takes roughly two
 minutes per draw, or about 50 minutes for 25 draws, which is why this moved
 here.
 
-That table is not enough to budget from, because the cost per forward pass
+Rank and `n` are not enough to budget from, because the cost per forward pass
 varies about fourfold between draws at identical `n` and `k`. Measured, one
 three-factor calibration at `n=400`:
 
@@ -177,23 +172,70 @@ solver. And concentration does not drive it: the draw holding six names was
 the fastest of the three.
 
 So budget from the worst case rather than the mean. **Seconds per draw is
-about `6.6 * n / 400 * f(k) / f(3) * (1 + |Ts|) * iterations`**, with
-iterations near 30. For the index study at `n=5000`, `k=2`, two panel lengths,
+about `6.6 * n / 400 * c(k) / c(3) * (1 + |Ts|) * iterations`**, with
+iterations near 30 and `c(k)` the per-rank cost from the table under "What the
+rank actually costs". For the index study at `n=5000`, `k=2`, two panel lengths,
 that is roughly three to four minutes per draw per core, or about fifteen
 minutes of wall clock for 256 draws on 64 workers.
 
 Record what you get. Every shard carries the iteration count and residual for
 each calibration, and `merge.py` prints the convergence rate beside the
 parent's concentration. `winning.calibrate_abilities` returns its last iterate
-after a warning when it fails
-([winning#149](https://github.com/microprediction/winning/issues/149)), so a
-row from a failed solve is not a measurement of the method and the merged
-table says so explicitly.
+after a warning when it fails, so a row from a failed solve is not a
+measurement of the method and the merged table says so explicitly. One such
+failure is fixed in
+[winning#163](https://github.com/microprediction/winning/pull/163): the warm
+start and step cap were in unit-variance units, so a field whose contrast
+standard deviation was 0.2 took steps of ten standard deviations and diverged.
+Others will exist, which is why this is recorded rather than assumed.
 
 Two consequences worth knowing before choosing sizes. Raising `k` from 2 to 3
 costs an order of magnitude and is the first thing to cut if the run is too
 slow. Raising `points` does nothing for `k=1` and doubles the cost for `k>=2`,
 so leave it alone.
+
+## What the rank actually costs
+
+The cost of the factor race against rank is not a curse of dimensionality. It
+rises to a peak at rank four and then falls back to a plateau, because
+winning's node rule escalates from a Gauss-Hermite tensor to scrambled Sobol
+once the tensor would exceed a hundred thousand nodes. Forward race at n=200,
+one thread:
+
+| rank | default rule | `qmc_nodes(r, m=13)` |
+|---|---|---|
+| 1 | 0.024s | 3.057s |
+| 2 | 0.071s | 3.230s |
+| 3 | 0.513s | 3.127s |
+| 4 | 4.180s | 3.101s |
+| 5 | 3.146s | 3.227s |
+| 6 | 3.090s | 3.045s |
+
+So rank five is cheaper than rank four, and the lever in the right column buys
+the plateau at rank four as well. I first filed this as an exponential
+([winning#156](https://github.com/microprediction/winning/issues/156)) having
+measured ranks one to four and extrapolated, and corrected it there.
+
+What binds is the plateau, and it is a flat constant of roughly 130 times the
+rank-one cost at any rank above three. Inversion runs a forward pass per
+Newton step and converges in about twenty, so a rank-five calibration is order
+a minute at n=200 and scales linearly in n. At five thousand names that is tens
+of minutes per calibration. Bounded, affordable in a single study, not
+affordable in a sweep.
+
+This study therefore uses two factors at index scale by budget, not because
+three is unavailable. Whether the third factor is worth its constant is what
+`rank_wall.py` measures, and the answer has to come from a market that has a
+third factor: on a rank-one market the question is already decided by the
+construction, which is how the first run of it was wasted.
+
+There is a second limit that may arrive first. An index holder has one or two
+years of weekly data, a hundred observations for a universe of thousands, and
+the higher eigenvectors of a correlation estimated from that panel are largely
+sampling noise. `rank_wall.py` reports the alignment of each sample direction
+with its population counterpart alongside the variance, so the two limits can
+be told apart: a factor that cannot be estimated cannot help however cheaply
+it could be raced.
 
 ## Interpreting the table
 

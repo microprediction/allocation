@@ -141,25 +141,75 @@ class MidMarket:
 # --------------------------------------------------------------------------
 
 class IndexMarket:
-    """Never dense. Parent is cap weights, exactly optimal by construction."""
+    """Never dense. Parent is cap weights, exactly optimal by construction.
+
+    `rank` is the number of factors in M. It matters for anything asking what
+    the restriction needs, because at rank 1 the market has only two
+    directions, the `11'` part and the factor, and a study of whether k=3
+    helps would be answering a question its own market has already decided.
+    """
 
     scale = "index"
 
-    def __init__(self, rng, n, solver=None, eps=10.0, tail=1.3):
-        b = rng.uniform(0.15, 0.75, n)
+    def __init__(self, rng, n, solver=None, eps=None, tail=1.3, rank=1,
+                 decay=0.6, target_corr=0.27):
         s = np.exp(rng.normal(0.0, 0.45, n))
-        self.v, self.d = b * s, (1.0 - b ** 2) * s ** 2
+        # rank loadings with geometrically decaying strength, so the factors
+        # are ordered and separated rather than exchangeable
+        scale = 0.6 * decay ** np.arange(rank)
+        B = rng.uniform(0.2, 1.0, (n, rank)) * scale
+        B *= rng.choice([-1.0, 1.0], (n, rank)) if rank > 1 else 1.0
+        comm = np.clip((B ** 2).sum(1), 1e-6, 0.95)
+        B = B / np.sqrt((B ** 2).sum(1) / comm)[:, None]
+        self.V = B * s[:, None]
+        self.d = (1.0 - comm) * s ** 2
+        self.rank = rank
+        # kept for the rank-1 callers and the premise algebra below
+        self.v = self.V[:, 0]
+        # eps sets the average pairwise correlation, and the correlation is
+        # the thing with a right answer: a broad equity index sits near a
+        # quarter. Solving for eps rather than fixing it keeps the market
+        # honest as the rank changes, because spreading the same communality
+        # over more factors lowers the average correlation at a fixed eps.
+        # At eps=10 a rank-3 market averages 0.10, which is not a market.
         cap = rng.pareto(tail, n) + 1.0
         self.parent = cap / cap.sum()
         self.u = self.parent / np.linalg.norm(self.parent)
-        self.Mu = self.v * (self.v @ self.u) + self.d * self.u
+        self.Mu = self._M_times(self.u)
         self.uMu = float(self.u @ self.Mu)
-        self.eps, self.n, self.family = eps, n, "implied one-factor"
+        self.n = n
+        self.eps = eps if eps is not None else self._solve_eps(rng, target_corr)
+        self.family = f"implied rank-{rank}"
+
+    def _M_times(self, x):
+        return self.V @ (self.V.T @ x) + self.d * x
+
+    def _solve_eps(self, rng, target, probe=150):
+        """Bisect eps so the average pairwise correlation hits the target.
+
+        Monotone: eps scales the whole QMQ' part against a fixed 11', so more
+        eps means less of the common unit term and lower correlation.
+        """
+        idx = np.sort(rng.choice(self.n, min(probe, self.n), replace=False))
+        def mean_corr(e):
+            self.eps = e
+            S = self.block(idx)
+            sd = np.sqrt(np.diag(S))
+            R = S / np.outer(sd, sd)
+            return float(R[~np.eye(len(idx), dtype=bool)].mean())
+        lo, hi = 1e-3, 1e4
+        for _ in range(60):
+            mid = np.sqrt(lo * hi)
+            if mean_corr(mid) > target:
+                lo = mid
+            else:
+                hi = mid
+        return float(np.sqrt(lo * hi))
 
     def block(self, idx):
-        """Sigma[idx, idx] in O(n + m^2), without forming Sigma."""
-        vs, us, ms = self.v[idx], self.u[idx], self.Mu[idx]
-        M = np.outer(vs, vs) + np.diag(self.d[idx])
+        """Sigma[idx, idx] in O(n r + m^2), without forming Sigma."""
+        Vs, us, ms = self.V[idx], self.u[idx], self.Mu[idx]
+        M = Vs @ Vs.T + np.diag(self.d[idx])
         C = (M - np.outer(us, ms) - np.outer(ms, us)
              + self.uMu * np.outer(us, us))
         S = 1.0 + self.eps * C
@@ -168,14 +218,14 @@ class IndexMarket:
     def panel(self, rng, T):
         """T observations from the true Sigma, in O(T n)."""
         g = rng.normal(size=T)                                  # the 11' part
-        f = rng.normal(size=T)
-        Z = f[:, None] * self.v + rng.normal(size=(T, self.n)) * np.sqrt(self.d)
+        f = rng.normal(size=(T, self.V.shape[1]))
+        Z = f @ self.V.T + rng.normal(size=(T, self.n)) * np.sqrt(self.d)
         Z = Z - np.outer(Z @ self.u, self.u)                    # Q M Q'
         return g[:, None] + np.sqrt(self.eps) * Z
 
     def sigma_times(self, w):
-        """Sigma w in O(n), without forming Sigma."""
-        Mw = self.v * (self.v @ w) + self.d * w
+        """Sigma w in O(n r), without forming Sigma."""
+        Mw = self._M_times(w)
         uw = float(self.u @ w)
         return (np.full_like(w, float(np.ones_like(w) @ w))
                 + self.eps * (Mw - self.u * float(self.u @ Mw)
