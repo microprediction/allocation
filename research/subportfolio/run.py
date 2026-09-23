@@ -39,7 +39,9 @@ def one_draw(args, g):
     """Run global draw index g. Returns a dict of method -> variance."""
     rng = np.random.default_rng([args.seed, g])
     Market = MARKETS[args.scale]
-    mk = Market(rng, args.n, solver=long_only_min_var)
+    kw = {} if args.scale == "mid" else {"rank": args.rank,
+                                         "target_corr": args.target_corr}
+    mk = Market(rng, args.n, solver=long_only_min_var, **kw)
 
     resid = mk.premise_residual()
     if resid > PREMISE_TOL:
@@ -80,6 +82,14 @@ def main():
     p.add_argument("--draws", type=int, default=25)
     p.add_argument("--seed", type=int, default=12)
     p.add_argument("--k", type=int, default=3, help="factors in the estimated correlation")
+    p.add_argument("--rank", type=int, default=5,
+                   help="true number of factors in the index market. A rank-1 "
+                        "market has only two directions and decides several "
+                        "questions by construction; 5 is the honest default.")
+    p.add_argument("--target-corr", dest="target_corr", type=float, default=0.27,
+                   help="average pairwise correlation the index market is "
+                        "solved to. Fixing eps instead gave 0.10 at rank 3, "
+                        "which is not an equity market.")
     p.add_argument("--Ts", type=int, nargs="+", default=[20, 40, 100],
                    help="panel lengths for the rules that use data")
     p.add_argument("--shard", type=int, default=0)

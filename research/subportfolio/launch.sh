@@ -17,9 +17,10 @@ WORKERS="${WORKERS:-$( (command -v nproc >/dev/null && nproc) || sysctl -n hw.nc
 
 case "$SCALE" in
   mid)   N="${N:-400}";  M="${M:-60}";  K="${K:-3}"; SEED="${SEED:-12}"
-         DRAWS="${DRAWS:-25}";  TS="${TS:-20 40 100}" ;;
+         DRAWS="${DRAWS:-25}";  TS="${TS:-20 40 100}"; EXTRA="" ;;
   index) N="${N:-5000}"; M="${M:-200}"; K="${K:-2}"; SEED="${SEED:-4}"
-         DRAWS="${DRAWS:-32}";  TS="${TS:-52 104}" ;;
+         DRAWS="${DRAWS:-32}";  TS="${TS:-52 104}"
+         RANK="${RANK:-5}"; EXTRA="--rank $RANK" ;;
   *) echo "usage: $0 [mid|index]" >&2; exit 2 ;;
 esac
 
@@ -35,6 +36,7 @@ echo "$TAG: $DRAWS draws over $WORKERS workers"
 for ((i = 0; i < WORKERS; i++)); do
   python run.py --scale "$SCALE" --n "$N" --m "$M" --k "$K" --seed "$SEED" \
     --draws "$DRAWS" --Ts $TS --shard "$i" --shards "$WORKERS" --tag "$TAG" \
+    $EXTRA \
     > "logs/${TAG}-shard${i}.log" 2>&1 &
 done
 wait

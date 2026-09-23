@@ -29,7 +29,7 @@ def main():
     mid = MidMarket(rng, 120, solver=long_only_min_var)
     check("mid parent stationary", mid.premise_residual() < 1e-6,
           f"residual {mid.premise_residual():.1e}")
-    idx_mk = IndexMarket(rng, 5000)
+    idx_mk = IndexMarket(rng, 5000, rank=5)
     check("index parent stationary", idx_mk.premise_residual() < 1e-9,
           f"residual {idx_mk.premise_residual():.1e}")
     check("index parent long only", idx_mk.parent.min() >= 0,
@@ -59,13 +59,15 @@ def main():
     check("V V' + D has unit diagonal", err < 1e-12, f"max departure {err:.1e}")
 
     print("\nthe race is a restriction, not a relabelling")
-    small = IndexMarket(np.random.default_rng(5), 300)
+    small = IndexMarket(np.random.default_rng(5), 300, rank=5)
     sub = np.sort(np.random.default_rng(6).choice(300, 40, replace=False))
     pw = proportional(small.parent, sub)
-    r = race(small.parent, sub)
+    r, rinfo = race(small.parent, sub)
     l1 = np.abs(r - pw).sum()
     check("race differs from proportional", l1 > 1e-3, f"L1 {l1:.4f}")
     check("race is a portfolio", abs(r.sum() - 1) < 1e-9 and r.min() >= 0)
+    check("race reports its calibration", rinfo["converged"],
+          f"{rinfo['iterations']} iterations, residual {rinfo['residual']:.1e}")
 
     print("\ncalibrating on the restricted field would return the input")
     a = np.asarray(__import__("winning").calibrate_abilities(
