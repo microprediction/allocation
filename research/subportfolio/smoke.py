@@ -12,7 +12,8 @@ from markets import (MidMarket, IndexMarket, effective_fraction,
                      REAL_EFFN_FRACTION)
 from rules import (long_only_min_var, long_only_max_sharpe, long_only_min_cvar,
                    expected_shortfall, factor_correlation, proportional, race,
-                   flattened, black_litterman, race_regime, estimate_and_solve)
+                   flattened, black_litterman, race_tail, race_sectors,
+                   sector_structure, estimate_and_solve)
 
 FAILS = []
 
@@ -156,13 +157,17 @@ def main():
     check("all 30 of a basket fall together about 3 times a year, not 1.4",
           2.0 < down < 4.5 and up < down, f"all-down {down:.1f}/yr, all-up {up:.1f}/yr")
 
-    print("\nthe race under the regime law reproduces the parent at zero tilt")
+    print("\nthe tail charts reproduce the parent at zero tilt")
     small_r = IndexMarket(np.random.default_rng(25), 300, law="regime")
     Xs = small_r.panel(np.random.default_rng(26), 200)
     _, Vs, Ds = factor_correlation(Xs, 2)
-    back = race_regime(small_r.parent, np.arange(300), Vs, Ds, small_r.regime())
-    check("regime race identity", np.abs(back - small_r.parent).sum() < 1e-7,
+    back = race_tail(small_r.parent, np.arange(300), Vs, Ds, small_r.regime())
+    check("crash-day chart identity", np.abs(back - small_r.parent).sum() < 1e-7,
           f"L1 {np.abs(back - small_r.parent).sum():.2e}")
+    cp_, ld_, dd_ = sector_structure(Xs, small_r.sector)
+    back2 = race_sectors(small_r.parent, np.arange(300), small_r.sector, cp_, ld_, dd_)
+    check("sector chart identity", np.abs(back2 - small_r.parent).sum() < 1e-6,
+          f"L1 {np.abs(back2 - small_r.parent).sum():.2e}")
 
     print("\nthe tail oracle really is the tail optimum")
     scen = small_r.panel(np.random.default_rng(27), 20000, sub)

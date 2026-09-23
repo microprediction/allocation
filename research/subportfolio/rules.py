@@ -179,35 +179,91 @@ def black_litterman(parent, idx, sd, V, D):
     return long_only_max_sharpe((S + S.T) / 2, Pi[idx])
 
 
-def race_regime(parent, idx, V, D, regime, iters=60, tol=1e-9):
-    """Calibrate on the parent field and race the survivors, under a two-regime
-    law: with probability 1 - p the field is the k-factor Gaussian race, with
-    probability p it is a crash day, performances shifted by -a |xi| times the
-    market loading with dispersion scaled by rho. Winning probabilities under a
-    mixture are the mixture of winning probabilities, so the race is two races
-    and the calibration a fixed point on their blend.
-
-    `regime` is (p, a, rho, beta): the crash probability, the shift multiple, the
-    dispersion factor, and the per-name market loading the shift acts on.
-    """
+def crash_law(V, D, regime):
+    """The crash-day law as a factor race: the k-factor correlation with
+    dispersion scaled by rho, plus one factor for the crash's random magnitude,
+    loading a * sd(|xi|) * beta. A deterministic shift and a common scale are
+    invisible to a race after calibration; the random magnitude is not."""
     p, a, rho, beta = regime
-    beta = np.asarray(beta, float)
-    shift = a * np.sqrt(2.0 / np.pi)           # E|xi|, the mean crash shift
+    Vx = np.column_stack([rho * np.asarray(V, float), np.sqrt(1.0 - 2.0 / np.pi) * a * np.asarray(beta, float)])
+    return Vx, rho ** 2 * np.asarray(D, float)
 
-    def mix(mu, Vk, Dk, bk):
-        normal = np.asarray(winning.race_probabilities(mu, V=Vk, D=Dk), float)
-        crash = np.asarray(winning.race_probabilities(mu + shift * bk, V=rho * Vk, D=rho ** 2 * Dk), float)
-        return (1.0 - p) * normal + p * crash
 
+def race_tail(parent, idx, V, D, regime):
+    """Calibrate on the parent field under the crash-day law and race the
+    survivors under it: the market read as its own answer to crash days."""
+    Vx, Dx = crash_law(V, D, regime)
+    return race(parent, idx, V=Vx, D=Dx)
+
+
+def race_avoid_worst(parent, idx, V, D, worst=0.10):
+    """Abilities from the parent under the k-factor law, read on the survivors
+    through a different chart: the probability of NOT being among the worst
+    `worst` share of the field. Weight is tail avoidance rather than winning."""
+    from winning.factor.topk import top_k_probabilities
+    a = np.asarray(winning.calibrate_abilities(
+        np.maximum(parent, 1e-12), target_floor=1e-12, V=V, D=D), float)
+    m = len(idx)
+    k = max(1, m - int(round(worst * m)))
+    q = np.asarray(top_k_probabilities(a[idx], k, V=V[idx], D=D[idx]), float)
+    q = np.maximum(q, 0.0)
+    return q / q.sum()
+
+
+def black_litterman_tail(parent, idx, sd, V, D, regime):
+    """Black-Litterman handed the crash-day covariance: the second-moment method
+    given the same tail law the race is given."""
+    Vx, Dx = crash_law(V, D, regime)
+    return black_litterman(parent, idx, sd, Vx, Dx)
+
+
+def sector_structure(X, sector):
+    """A nested factor structure from a panel with KNOWN sector labels, in
+    correlation units: one global factor (first principal component) with a
+    per-name coupling, one private factor per sector with a per-name loading,
+    and the idiosyncratic remainder. O(n T)."""
+    Z = X - X.mean(0)
+    Z = Z / np.where(Z.std(0, ddof=1) > 0, Z.std(0, ddof=1), 1.0)
+    T = len(Z)
+    _, sv, Wt = np.linalg.svd(Z, full_matrices=False)
+    f = Z @ Wt[0]                                   # global factor score
+    f = f / f.std(ddof=1)
+    coupling = (Z.T @ f) / (T - 1)
+    E = Z - np.outer(f, coupling)
+    loading = np.zeros(Z.shape[1])
+    for g in np.unique(sector):
+        mem = np.flatnonzero(sector == g)
+        if len(mem) < 2:
+            continue
+        s_g = E[:, mem].mean(1)
+        sd_g = s_g.std(ddof=1)
+        if sd_g > 0:
+            loading[mem] = (E[:, mem].T @ (s_g / sd_g)) / (T - 1)
+    D = np.clip(1.0 - coupling ** 2 - loading ** 2, 0.05, None)
+    scale = np.sqrt(coupling ** 2 + loading ** 2 + D)
+    return coupling / scale, loading / scale, D / scale ** 2
+
+
+def race_sectors(parent, idx, sector, coupling, loading, D, iters=60, tol=1e-9):
+    """Calibrate on the parent field under the nested law, one private factor
+    per sector plus a global factor, and race the survivors under it. The chart
+    a k-factor correlation cannot represent: it knows which names share a
+    sector, so a departed name's weight can flow to its own sector."""
+    from winning.factor.blocks import nested_race_probabilities, abilities_from_block_race
+    sector = np.asarray(sector); coupling = np.asarray(coupling, float)
+    loading = np.asarray(loading, float); D = np.asarray(D, float)
     target = np.maximum(np.asarray(parent, float), 1e-12)
     target = target / target.sum()
-    mu = np.asarray(winning.calibrate_abilities(target, target_floor=1e-12, V=V, D=D), float)
-    # Log-space fixed point with backtracking: a step is accepted only if it
-    # lowers the L1 residual, the damping grows on success and halves on
-    # failure, and the best iterate is kept. An undamped update reaches 1e-4
-    # and then diverges for the sharpest names; this cannot.
+
+    def fwd(mu, c, l, d, cp):
+        return np.asarray(nested_race_probabilities(mu, c, l, d, coupling=cp), float)
+
+    m0 = abilities_from_block_race(target, sector, loading, D)
+    mu = np.asarray(m0[0] if isinstance(m0, tuple) else m0, float)
+    mu = mu - mu.mean()
+
     def residual(m_):
-        pr = np.maximum(mix(m_, V, D, beta), 1e-300)
+        pr = np.maximum(fwd(m_, sector, loading, D, coupling), 1e-300)
         return float(np.abs(pr - target).sum()), pr
 
     resid, pr = residual(mu)
@@ -226,16 +282,11 @@ def race_regime(parent, idx, V, D, regime, iters=60, tol=1e-9):
                 break
             damp *= 0.5
         else:
-            break                              # no decrease at any step size
+            break
     if resid > 1e-6:
-        # Never hand back the last iterate as if it were the answer. Under a
-        # mixture law the fixed point can stall; a stalled calibration means
-        # phi = 0 is already a tilt and every number downstream is wrong by an
-        # amount nothing announces.
-        raise ValueError(f"race_regime did not converge: L1 residual {resid:.2e} "
-                         f"after {iters} iterations")
-    sub = mix(mu[idx], V[idx], D[idx], beta[idx])
-    return sub / sub.sum()
+        raise ValueError(f"race_sectors did not converge: L1 residual {resid:.2e}")
+    w = fwd(mu[idx], sector[idx], loading[idx], D[idx], coupling[idx])
+    return w / w.sum()
 
 
 def estimate_and_solve(X, idx):

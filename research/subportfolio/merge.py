@@ -48,13 +48,20 @@ def main():
     est_Ts = cfg.get("Ts_est") or Ts
     order = (["equal weight", "proportional", "flattened", "race"]
              + [f"race+factor T={t}" for t in Ts]
-             + [f"race+regime T={t}" for t in Ts]
+             + [f"race avoid-worst-10% T={t}" for t in Ts]
+             + [f"race+sectors T={t}" for t in Ts]
+             + [f"race+tail T={t}" for t in Ts]
              + [f"black-litterman T={t}" for t in est_Ts]
+             + [f"BL tail T={t}" for t in est_Ts]
              + [f"estimate+solve T={t}" for t in est_Ts]
              + ["oracle", "tail oracle"])
-    order = [k for k in order if all(k in r for r in rows)]
-    res = {k: np.array([r[k] for r in rows]) for k in order}
-    base = res["proportional"]
+    # A rule is reported over the draws that have it, paired with proportional
+    # on those same draws, so a run restarted with new rules keeps its old draws.
+    order = [k for k in order if any(k in r for r in rows)]
+    have = {k: [r for r in rows if k in r] for k in order}
+    res = {k: np.array([r[k] for r in have[k]]) for k in order}
+    bases = {k: np.array([r["proportional"] for r in have[k]]) for k in order}
+    base = bases["proportional"]
 
     print(f"\n{cfg['scale']} scale: parent {cfg['n']} names, sub-universe "
           f"{cfg['m']}, {len(rows)} draws, {cfg['k']}-factor correlation.")
@@ -85,24 +92,26 @@ def main():
         print(f"{k}: did not converge on {c} of {len(rows)} draws (left out of its row)")
     print(f"{'method':26s}{'sharpe':>9s}{'x prop':>9s}{'bps vs prop':>13s}{'beats it':>10s}")
     for k in order:
-        x = res[k]
-        bps = "" if k == "proportional" else f"{1e4 * VOL * np.nanmedian(x - base):+12.0f}"
-        note = "" if k == "proportional" else f"{np.mean(x[~np.isnan(x)] > base[~np.isnan(x)]):9.0%}"
-        print(f"{k:26s}{np.nanmedian(x):9.4f}{np.nanmedian(x / base):9.3f}{bps:>13s}{note}")
+        x, b = res[k], bases[k]
+        ok = ~np.isnan(x)
+        bps = "" if k == "proportional" else f"{1e4 * VOL * np.nanmedian(x - b):+12.0f}"
+        note = "" if k == "proportional" else f"{np.mean(x[ok] > b[ok]):9.0%}"
+        n_k = "" if len(x) == len(rows) else f"  ({len(x)} draws)"
+        print(f"{k:26s}{np.nanmedian(x):9.4f}{np.nanmedian(x / b):9.3f}{bps:>13s}{note}{n_k}")
 
     # The tail analogue of Sharpe: expected return per unit of expected
     # shortfall at 95% under the true law (the STARR ratio). Higher is better,
     # and it is what the tail oracle maximises. Raw es95 is kept in the rows.
-    st_keys = [k for k in order if all(("starr " + k) in r for r in rows)]
+    st_keys = [k for k in order if any(("starr " + k) in r for r in rows)]
     if st_keys:
-        st = {k: np.array([r["starr " + k] for r in rows]) for k in st_keys}
-        sb = st["proportional"]
         print()
         print(f"{'method':26s}{'starr':>9s}{'x prop':>9s}{'beats it':>10s}")
         for k in st_keys:
-            x = st[k]
-            note = "" if k == "proportional" else f"{np.mean(x[~np.isnan(x)] > sb[~np.isnan(x)]):9.0%}"
-            print(f"{k:26s}{np.nanmedian(x):9.4f}{np.nanmedian(x / sb):9.3f}{note}")
+            hk = [r for r in rows if ("starr " + k) in r]
+            x = np.array([r["starr " + k] for r in hk]); b = np.array([r["starr proportional"] for r in hk])
+            ok = ~np.isnan(x)
+            note = "" if k == "proportional" else f"{np.mean(x[ok] > b[ok]):9.0%}"
+            print(f"{k:26s}{np.nanmedian(x):9.4f}{np.nanmedian(x / b):9.3f}{note}")
 
 
 if __name__ == "__main__":

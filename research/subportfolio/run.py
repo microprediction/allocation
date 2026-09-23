@@ -32,7 +32,8 @@ from markets import MARKETS
 from rules import (long_only_min_var, long_only_max_sharpe, long_only_min_cvar,
                    expected_shortfall, factor_correlation, factor_covariance,
                    proportional, race, flattened, black_litterman,
-                   race_regime, estimate_and_solve)
+                   race_tail, race_avoid_worst, black_litterman_tail,
+                   sector_structure, race_sectors, estimate_and_solve)
 
 PREMISE_TOL = 1e-9      # the premise holds by construction; this catches bugs
 
@@ -107,18 +108,26 @@ def one_draw(args, g):
         if T in set(args.Ts):
             _, V, D = factor_correlation(X, args.k)
             row[f"race+factor T={T}"] = score(race(mk.parent, idx, V=V, D=D), f"race+factor T={T}")
-            if getattr(mk, "pc", 0.0) > 0:
-                name = f"race+regime T={T}"
+            row[f"race avoid-worst-10% T={T}"] = score(
+                race_avoid_worst(mk.parent, idx, V, D, 0.10), f"race avoid-worst-10% T={T}")
+            if hasattr(mk, "sector"):
+                name = f"race+sectors T={T}"
                 try:
-                    row[name] = score(race_regime(mk.parent, idx, V, D, mk.regime()), name)
+                    cp, ld, dd = sector_structure(X, mk.sector)
+                    row[name] = score(race_sectors(mk.parent, idx, mk.sector, cp, ld, dd), name)
                 except ValueError as err:       # recorded, not hidden
                     row[name] = row_es["es95 " + name] = row_es["starr " + name] = float("nan")
                     row.setdefault("failed", []).append(f"{name}: {err}")
+            if getattr(mk, "pc", 0.0) > 0:
+                row[f"race+tail T={T}"] = score(race_tail(mk.parent, idx, V, D, mk.regime()), f"race+tail T={T}")
         if T in set(est_Ts):
             row[f"estimate+solve T={T}"] = score(estimate_and_solve(X, idx), f"estimate+solve T={T}")
             sd, Vc, Dc = factor_covariance(X, args.k)
             row[f"black-litterman T={T}"] = score(
                 black_litterman(mk.parent, idx, sd, Vc, Dc), f"black-litterman T={T}")
+            if getattr(mk, "pc", 0.0) > 0:
+                row[f"BL tail T={T}"] = score(
+                    black_litterman_tail(mk.parent, idx, sd, Vc, Dc, mk.regime()), f"BL tail T={T}")
     row.update(row_es)
     return row
 
