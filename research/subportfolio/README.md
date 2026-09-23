@@ -178,6 +178,17 @@ rank actually costs". For the index study at `n=5000`, `k=2`, two panel lengths,
 that is roughly three to four minutes per draw per core, or about fifteen
 minutes of wall clock for 256 draws on 64 workers.
 
+One draw is not a sample. Timing a single draw at n=5000 gave 37 seconds and I
+reported that the whole study was minutes of work. Across 14 draws the real
+distribution is 350s minimum, 1595s median, 2233s maximum, so that draw was 43
+times faster than typical and the study is an hour and a half on six workers
+rather than minutes. The spread is the sharpness threshold again: a draw whose
+sharpest name pushes the field onto the Sobol rule costs several times one that
+stays on Gauss-Hermite, and which draws those are is not predictable in advance.
+
+Budget from a timed sample of at least ten draws, and expect the tail rather
+than the median to set your wall clock, because the slowest shard finishes last.
+
 Record what you get. Every shard carries the iteration count and residual for
 each calibration, and `merge.py` prints the convergence rate beside the
 parent's concentration. `winning.calibrate_abilities` returns its last iterate
