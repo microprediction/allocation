@@ -42,6 +42,7 @@ command -v caffeinate >/dev/null 2>&1 && CAFF="caffeinate -ims"
 
 SCALE="${1:-mid}"
 SUBSET="${SUBSET:-random}"
+LAW="${LAW:-gaussian}"
 # Leave headroom. Taking every core makes the machine unusable for whoever is
 # sitting at it, and the last few workers buy very little: the draws are
 # independent, so the run is already near-linear well short of saturation.
@@ -59,7 +60,7 @@ case "$SCALE" in
   *) echo "usage: $0 [mid|index]" >&2; exit 2 ;;
 esac
 
-TAG="${SCALE}-${SUBSET}-n${N}-m${M}-k${K}-s${SEED}"
+TAG="${SCALE}-${SUBSET}-${LAW}-n${N}-m${M}-k${K}-s${SEED}"
 THREADS="${THREADS:-$(( WORKERS > 0 ? (NCPU - RESERVE) / WORKERS : 1 ))}"
 [ "$THREADS" -lt 1 ] && THREADS=1
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
@@ -73,7 +74,7 @@ echo "checking the install before spending anything long"
 mkdir -p results logs
 echo "$TAG: $DRAWS draws over $WORKERS workers"
 for ((i = 0; i < WORKERS; i++)); do
-  $CAFF "$PY" run.py --scale "$SCALE" --n "$N" --m "$M" --k "$K" --seed "$SEED" --subset "$SUBSET" \
+  $CAFF "$PY" run.py --scale "$SCALE" --n "$N" --m "$M" --k "$K" --seed "$SEED" --subset "$SUBSET" --law "$LAW" \
     --draws "$DRAWS" --Ts $TS --Ts-est $TS_EST \
     --shard "$i" --shards "$WORKERS" --tag "$TAG" \
     > "logs/${TAG}-shard${i}.log" 2>&1 &

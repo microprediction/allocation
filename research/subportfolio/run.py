@@ -29,9 +29,10 @@ import numpy as np
 import winning
 
 from markets import MARKETS
-from rules import (long_only_min_var, long_only_max_sharpe, factor_correlation,
-                   factor_covariance, proportional, race, flattened,
-                   black_litterman, estimate_and_solve)
+from rules import (long_only_min_var, long_only_max_sharpe, long_only_min_cvar,
+                   expected_shortfall, factor_correlation, factor_covariance,
+                   proportional, race, flattened, black_litterman,
+                   race_regime, estimate_and_solve)
 
 PREMISE_TOL = 1e-9      # the premise holds by construction; this catches bugs
 
@@ -56,7 +57,8 @@ def one_draw(args, g):
     """Run global draw index g. Returns a dict of method -> variance."""
     rng = np.random.default_rng([args.seed, g])
     Market = MARKETS[args.scale]
-    mk = Market(rng, args.n, solver=long_only_min_var)
+    kw = {"law": args.law} if args.scale == "index" else {}
+    mk = Market(rng, args.n, solver=long_only_min_var, **kw)
 
     resid = mk.premise_residual()
     if resid > PREMISE_TOL:
@@ -67,19 +69,29 @@ def one_draw(args, g):
     m_S = mk.m[idx]
     ev = np.linalg.eigvalsh(Sub)
 
-    def score(w):
+    # Two scores per rule. Sharpe is exact from (Sigma, m). Expected shortfall
+    # is under the true LAW, from a scenario sample of the sub-universe, which
+    # is where a regime the covariance cannot carry shows up.
+    scen = mk.panel(np.random.default_rng([args.seed, g, 7]), args.scenarios, idx)
+    row_es = {}
+
+    def score(w, name):
         w = np.asarray(w, float)
+        es = expected_shortfall(scen, w)
+        row_es["es95 " + name] = es
+        row_es["starr " + name] = float(w @ m_S) / es      # return per unit of shortfall
         return float(w @ m_S) / float(np.sqrt(w @ Sub @ w))
 
     row = {"draw": g, "family": mk.family, "objective": "sharpe",
            "premise_residual": resid,
            "min_eig": float(ev.min()), "parent_effective_n":
            float(1.0 / np.sum(mk.parent ** 2))}
-    row["equal weight"] = score(np.full(args.m, 1.0 / args.m))
-    row["proportional"] = score(proportional(mk.parent, idx))
-    row["flattened"] = score(flattened(mk.parent, idx))
-    row["race"] = score(race(mk.parent, idx))
-    row["oracle"] = score(long_only_max_sharpe(Sub, m_S))
+    row["equal weight"] = score(np.full(args.m, 1.0 / args.m), "equal weight")
+    row["proportional"] = score(proportional(mk.parent, idx), "proportional")
+    row["flattened"] = score(flattened(mk.parent, idx), "flattened")
+    row["race"] = score(race(mk.parent, idx), "race")
+    row["oracle"] = score(long_only_max_sharpe(Sub, m_S), "oracle")
+    row["tail oracle"] = score(long_only_min_cvar(scen, m_S), "tail oracle")
 
     # Two T grids, because the two rules cost three orders of magnitude apart.
     # race+factor calibrates under a k-factor correlation, which is 68 core-
@@ -94,12 +106,20 @@ def one_draw(args, g):
         X = mk.panel(rng, T)
         if T in set(args.Ts):
             _, V, D = factor_correlation(X, args.k)
-            row[f"race+factor T={T}"] = score(race(mk.parent, idx, V=V, D=D))
+            row[f"race+factor T={T}"] = score(race(mk.parent, idx, V=V, D=D), f"race+factor T={T}")
+            if getattr(mk, "pc", 0.0) > 0:
+                name = f"race+regime T={T}"
+                try:
+                    row[name] = score(race_regime(mk.parent, idx, V, D, mk.regime()), name)
+                except ValueError as err:       # recorded, not hidden
+                    row[name] = row_es["es95 " + name] = row_es["starr " + name] = float("nan")
+                    row.setdefault("failed", []).append(f"{name}: {err}")
         if T in set(est_Ts):
-            row[f"estimate+solve T={T}"] = score(estimate_and_solve(X, idx))
+            row[f"estimate+solve T={T}"] = score(estimate_and_solve(X, idx), f"estimate+solve T={T}")
             sd, Vc, Dc = factor_covariance(X, args.k)
             row[f"black-litterman T={T}"] = score(
-                black_litterman(mk.parent, idx, sd, Vc, Dc))
+                black_litterman(mk.parent, idx, sd, Vc, Dc), f"black-litterman T={T}")
+    row.update(row_es)
     return row
 
 
@@ -114,6 +134,12 @@ def main():
     p.add_argument("--k", type=int, default=3, help="factors in the estimated correlation")
     p.add_argument("--subset", choices=["random", "sector"], default="random",
                    help="how the sub-universe is chosen")
+    p.add_argument("--law", choices=["gaussian", "regime"], default="gaussian",
+                   help="the true law: gaussian, or gaussian plus crash and cascade days")
+    p.add_argument("--scenarios", type=int, default=20000,
+                   help="true-law scenarios for scoring expected shortfall; the "
+                        "tail oracle is fitted on the same sample, so it is an "
+                        "in-sample bound by construction")
     p.add_argument("--Ts", type=int, nargs="+", default=[20, 40, 100],
                    help="panel lengths for race+factor (the expensive rule)")
     p.add_argument("--Ts-est", type=int, nargs="+", default=None,
@@ -127,7 +153,7 @@ def main():
 
     if not 0 <= a.shard < a.shards:
         p.error("--shard must be in [0, --shards)")
-    tag = a.tag or f"{a.scale}-{a.subset}-n{a.n}-m{a.m}-k{a.k}-s{a.seed}"
+    tag = a.tag or f"{a.scale}-{a.subset}-{a.law}-n{a.n}-m{a.m}-k{a.k}-s{a.seed}"
     mine = [g for g in range(a.draws) if g % a.shards == a.shard]
     Path(a.out).mkdir(parents=True, exist_ok=True)
     dest = Path(a.out) / f"{tag}-shard{a.shard}of{a.shards}.json"

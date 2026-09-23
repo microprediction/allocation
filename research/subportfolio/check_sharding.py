@@ -32,6 +32,11 @@ import tempfile
 
 ARGS = ["--scale", "mid", "--n", "80", "--m", "20", "--draws", "6",
         "--k", "2", "--Ts", "30"]
+# Any arguments given on the command line replace ARGS, so the check can be
+# pointed at another scale or law:
+#   python check_sharding.py --scale index --law regime --n 600 --m 40 --draws 6 --k 2 --Ts 30 --scenarios 4000
+if len(sys.argv) > 1:
+    ARGS = sys.argv[1:]
 
 
 def run_config(out, shards):
