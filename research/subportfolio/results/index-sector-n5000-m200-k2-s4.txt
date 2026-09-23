@@ -1,0 +1,27 @@
+
+index scale: parent 5000 names, sub-universe 200, 500 draws, 2-factor correlation.
+8 shard files.
+premise: the parent is the exact optimum of the true covariance to 0.0e+00 relative, worst draw.
+markets: sector market; parent holds 217 effective names.
+built by: winning 1.5.0 (/Users/petercotton/github/allocation/allocation-py312/lib/python3.12/site-packages/winning), numpy 2.4.6, python 3.12.13
+
+method                       sharpe   x prop  bps vs prop  beats it
+equal weight                 0.5398    1.016          +14      89%
+proportional                 0.5275    1.000             
+flattened                    0.5360    1.011           +9      95%
+race                         0.5364    1.012          +10      94%
+race+factor T=52             0.5423    1.024          +20     100%
+race+factor T=104            0.5424    1.025          +21     100%
+black-litterman T=26         0.5468    1.032          +27      99%
+black-litterman T=52         0.5477    1.032          +28      99%
+black-litterman T=78         0.5475    1.033          +28     100%
+black-litterman T=104        0.5477    1.033          +28      99%
+black-litterman T=156        0.5476    1.033          +28     100%
+black-litterman T=260        0.5478    1.034          +29     100%
+estimate+solve T=26          0.4524    0.859         -120       3%
+estimate+solve T=52          0.4619    0.876         -104       3%
+estimate+solve T=78          0.4644    0.881         -101       3%
+estimate+solve T=104         0.4656    0.886          -97       3%
+estimate+solve T=156         0.4688    0.889          -94       3%
+estimate+solve T=260         0.4696    0.890          -94       4%
+oracle                       0.5681    1.075          +63     100%
