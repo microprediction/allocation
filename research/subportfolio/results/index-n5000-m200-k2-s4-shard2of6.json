@@ -1,0 +1,130 @@
+{
+ "config": {
+  "scale": "index",
+  "n": 5000,
+  "m": 200,
+  "draws": 18,
+  "seed": 4,
+  "k": 2,
+  "rank": 5,
+  "target_corr": 0.27,
+  "Ts": [
+   52,
+   104
+  ],
+  "shard": 2,
+  "shards": 6,
+  "out": "results",
+  "tag": "index-n5000-m200-k2-s4"
+ },
+ "rows": [
+  {
+   "draw": 2,
+   "family": "implied rank-5",
+   "premise_residual": 5.551115123125783e-16,
+   "min_eig": 0.22349068642547662,
+   "parent_effective_n": 487.9032903720536,
+   "equal weight": 1.0168919977318818,
+   "proportional": 1.0359511777041792,
+   "race": 1.0246813622623927,
+   "calib race": {
+    "converged": true,
+    "residual": 1.69908398461871e-09,
+    "iterations": 6
+   },
+   "oracle": 1.0070881483842569,
+   "parent_top_weight": 0.020763379937523203,
+   "parent_names_held": 5000,
+   "race+factor T=52": 1.0191448031440868,
+   "calib race+factor T=52": {
+    "converged": true,
+    "residual": 6.8039760492411006e-09,
+    "iterations": 29
+   },
+   "estimate+solve T=52": 1.359190061491071,
+   "race+factor T=104": 1.0164520652051032,
+   "calib race+factor T=104": {
+    "converged": true,
+    "residual": 8.600146372828021e-09,
+    "iterations": 29
+   },
+   "estimate+solve T=104": 1.307584164588714
+  },
+  {
+   "draw": 8,
+   "family": "implied rank-5",
+   "premise_residual": 4.440892098500624e-16,
+   "min_eig": 0.3146470906644098,
+   "parent_effective_n": 210.74706971941393,
+   "equal weight": 1.0204250766505143,
+   "proportional": 2.5785528693866304,
+   "race": 1.2870078392087092,
+   "calib race": {
+    "converged": true,
+    "residual": 5.110565304278225e-10,
+    "iterations": 7
+   },
+   "oracle": 1.0082525919737635,
+   "parent_top_weight": 0.03633173745702941,
+   "parent_names_held": 5000,
+   "race+factor T=52": 1.1809747559390118,
+   "calib race+factor T=52": {
+    "converged": true,
+    "residual": 7.635060583766062e-09,
+    "iterations": 27
+   },
+   "estimate+solve T=52": 1.4488637374196314,
+   "race+factor T=104": 1.1576766352569647,
+   "calib race+factor T=104": {
+    "converged": true,
+    "residual": 5.409038550396872e-09,
+    "iterations": 27
+   },
+   "estimate+solve T=104": 1.1642925916450175
+  },
+  {
+   "draw": 14,
+   "family": "implied rank-5",
+   "premise_residual": 4.440892098500627e-16,
+   "min_eig": 0.1427546567357503,
+   "parent_effective_n": 66.55621786842718,
+   "equal weight": 1.0180687316200978,
+   "proportional": 1.0438029963324134,
+   "race": 1.026038440056669,
+   "calib race": {
+    "converged": true,
+    "residual": 4.1574965692348087e-10,
+    "iterations": 8
+   },
+   "oracle": 1.0085873863316,
+   "parent_top_weight": 0.1025900464087919,
+   "parent_names_held": 5000,
+   "race+factor T=52": 1.018604881064403,
+   "calib race+factor T=52": {
+    "converged": true,
+    "residual": 7.547816593955758e-09,
+    "iterations": 26
+   },
+   "estimate+solve T=52": 1.4137505920919842,
+   "race+factor T=104": 1.0186883356360998,
+   "calib race+factor T=104": {
+    "converged": true,
+    "residual": 7.0238623806062606e-09,
+    "iterations": 24
+   },
+   "estimate+solve T=104": 1.2131660711986365
+  }
+ ],
+ "elapsed_seconds": 7877.357419013977,
+ "host": "Peters-MacBook-Air-3.local",
+ "python": "3.12.9",
+ "numpy": "2.4.6",
+ "winning": "1.6.0",
+ "winning_path": "/Users/petercotton/github/winning/winning",
+ "threads": {
+  "OMP_NUM_THREADS": "1",
+  "OPENBLAS_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "VECLIB_MAXIMUM_THREADS": "1"
+ }
+}

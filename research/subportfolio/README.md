@@ -248,6 +248,59 @@ with its population counterpart alongside the variance, so the two limits can
 be told apart: a factor that cannot be estimated cannot help however cheaply
 it could be raced.
 
+## What it found
+
+At index scale, 5000 names restricted to 200, on a market with true rank five
+and average pairwise correlation 0.27. Eighteen draws, scored against the true
+sub-covariance, paired sign tests.
+
+| comparison | draws won | median ratio | p |
+|---|---|---|---|
+| race < proportional | 18 / 18 | 0.9678 | 0.000 |
+| race + factor < race | 17 / 18 | 0.9887 | 0.000 |
+| equal weight < race + factor | 12 / 18 | 0.9953 | 0.119 |
+| oracle < equal weight | 18 / 18 | 0.9869 | 0.000 |
+
+Proportional restriction is beaten by everything, unanimously and by a wide
+margin, which settles the practical question the study was built for: the rule
+in universal use is the worst sensible rule available. The race improves on it
+by 3.2 percent on every draw, and a two-factor correlation adds a further 1.1
+percent on seventeen of eighteen.
+
+Equal weight matches the race. Twelve draws of eighteen and p = 0.119 is a tie,
+not a win, and the two rules capture 71 and 67 percent of the room the oracle
+shows to exist. So the Thurstone machinery is directionally right, reliable,
+and adds nothing here over a rule that uses no information at all.
+
+The reason is not that the race under-diversifies. On a representative draw:
+
+| rule | effective names | top weight | variance |
+|---|---|---|---|
+| proportional | 15 | 0.237 | 1.3285 |
+| race | 62 | 0.096 | 1.1014 |
+| race + factor | 57 | 0.081 | 1.0591 |
+| equal weight | 200 | 0.005 | 1.0255 |
+| oracle | 73 | 0.063 | 1.0080 |
+
+The race lands at 62 effective names against the oracle's 73, while equal
+weight sits at 200 and is nowhere near it. The race gets the degree of
+concentration nearly right and ties anyway, which means it is choosing among
+names no better than chance at a scale where choosing well would pay. What
+beats proportional restriction is diversification as such, and the cheapest
+way to buy it wins.
+
+One rule is worse than doing nothing. Estimating a 200 by 200 covariance from
+52 or 104 observations and optimising returns 1.202 and 1.108 against
+proportional, beating it on 17 and 22 percent of draws. With a sub-universe
+that size and a panel that short, the estimate destroys more than the optimiser
+recovers.
+
+What would change this conclusion: a sub-universe chosen by a screen rather
+than at random, since a random 200 of 5000 has no structure for the parent
+weights to carry; a market whose sub-blocks differ more from the parent; or a
+parent that is not a power law, since the concentration of proportional
+restriction is what every other rule is beating.
+
 ## Interpreting the table
 
 `merge.py` reports the median ratio to proportional restriction and the share

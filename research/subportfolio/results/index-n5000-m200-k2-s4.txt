@@ -1,0 +1,21 @@
+
+index scale: parent 5000 names, sub-universe 200, 18 draws, 2-factor correlation.
+6 shard files.
+premise: the parent is the exact optimum of the true covariance to 1.6e-15 relative, worst draw.
+markets: implied rank-5; parent holds 203 effective names.
+built by: winning 1.6.0 (/Users/petercotton/github/winning/winning), numpy 2.4.6, python 3.12.9
+
+method                       variance  vs proportional  beats it
+equal weight                  1.02041            0.957      94%
+proportional                  1.07291            1.000
+race                          1.04181            0.968     100%
+race+factor T=52              1.02609            0.956     100%
+estimate+solve T=52           1.35579            1.202      17%
+race+factor T=104             1.02801            0.959     100%
+estimate+solve T=104          1.19572            1.108      22%
+oracle                        1.00754            0.940     100%
+
+parent concentration: holds 5000 names (min 5000), top weight 0.040 (max 0.366)
+  race                     converged   100%, median   7 iterations, worst residual 9.6e-09
+  race+factor T=52         converged   100%, median  27 iterations, worst residual 9.9e-09
+  race+factor T=104        converged   100%, median  26 iterations, worst residual 9.6e-09
