@@ -74,6 +74,34 @@ def long_only_max_sharpe(C, mu):
     return x / t if t > 0 else np.full(m, 1.0 / m)
 
 
+def long_only_min_cvar(scen, mu, alpha=0.95):
+    """Long-only portfolio with the least expected shortfall per unit of expected
+    return: minimise CVaR_alpha of the loss over scenarios `scen` (S x m, zero
+    mean) subject to mu'w = 1 and w >= 0, then rescale to the budget. The
+    Rockafellar-Uryasev linear program; the tail counterpart of
+    long_only_max_sharpe."""
+    S, m = scen.shape
+    mu = np.asarray(mu, float)
+    if m == 1 or not np.any(mu > 0):
+        return np.full(m, 1.0 / m)
+    w = cp.Variable(m); t = cp.Variable(); u = cp.Variable(S, nonneg=True)
+    prob = cp.Problem(cp.Minimize(t + cp.sum(u) / (S * (1.0 - alpha))),
+                      [u >= -(scen @ w) - t, mu @ w == 1, w >= 0])
+    prob.solve(solver=cp.CLARABEL)
+    if w.value is None:
+        return np.full(m, 1.0 / m)
+    x = np.maximum(np.asarray(w.value, float), 0.0)
+    tot = x.sum()
+    return x / tot if tot > 0 else np.full(m, 1.0 / m)
+
+
+def expected_shortfall(scen, w, alpha=0.95):
+    """Mean loss in the worst (1 - alpha) share of scenarios, for portfolio w."""
+    loss = -(scen @ np.asarray(w, float))
+    k = max(1, int(round((1.0 - alpha) * len(loss))))
+    return float(np.sort(loss)[-k:].mean())
+
+
 def factor_correlation(X, k):
     """A k-factor form of the CORRELATION of X, with unit diagonal.
 
@@ -149,6 +177,65 @@ def black_litterman(parent, idx, sd, V, D):
     Vi, Di, si = V[idx], D[idx], sd[idx]
     S = np.outer(si, si) * (Vi @ Vi.T + np.diag(Di))
     return long_only_max_sharpe((S + S.T) / 2, Pi[idx])
+
+
+def race_regime(parent, idx, V, D, regime, iters=60, tol=1e-9):
+    """Calibrate on the parent field and race the survivors, under a two-regime
+    law: with probability 1 - p the field is the k-factor Gaussian race, with
+    probability p it is a crash day, performances shifted by -a |xi| times the
+    market loading with dispersion scaled by rho. Winning probabilities under a
+    mixture are the mixture of winning probabilities, so the race is two races
+    and the calibration a fixed point on their blend.
+
+    `regime` is (p, a, rho, beta): the crash probability, the shift multiple, the
+    dispersion factor, and the per-name market loading the shift acts on.
+    """
+    p, a, rho, beta = regime
+    beta = np.asarray(beta, float)
+    shift = a * np.sqrt(2.0 / np.pi)           # E|xi|, the mean crash shift
+
+    def mix(mu, Vk, Dk, bk):
+        normal = np.asarray(winning.race_probabilities(mu, V=Vk, D=Dk), float)
+        crash = np.asarray(winning.race_probabilities(mu + shift * bk, V=rho * Vk, D=rho ** 2 * Dk), float)
+        return (1.0 - p) * normal + p * crash
+
+    target = np.maximum(np.asarray(parent, float), 1e-12)
+    target = target / target.sum()
+    mu = np.asarray(winning.calibrate_abilities(target, target_floor=1e-12, V=V, D=D), float)
+    # Log-space fixed point with backtracking: a step is accepted only if it
+    # lowers the L1 residual, the damping grows on success and halves on
+    # failure, and the best iterate is kept. An undamped update reaches 1e-4
+    # and then diverges for the sharpest names; this cannot.
+    def residual(m_):
+        pr = np.maximum(mix(m_, V, D, beta), 1e-300)
+        return float(np.abs(pr - target).sum()), pr
+
+    resid, pr = residual(mu)
+    damp = 0.3
+    for _ in range(iters):
+        if resid < tol:
+            break
+        step = np.log(pr) - np.log(target)
+        for _try in range(12):
+            cand = mu + damp * step
+            cand = cand - cand.mean()
+            r_new, pr_new = residual(cand)
+            if r_new < resid:
+                mu, resid, pr = cand, r_new, pr_new
+                damp = min(1.0, damp * 1.3)
+                break
+            damp *= 0.5
+        else:
+            break                              # no decrease at any step size
+    if resid > 1e-6:
+        # Never hand back the last iterate as if it were the answer. Under a
+        # mixture law the fixed point can stall; a stalled calibration means
+        # phi = 0 is already a tilt and every number downstream is wrong by an
+        # amount nothing announces.
+        raise ValueError(f"race_regime did not converge: L1 residual {resid:.2e} "
+                         f"after {iters} iterations")
+    sub = mix(mu[idx], V[idx], D[idx], beta[idx])
+    return sub / sub.sum()
 
 
 def estimate_and_solve(X, idx):

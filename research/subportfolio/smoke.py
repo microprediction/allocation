@@ -10,9 +10,9 @@ import numpy as np
 
 from markets import (MidMarket, IndexMarket, effective_fraction,
                      REAL_EFFN_FRACTION)
-from rules import (long_only_min_var, long_only_max_sharpe, factor_correlation,
-                   proportional, race, flattened, black_litterman,
-                   estimate_and_solve)
+from rules import (long_only_min_var, long_only_max_sharpe, long_only_min_cvar,
+                   expected_shortfall, factor_correlation, proportional, race,
+                   flattened, black_litterman, race_regime, estimate_and_solve)
 
 FAILS = []
 
@@ -134,6 +134,47 @@ def main():
     gap = np.abs(w - pw).sum()
     check("the sub-universe optimum differs from proportional", gap > 0.05,
           f"L1 {gap:.3f}: the departed names' weight does not just rescale")
+
+    print("\nthe regime law: same covariance, a different copula")
+    gm = IndexMarket(np.random.default_rng(21), 4000, law="gaussian")
+    rm = IndexMarket(np.random.default_rng(21), 4000, law="regime")
+    blk = np.sort(np.random.default_rng(22).choice(4000, 300, replace=False))
+    check("covariance identical under both laws",
+          np.abs(gm.block(blk) - rm.block(blk)).max() == 0.0 and np.abs(gm.m - rm.m).max() == 0.0,
+          "Sigma and m do not move; only the law does")
+    Xr = rm.panel(np.random.default_rng(23), 2000, blk)
+    Sr = rm.block(blk)
+    err = np.abs(np.cov(Xr, rowvar=False) - Sr).max() / np.abs(Sr).max()
+    check("regime panel has the stated covariance", err < 0.08, f"max rel err {err:.3f}")
+    rr = np.random.default_rng(24)
+    down = up = 0.0
+    for _ in range(150):
+        sidx = rr.choice(300, 30, replace=False)
+        d = (Xr[:, sidx] < 0).sum(1)
+        down += (d == 30).mean(); up += (d == 0).mean()
+    down, up = 252 * down / 150, 252 * up / 150
+    check("all 30 of a basket fall together about 3 times a year, not 1.4",
+          2.0 < down < 4.5 and up < down, f"all-down {down:.1f}/yr, all-up {up:.1f}/yr")
+
+    print("\nthe race under the regime law reproduces the parent at zero tilt")
+    small_r = IndexMarket(np.random.default_rng(25), 300, law="regime")
+    Xs = small_r.panel(np.random.default_rng(26), 200)
+    _, Vs, Ds = factor_correlation(Xs, 2)
+    back = race_regime(small_r.parent, np.arange(300), Vs, Ds, small_r.regime())
+    check("regime race identity", np.abs(back - small_r.parent).sum() < 1e-7,
+          f"L1 {np.abs(back - small_r.parent).sum():.2e}")
+
+    print("\nthe tail oracle really is the tail optimum")
+    scen = small_r.panel(np.random.default_rng(27), 20000, sub)
+    m_sub = small_r.m[sub]
+    tw = long_only_min_cvar(scen, m_sub)
+    starr = lambda x: float(x @ m_sub) / expected_shortfall(scen, x)
+    others = [starr(x) for x in (proportional(small_r.parent, sub),
+                                 flattened(small_r.parent, sub),
+                                 long_only_max_sharpe(small_r.block(sub), m_sub))]
+    check("tail oracle has the highest return per unit of shortfall",
+          starr(tw) >= max(others) - 1e-6,
+          f"tail oracle {starr(tw):.4f} vs best other {max(others):.4f}")
 
     print("\nthe oracle really is optimal")
     sh = lambda x: float(x @ msm) / float(np.sqrt(x @ Ssm @ x))
