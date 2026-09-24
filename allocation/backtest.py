@@ -99,7 +99,9 @@ def _max_drawdown(rets) -> float:
     rets = np.asarray(rets, dtype=float)
     if rets.size == 0:
         return 0.0
-    equity = np.cumprod(1.0 + rets)
+    # The path starts at initial wealth 1.0, so a first-period loss is a
+    # drawdown and the running peak never sits below initial capital.
+    equity = np.concatenate([[1.0], np.cumprod(1.0 + rets)])
     peak = np.maximum.accumulate(equity)
     return float(np.max(1.0 - equity / peak))
 

@@ -84,3 +84,17 @@ def test_box_constraint_caps_concentration_through_backtest():
     panel = make_panel(seed=4)
     _, path = walk_forward(lambda: BoxConstrained(MinimumVariance(shrinkage=0.1), upper=0.2), panel, 80)
     assert np.all(path <= 0.2 + 1e-6)  # cap respected at every rebalance
+
+
+def test_max_drawdown_counts_an_initial_loss():
+    from allocation.backtest import _max_drawdown
+    assert _max_drawdown([-0.2]) == pytest.approx(0.2)
+    assert _max_drawdown([-0.2, 0.05]) == pytest.approx(0.2)
+
+
+def test_max_drawdown_later_peak_then_loss():
+    from allocation.backtest import _max_drawdown
+    # equity 1.1 then 1.045: the drawdown is measured from the later peak
+    assert _max_drawdown([0.1, -0.05]) == pytest.approx(0.05)
+    # a run-up never below initial capital has no drawdown
+    assert _max_drawdown([0.1, 0.1]) == 0.0
