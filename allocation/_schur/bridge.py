@@ -140,9 +140,28 @@ def leaf_direction(Q: np.ndarray, b: np.ndarray, eta: float, ridge: float = 0.0)
     direction). Both numerator and denominator are affine in ``eta``.
     """
     if eta == 0.0:
-        return b / np.diag(Q)
-    q, s = _leaf_quantities(Q, b, ridge)
-    return ((1.0 - eta) * b + eta * s) / ((1.0 - eta) * np.diag(Q) + eta * q)
+        num, den = np.asarray(b, dtype=float), np.diag(Q).astype(float)
+    else:
+        q, s = _leaf_quantities(Q, b, ridge)
+        num = (1.0 - eta) * b + eta * s
+        den = (1.0 - eta) * np.diag(Q) + eta * q
+    return num / _guard_zero_variance(den)
+
+
+def _guard_zero_variance(den: np.ndarray) -> np.ndarray:
+    """A zero conditioned variance makes the minimum-variance direction
+    unbounded, and dividing by it returns ``inf`` (then ``nan`` once
+    normalised). Two cases. With no variance information in the leaf at all,
+    the cold start where ``Q = 0``, the direction is the prior ``b``: every
+    denominator becomes one. With zero-variance assets among positive ones,
+    they are floored at the smallest positive conditioned variance in the
+    leaf, so they take the largest finite weight, which is the positive-floor
+    convention the streaming path already uses."""
+    den = np.asarray(den, dtype=float)
+    pos = den > 0
+    if not pos.any():
+        return np.ones_like(den)
+    return np.where(pos, den, den[pos].min())
 
 
 def leaf_frontier(Q: np.ndarray, b: np.ndarray, ridge: float = 0.0) -> float:

@@ -327,3 +327,27 @@ def test_named_constructors_are_exact_at_the_far_end_by_default():
         assert not est.endpoints_[1].endswith("(approximate)")
     assert SchurBridge.herc_to_min_variance(0.5, 0.5, 3, conditioning="factor").endpoints_[1].endswith("(approximate)")
     assert SchurBridge.herc_to_min_variance(1.0, 1.0, 3).endpoints_ == ("HERC", "minimum variance")
+
+
+def test_leaf_direction_is_finite_on_a_zero_variance_leaf():
+    import warnings
+    Q = np.zeros((3, 3))
+    b = np.ones(3)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        for eta in (0.0, 0.5, 1.0):
+            z = leaf_direction(Q, b, eta)
+            assert np.all(np.isfinite(z))
+            assert np.all(np.isfinite(z / z.sum()))
+            # no variance information: the direction is the prior b
+            assert np.allclose(z / z.sum(), b / b.sum())
+
+
+def test_leaf_direction_floors_a_zero_variance_asset_among_positive_ones():
+    Q = np.diag([0.0, 1.0, 4.0])
+    b = np.ones(3)
+    z = leaf_direction(Q, b, 0.0)
+    assert np.all(np.isfinite(z))
+    # floored at the smallest positive variance: the riskless asset ties the
+    # best finite inverse-variance weight and beats the rest
+    assert z[0] == z[1] > z[2]
