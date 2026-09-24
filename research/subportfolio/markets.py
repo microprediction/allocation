@@ -123,6 +123,26 @@ def cap_weights(rng, n):
     return w[rng.permutation(n)], src
 
 
+MAX_WEIGHT = 0.081       # the S&P 500's largest weight over 2014-2024
+
+
+def _cap_largest(w, cap, iters=50):
+    """Hold every weight at or below `cap`, spreading the excess proportionally
+    over the names that are under it, until the constraint holds."""
+    w = np.asarray(w, float).copy()
+    for _ in range(iters):
+        over = w > cap
+        if not over.any():
+            break
+        excess = float((w[over] - cap).sum())
+        w[over] = cap
+        under = ~over
+        if not under.any():
+            break
+        w[under] += excess * w[under] / w[under].sum()
+    return w / w.sum()
+
+
 def effective_fraction(w):
     """Effective name count as a fraction of the listed count."""
     return float(1.0 / np.sum(np.asarray(w, float) ** 2) / len(w))
@@ -296,8 +316,14 @@ class IndexMarket:
         self.sector = rng.choice(sectors, size=n, p=sizes)
         self.b, self.e, self.e2, self.c = b * s, e * s, e2 * s, c * s
         self.d = np.maximum(1.0 - b ** 2 - e ** 2 - e2 ** 2 - c ** 2, 0.05) * s ** 2
+        # A Pareto tail gives the right median concentration and far too heavy
+        # an upper tail: a median largest weight of 4.1% against the real
+        # index's 4.6%, but a 90th percentile of 11% against 7.5% and draws
+        # reaching 30%. No index has a 30% name. The largest weight is capped
+        # at the largest the S&P 500 reached over 2014-2024 and the excess is
+        # spread over the rest, which leaves the median untouched.
         cap = rng.pareto(tail, n) + 1.0
-        self.parent = cap / cap.sum()
+        self.parent = _cap_largest(cap / cap.sum(), MAX_WEIGHT)
         self.m = self.sigma_times(self.parent)
 
     def _same(self, idx):

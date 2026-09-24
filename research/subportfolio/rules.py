@@ -289,6 +289,49 @@ def race_sectors(parent, idx, sector, coupling, loading, D, iters=60, tol=1e-9):
     return w / w.sum()
 
 
+def max_feasible_k(parent):
+    """The largest k for which a portfolio can be read as a top-k probability.
+
+    The targets are k * w and a probability cannot exceed one, so k is bounded
+    by 1 / max(w). That is a property of the index rather than of the method:
+    the S&P 500's largest weight of about seven percent caps k near thirteen,
+    and a broader index admits more. A portfolio with a dominant name cannot be
+    read as a top-k finish at all beyond small k.
+    """
+    w = np.asarray(parent, float)
+    return int(np.floor(0.95 / (w / w.sum()).max()))
+
+
+def race_topk(parent, idx, V, D, k=20, sub="same"):
+    """The portfolio read as the probability of a top-k finish, not a win.
+
+    Abilities are calibrated so the top-k probabilities of the parent field,
+    which sum to k, are proportional to the parent weights; the survivors are
+    then read through the same chart. `sub="same"` keeps k on the sub-field,
+    `sub="fraction"` keeps the share k/n.
+
+    k is a dial on how much the field matters. At k = 1 a name's probability
+    depends strongly on who else is racing; as k grows it depends more on the
+    name alone, so the chart approaches proportional restriction. Feasible k is
+    bounded by max_feasible_k.
+    """
+    from winning.factor.topk import top_k_probabilities, abilities_from_topk
+    w = np.maximum(np.asarray(parent, float), 1e-12)
+    w = w / w.sum()
+    n = len(w)
+    if k * w.max() >= 1.0:
+        raise ValueError(f"k={k} exceeds max_feasible_k={max_feasible_k(parent)}: "
+                         f"k * max(parent) = {k * w.max():.2f} >= 1")
+    out = abilities_from_topk(k * w, k, V=V, D=D, target_floor=1e-12, return_info=True)
+    a = np.asarray(out[0] if isinstance(out, tuple) else out, float)
+    m = len(idx)
+    kk = k if sub == "same" else max(1, int(round(k * m / n)))
+    kk = min(kk, m - 1)
+    q = np.asarray(top_k_probabilities(a[idx], kk, V=V[idx], D=D[idx]), float)
+    q = np.maximum(q, 0.0)
+    return q / q.sum()
+
+
 def estimate_and_solve(X, idx):
     m = len(idx)
     return long_only_min_var(np.cov(X[:, idx], rowvar=False) + 1e-8 * np.eye(m))
