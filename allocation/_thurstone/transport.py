@@ -44,16 +44,28 @@ __all__ = [
 
 
 def _race_weights(X: np.ndarray) -> np.ndarray:
-    """Win frequencies of a performance matrix: the argmin of each row wins.
+    """Win frequencies of a performance matrix: the minimum of each row wins.
 
     ``X`` has shape ``(M, n)`` (``M`` paths, ``n`` assets); smaller performance
-    wins, matching the ability convention (smaller ability == stronger). Returns
-    a length-``n`` simplex vector.
+    wins, matching the ability convention (smaller ability == stronger). An
+    exact tie for the row minimum is split equally among the tying columns,
+    so exact duplicate competitors receive identical shares whatever their
+    order (the duplicate-symmetry contract the feasibility and redundancy
+    arguments rely on). Rows without a finite minimum are ignored. Returns a
+    length-``n`` simplex vector.
     """
-    winners = np.argmin(X, axis=1)
-    counts = np.bincount(winners, minlength=X.shape[1]).astype(float)
+    X = np.asarray(X, dtype=float)
+    n = X.shape[1]
+    if X.shape[0] == 0:
+        return np.full(n, 1.0 / n)
+    is_min = X == X.min(axis=1, keepdims=True)
+    share = is_min.sum(axis=1)
+    valid = share > 0
+    if not valid.any():
+        return np.full(n, 1.0 / n)
+    counts = (is_min[valid] / share[valid, None]).sum(axis=0)
     total = counts.sum()
-    return counts / total if total > 0 else np.full(X.shape[1], 1.0 / X.shape[1])
+    return counts / total if total > 0 else np.full(n, 1.0 / n)
 
 
 def race_weights(X: np.ndarray) -> np.ndarray:

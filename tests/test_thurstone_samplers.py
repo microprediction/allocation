@@ -236,3 +236,17 @@ def test_callable_sampler_rejects_factor_mode():
     except ValueError:
         return
     raise AssertionError("expected ValueError for callable sampler + factor mode")
+
+
+def test_race_weights_split_exact_ties_equally():
+    X = np.array([[0., 0., 1.], [0., 0., 1.], [1., 1., 0.]])
+    w = _race_weights(X)
+    assert np.allclose(w, [1 / 3, 1 / 3, 1 / 3])
+    # duplicate competitors get identical shares whatever their column order
+    Xp = X[:, [1, 0, 2]]
+    assert np.allclose(_race_weights(Xp), w[[1, 0, 2]])
+
+
+def test_race_weights_ignores_rows_without_a_finite_minimum():
+    X = np.array([[np.nan, np.nan], [0., 1.]])
+    assert np.allclose(_race_weights(X), [1.0, 0.0])
