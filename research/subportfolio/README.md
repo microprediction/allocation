@@ -250,56 +250,55 @@ it could be raced.
 
 ## What it found
 
-At index scale, 5000 names restricted to 200, on a market with true rank five
-and average pairwise correlation 0.27. Eighteen draws, scored against the true
-sub-covariance, paired sign tests.
+Equal-weight the survivors. Nothing derived from the parent beats it.
 
-| comparison | draws won | median ratio | p |
+At 2000 names restricted to a random 200, on a market with a diffuse efficient
+parent at 6 percent breadth, average pairwise correlation 0.27 and true rank
+five. Ten draws, scored against the true sub-covariance.
+
+| rule | effective names | vs proportional | vs equal weight |
 |---|---|---|---|
-| race < proportional | 18 / 18 | 0.9678 | 0.000 |
-| race + factor < race | 17 / 18 | 0.9887 | 0.000 |
-| equal weight < race + factor | 12 / 18 | 0.9953 | 0.119 |
-| oracle < equal weight | 18 / 18 | 0.9869 | 0.000 |
+| proportional | 17 | 1.000 | 1.198 |
+| race | 34 | 0.943 | |
+| race + factor | 34 | 0.885 | 1.057 |
+| race + factor, tempered to 45% breadth | 90 | 0.849 | 1.010 |
+| equal weight | 200 | 0.835 | 1.000 |
+| oracle | 92 | 0.825 | 0.987 |
 
-Proportional restriction is beaten by everything, unanimously and by a wide
-margin, which settles the practical question the study was built for: the rule
-in universal use is the worst sensible rule available. The race improves on it
-by 3.2 percent on every draw, and a two-factor correlation adds a further 1.1
-percent on seventeen of eighteen.
+Proportional restriction, the rule in universal use, is the worst thing on the
+board by a wide margin: it leaves 17 effective names where the sub-universe's
+own optimum holds 92. Everything beats it, and the ranking among the rules that
+beat it is monotone in how much breadth they buy.
 
-Equal weight matches the race. Twelve draws of eighteen and p = 0.119 is a tie,
-not a win, and the two rules capture 71 and 67 percent of the room the oracle
-shows to exist. So the Thurstone machinery is directionally right, reliable,
-and adds nothing here over a rule that uses no information at all.
+The race is not adding information. Two controls say so, and they say different
+things.
 
-The reason is not that the race under-diversifies. On a representative draw:
+Held at its own breadth against `parent^beta` tempered to the same effective
+count, the plain race is indistinguishable from tempering: 50 percent of draws,
+ratio 1.0000. It is a de-concentration operator and nothing else. With the
+factor correlation it does better than the parent's ordering on every draw by
+2.2 percent, so the correlation is real information about which names to hold.
 
-| rule | effective names | top weight | variance |
-|---|---|---|---|
-| proportional | 15 | 0.237 | 1.3285 |
-| race | 62 | 0.096 | 1.1014 |
-| race + factor | 57 | 0.081 | 1.0591 |
-| equal weight | 200 | 0.005 | 1.0255 |
-| oracle | 73 | 0.063 | 1.0080 |
+But both orderings lose to no ordering. Tempered to the oracle's own breadth
+the race still trails equal weight by 1 percent and wins on no draw. Any tilt
+inherited from the parent hurts sub-universe minimum variance; the race's tilt
+simply hurts less than the parent's does.
 
-The race lands at 62 effective names against the oracle's 73, while equal
-weight sits at 200 and is nowhere near it. The race gets the degree of
-concentration nearly right and ties anyway, which means it is choosing among
-names no better than chance at a scale where choosing well would pay. What
-beats proportional restriction is diversification as such, and the cheapest
-way to buy it wins.
+The room is small in any case. The oracle beats equal weight by 1.3 percent.
 
-One rule is worse than doing nothing. Estimating a 200 by 200 covariance from
-52 or 104 observations and optimising returns 1.202 and 1.108 against
-proportional, beating it on 17 and 22 percent of draws. With a sub-universe
-that size and a panel that short, the estimate destroys more than the optimiser
-recovers.
+The earlier version of this section, reported before the controls existed, said
+the race and equal weight were tied and read that as the race adding nothing
+about name selection. Both halves were wrong. The comparison was confounded,
+because restricting an over-confident parent pays any move toward diffuseness
+and equal weight moves furthest, and the parent's concentration was itself an
+artifact of a Pareto cap distribution whose effective breadth wandered between
+80 and 399 names on the same universe.
 
-What would change this conclusion: a sub-universe chosen by a screen rather
-than at random, since a random 200 of 5000 has no structure for the parent
-weights to carry; a market whose sub-blocks differ more from the parent; or a
-parent that is not a power law, since the concentration of proportional
-restriction is what every other rule is beating.
+What would change this: a sub-universe chosen by a screen or a sector rather
+than at random, which is the case where the parent's tilt should carry
+something a random 200 of 2000 cannot; a scoring objective other than variance,
+since equal weight is being rewarded for breadth alone; or a parent whose
+optimality is stale rather than exact, since here it is exact by construction.
 
 ## Interpreting the table
 
