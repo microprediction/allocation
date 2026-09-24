@@ -139,29 +139,26 @@ def leaf_direction(Q: np.ndarray, b: np.ndarray, eta: float, ridge: float = 0.0)
     numerator); ``eta = 1`` is ``(Q^{-1} b)_i`` (the leaf's minimum-variance
     direction). Both numerator and denominator are affine in ``eta``.
     """
+    b = np.asarray(b, dtype=float)
     if eta == 0.0:
-        num, den = np.asarray(b, dtype=float), np.diag(Q).astype(float)
+        num, den = b, np.diag(Q).astype(float)
     else:
         q, s = _leaf_quantities(Q, b, ridge)
         num = (1.0 - eta) * b + eta * s
         den = (1.0 - eta) * np.diag(Q) + eta * q
-    return num / _guard_zero_variance(den)
-
-
-def _guard_zero_variance(den: np.ndarray) -> np.ndarray:
-    """A zero conditioned variance makes the minimum-variance direction
-    unbounded, and dividing by it returns ``inf`` (then ``nan`` once
-    normalised). Two cases. With no variance information in the leaf at all,
-    the cold start where ``Q = 0``, the direction is the prior ``b``: every
-    denominator becomes one. With zero-variance assets among positive ones,
-    they are floored at the smallest positive conditioned variance in the
-    leaf, so they take the largest finite weight, which is the positive-floor
-    convention the streaming path already uses."""
-    den = np.asarray(den, dtype=float)
+    # A zero conditioned variance makes the minimum-variance direction
+    # unbounded: the division returns inf, then nan once normalised. Two
+    # cases. No variance information in the leaf at all (the cold start,
+    # Q = 0): the direction is the prior b, at every eta -- at eta = 1 the
+    # numerator Q^{-1} b is itself zero there, so the denominator alone
+    # cannot be guarded. Zero-variance assets among positive ones: floor
+    # them at the smallest positive conditioned variance in the leaf, so
+    # they take the largest finite weight, the positive-floor convention
+    # the streaming path already uses.
     pos = den > 0
     if not pos.any():
-        return np.ones_like(den)
-    return np.where(pos, den, den[pos].min())
+        return b.copy()
+    return num / np.where(pos, den, den[pos].min())
 
 
 def leaf_frontier(Q: np.ndarray, b: np.ndarray, ridge: float = 0.0) -> float:
