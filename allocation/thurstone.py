@@ -132,7 +132,14 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
             if self.target == "equal":
                 return np.full(n, 1.0 / n)
             raise ValueError(f"unknown target {self.target!r}")
-        return _normalize(self.target)
+        # a wrong-length target would otherwise broadcast through the race: a
+        # singleton fitted to three assets as an equal three-name field (#89)
+        t = np.asarray(self.target, dtype=float)
+        if t.shape != (n,):
+            raise ValueError(
+                f"target must be one-dimensional with one entry per asset: "
+                f"expected shape ({n},), got {t.shape}")
+        return _normalize(t)
 
     # ------------------------------------------------------- estimator hooks
     def _cold_start(self, cov: np.ndarray) -> None:

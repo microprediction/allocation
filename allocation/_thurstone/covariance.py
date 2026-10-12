@@ -83,10 +83,17 @@ def factor_decompose(corr: np.ndarray, k: int, oversample: int = 5, seed: int = 
 
     Returns ``(B, d)`` with ``B`` of shape ``(n, k)`` and ``d`` the idiosyncratic
     residual variances, so ``B B^T + diag(d)`` has unit diagonal. Uses a
-    randomized range finder (one ``corr @ Omega`` matvec, a thin QR, a tiny
-    eigendecomposition) -- ``O(n^2 k)`` rather than the ``O(n^3)`` of a full eigh,
-    and with a *fixed* ``seed`` the projection is constant so the factors vary
-    smoothly with ``corr``. The result feeds :func:`transport_weights_lowrank`.
+    block-Krylov range finder (a few ``corr @ Q`` matvecs, thin QRs, a tiny
+    eigendecomposition) -- ``O(n^2 k)`` rather than the ``O(n^3)`` of a full eigh.
+    The result feeds :func:`transport_weights_lowrank`.
+
+    The starting block is built from each asset's own row of ``corr`` (row means
+    of its elementwise powers), not drawn positionally, so relabelling the assets
+    relabels the factors and leaves ``B B^T + diag(d)`` unchanged (issue #79): a
+    positional Gaussian sketch is regenerated in the new order rather than
+    permuted with the assets, and changed implied correlations by up to 0.8. The
+    start is a smooth function of ``corr``, so the factors still vary smoothly
+    with it. ``seed`` no longer affects the result and is kept for compatibility.
 
     A genuine factor covariance estimator would supply ``(B, d)`` directly in
     ``O(n k)`` and remove the ``O(n^2)`` floor here; this keeps the tilt usable to
@@ -95,10 +102,21 @@ def factor_decompose(corr: np.ndarray, k: int, oversample: int = 5, seed: int = 
     c = np.asarray(corr, dtype=float)
     n = c.shape[0]
     k = max(1, min(int(k), n))
-    rng = np.random.default_rng(seed)
     p = min(n, k + oversample)
-    omega = rng.standard_normal((n, p))
-    q, _ = np.linalg.qr(c @ omega)         # orthonormal basis for the dominant subspace
+    # permutation-equivariant start: row moments of corr
+    cj = c.copy()
+    start = [cj.mean(axis=1), np.abs(c).mean(axis=1)]
+    for _ in range(3):
+        cj = cj * c
+        start.append(cj.mean(axis=1))
+    q, _ = np.linalg.qr(np.column_stack(start))
+    basis = q
+    while basis.shape[1] < p:               # grow the Krylov block to p columns
+        y = c @ q
+        y -= basis @ (basis.T @ y)
+        q, _ = np.linalg.qr(y)
+        basis = np.hstack([basis, q])
+    q, _ = np.linalg.qr(c @ c @ basis[:, :p])  # one power step sharpens the subspace
     small = q.T @ c @ q                     # (p, p)
     vals, vecs = np.linalg.eigh(small)
     order = np.argsort(vals)[::-1][:k]

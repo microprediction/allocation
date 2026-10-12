@@ -106,7 +106,34 @@ def _max_drawdown(rets) -> float:
     return float(np.max(1.0 - equity / peak))
 
 
-def portfolio_metrics(rets, weight_path, periods_per_year: int = 252, cost_bps: float = 10.0):
+def _trades(W, asset_returns=None):
+    """L1 trade size at each rebalance after the first, as a length ``len(W)-1`` array.
+
+    Row ``t`` of ``W`` is the target held through period ``t``. Without
+    ``asset_returns`` this is the motion of the targets, ``|W[t] - W[t-1]|``.
+    With them (row ``t`` = asset returns earned in period ``t``) the holdings
+    are first drifted by the period's returns, so the trade executed at the
+    start of period ``t`` is ``|W[t] - w_drift|`` with
+    ``w_drift = W[t-1] * (1 + r) / (1 + W[t-1] @ r)`` (any residual cash earns
+    zero). Initial entry and terminal liquidation are not charged.
+    """
+    if len(W) < 2:
+        return np.array([0.0])
+    prev = W[:-1]
+    if asset_returns is not None:
+        R = np.asarray(asset_returns, dtype=float)
+        if R.shape != W.shape:
+            raise ValueError(f"asset_returns has shape {R.shape}; expected {W.shape}, one row per weight row")
+        R = R[:-1]
+        growth = 1.0 + (prev * R).sum(axis=1, keepdims=True)
+        if np.any(growth <= 0):
+            raise ValueError("portfolio wealth reached zero or below; drifted holdings are undefined")
+        prev = prev * (1.0 + R) / growth
+    return np.abs(W[1:] - prev).sum(axis=1)
+
+
+def portfolio_metrics(rets, weight_path, periods_per_year: int = 252, cost_bps: float = 10.0,
+                      asset_returns=None):
     """Summary metrics for a realised return series and its weight path.
 
     Alongside the smoothness/return headline (turnover, Sharpe), reports the
@@ -114,12 +141,21 @@ def portfolio_metrics(rets, weight_path, periods_per_year: int = 252, cost_bps: 
     ratio (downside-only Sharpe) -- so a tail-aware method (e.g. the Student-t
     Thurstone race) can be scored on the axis it is meant to win, not just on
     variance-flavoured Sharpe.
+
+    Pass ``asset_returns`` (same shape as ``weight_path``; row ``t`` is what the
+    assets earned while row ``t`` was held) to charge turnover and cost on the
+    trades actually executed, including those that restore targets after price
+    drift. Without it, turnover and cost measure only the motion of the targets
+    (a constant target then shows zero trading however far prices move).
+    ``target_turnover`` always reports that target motion as a smoothness
+    diagnostic.
     """
     rets = np.asarray(rets, dtype=float)
     W = np.asarray(weight_path, dtype=float)
-    dW = np.abs(np.diff(W, axis=0)).sum(axis=1) if len(W) > 1 else np.array([0.0])
+    target = _trades(W)
+    dW = _trades(W, asset_returns)
     turnover = 0.5 * float(np.mean(dW))  # one-way fraction traded per step
-    cost = (cost_bps / 1e4) * np.concatenate([[0.0], np.abs(np.diff(W, axis=0)).sum(axis=1)])
+    cost = (cost_bps / 1e4) * np.concatenate([[0.0], dW if len(W) > 1 else []])
     net = rets - cost
     sd = float(np.std(rets))
     sd_net = float(np.std(net))
@@ -129,6 +165,7 @@ def portfolio_metrics(rets, weight_path, periods_per_year: int = 252, cost_bps: 
         "sharpe": float(np.mean(rets) / sd * ann) if sd > 0 else 0.0,
         "ann_vol": sd * ann,
         "turnover": turnover,
+        "target_turnover": 0.5 * float(np.mean(target)),
         "net_sharpe": float(np.mean(net) / sd_net * ann) if sd_net > 0 else 0.0,
         "max_w": float(np.mean(np.max(W, axis=1))),
         "eff_n": float(np.mean(1.0 / np.sum(W**2, axis=1))),
@@ -146,7 +183,8 @@ def compare(factories: dict, returns, *, warmup: int = 60, cost_bps: float = 10.
     rows = []
     for name, factory in factories.items():
         rets, path = walk_forward(factory, returns, warmup=warmup)
-        m = portfolio_metrics(rets, path, periods_per_year, cost_bps)
+        m = portfolio_metrics(rets, path, periods_per_year, cost_bps,
+                              asset_returns=np.asarray(returns, dtype=float)[warmup:warmup + len(path)])
         rows.append({"name": name, **m})
     rows.sort(key=lambda r: r["net_sharpe"], reverse=True)
     return rows
@@ -184,7 +222,8 @@ def compare_random_subsets(factories: dict, returns, *, k=50, window=None, n_tri
         for name, fac in factories.items():
             try:
                 rets, path = walk_forward(fac, panel, warmup=wu)
-                m = portfolio_metrics(rets, path, periods_per_year, cost_bps)
+                m = portfolio_metrics(rets, path, periods_per_year, cost_bps,
+                                      asset_returns=panel[wu:wu + len(path)])
             except Exception:
                 continue
             st = stats[name]

@@ -102,6 +102,20 @@ class KeyedEwmaCovariance:
         d = np.diag(C).copy()
         d[d <= 0] = 1e-8
         np.fill_diagonal(C, d)
+        # A pair's cross-covariance freezes while either asset is absent but each
+        # variance keeps decaying when its own asset is observed, so a changing
+        # universe can leave a stale |cov_ij| > sqrt(var_i var_j). If the
+        # assembled matrix is indefinite, shrink the correlations uniformly
+        # toward zero, just enough that the correlation matrix's smallest
+        # eigenvalue is 1e-8 (positive definite; variances kept).
+        s = np.sqrt(d)
+        R = C / np.outer(s, s)
+        e = float(np.linalg.eigvalsh(R)[0]) if n else 0.0
+        if e < 0:
+            lam = (1e-8 - e) / (1.0 - e)
+            R = (1.0 - lam) * R
+            np.fill_diagonal(R, 1.0)
+            C = R * np.outer(s, s)
         return C
 
 

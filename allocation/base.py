@@ -66,6 +66,18 @@ class BaseOnlinePortfolio:
         self._cov_estimator.partial_fit(X)
         return np.asarray(self._cov_estimator.covariance_, dtype=float)
 
+    def _check_weights(self) -> None:
+        # the fitted contract: one finite weight per asset seen by fit
+        w = self._weights
+        n = self.n_features_in_
+        if w is None or np.shape(w) != (n,) or not np.all(np.isfinite(w)):
+            shape = None if w is None else np.shape(w)
+            self._weights = None
+            raise ValueError(
+                f"{type(self).__name__} produced weights of shape {shape}; expected "
+                f"{n} finite weights, one per asset"
+            )
+
     # -------------------------------------------------------------- fitting
     def fit(self, X, y=None):
         X = self._as_2d(X)
@@ -75,6 +87,7 @@ class BaseOnlinePortfolio:
             self._cov_estimator.fit(X)
         cov = np.asarray(self._cov_estimator.covariance_, dtype=float)
         self._cold_start(cov)
+        self._check_weights()
         self._n_updates = 1
         return self
 
@@ -89,6 +102,7 @@ class BaseOnlinePortfolio:
             )
         cov = self._feed(X)
         self._online_update(cov)
+        self._check_weights()
         self._n_updates += 1
         return self
 

@@ -415,8 +415,12 @@ def bridge_weights(
     ridge : float
         Regularizes every solve (see :mod:`allocation._schur.coupling`).
     long_only : bool
-        Cap ``eta`` at each leaf's long-only frontier. Weights are then
-        nonnegative whenever every companion entry is (always at ``gamma = 0``).
+        Cap ``eta`` at each leaf's long-only frontier, and require the final
+        weights to be nonnegative. The frontier alone guarantees that only
+        with ``outer='stack'`` and positive conditioned companion entries
+        (always the case at ``gamma = 0`` with a positive ``u``); when the
+        result would still be short, a ``ValueError`` is raised rather than
+        clipping the weights.
     return_info : bool
         Also return a dict with ``eta_effective`` per leaf and the clusters.
     """
@@ -498,6 +502,21 @@ def bridge_weights(
             "covariance is degenerate at this gamma; returning equal weight. "
             "Pass return_info=True and read info['degenerate'] to detect this.",
             RuntimeWarning, stacklevel=2)
+    if long_only and float(w.min()) < -1e-12:
+        # The frontier caps eta inside each leaf, which keeps the leaf vector
+        # nonnegative only while its conditioned companion entries are
+        # positive. Conditioning on the outside (gamma > 0) can make them
+        # negative, and NCO's outer step is an unconstrained minimum variance
+        # that can short even at gamma = 0. Clipping would move the endpoints,
+        # so the constraint is reported as unreachable instead.
+        raise ValueError(
+            "long_only=True could not be met: the bridge at gamma="
+            f"{gamma}, eta={eta} (conditioning={conditioning!r}, outer={outer!r}) "
+            f"has a weight of {float(w.min()):.3g}. The long-only frontier caps "
+            "eta within each cluster only; it does not constrain negative "
+            "conditioned companions or the outer='optimize' step. "
+            + ("Use outer='stack', lower gamma" if outer == "optimize" else "Lower gamma")
+            + ", or drop long_only.")
     if return_info:
         info = dict(info or {})
         info["degenerate"] = degenerate

@@ -27,6 +27,9 @@ __all__ = [
     "calibrate_one_factor",
 ]
 
+# largest share error a one-factor calibration may leave before it is refused
+_ROUND_TRIP_TOL = 1e-3
+
 
 def _normalize(w: np.ndarray) -> np.ndarray:
     w = np.asarray(w, dtype=float)
@@ -82,4 +85,15 @@ def calibrate_one_factor(target, betas) -> np.ndarray:
             np.maximum(target, 1e-12), V=b.reshape(-1, 1), D=1.0 - b ** 2,
             target_floor=1e-12),
         dtype=float)
+    # winning only warns when its inverse fails to converge and hands back the
+    # last iterate; with highly correlated names (b near 0.99) that came back as
+    # 100/0 for an 80/20 target (issue #58). Check the round trip and refuse to
+    # pass a wrong benchmark on.
+    resid = float(np.max(np.abs(winprobs_one_factor(a, b) - target)))
+    if not np.isfinite(resid) or resid > _ROUND_TRIP_TOL:
+        raise RuntimeError(
+            f"one-factor calibration did not reproduce the target: max share "
+            f"error {resid:.3g} (tolerance {_ROUND_TRIP_TOL:g}). The loadings "
+            f"may be too close to 1 for the installed winning "
+            f"{getattr(winning, '__version__', '?')}; try calib='diagonal'.")
     return a - np.median(a)

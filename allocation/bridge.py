@@ -93,7 +93,9 @@ class SchurBridge(BaseOnlinePortfolio):
     companion : {'ones', 'vol', 'mean'} or array (n,), default 'ones'
         The vector ``u`` of ``Sigma^{-1} u`` at the far end.
     long_only : bool, default False
-        Cap ``eta`` at each cluster's long-only frontier.
+        Cap ``eta`` at each cluster's long-only frontier, and raise
+        ``ValueError`` if the weights are still short (possible at
+        ``gamma > 0``, or with ``outer='optimize'`` at any ``gamma``).
     ridge : float, default 0.0
         Regularization of every block solve, as in :class:`SchurComplementary`.
     knn, prior, prior_weight : seriation options, as in :class:`SchurComplementary`.
