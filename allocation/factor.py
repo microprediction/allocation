@@ -97,8 +97,26 @@ class _FactorOptimizer(BaseOnlinePortfolio):
         psi = getattr(self._cov_estimator, "idiosyncratic_", None)
         if B is not None and psi is not None:
             B = np.asarray(B, dtype=float)
-            psi = np.clip(np.asarray(psi, dtype=float), 1e-300, None)
-            return B, psi
+            psi = np.asarray(psi, dtype=float)
+            # the Woodbury algebra is conformable for a transposed (k, n) model too,
+            # so check the asset axis here or it silently returns k weights
+            n = cov.shape[0]
+            if B.ndim != 2 or B.shape[0] != n:
+                raise ValueError(
+                    f"{type(self).__name__}: covariance estimator loadings_ has shape "
+                    f"{B.shape}; expected (n_assets, n_factors) with n_assets={n}"
+                )
+            if psi.shape != (n,):
+                raise ValueError(
+                    f"{type(self).__name__}: covariance estimator idiosyncratic_ has "
+                    f"shape {psi.shape}; expected ({n},)"
+                )
+            if not (np.all(np.isfinite(B)) and np.all(np.isfinite(psi)) and np.all(psi >= 0)):
+                raise ValueError(
+                    f"{type(self).__name__}: covariance estimator loadings_ / "
+                    "idiosyncratic_ must be finite, with idiosyncratic_ >= 0"
+                )
+            return B, np.clip(psi, 1e-300, None)
         return covariance_to_factors(cov, self.factors, self.floor)
 
     def _weights_from(self, B, psi) -> np.ndarray:  # pragma: no cover - abstract
