@@ -105,7 +105,8 @@ vector (`clusters=`) such as sectors.
 other cluster, exact when cross-cluster dependence runs through one latent factor
 per cluster and costing only cluster-sized solves; on a generic covariance it is
 approximate at the far end, so the named constructors default to `'siblings'`. `long_only=True` caps `eta` at
-each cluster's closed-form long-only frontier. The exact-arithmetic theory behind
+each cluster's closed-form long-only frontier, and raises rather than return a
+short position when the companion or outer layer would still produce one. The exact-arithmetic theory behind
 the corners is in the papers at [schur.microprediction.org](https://schur.microprediction.org).
 
 ### Very large universes (e.g. Russell 3000)
@@ -139,8 +140,9 @@ turnover control (smooth target) and has a streaming twin `StreamingTurnoverPena
 
 `BoxConstrained(estimator, lower=, upper=, groups=, group_caps=)` imposes per-asset
 bounds and (disjoint) group caps on any estimator via a **log-barrier**, not a QP.
-The barrier's domain *is* the constraint set, so the result is strictly feasible for
-any `tau>0` — feasibility never depends on tuning, and the operator stays C¹ (no
+The barrier's domain *is* the constraint set, so the result is feasible for
+any `tau>0` (strictly, except for coordinates that a bound or cap pins exactly) —
+feasibility never depends on tuning. Infeasible or malformed constraints raise. The operator stays C¹ (no
 active-set kinks), so turnover stays low. Streaming twin: `StreamingBoxConstrained`.
 
 ## Comparing methods
@@ -148,7 +150,8 @@ active-set kinks), so turnover stays low. Streaming twin: `StreamingBoxConstrain
 `allocation.backtest` is a numpy-only walk-forward harness: it trades each
 estimator forward (form weights → earn next period → update) and tabulates
 out-of-sample Sharpe, **turnover**, concentration, and Sharpe net of a
-proportional cost.
+proportional cost. Turnover and cost are charged on the trades needed to return
+drifted holdings to each new target.
 
 ```python
 from allocation import SchurComplementary, TurnoverPenalty, MinimumVariance

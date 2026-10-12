@@ -9,8 +9,10 @@ given the base allocator's target ``w*``, return
                                            + sum_g ln(c_g - sum_{i in g} w_i) ]
     subject to  sum_i w_i = 1.
 
-The barrier's *domain* is the constraint set, so the result is strictly feasible
-for **any** ``tau > 0`` -- feasibility never depends on tuning. ``tau`` only sets
+The barrier's *domain* is the constraint set, so the result is feasible for
+**any** ``tau > 0`` -- feasibility never depends on tuning. It is strictly
+interior except for coordinates a bound or group cap pins exactly, and
+infeasible or malformed constraints raise ``ValueError``. ``tau`` only sets
 how close to a binding bound we allow; small ``tau`` approaches the exact
 projection while staying C^1 in ``w*`` (hence smooth in the covariance, hence low
 turnover). Group caps are assumed **disjoint** (each asset in at most one group),

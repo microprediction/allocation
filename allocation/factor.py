@@ -13,8 +13,8 @@ fix for the rank-deficient regime where dense ``Sigma^{-1}`` does not exist.
 
 The factor model is read straight from a factor covariance estimator that exposes
 ``loadings_`` / ``idiosyncratic_`` (e.g. an adapted ``precise.FactorCovariance``,
-``O(n k)`` end to end), or built from a dense covariance with a randomized
-``factor_decompose`` when none is supplied (``O(n^2 k)`` -- still well-posed, just
+``O(n k)`` end to end), or built from a dense covariance with
+``factor_decompose`` (a deterministic, label-equivariant subspace sketch) when none is supplied (``O(n^2 k)`` -- still well-posed, just
 bounded by the dense covariance).
 """
 
