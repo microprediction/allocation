@@ -53,7 +53,15 @@ def _shrink(cov: np.ndarray, delta: float) -> np.ndarray:
 
 
 def _solve(cov: np.ndarray, rhs: np.ndarray) -> np.ndarray:
-    """``cov^{-1} rhs`` via a solve, falling back to least squares if singular."""
+    """``cov^{-1} rhs`` via a solve, or least squares if ``cov`` is singular.
+
+    Singularity is decided by :func:`is_singular` (the same test that sets
+    ``singular_``), not by whether LAPACK happens to raise: ``solve`` on a
+    numerically rank-deficient matrix can return a roundoff-dependent answer
+    that changes when the assets are merely relabeled.
+    """
+    if is_singular(cov):
+        return np.linalg.lstsq(cov, rhs, rcond=None)[0]
     try:
         return np.linalg.solve(cov, rhs)
     except np.linalg.LinAlgError:
