@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "allocation"
-version = "0.0.1"
+version = "0.0.2"
 description = "Online (streaming) portfolio construction: scikit-learn / skfolio-compatible estimators over a keyed dynamic universe"
 authors = [{name = "Peter Cotton", email = "peter.cotton@microprediction.com"}]
 readme = "README.md"
