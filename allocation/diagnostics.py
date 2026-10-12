@@ -56,8 +56,8 @@ def negative_weight_diagnostic(
     Wl = _long_only_projection(W)
     rets_long = (Wl * R).sum(axis=1)
 
-    signed = portfolio_metrics(rets, W, periods_per_year, cost_bps)
-    longonly = portfolio_metrics(rets_long, Wl, periods_per_year, cost_bps)
+    signed = portfolio_metrics(rets, W, periods_per_year, cost_bps, asset_returns=R)
+    longonly = portfolio_metrics(rets_long, Wl, periods_per_year, cost_bps, asset_returns=R)
 
     short_mass = float(np.mean(np.abs(np.minimum(W, 0.0)).sum(axis=1)))
     ever_short = (W < -1e-9).any(axis=0)
