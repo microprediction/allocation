@@ -11,6 +11,7 @@ a prior fixed before the data. For the block prior the selected nu0 is the top o
 market at both T, and the evidence keeps rising on a grid extended to 20480 (all 20 markets at
 T=60, 11 of 20 at T=250). The diagonal prior selects interior values. Read the block-prior rows
 as strong shrinkage toward the within-block sample entries, not as a data-chosen strength."""
+import math
 import numpy as np
 from allocation._thurstone.calibrate import calibrate_diagonal
 from allocation._thurstone.diagonal import diagonal_portfolio
@@ -40,9 +41,11 @@ def inv_wishart_draw(nu, Psi, r):
     L = np.linalg.cholesky(np.linalg.inv(Psi))
     X = L @ r.standard_normal((n, nu))
     return np.linalg.inv(X @ X.T)
+def multigammaln(a, d):
+    # log of the multivariate gamma function Gamma_d(a); the standard library suffices, no SciPy needed
+    return 0.25*d*(d-1)*np.log(np.pi) + sum(math.lgamma(a + 0.5*(1-j)) for j in range(1, d+1))
 def log_marginal(S, T, nu0, Sigma0):
     # marginal likelihood of the data under N(0, Sigma), Sigma ~ IW(nu0, nu0*Sigma0), up to constants common across nu0
-    from scipy.special import multigammaln
     Psi0 = nu0*Sigma0; PsiT = Psi0 + T*S; nuT = nu0 + T
     return (nu0/2)*np.linalg.slogdet(Psi0)[1] - (nuT/2)*np.linalg.slogdet(PsiT)[1] + multigammaln(nuT/2, n) - multigammaln(nu0/2, n)
 def bayes_race(S, T, prior, nu0, ndraw=32, r=None):
