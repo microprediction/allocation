@@ -52,6 +52,8 @@ and are now far faster than their labels suggest.
 | `tilt_confirm.py`, `tilt_replicate.py`, `tilt_highdata.py` | three seeds; the tilt is worth nothing at T/n=0.1 and 13% of variance at T/n=5 | ~1 min each |
 | `mhp.py` | the multi-hypothesis ensemble method, implemented and benchmarked | ~5 min |
 | `nonelliptical.py` | that a market can separate tail risk from variance, now also in `benchmark/markets.py` | ~1 min |
+| `where_to_damp.py` | damping in the algorithm versus in the estimate: four paths between the same ends, minima within a point of each other | ~1 min |
+| `bayes_race.py` | the Thurstone race under a plug-in posterior mean; the block prior's marginal likelihood saturates its grid, see the docstring | ~3 min |
 
 ## Read this before trusting a new result
 

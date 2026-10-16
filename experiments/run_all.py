@@ -33,6 +33,8 @@ CATALOGUE = {
     "taper_beats_hrp":    ([], "slow",  "HRP sits at the dominated corner"),
     "nested_best_case":   ([], "slow",  "HRP on a clean hierarchy, its best case"),
     "seriation_value":    ([], "slow",  "the seriation works, the split rule cannot use it"),
+    "where_to_damp":      ([], "slow",  "damping in the algorithm vs in the estimate"),
+    "bayes_race":         ([], "slow",  "the race under a plug-in posterior; the block prior's evidence saturates"),
     "huge_universe":      (["5000", "104", "30"], "verylong", "5000 assets, 2y weekly: HRP wins"),
     "mhp":                (["40", "0.3"], "slow", "the multi-hypothesis method, benchmarked"),
     "thurstone_paired":   ([], "verylong", "the tilt is neutral on a stationary market"),
