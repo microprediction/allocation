@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>The geometry of choice — allocation</title>
-  <meta name="description" content="The Thurstone portfolio maximizes ability minus a dependence-aware entropy. Watch that entropy's geometry collapse from a triangle to a segment as two assets become clones — while softmax's never moves.">
+  <meta name="description" content="The Thurstone portfolio maximizes ability plus a dependence-aware entropy (a convex negentropy subtracted). Watch that entropy's geometry collapse from a triangle to a segment as two assets become clones — while softmax's never moves.">
   <style>
     :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
       --accent:#4a3aff;--accent-soft:#ecebfb;--border:#e2e2e2;--ink:#1f1d3d;}
@@ -56,17 +56,19 @@
 
 <main>
   <h1>The geometry of choice</h1>
-  <p class="subtitle">The Thurstone portfolio maximizes ability minus an entropy that knows the correlation.</p>
+  <p class="subtitle">The Thurstone portfolio maximizes ability plus an entropy that knows the correlation.</p>
 
   <p class="lead">The Thurstone portfolio is defined procedurally — weights are winning
   probabilities — but it secretly solves a recognizable program: the weights maximize
   <code>⟨θ, p⟩ − Ω(p)</code> over the simplex, where <code>θ</code> is the ability vector and
   <code>Ω</code> is a convex regularizer determined by the noise law of the race. The noise is
-  decisive. Gumbel noise makes <code>Ω</code> the Shannon entropy and the allocator softmax —
-  a rule that rewards spreading across three names <em>whether or not two of them are the same
-  asset in different wrappers</em>. Gaussian noise with correlation <code>C</code> makes
-  <code>Ω</code> a <em>dependence-aware</em> entropy: it rewards spreading only across
-  genuinely distinct bets.</p>
+  decisive. Gumbel noise makes <code>Ω</code> the <em>negative</em> Shannon entropy (up to
+  scale and an additive constant), so the objective is equivalently ability <em>plus</em>
+  Shannon entropy, and the allocator is softmax — a rule that rewards spreading across three
+  names <em>whether or not two of them are the same asset in different wrappers</em>. Gaussian
+  noise with correlation <code>C</code> makes <code>Ω</code> a <em>dependence-aware</em>
+  negentropy: its negative <code>−Ω</code> is the concave entropy that rewards spreading only
+  across genuinely distinct bets.</p>
 
   <p>This page draws that entropy. Three assets; assets 1 and 2 are progressively correlated
   (the twins), asset 3 stays independent. A fixed grid of ability vectors (radius 3, the
