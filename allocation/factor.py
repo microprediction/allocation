@@ -36,16 +36,25 @@ __all__ = [
 
 
 def woodbury_solve(loadings, idiosyncratic, rhs) -> np.ndarray:
-    """``(B B^T + diag(psi))^{-1} @ rhs`` via Woodbury -- ``O(n k^2 + k^3)``."""
+    """``(B B^T + diag(psi))^{-1} @ rhs`` via Woodbury.
+
+    ``rhs`` is a vector of shape ``(n,)`` or a matrix of shape ``(n, m)``;
+    the result has the same shape. Cost is ``O(n k^2 + k^3)`` for a vector,
+    with ``O(n k m + k^2 m)`` work for multiple right-hand sides.
+    """
     B = np.asarray(loadings, dtype=float)
     psi = np.asarray(idiosyncratic, dtype=float)
     rhs = np.asarray(rhs, dtype=float)
+    if rhs.ndim not in (1, 2):
+        raise ValueError("rhs must have shape (n,) or (n, m)")
     d_inv = 1.0 / psi
     bt_dinv = B.T * d_inv  # (k, n)
     k = B.shape[1]
     cap = np.eye(k) + bt_dinv @ B  # (k, k) capacitance matrix
     z = np.linalg.solve(cap, bt_dinv @ rhs)
-    return d_inv * rhs - d_inv * (B @ z)
+    # D^{-1} multiplies rows, not columns, for a matrix right-hand side.
+    scale = d_inv if rhs.ndim == 1 else d_inv[:, None]
+    return scale * rhs - scale * (B @ z)
 
 
 def covariance_to_factors(cov: np.ndarray, k: int, floor: float = 1e-3):
