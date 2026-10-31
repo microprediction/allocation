@@ -32,7 +32,7 @@ import math
 import numpy as np
 
 from .base import BaseOnlinePortfolio
-from ._schur.bridge import bisection_tree, bridge_weights, tree_leaves
+from ._schur.bridge import _validate_outer, bisection_tree, bridge_weights, tree_leaves
 from ._schur.seriation import seriate
 
 __all__ = ["SchurBridge"]
@@ -139,6 +139,14 @@ class SchurBridge(BaseOnlinePortfolio):
         self._order = None
         self._clusters = None
         self.eta_effective_ = None
+
+    def fit(self, X, y=None):
+        _validate_outer(self.outer)
+        return super().fit(X, y)
+
+    def partial_fit(self, X, y=None):
+        _validate_outer(self.outer)
+        return super().partial_fit(X, y)
 
     # ---------------------------------------------------- named by endpoints
     @classmethod

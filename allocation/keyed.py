@@ -25,7 +25,7 @@ from .convex import (
     mean_variance_weights,
     min_variance_weights,
 )
-from ._schur.bridge import bisection_tree, bridge_weights, tree_leaves
+from ._schur.bridge import _validate_outer, bisection_tree, bridge_weights, tree_leaves
 from ._schur.coupling import compute_monotonic_weights, compute_weights
 from ._schur.seriation import seriate
 from ._thurstone.calibrate import calibrate_diagonal, calibrate_one_factor
@@ -309,6 +309,7 @@ class StreamingSchurBridge:
         self._n = 0
 
     def learn_one(self, x: dict) -> "StreamingSchurBridge":
+        _validate_outer(self.outer)
         self._cov.learn_one(x)
         self._n += 1
         warm = [k for k in sorted(x.keys()) if self._cov.count.get(k, 0) >= self.min_obs]

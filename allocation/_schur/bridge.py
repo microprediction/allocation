@@ -371,6 +371,12 @@ def _localize(tree):
     return rec(tree), order
 
 
+def _validate_outer(outer) -> None:
+    """Reject unknown algorithms rather than silently selecting stacking."""
+    if not isinstance(outer, str) or outer not in ("stack", "optimize"):
+        raise ValueError("outer must be 'stack' or 'optimize'")
+
+
 def bridge_weights(
     covariance: np.ndarray,
     partition,
@@ -424,6 +430,7 @@ def bridge_weights(
     return_info : bool
         Also return a dict with ``eta_effective`` per leaf and the clusters.
     """
+    _validate_outer(outer)
     cov = np.asarray(covariance, dtype=float)
     n = cov.shape[0]
     if companion is None or (isinstance(companion, str) and companion == "ones"):
