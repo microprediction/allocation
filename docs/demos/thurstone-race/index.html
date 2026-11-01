@@ -131,10 +131,20 @@
   exception.</p>
 
   <p class="muted">Reproducible: <code>experiments/gen_thurstone_race_data.py</code> builds the
-  embedded data (tickers, correlation, calibrated abilities) with the actual
-  <code>allocation</code> package; the in-browser race is the forward pass of
-  <code>ThurstonePortfolio</code> with <code>target="equal"</code>. Estimator:
-  <code>allocation/thurstone.py</code>.</p>
+  embedded data (tickers, correlation, calibrated abilities). It calls
+  <code>allocation._thurstone.transport.transport_weights</code> to calibrate abilities
+  directly under the empirical correlation <code>C</code>, giving this demo an
+  approximately equal-weight starting point. The browser evaluates the same Gaussian
+  race law using those fixed abilities; it does not run the estimator's calibration.</p>
+
+  <p class="muted">This is not the default calibration path of
+  <code>ThurstonePortfolio(target="equal")</code>: its default <code>calib="diagonal"</code>
+  calibrates under the identity correlation, producing equal abilities. With the default
+  <code>phi=1</code>, its subsequent race under the empirical correlation need not have
+  equal weights. See <code>allocation/thurstone.py</code>. The generator uses 65,536 NumPy
+  normal paths (seed 1); the browser uses 131,072 Mulberry32/Box–Muller paths (seed 42)
+  and a Cholesky factor. These are different finite ensembles, so their win frequencies
+  need not agree exactly, even for the same abilities and correlation.</p>
 </main>
 
 <footer>
