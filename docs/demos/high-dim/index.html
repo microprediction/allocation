@@ -75,6 +75,12 @@
   exactly. Every "× true GMV" below has an exact denominator, which no real dataset can give
   you. One simulated history of 2000 days; the slider shortens the estimation window.</p>
 
+  <p class="muted"><strong>Historical snapshot.</strong> The embedded data below were
+  archived in July 2026, before the decomposition change in
+  <a href="https://github.com/microprediction/allocation/pull/107">PR #107</a>.
+  The race illustrates that archived factor model, not the output of the current
+  <code>ThurstonePortfolio(factors=k)</code>. The data and source revision are pinned below.</p>
+
   <h2>Try it: shrink the window</h2>
   <div class="widget">
     <div class="controls">
@@ -124,11 +130,20 @@
   Russell-3000 scale, where <code>n/T &gt; 1</code> is not a stress test but the everyday
   condition.</p>
 
-  <p class="muted">Reproducible: <code>experiments/gen_highdim_data.py</code> builds the market,
-  the minimum-variance sweep, and the factor decompositions with the
-  <code>allocation</code> package; the in-browser race is the forward pass of
-  <code>transport_weights_lowrank</code> (see <code>ThurstonePortfolio(factors=k)</code> in
-  <code>allocation/thurstone.py</code>) on a fixed ensemble of 8,192 scenarios.</p>
+  <p class="muted">Snapshot provenance: the embedded
+  <a href="https://github.com/microprediction/allocation/blob/8cd9da067dec39bf7262f10d72a9d1ed74f3f651/docs/demos/high-dim/data.js"><code>data.js</code></a>,
+  <a href="https://github.com/microprediction/allocation/blob/8cd9da067dec39bf7262f10d72a9d1ed74f3f651/experiments/gen_highdim_data.py">generator</a>, and
+  <a href="https://github.com/microprediction/allocation/blob/8cd9da067dec39bf7262f10d72a9d1ed74f3f651/allocation/_thurstone/covariance.py"><code>factor_decompose</code> routine</a>
+  are pinned to revision <code>8cd9da0</code> (22 July 2026). The generator builds
+  the market, minimum-variance sweep and factor decompositions. Running today's
+  <code>experiments/gen_highdim_data.py</code> replaces the artifact with the current
+  decomposition; it does not reproduce this snapshot. The in-browser race applies the
+  low-rank Gaussian forward calculation to the stored, rounded loadings and idiosyncratic
+  standard deviations on a fixed ensemble of 8,192 scenarios. Its scenario generator
+  differs from the Python generator's verification ensemble, so those finite-sample
+  weights need not match. Use the pinned artifact for this exact browser demonstration;
+  numerical-library changes and factor sign choices can also affect a regenerated
+  finite-ensemble result.</p>
 </main>
 
 <footer>
