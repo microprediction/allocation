@@ -25,6 +25,8 @@ turnover guarantee, so it is a contract, not a suggestion.
 
 from __future__ import annotations
 
+from numbers import Integral, Real
+
 import numpy as np
 
 from .covariance import cov_to_corr, nearest_correlation
@@ -108,11 +110,22 @@ through the function and through the estimator differed.
 
 
 def path_budget(n_paths: int) -> int:
-    """Round a requested budget up to a power of two, as the samplers need."""
+    """Round an integer-valued count >= 2 up to a power of two.
+
+    Integral real scalars (including NumPy scalars) retain their existing
+    behavior. Reject fractional counts, strings and booleans rather than
+    silently truncating or coercing a Monte Carlo budget.
+    """
+    if isinstance(n_paths, (bool, np.bool_)) or not isinstance(n_paths, Real):
+        raise ValueError("n_paths must be an integer-valued real count of at least 2")
+    if not isinstance(n_paths, Integral):
+        if not np.isfinite(n_paths) or n_paths != int(n_paths):
+            raise ValueError("n_paths must be an integer-valued real count of at least 2")
     n_paths = int(n_paths)
     if n_paths < 2:
         raise ValueError("n_paths must be at least 2")
-    return 1 << int(np.ceil(np.log2(n_paths)))
+    # Floating log2 can round 2**k + 1 down to k for large exact integers.
+    return 1 << (n_paths - 1).bit_length()
 
 
 def _t_scale(seeds_chi2: np.ndarray, nu: float, *, unit_variance: bool = True) -> np.ndarray:
