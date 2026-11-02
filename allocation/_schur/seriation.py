@@ -20,11 +20,21 @@ lets a prior place cold-start names the realized correlation cannot.
 
 from __future__ import annotations
 
+from numbers import Real
+
 import numpy as np
 
 from .._thurstone.covariance import cov_to_corr
 
 __all__ = ["affinity", "fiedler_vector", "seriate"]
+
+
+def _validate_prior_weight(prior_weight) -> None:
+    """Reject latent invalid controls even when no prior is supplied."""
+    if (isinstance(prior_weight, (bool, np.bool_))
+            or not isinstance(prior_weight, Real)
+            or not 0.0 <= prior_weight <= 1.0):
+        raise ValueError("prior_weight must be a finite real scalar in [0, 1].")
 
 
 def affinity(
@@ -39,6 +49,7 @@ def affinity(
     similarity by ``prior_weight``. With ``knn`` set, each row keeps only its k
     largest off-diagonal affinities (symmetrized).
     """
+    _validate_prior_weight(prior_weight)
     A = 0.5 * (cov_to_corr(cov) + 1.0)
     if prior is not None and prior_weight > 0.0:
         A = (1.0 - prior_weight) * A + prior_weight * np.asarray(prior, dtype=float)

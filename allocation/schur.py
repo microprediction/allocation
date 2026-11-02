@@ -25,7 +25,7 @@ import numpy as np
 
 from .base import BaseOnlinePortfolio
 from ._schur.coupling import compute_monotonic_weights, compute_weights
-from ._schur.seriation import seriate
+from ._schur.seriation import _validate_prior_weight, seriate
 
 __all__ = ["SchurComplementary", "HierarchicalRiskParity"]
 
@@ -72,6 +72,14 @@ class SchurComplementary(BaseOnlinePortfolio):
         self._fiedler = None
         self._order = None
         self.effective_gamma_ = None
+
+    def fit(self, X, y=None):
+        _validate_prior_weight(self.prior_weight)
+        return super().fit(X, y)
+
+    def partial_fit(self, X, y=None):
+        _validate_prior_weight(self.prior_weight)
+        return super().partial_fit(X, y)
 
     def _seriate(self, cov: np.ndarray):
         order, v = seriate(
