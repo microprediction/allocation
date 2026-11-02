@@ -33,7 +33,7 @@ import numpy as np
 
 from .base import BaseOnlinePortfolio
 from ._schur.bridge import bisection_tree, bridge_weights, tree_leaves
-from ._schur.seriation import seriate
+from ._schur.seriation import _validate_prior_weight, seriate
 
 __all__ = ["SchurBridge"]
 
@@ -141,6 +141,14 @@ class SchurBridge(BaseOnlinePortfolio):
         self.eta_effective_ = None
 
     # ---------------------------------------------------- named by endpoints
+    def fit(self, X, y=None):
+        _validate_prior_weight(self.prior_weight)
+        return super().fit(X, y)
+
+    def partial_fit(self, X, y=None):
+        _validate_prior_weight(self.prior_weight)
+        return super().partial_fit(X, y)
+
     @classmethod
     def hrp_to_min_variance(cls, gamma: float = 0.5, **kw):
         """HRP at ``gamma = 0``, minimum variance at ``gamma = 1`` (both exact)."""
