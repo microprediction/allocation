@@ -21,6 +21,8 @@ the sector-cap case.
 
 from __future__ import annotations
 
+from numbers import Integral, Real
+
 import numpy as np
 
 __all__ = ["barrier_constrain", "BoxConstrained", "StreamingBoxConstrained"]
@@ -123,8 +125,16 @@ def barrier_constrain(
     the rest; a set with only one feasible point returns it. Raises ``ValueError``
     if the constraints are infeasible, or if the feasible set is a face of the
     box/caps with no strict interior that is not simply a point, and
-    ``RuntimeError`` if the Newton iteration does not converge.
+    ``RuntimeError`` if the Newton iteration does not converge. ``tol`` must be
+    a positive finite real scalar and ``max_iter`` a positive integer; Boolean
+    controls are rejected, including when the constraints determine one point.
     """
+    if (isinstance(tol, (bool, np.bool_)) or not isinstance(tol, Real)
+            or not (np.isfinite(tol) and tol > 0)):
+        raise ValueError("tol must be a positive finite real scalar")
+    if (isinstance(max_iter, (bool, np.bool_)) or not isinstance(max_iter, Integral)
+            or max_iter <= 0):
+        raise ValueError("max_iter must be a positive integer")
     target = np.asarray(target, dtype=float)
     n = len(target)
     if not np.all(np.isfinite(target)):
