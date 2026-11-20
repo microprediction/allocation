@@ -15,7 +15,7 @@ $S = \mathcal{N}(0, \Sigma_\varepsilon)$ is the workhorse, and the only case in
 which the calibration and smoothness results below are closed-form; but the
 construction---and the implementation---treat $S$ as a black-box sampler, so a
 copula with genuine tail dependence, a fat-tailed or skewed law, or a structured
-generator are equally admissible (\Cref{prop:tail,rem:anysim}). The \emph{state price} (winning
+generator are equally admissible (\Cref{prop:tail} and \Cref{rem:anysim}). The \emph{state price} (winning
 probability) of asset $i$ is
 \begin{equation}
   p_i \;=\; \Prob\!\left( X_i = \min_{k} X_k \right).
@@ -50,15 +50,20 @@ target law in particular carrying dependence (tail dependence included) that the
 reference does not.
 
 \paragraph{The population map.}
-One display organizes the whole construction. Write $\theta = -a$, so a larger
-$\theta_i$ denotes a stronger competitor, and let
+One display organizes the whole construction. Write $\theta = -a$ and
+$\eta = -\varepsilon$, so a larger $\theta_i$ denotes a stronger competitor and
+$\max_i(\theta_i + \eta_i) = -\min_i(a_i + \varepsilon_i)$, and let
 \begin{equation}
-  G_S(\theta) = \E_{\eta\sim S}\Big[\max_i(\theta_i + \eta_i)\Big], \qquad
+  G_S(\theta) = \E\Big[\max_i(\theta_i + \eta_i)\Big], \quad
+  \eta = -\varepsilon,\ \ \varepsilon\sim S, \qquad
   W_S(\theta) = \nabla G_S(\theta) \in \Delta,
   \label{eq:popmap}
 \end{equation}
 so $W_S(\theta)$ is the vector of winning probabilities \eqref{eq:stateprice} (the
-gradient identity is \Cref{thm:objective}). Calibration to a benchmark
+gradient identity is \Cref{thm:objective}). The reflection $\eta = -\varepsilon$ is
+immaterial for a symmetric $S$. For a skewed or tail-asymmetric law it is what
+keeps the maximum in \eqref{eq:popmap} reading the same tail as the minimum in
+\eqref{eq:stateprice}. Calibration to a benchmark
 $w^{\mathrm{target}}\in\operatorname{int}\Delta$ under a reference law $S_0$ inverts
 this map, $\theta^0 = W_{S_0}^{-1}(w^{\mathrm{target}})$ up to an additive constant
 (\Cref{prop:calib}), and the ability tilt is the composition
@@ -109,23 +114,26 @@ zero-weight assets are dropped or floored before calibration.
        \Comment{abilities s.t.\ the race under $S_{\mathrm{calib}}$ yields $w^{\mathrm{target}}$}
 \State Draw $X^{(1)},\dots,X^{(M)} \sim S_{\mathrm{tilt}}(a)$ from \emph{fixed} seeds
        \Comment{Gaussian: $X^{(m)} = a + C_{\mathrm{tilt}}^{1/2} Z^{(m)}$}
-\State $w_i \gets \dfrac{1}{M}\sum_{m=1}^{M}
-       \mathbf{1}\!\left[\, i = \argminop_k X^{(m)}_k \,\right]$
-       \Comment{win frequency}
+\State $T^{(m)} \gets \argminop_k X^{(m)}_k$ (a set when tied), \quad
+       $w_i \gets \dfrac{1}{M}\sum_{m=1}^{M}
+       \dfrac{\mathbf{1}[\, i \in T^{(m)} \,]}{|T^{(m)}|}$
+       \Comment{win frequency, ties split evenly}
 \State \Return $w$
 \end{algorithmic}
 \end{algorithm}
 
 Two choices of the reference correlation give the practical flavours:
 \begin{itemize}
-  \item \textbf{Diagonal} ($C_{\mathrm{calib}} = I$). Calibration is the exact
-        order-statistic inverse of \Cref{sec:model} (the Fast Ability
+  \item \textbf{Diagonal} ($C_{\mathrm{calib}} = I$). Calibration is the
+        deterministic order-statistic inverse of \Cref{sec:model} (the Fast Ability
         Transform), and the tilt then injects the estimated correlation. The
         target may be any benchmark---the variance-only diagonal portfolio,
         capitalization weights, or equal weight.
   \item \textbf{One-factor market}
-        ($C_{\mathrm{calib}} = \beta\beta^\top + \mathrm{diag}(1-\beta^2)$). The
-        reference is a single market factor with loadings $\beta$; calibration
+        ($C_{\mathrm{calib}} = \beta\beta^\top + \mathrm{diag}(1-\beta_i^2)$). The
+        reference is a single market factor with loadings $\beta_i$, each the
+        correlation of asset $i$ with the benchmark-weighted portfolio, so
+        $|\beta_i| < 1$ and the idiosyncratic variances are positive; calibration
         reproduces the benchmark \emph{given} that market correlation, so the
         tilt's deviation is driven by the residual (non-market) correlation in
         $C_{\mathrm{tilt}}$.
@@ -149,16 +157,20 @@ monotonicity, and objective properties are established in \Cref{sec:properties}.
 \label{sec:computation}
 
 \paragraph{Calibration (deterministic).}
-The calibration step---the inverse map from target weights to abilities---is
-computed deterministically with the lattice machinery of the \texttt{thurstone}
+The calibration step, the inverse map from target weights to abilities, is
+computed deterministically with the lattice machinery of the \texttt{winning}
 package, which builds the distribution of the first order statistic by convolving
 competitor densities and tracking conditional multiplicity for ties
-\parencite{cotton2021}. For a diagonal reference this is the exact
-order-statistic inverse \eqref{eq:inverse}, with no Monte-Carlo error and cost
-linear in $n$. For the one-factor reference the assets are conditionally
-independent given the market factor, so the same lattice race is evaluated at a
-few Gauss--Hermite nodes and integrated over the factor; the inverse is then a
-damped fixed-point on this forward map. This is the only place quadrature enters.
+\parencite{cotton2021}. For a diagonal reference this is the order-statistic
+inverse \eqref{eq:inverse}, with no Monte-Carlo error and cost linear in $n$. For
+the one-factor reference the assets are conditionally independent given the
+market factor, so the same lattice race is evaluated at Gauss--Hermite nodes and
+integrated over the factor. The inverse is then a preconditioned fixed-point
+iteration on this forward map, warm-started from the independent inverse and run
+until the race reproduces the benchmark to $10^{-8}$; the loadings are clipped to
+$|\beta_i| \le 0.99$. A zero benchmark weight is floored at $10^{-12}$ before
+calibration, and the floored name's ability is then a one-sided bound. This is
+the only place quadrature enters.
 
 \paragraph{Tilt (Monte-Carlo).}
 The race under a general target law has no tractable analytic form, so it is
@@ -168,11 +180,10 @@ core, so the sampler is a plug-in: the Gaussian default recolours a fixed
 standard-normal ensemble by $C_{\mathrm{tilt}}^{1/2}$ (a quasi-Monte-Carlo
 ensemble may be substituted to sharpen the win-frequency \emph{level}, though not
 the step-to-step turnover of \Cref{sec:smoothness}); a Student-$t$ and a low-rank
-factor race (for scale) ship alongside; and any user callable obeying the
+factor race (for scale) ship alongside; and any user-supplied callable obeying the
 fixed-seed contract supplies an arbitrary law. Tail consistency (\Cref{prop:tail}) follows by
 driving the race with a downside-dependent sampler---or, within the Gaussian
-workhorse, a downside (lower-partial-moment) covariance. This supersedes the
-earlier \texttt{winningport} implementation of the tilt.
+workhorse, a downside (lower-partial-moment) covariance.
 
 \paragraph{Online updates and scale.}
 At rebalancing the correlation estimate moves slowly, and \Cref{sec:smoothness}
@@ -180,9 +191,16 @@ shows the weights move smoothly with it. We exploit this by holding the
 standard-normal seeds fixed and \emph{transporting} the path ensemble to the new
 correlation (recolouring by the updated square root), so turnover tracks genuine
 correlation change rather than sampling noise. For large universes the dense
-correlation is never formed: a low-rank factor model $C = BB^\top + D$ keeps both
-the transport and the argmin streaming and linear in $n$, scaling to thousands of
-assets. The covariance estimate itself is supplied by any external online
+correlation is never formed. A low-rank factor model $C = BB^\top + D$,
+$D = \mathrm{diag}(\psi)$, draws $X^{(m)} = a + B Z_f^{(m)} + D^{1/2} Z_\epsilon^{(m)}$
+from fixed $k$-dimensional factor seeds and $n$-dimensional idiosyncratic seeds,
+so the transport and the argmin are streaming and cost $O(Mnk)$, scaling to
+thousands of assets. A factor basis is identified only up to rotation, and a
+rotation between steps would re-colour the factor seeds and register as turnover.
+The loadings are therefore taken from a randomized range finder with a fixed
+projection, which holds the basis steady except at eigenvalue crossings and sign
+flips; aligning each step's loadings to the last by a Procrustes rotation is the
+general cure. The covariance estimate itself is supplied by any external online
 estimator, so the method interoperates with standard covariance-forecasting
 tooling.
 

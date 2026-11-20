@@ -6,7 +6,7 @@ allocation on the simplex---a capitalization index, an equal-weight book, any
 benchmark---and re-tilt it under a view on \emph{dependence} rather than returns.
 The vehicle is a race among assets: each asset draws a noisy performance, and a
 weight is the probability that it comes out best. The abilities driving the race
-are backed out of the benchmark by a fast \emph{exact} inverse, and the polish is
+are backed out of the benchmark by a fast deterministic inverse, and the polish is
 what happens when those same abilities are re-raced under a richer dependence law.
 The race has a second reading as a Thurstonian model of choice, which we set against
 the passive industry's capitalization weighting and its implicit appeal to Luce's
@@ -35,6 +35,9 @@ near-duplicate inflates the duplicated exposure and drains weight from everythin
 else (\Cref{prop:restriction,prop:redundancy}). A Thurstonian race does not: two
 assets that move together compete with \emph{each other}, and in the limit a
 co-moving pair collapses to a single horse that holds their combined weight.
+That statement is about the race at fixed abilities. Recalibrating the abilities
+to a renormalised benchmark after a clone enters does not commute with it exactly
+(\Cref{rem:fixedability}).
 
 Covariance-based allocators are not blind to this; they reach the same
 de-duplication, but lurchily. Mean--variance settles the split between near-
@@ -42,8 +45,9 @@ duplicates by inverting $\Sigma$, and the direction in which two assets become
 identical is exactly the direction in which $\Sigma$ loses rank; so the population
 answer is right while its sample estimate, dividing through a vanishing eigenvalue,
 swings between the twins and flips sign with the data \parencite{markowitz1952}.
-The inversion-free clustering allocators (hierarchical risk parity, the
-Schur-complementary family) de-duplicate by grouping instead, but discretely: the
+The inversion-free clustering allocators (hierarchical risk parity
+\parencite{lopezdeprado2016}, the Schur-complementary family
+\parencite{cotton2024schur}) de-duplicate by grouping instead, but discretely: the
 split jumps as cluster membership flips. The race de-duplicates \emph{smoothly},
 with a closed characterization (\Cref{prop:redundancy}) and without ever forming
 $\Sigma^{-1}$.
@@ -91,7 +95,6 @@ market portfolio, a non-Lucian object the indexer never holds, and that
 endorsement does not transfer to the restricted universes where weighting
 decisions are made.
 
-\paragraph{What the CAPM says.}
 Under the CAPM every investor is a mean--variance optimizer who agrees on the
 expected returns $\mu$ and on the \emph{same} covariance $\Sigma$. Two-fund
 separation then has each investor hold the risk-free
@@ -152,8 +155,13 @@ restricted-universe tangency weights are
   \;=\; \gamma\big(m_S + \Sigma_{SS}^{-1}\Sigma_{SX}\, m_X\big),
 \end{equation*}
 while restricted capitalization weighting uses $m_S$. The two coincide iff
-$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X \propto m_S$, which holds generically only at the
-full universe ($X = \varnothing$), fixing the single coincidence point. The wedge
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X = c\, m_S$ for some scalar $c > -1$, the sign
+keeping the normalised weights on the simplex. At the full universe
+$X = \varnothing$ and $c = 0$. On a strict sub-universe the condition is $|S|$
+equations in the one unknown $c$, which fail for generic $\Sigma_{SX} \neq 0$.
+The non-generic exceptions are a block-diagonal $\Sigma$ with $\Sigma_{SX} = 0$,
+and an excluded set whose market portfolio regresses identically on every retained
+asset, $\Sigma_{SX} m_X \propto \Sigma_{SS} m_S$. The wedge
 $\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$---the regression of the retained assets on the
 excluded ones---is precisely the part of each cap weight that reflects covariance
 with $U\setminus S$, irrelevant to the $S$-frontier yet baked into the full-market
@@ -198,7 +206,7 @@ It needs only that dependence, no return forecast, and it \emph{anchors} to the
 benchmark, departing from the prevailing allocation only as far as the correlation
 warrants. Treating the market as at least weakly efficient is the prudent default;
 discarding that anchor to bet against the index on thin evidence is the error that
-undid many entrants in the M6 forecasting competition.
+undid many entrants in the M6 forecasting competition \parencite{makridakis2025m6}.
 
 \subsection{Thurstone's eclipse, and the Fast Ability Transform}
 \label{sec:fat}
@@ -227,7 +235,7 @@ The transform is the hinge of everything that follows. We develop several uses o
 the apparatus, with different benchmarks to anchor to, different reference
 correlations, and target simulations carrying whatever dependence one wishes to
 match, but each routes through this one calibration map. None is practical without
-a fast, exact inverse from weights to abilities; with it, the rest is sampling.
+a fast, deterministic inverse from weights to abilities; with it, the rest is sampling.
 
 \subsection{Avoiding matrix inversion}
 \label{sec:robust}
@@ -237,8 +245,9 @@ estimated covariance \parencite{markowitz1952}: as $\Sigma$ nears singularity,
 $\Sigma^{-1}$ and with it the weights explode. The discipline's responses are
 shrinkage toward a structured target \parencite{ledoitwolf2004} and, more
 radically, allocators that never form $\Sigma^{-1}$ at all (hierarchical risk
-parity, the Schur-complementary family, risk parity), trading point optimality for
-stability and scale. The Thurstone race belongs to this inversion-free family: it
+parity \parencite{lopezdeprado2016}, the Schur-complementary family
+\parencite{cotton2024schur}, risk parity \parencite{maillard2010}), trading point
+optimality for stability and scale. The Thurstone race belongs to this inversion-free family: it
 \emph{samples} from a correlation rather than inverting one, so it stays well posed
 even when $\Sigma$ is singular or rank-deficient.
 
@@ -250,6 +259,15 @@ identical covariance, hence identical minimum-variance, HRP, Schur, and
 risk-parity weights, can carry entirely different probabilities of a simultaneous
 crash. The quantity that separates them, tail dependence, is not a moment, and no
 re-estimation or shrinkage of $\Sigma$ recovers it.
+
+Two allocators do reach past the second moment without an inverse. Scenario CVaR
+minimisation \parencite{rockafellar2000} is a linear program over joint return
+draws, and the hierarchical equal-risk-contribution family \parencite{raffinot2018}
+bisects a cluster tree on a downside measure. Both see the tail. Neither anchors
+to a benchmark. The first re-solves a program at every step and the second
+re-clusters, so each lurches where the race moves smoothly (\Cref{thm:smooth}).
+Neither has the deterministic inverse from a benchmark to latent scores that the
+tilt turns on.
 
 \subsection{The tail a covariance cannot see}
 \label{sec:tailmotiv}
@@ -264,7 +282,7 @@ eighty times more often than the fitted Gaussian allows, and beyond three percen
 the Gaussian effectively never produces such a day, yet two did. The direction of
 the asymmetry is the fingerprint: the same fit underpredicts joint \emph{crashes}
 far more than joint \emph{rallies} (\Cref{tab:tail}).\footnote{Daily log returns of
-the 28 Dow names with full 2010--2024 history (Yahoo Finance; average pairwise
+the 28 Dow names with full 2010--2024 history (Yahoo Finance; some $3{,}770$ trading days; average pairwise
 correlation $0.42$), against a Gaussian fit to their mean and covariance, the
 probabilities by $10^{8}$ Monte-Carlo draws. The deepest rows rest on two to four
 days, so the precise multiples are noisy; the monotone, asymmetric divergence is
@@ -274,6 +292,7 @@ wrong, because the lower-tail dependence
   \lambda_L \;=\; \lim_{u\downarrow 0}\Prob\!\big(U_i < u \,\big|\, U_j < u\big)
   \label{eq:lambdaL}
 \end{equation}
+with $U_i = F_i(R_i)$ the probability-integral transform of asset $i$'s return,
 is zero for the Gaussian copula and substantial in markets. No shrinkage or
 re-estimation of $\Sigma$ moves $\lambda_L$ off zero; it is invisible to second
 moments.

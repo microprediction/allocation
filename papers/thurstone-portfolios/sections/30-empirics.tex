@@ -9,6 +9,18 @@ constituents with full 2010--2024 daily history (Yahoo Finance) from a $252$-day
 warm-up, updating online each day; turnover is the mean one-way fraction of the
 book traded per day, the net Sharpe charging $10$ basis points on it.
 
+Every method sees the same covariance, an exponentially weighted estimate with a
+$60$-day half-life updated daily. The Thurstone tilt anchors to the equal-weight
+benchmark under the one-factor market reference, with full conviction $\phi = 1$,
+unit temperature $\beta = 1$, the Gaussian sampler, and $M = 2^{16}$ common-seed
+paths. The abilities are calibrated once at the end of the warm-up and held, so
+the daily motion is the full-correlation race responding to the moving estimate
+and nothing else. Minimum variance is the unconstrained $\Sigma^{-1}\mathbf 1$
+with ten percent shrinkage toward a scaled identity, and may short. Hierarchical
+risk parity is \textcite{lopezdeprado2016}, Schur is the $\gamma = 0.5$ member of
+\textcite{cotton2024schur}, and risk parity is equal risk contribution
+\parencite{maillard2010}.
+
 \begin{table}[h]
   \centering
   \caption{Walk-forward over $28$ Dow constituents, 2010--2024. The Thurstone tilt
@@ -41,14 +53,18 @@ little. We make no risk-adjusted-return claim.
 \paragraph{Scale.}
 The second practical property is feasibility. Beyond a few hundred names ($n > T$)
 the sample covariance is rank-deficient, so the dense \emph{inverse-covariance
-formulas} for minimum-variance and maximum-diversification ($\Sigma^{-1}\mathbf 1$,
-$\Sigma^{-1}\sigma$) are undefined; the long-only quadratic program
+formulas} for minimum-variance and maximum-diversification
+\parencite{choueifaty2008} ($\Sigma^{-1}\mathbf 1$, $\Sigma^{-1}\sigma$) are
+undefined; the long-only quadratic program
 $\min_{p\in\Delta} p^\top\Sigma p$ still has a solution---the simplex constraints can
 remove null directions---though it can be non-unique or unstable. Only the
 inversion-free methods stay well-behaved. The factor-form
 race never inverts and costs $O(Mnk)$, staying well-posed
-and fitting in a few seconds to $n = 3000$ (the Woodbury factor optimizers of
-\Cref{sec:computation} scale likewise, and faster).
+and fitting in a few seconds to $n = 3000$. The factor minimum-variance comparator
+in \Cref{tab:scale} solves $\Sigma^{-1}\mathbf 1$ for
+$\Sigma = BB^\top + \operatorname{diag}(\psi)$ by the Woodbury identity, with
+$\psi$ floored at a thousandth of the mean variance so the inverse exists, and
+normalises the signed solution to sum one; it scales likewise, and faster.
 
 \begin{table}[h]
   \centering
@@ -59,7 +75,7 @@ and fitting in a few seconds to $n = 3000$ (the Woodbury factor optimizers of
   \label{tab:scale}
   \begin{tabular}{lcccc}
     \toprule
-    $n$  & dense MinVar & Thurstone ($k{=}5$) & FactorMinVar & HRP \\
+    $n$  & dense MinVar & Thurstone ($k{=}5$) & factor MinVar & HRP \\
     \midrule
     $250$  & undefined & $0.38$ & $0.01$ & $0.02$ \\
     $1000$ & undefined & $0.90$ & $0.20$ & $0.33$ \\
@@ -68,31 +84,44 @@ and fitting in a few seconds to $n = 3000$ (the Woodbury factor optimizers of
   \end{tabular}
 \end{table}
 
-The cost is that the realized turnover of \Cref{thm:smooth} grows with the path
-budget needed for stable win frequencies at large $n$, so the race trades compute
-for smoothness in a regime where dense inversion is not an option at all.
+\Cref{tab:scale} holds the path budget at $M = 2^{16}$ for every $n$, which is
+why the fit time is linear in $n$. The win-frequency standard error of a name is
+about $\sqrt{w_i/M}$ while the weights themselves are of order $1/n$, so relative
+precision degrades like $\sqrt{n/M}$, and holding it fixed means growing $M$ with
+$n$. The race trades compute for smoothness in a regime where dense inversion is
+not an option at all.
 
 \section{Forecast combination: a promising but inconclusive study}
 \label{sec:combination}
 
 Because the tilt returns simplex weights from a dependence-adjusted regularizer
 without inverting anything (\Cref{thm:objective}), it is naturally a
-\emph{forecast combiner}: feed the $K$ base models' per-period \emph{losses}
-$L_{k,t}$ (absolute or squared error, or an sMAPE contribution) to the race as the
-competitors' performances---losses, not signed errors, so that the lowest-loss
-forecaster wins rather than the most negatively biased one---and read off the
-combination weights. Forecast
+\emph{forecast combiner}: treat the $K$ base models' forecast errors as the
+asset returns of \Cref{alg:tilt} and read off simplex combination weights. In the
+Gaussian tilt the errors enter only through their covariance, so their sign is
+immaterial. If the race is instead run on performances directly, as in
+\Cref{sec:tail}, those must be losses (absolute or squared error, or an sMAPE
+contribution), so that the lowest-loss forecaster wins rather than the most
+negatively biased one. Forecast
 combination is also where the central tension of this paper has a long
 empirical history---the ``forecast combination puzzle'' that the simple average
 is hard to beat with an estimated-optimal combination
 \parencite{bates1969,timmermann2006}, precisely because the optimal weights
 overfit a noisily estimated error covariance.
 
-We ran a first study on the M4 competition data \parencite{makridakis2020},
-fitting the standard statistical base-forecaster pool to the Yearly, Quarterly
-and Monthly series, estimating combination weights on a small set of series, and
-evaluating held-out sMAPE while sweeping the number of fitting series---the
-small-sample lever the puzzle turns on (\Cref{fig:combine}). The result is the
+We ran a first study on the M4 competition data \parencite{makridakis2020}. The
+base pool is six comparable statistical forecasters (automatic ETS, complex
+exponential smoothing, two Theta variants, random walk with drift, and a window
+average), fitted to $500$ Yearly, $500$ Quarterly and $400$ Monthly series. Each
+series' per-horizon errors are scaled by its mean absolute level and pooled across
+the fitting series to form the $K \times K$ error covariance. The tilt is
+\Cref{alg:tilt} with the inverse-error-variance portfolio as benchmark, the
+independent reference, $\phi = 1$ and $M = 2^{14}$ paths. Bates--Granger uses the
+pseudoinverse of that covariance, and stacking is non-negative least squares on
+the scaled forecasts, projected to the simplex. Weights are estimated on $5$,
+$10$, $20$, $50$ or $200$ fitting series, drawn $25$ times at random, and scored
+by sMAPE on $200$ held-out series (\Cref{fig:combine}). The number of fitting
+series is the small-sample lever the puzzle turns on. The result is the
 expected bias--variance crossover. The variance-optimal Bates--Granger
 combination ($w \propto \Sigma_e^{-1}\mathbf 1$) is wild when series are few and
 settles only once the error covariance is well estimated; the equal-weight
@@ -145,6 +174,22 @@ correlation-aware refinements \parencite{prono2009}, fundamental indexing
 tracking-error analysis \parencite{roll1992}, and the Markowitz optimization
 baseline \parencite{markowitz1952} are taken up where they bear on the argument
 (\Cref{sec:capm,sec:robust}).
+
+\paragraph{Benchmark-relative and tail-aware allocation.}
+Black--Litterman \parencite{black1992} and entropy pooling \parencite{meucci2008}
+tilt a benchmark by views, the first through a linear inverse of a covariance on
+returns, the second by re-weighting scenarios and re-optimising. Scenario CVaR
+minimisation \parencite{rockafellar2000} and hierarchical equal risk contribution
+\parencite{raffinot2018} reach the tail without inverting a covariance, by a
+linear program and by downside bisection. The tilt sits between them. It anchors
+like Black--Litterman, takes a dependence view that may be a tail view like
+entropy pooling, and reaches the tail like the scenario methods, but through a
+deterministic inverse from the benchmark and a forward race, with no program
+re-solved and no tree re-cut at each step (\Cref{sec:markowitz,sec:tail}).
+Hierarchical risk parity \parencite{lopezdeprado2016}, the Schur-complementary
+family \parencite{cotton2024schur}, risk parity \parencite{maillard2010} and
+maximum diversification \parencite{choueifaty2008} are the inversion-free and
+covariance-based comparators of \Cref{sec:experiments}.
 
 \paragraph{Long-only allocation as regularized regression.}
 Long-only mean--variance is a non-negative regression: the tangency weights are the

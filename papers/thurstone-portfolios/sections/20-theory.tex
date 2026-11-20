@@ -3,7 +3,8 @@
 
 We collect the properties that make the ability tilt a principled allocator
 rather than a heuristic. Throughout, the abilities $a$ are fixed and we view the
-weights as the winning-probability map $w(C)$.
+weights as the winning-probability map $w(C) := W_{\mathcal N(0,C)}(-a)$ of
+\eqref{eq:popmap}.
 
 \begin{proposition}[Feasibility]
 \label{prop:feasible}
@@ -145,12 +146,15 @@ laws; the Slepian argument is what buys the stated case.
 \subsection{Tail consistency}
 \label{sec:tail}
 
-We fix the sign convention for this section, since the race uses
-\emph{minimum-performance-wins}: take $X_i$ to be a centred \emph{loss-side}
-performance, so a larger $X_i$ is worse and the winner is $\min_i X_i$. Lower-tail
-dependence in returns (assets crashing together) is then upper-tail dependence in
-these losses, and ``a cluster that crashes together'' is one whose loss-side
-performances are large together.
+We fix the sign convention for this section. The race uses
+minimum-performance-wins and its winner is an extreme order statistic, so it
+reads one tail of the shocks, the lower one. The shocks are therefore
+\emph{return-signed}: a crash is $\varepsilon_i \to -\infty$, and a cluster that
+crashes together is one whose centred performances are small together. The
+winner is then the worst performer. That is a convention, not a loss. The race is
+a device for weights, and pointing its order statistic at the crash tail is what
+lets it read the crash copula. In the maximum form \eqref{eq:popmap} the same
+convention makes $\eta = -\varepsilon$ a loss and joint crashes its upper tail.
 
 \Cref{prop:monotone} de-weights a cluster by its \emph{full} correlation. Yet two
 clusters with an identical covariance can behave oppositely in the tail: one may
@@ -205,8 +209,8 @@ say, at fixed margins) deepens $M_G$ monotonically is a family-specific question
   \includegraphics[width=0.80\textwidth]{figures/tail_consistency.png}
   \caption{Tail consistency. One independent asset versus a $99$-name cluster
   with Clayton lower-tail dependence $\lambda_L$ (assets crash together, rally
-  independently; standard-normal margins; $M=1.5\times10^5$; loss-side race on
-  centred performances). As $\lambda_L\to1$ \emph{within this Clayton family} the
+  independently; standard-normal margins; $M=1.5\times10^5$; minimum-wins race on
+  centred return-signed performances, so the worst performer wins). As $\lambda_L\to1$ \emph{within this Clayton family} the
   cluster's combined weight falls toward the two-body limit $\tfrac12$
   (\Cref{prop:tail} gives the comonotone endpoint; the monotone descent is
   family-specific)---the $99$ names de-duplicate to a single horse. Driving the race by the downside semicovariance
@@ -221,10 +225,13 @@ say, at fixed margins) deepens $M_G$ monotonically is a family-specific question
 \label{rem:twolayers}
 Full covariance is blind to the downside asymmetry (\Cref{fig:tail}, grey); the
 downside semicovariance captures the asymmetry but is still a second moment,
-dominated by moderate losses; the exact object is the tail copula of
-$\min_{i\in G}$, which the argmin reads directly from a tail-dependent simulation
-and which no covariance summary represents. In the loss-side race the
-second-moment shadow is a close approximation (\Cref{fig:tail}, orange versus
+dominated by moderate losses; the exact object is the law of
+$M_G = \min_{i\in G} X_i$, set by the lower-tail copula, which the argmin reads
+directly from a tail-dependent simulation and which no covariance summary
+represents. A Gaussian race driven by the downside semicovariance moves because
+that matrix differs from the full correlation when the law is asymmetric, not
+because the Gaussian sampler carries any tail asymmetry of its own. In the race of
+\Cref{fig:tail} the second-moment shadow is a close approximation (orange versus
 green), so a downside-covariance estimator suffices in practice, with the
 simulation path as the exact limit.
 \end{remark}
@@ -254,7 +261,7 @@ with $\theta = -a$ (so a larger $\theta$ denotes a stronger competitor).
 
 \begin{theorem}[Implied objective]
 \label{thm:objective}
-$G_C$ is convex and $C^\infty$ in $\theta$, the weights are its gradient,
+For $C \succ 0$, $G_C$ is convex and $C^\infty$ in $\theta$, the weights are its gradient,
 $w = \nabla G_C(\theta)$, and equivalently $w$ is the unique solution of the
 regularized program
 \begin{equation}
@@ -351,7 +358,8 @@ benchmark-reproducing end.
 \label{rem:anysim}
 
 Nothing in \Cref{thm:objective} uses Gaussianity. For any centred performance law
-$S$ set $G_S(\theta) = \E_{\eta\sim S}[\max_i(\theta_i + \eta_i)]$. This is convex
+$S$ set $G_S(\theta) = \E[\max_i(\theta_i + \eta_i)]$ with $\eta = -\varepsilon$,
+$\varepsilon \sim S$, as in \eqref{eq:popmap}. This is convex
 in $\theta$ for any $S$, so the tie-split winning vector is a selected subgradient,
 $w \in \partial G_S(\theta) = \argmaxop_{p\in\Delta}\{\langle\theta, p\rangle -
 \Omega_S(p)\}$ with $\Omega_S = G_S^{*}$ convex on the simplex; when $S$ is full-rank
@@ -442,7 +450,11 @@ Adding and subtracting $\Omega_{S_0}(p)$ writes this as
 \]
 with $D_{\Omega_{S_0}}(p,w^0) = \Omega_{S_0}(p) - \Omega_{S_0}(w^0)
 - \nabla\Omega_{S_0}(w^0)^\top(p-w^0)$ the Bregman divergence of the reference
-regularizer. For a smooth perturbation $\Omega_{S_\phi} = \Omega_{S_0}
+regularizer. Since $G_{S_0}(\theta + c\mathbf 1) = G_{S_0}(\theta) + c$, the domain
+of $\Omega_{S_0}$ is the simplex and $\nabla\Omega_{S_0}(w^0)$ is its gradient on
+the tangent space $\{v : \mathbf 1^\top v = 0\}$; the additive constant in
+$\theta$ drops out of $\nabla\Omega_{S_0}(w^0)^\top(p - w^0)$ because
+$\mathbf 1^\top(p - w^0) = 0$. For a smooth perturbation $\Omega_{S_\phi} = \Omega_{S_0}
 + \phi\,\dot\Omega_{\Delta S} + O(\phi^2)$, so
 \[
   w^T_\phi \approx \argminop_{p\in\Delta}\big\{ D_{\Omega_{S_0}}(p, w^0)
@@ -469,7 +481,7 @@ orthogonal inputs. The reverse step is genuinely nonlinear here: Black--Litterma
 implied returns are a linear first-order condition ($\mu = \gamma\Sigma_0 w^0$, no
 inverse), whereas the choice geometry requires the gradient inverse
 $(\nabla G_{S_0})^{-1}$---which the Fast Ability Transform \parencite{cotton2021}
-supplies exactly and in linear time. Only the simple \emph{reference} law is
+supplies deterministically and in linear time. Only the simple \emph{reference} law is
 inverted; the rich correlation- or tail-dependent target enters by forward sampling,
 so the prohibitive inverse of the dependent race is never formed. The closest
 existing device is Meucci's entropy pooling \parencite{meucci2008}, which tilts a
@@ -513,14 +525,20 @@ For the Gaussian workhorse one identity sits behind this local geometry.
 \label{lem:tweedie}
 With $X = \theta + \eta$, $\eta\sim\mathcal N(0,C)$ for $C\succ0$, and
 $I = \argmaxop_k X_k$, the winning probability $w_i(\theta) = \Prob_\theta(I=i)$
-satisfies the selection form of Tweedie's formula
+satisfies the selection form of Tweedie's formula \parencite{efron2011}
 \begin{equation*}
   \E[X \mid I=i] = \theta + C\,\nabla_\theta\log w_i(\theta), \qquad
   \frac{\partial w_i}{\partial\theta_j}
   = w_i(\theta)\,\big[C^{-1}(\E[X\mid I=i] - \theta)\big]_j.
 \end{equation*}
-(For singular $C$, read $C^{-1}$ as a pseudoinverse and the identity in the limit.)
+(For singular $C$ the identity holds with the pseudoinverse for directional
+derivatives in $\operatorname{range}(C)$, where ties have probability zero; along
+$\ker C$ a perturbation can break an exact tie deterministically and $w$ jumps.)
 \end{lemma}
+Both lines are the score identity: differentiating
+$w_i(\theta) = \int_{\{x_i = \max_k x_k\}} \varphi_C(x - \theta)\,dx$ under the
+integral sign gives $\nabla_\theta w_i = \int_{\{x_i = \max_k x_k\}}
+C^{-1}(x - \theta)\,\varphi_C(x - \theta)\,dx = w_i\, C^{-1}(\E[X \mid I = i] - \theta)$.
 The score of the winning probability is the conditional displacement of the latent
 performance given that $i$ won; the Jacobian $\nabla_\theta w(\theta)$, whose
 inverse is the local penalty curvature, is a matrix of selection sensitivities.
@@ -593,10 +611,14 @@ then gives $w_i \in C^\infty$. For the gradient, Price's theorem
 \parencite{price1958}---the Gaussian identity
 $\partial \varphi_C/\partial C_{jk} = \partial^2 \varphi_C/\partial y_j\,\partial y_k$
 for $j \neq k$---followed by the divergence theorem over the cone $A_i$ rewrites
-$\partial w_i/\partial C_{jk}$ as an integral of $\varphi_C$ over the boundary
-faces of $A_i$ (the pairwise-tie hyperplanes), which is finite. The gradient is
-therefore bounded; since the conditioning of $C$ controls the tie-boundary
-density, the bound deteriorates as $\lambda\downarrow0$, giving \eqref{eq:lip}. (We
+$\partial w_i/\partial C_{jk}$ as an integral of the first derivative
+$\nabla_y\varphi_C = -C^{-1}y\,\varphi_C$ over the boundary faces of $A_i$ (the
+pairwise-tie hyperplanes). A second integration by parts along the faces reduces
+it to $\varphi_C$ itself on the codimension-two ridges where two faces meet, plus
+face normal-derivative terms when $i \in \{j, k\}$. Each is finite, so the gradient
+is bounded on the compact set; that set is convex, so the mean-value theorem gives
+\eqref{eq:lip}. The conditioning of $C$ controls the tie-boundary density, so the
+bound deteriorates as $\lambda\downarrow0$. (We
 do not claim the exact power of $1/\lambda$; the square-root recolouring below
 suggests the milder $1/\sqrt\lambda$, and the qualitative degradation near
 singularity is what matters.)
@@ -616,11 +638,17 @@ population difference $w(C+\Delta C) - w(C)$ with no independent-resampling floo
 its bias is zero given the shared transport, and its variability comes from paths
 crossing decision boundaries. Under a bounded tie-boundary density the expected
 number of crossing paths is $O(M\|\Delta C\|_F)$ and each moves the weight by
-$O(1/M)$, so the expected realized turnover is
-$\E\,\|\widehat w_M(C+\Delta C) - \widehat w_M(C)\|_1 = O(\|\Delta C\|_F)$---the
-population motion of \eqref{eq:lip}---with stochastic fluctuation of order
-$O(\sqrt{\|\Delta C\|_F/M})$ around it. Common seeds therefore reduce the difference
-noise; they do not make the finite-$M$ map Lipschitz.
+$O(1/M)$, so the signed change in each weight has mean $O(\|\Delta C\|_F)$, the
+population motion of \eqref{eq:lip}, and standard deviation
+$O(\sqrt{\|\Delta C\|_F/M})$. The expected realized turnover is therefore
+\[
+  \E\,\|\widehat w_M(C+\Delta C) - \widehat w_M(C)\|_1
+  = O\big(\|\Delta C\|_F + \sqrt{\|\Delta C\|_F/M}\,\big).
+\]
+The population term dominates when $M\|\Delta C\|_F \gtrsim 1$, the regime of
+\Cref{tab:turnover}; for very small steps at fixed $M$ the crossing noise does.
+Common seeds therefore reduce the difference noise; they do not make the
+finite-$M$ map Lipschitz.
 
 \paragraph{Rank deficiency and conditioning.}
 The square root is not the inversion it replaces, and the difference is what keeps
@@ -637,7 +665,7 @@ H\"older-$\tfrac12$ there ($\partial_\lambda\sqrt\lambda \sim \lambda^{-1/2}$), 
 $\lambda\downarrow0$ degradation of \eqref{eq:lip} (and the reason we do not pin its
 power tightly). The factor route of
 \Cref{sec:computation} removes even this: with
-$C = BB^\top + \operatorname{diag}(\psi)$ the idiosyncratic floor bounds
+$C = BB^\top + D$, $D = \operatorname{diag}(\psi)$, the idiosyncratic floor bounds
 $\lambda_{\min}\ge\min_i\psi_i$, regularizing both the root and the Lipschitz
 constant while never forming a dense $C^{1/2}$.\footnote{Rank deficiency is, if
 anything, favourable for the estimate: it lowers the effective dimension of the
@@ -663,8 +691,9 @@ $\Delta\widehat{w} = 0$ \emph{exactly}, whereas fresh resampling carries an
 $O(1/\sqrt{M})$ floor whether or not $C$ moved. The sampling offset cancels in
 differences, leaving only the (smaller) crossing term, which shrinks with the path
 budget $M$; this is the mechanism behind the incremental (online) update. The
-realized turnover is therefore not zero at finite $M$ but is far below fresh
-resampling and vanishes with the path budget. (Quasi-Monte-Carlo sharpens the
+realized turnover is therefore not zero at finite $M$. Its sampling component is
+far below fresh resampling and vanishes with the path budget, leaving the
+population turnover $\|w(C+\Delta C) - w(C)\|_1$. (Quasi-Monte-Carlo sharpens the
 \emph{level} of each $\widehat{w}(C)$, but not this difference, whose noise is set
 by the moved decision boundary rather than by integration error.)
 

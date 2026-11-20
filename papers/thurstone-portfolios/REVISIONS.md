@@ -159,3 +159,34 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
 3. Item **5** — restate tail consistency via the group-minimum stochastic-order theorem.
 4. Items **2, 9, 11** — calibration existence theorem, CAPM block-matrix wedge, Tweedie lemma.
 5. Items **7, 7-bis, 7-ter, 8, 12, 4, 10** — regularity regimes, smoothness cleanup, wording softenings.
+
+---
+
+# Second referee pass (October 2026)
+
+- [x] Abstract cut to results only; Dow claim limited to turnover; "fast deterministic inverse".
+- [x] Sign convention: `eq:popmap` sets `η = −ε`; §tail uses return-signed shocks (minimum wins reads
+      the crash tail, the winner is the worst performer); `fig:tail` caption and `rem:twolayers` match
+      `experiments/tail_consistency_demo.py`.
+- [x] Clone consistency qualified in the introduction (fixed abilities; recalibration does not commute).
+- [x] `prop:restriction` proof: `c > −1`, generic failure for `Σ_SX ≠ 0`, the two non-generic exceptions named.
+- [x] `alg:tilt` line 3 splits ties explicitly; `w(C) := W_{N(0,C)}(−a)` identified.
+- [x] §computation: `winning` package, not `thurstone`; one-factor inverse described as implemented
+      (preconditioned fixed point, `|β| ≤ 0.99`, floor `1e-12`); low-rank seeds `(k+n)`-dimensional,
+      fixed-projection range finder, rotation caveat.
+- [x] `thm:smooth` proof: `∇φ` on faces after one divergence pass, `φ` on ridges after a second;
+      convexity for the mean-value step. Finite-path bound `O(‖ΔC‖ + √(‖ΔC‖/M))`; only the sampling
+      component vanishes with `M`.
+- [x] `lem:tweedie`: score derivation; singular-`C` caveat restricted to `range(C)`. Bregman gradient on
+      the tangent space. `thm:objective` states `C ≻ 0`.
+- [x] `tab:dow` configuration stated (EWMA 60d, equal-weight target, market reference, `φ = β = 1`,
+      `M = 2^16`, abilities held after warm-up; MinVar unconstrained with 10% shrinkage; baselines cited).
+- [x] `tab:scale`: factor MinVar defined (Woodbury, `ψ` floor), `M = 2^16` constant, `√(n/M)` precision note.
+- [x] §combination protocol as implemented: six-model comparable pool, scaled errors, inverse-variance
+      benchmark, `φ = 1`, `M = 2^14`, 25 draws, 200 held-out series; sign immaterial in the Gaussian tilt.
+- [x] Related work: benchmark-relative and tail-aware paragraph (BL, entropy pooling, CVaR, HERC);
+      HRP, Schur, risk parity, max-div, M6, Tweedie cited; four Crossref-verified entries in `refs.bib`.
+- [ ] `fig:combine` legend labels fixed in `experiments/m4_combination.py`; figure not regenerated
+      (M4 forecast cache absent).
+- [ ] Out-of-sample tail backtest of the downside tilt: not added, equities are not its natural home;
+      abstract tempered instead.
