@@ -669,9 +669,9 @@ $\widehat{Y}_m(C) = S(C)\,Z_m$ and
 $\widehat{w}_i(C) = M^{-1}\sum_m \mathbf{1}[\widehat{Y}_m(C) \in A_i]$. Each
 indicator is piecewise constant in $C$, flipping only when a path crosses a face
 of $A_i$. A step $\Delta C$ thus moves the realized weights by two contributions:
-the systematic response $O(\|\Delta C\|)$ inherited from \Cref{thm:smooth}, and a
-sampling term from the $O(M\,\|\Delta C\|)$ boundary crossings, which net out
-stochastically to $O(\sqrt{\|\Delta C\|/M})$. Common seeds keep the second
+the systematic response $O(\|\Delta C\|_F)$ inherited from \Cref{thm:smooth}, and a
+sampling term from the $O(M\,\|\Delta C\|_F)$ boundary crossings, which net out
+stochastically to $O(\sqrt{\|\Delta C\|_F/M})$. Common seeds keep the second
 small: when $\Delta C = 0$ the same seeds give the same winners and
 $\Delta\widehat{w} = 0$ \emph{exactly}, whereas fresh resampling carries an
 $O(1/\sqrt{M})$ floor whether or not $C$ moved. The sampling offset cancels in

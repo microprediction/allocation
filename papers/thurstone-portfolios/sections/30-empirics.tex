@@ -21,10 +21,9 @@ risk parity is \textcite{lopezdeprado2016}, Schur is the $\gamma = 0.5$ member o
 
 \begin{table}[h]
   \centering
-  \caption{Walk-forward over $28$ Dow constituents, 2010--2024. The Thurstone tilt
-  turns over far less than the inversion-free clustering allocators (HRP, Schur)
-  and than minimum variance, at comparable gross Sharpe. Net Sharpe charges $10$ basis points on
-  turnover.}
+  \caption{Walk-forward over $28$ Dow constituents, 2010--2024. Turnover is the
+  mean one-way fraction of the book traded per day; net Sharpe charges $10$ basis
+  points on it.}
   \label{tab:dow}
   \begin{tabular}{lccc}
     \toprule
@@ -44,9 +43,10 @@ risk parity is \textcite{lopezdeprado2016}, Schur is the $\gamma = 0.5$ member o
 The tilt turns over four to nine times less than the seriation-smoothed Schur and
 HRP and than minimum variance, in line with \Cref{thm:smooth}: its weights move
 with the correlation, not with the re-clustering or re-seriation those methods
-incur each step, and it sits at the low-turnover end alongside inverse variance.
-Gross Sharpe is comparable across methods, so the gap is not an artefact of trading
-little.
+incur each step. Inverse variance and risk parity turn over less still. The tilt's
+gross Sharpe, $0.71$, is the lowest in the table, and its net Sharpe, $0.69$, is
+below that of inverse variance and risk parity ($0.76$) and above that of minimum
+variance, HRP and Schur.
 
 \paragraph{Scale.}
 The second practical property is feasibility. Beyond a few hundred names ($n > T$)

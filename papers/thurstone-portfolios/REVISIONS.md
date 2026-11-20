@@ -136,6 +136,8 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
   (fixed seeds, boundary-density condition): `E‖ŵ(C+ΔC)−ŵ(C)‖_1 = O(‖ΔC‖)+O(‖ΔC‖/√M)`. It inherits
   **low turnover in expectation/high probability**, not literal smoothness. *We already corrected Thm 2
   toward the O(1/√M) term in the empirics; make sure the Theorem 2 statement itself carries this.*
+  **The bound as the paper now states it ("Finite paths"):** `E‖Δŵ_M‖_1 = O(‖ΔC‖_F + √(‖ΔC‖_F/M))`;
+  the two forms above are superseded.
 
 - [x] **[S] 10. Markowitz analogy — warning sentence DONE** ("Not a return forecast" para now states
   the geometry is a diversification geometry induced by `S`, not a risk geometry in return space;
@@ -175,7 +177,7 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
       (preconditioned fixed point, `|β| ≤ 0.99`, floor `1e-12`); low-rank seeds `(k+n)`-dimensional,
       fixed-projection range finder, rotation caveat.
 - [x] `thm:smooth` proof: `∇φ` on faces after one divergence pass, `φ` on ridges after a second;
-      convexity for the mean-value step. Finite-path bound `O(‖ΔC‖ + √(‖ΔC‖/M))`; only the sampling
+      convexity for the mean-value step. Finite-path bound `O(‖ΔC‖_F + √(‖ΔC‖_F/M))`; only the sampling
       component vanishes with `M`.
 - [x] `lem:tweedie`: score derivation; singular-`C` caveat restricted to `range(C)`. Bregman gradient on
       the tangent space. `thm:objective` states `C ≻ 0`.
