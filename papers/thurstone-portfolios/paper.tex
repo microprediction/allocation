@@ -13,7 +13,7 @@
 \title{Thurstone Portfolio Polishing:\\
        Tail-Sensitive Black--Litterman and Beyond}
 \author{Peter Cotton}
-\date{June 25, 2026}
+\date{First version: June 25, 2026. This version: November 20, 2026.}
 
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\Prob}{\mathbb{P}}
@@ -29,19 +29,17 @@
 \maketitle
 
 \begin{abstract}
-We take an allocation on the simplex and tilt it under a view on dependence
-rather than returns. A weight is read as a winning probability: each asset draws
-a noisy performance and its weight is the probability it comes out best. A fast
-deterministic inverse backs the abilities out of the benchmark, and the tilt is
-the race re-run under a richer dependence law. This is a tail-sensitive analogue
-of Black--Litterman. The view is on co-movement, tails included, and no
-covariance is inverted and no optimization solved. A near-duplicate asset splits
-a position rather than doubling it. Luce-type rules count it twice, and
-capitalization weighting is one. We prove feasibility, benchmark reproduction,
-redundancy and tail consistency, an implied convex objective, and a Lipschitz
-turnover bound. In a known-truth lab the tail-dependent tilt de-duplicates the
-names that crash together. A Dow walk-forward runs at four to nine times less
-turnover than clustering allocators.
+We tilt an allocation on the simplex under a view on dependence rather than
+returns. Each asset draws a noisy performance, and its weight is read as the
+probability that it comes out best. A fast deterministic inverse backs the
+abilities out of the benchmark, and the tilt re-runs the race under a richer
+dependence law. The result is a tail-sensitive analogue of Black--Litterman that
+inverts no covariance and solves no optimization. A near-duplicate asset splits a
+position rather than doubling it, as Luce-type rules such as capitalization
+weighting do. We prove feasibility, benchmark reproduction, redundancy and tail
+consistency, an implied convex objective, and a Lipschitz turnover bound. On the
+Dow constituents over 2010--2024 the tilt turns over four to nine times less than
+minimum variance and the clustering allocators.
 \end{abstract}
 
 % --- body split into sections/ for editing; see git log ---

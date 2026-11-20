@@ -1,9 +1,9 @@
 \section{Introduction}
 \label{sec:intro}
 
-We develop \emph{Thurstone portfolio polishing}: a way to take an existing
-allocation on the simplex---a capitalization index, an equal-weight book, any
-benchmark---and re-tilt it under a view on \emph{dependence} rather than returns.
+We develop \emph{Thurstone portfolio polishing}, a way to take an existing
+allocation on the simplex (a capitalization index, an equal-weight book, any
+benchmark) and re-tilt it under a view on \emph{dependence} rather than returns.
 The vehicle is a race among assets: each asset draws a noisy performance, and a
 weight is the probability that it comes out best. The abilities driving the race
 are backed out of the benchmark by a fast deterministic inverse, and the polish is
@@ -16,20 +16,20 @@ whole-universe market portfolio, a non-Lucian object no investor on a restricted
 universe actually holds (\Cref{sec:capm}).
 
 The reason to read allocation as a Thurstonian rather than a Lucian choice is a
-single property---\emph{clone consistency}: cloning an option should not create
+single property, \emph{clone consistency}: cloning an option should not create
 value. The same axiom is named in social choice, where it is Tideman's
 \emph{independence of clones} \parencite{tideman1987}. Add a second asset that
 behaves almost exactly like one already held, and a
 sensible rule should \emph{split} the position across the two near-duplicates and
 leave the rest of the book untouched; it must not let the duplicated exposure count
-twice. Everything else this paper advertises---robustness without inverting a
-covariance, low turnover, feasibility at scale---is downstream of meeting this one
-axiom with a smooth order-statistic race rather than a hard clustering or an inverse. This is the portfolio form of
+twice. Robustness without inverting a covariance, low turnover and feasibility at
+scale all follow from meeting this one axiom with a smooth order-statistic race
+rather than a hard clustering or an inverse. This is the portfolio form of
 the red-bus/blue-bus problem that unseated the logit model in discrete choice
 \parencite{mcfadden1974}. The logit inherits that paradox from its noise:
 independence of irrelevant alternatives holds exactly when the race is driven by
 Gumbel errors \parencite{yellott1977}, so a race under any other law escapes it by
-construction. A Lucian rule---capitalization weighting included---fixes
+construction. A Lucian rule, capitalization weighting included, fixes
 the ratio of any two weights independently of the rest of the field, so inserting a
 near-duplicate inflates the duplicated exposure and drains weight from everything
 else (\Cref{prop:restriction,prop:redundancy}). A Thurstonian race does not: two
@@ -39,8 +39,7 @@ That statement is about the race at fixed abilities. Recalibrating the abilities
 to a renormalised benchmark after a clone enters does not commute with it exactly
 (\Cref{rem:fixedability}).
 
-Covariance-based allocators are not blind to this; they reach the same
-de-duplication, but lurchily. Mean--variance settles the split between near-
+Covariance-based allocators reach the same de-duplication, but unstably. Mean--variance settles the split between near-
 duplicates by inverting $\Sigma$, and the direction in which two assets become
 identical is exactly the direction in which $\Sigma$ loses rank; so the population
 answer is right while its sample estimate, dividing through a vanishing eigenvalue,
@@ -52,21 +51,19 @@ split jumps as cluster membership flips. The race de-duplicates \emph{smoothly},
 with a closed characterization (\Cref{prop:redundancy}) and without ever forming
 $\Sigma^{-1}$.
 
-That is the organizing idea of the paper. Redundancy is near-singularity, so three
-properties usually treated apart turn out to be one. The race is robust to
+Redundancy is near-singularity, so three properties usually treated apart are one. The race is robust to
 ill-conditioning because it samples from a correlation rather than inverting one
 (\Cref{sec:robust}); it turns over little because its weights are locally Lipschitz
 in the correlation and move only as far as the correlation moves, where the
 clustering methods re-seriate each period (\Cref{thm:smooth}, \Cref{sec:experiments});
-and it splits redundant exposure gracefully. The three are one behaviour---moving
-smoothly along the direction in which assets become collinear and a covariance
-inverse would explode.
+and it splits redundant exposure gracefully. All three are the same behaviour:
+the weights move smoothly along the direction in which assets become collinear and
+a covariance inverse would explode.
 
-One property genuinely stands apart, because it is not about conditioning at all.
-Unlike any covariance functional, the race admits \emph{tail dependence}: driven by
+A fourth property is not about conditioning. Unlike any covariance functional, the race admits \emph{tail dependence}: driven by
 a tail-dependent simulation it responds to lower-tail co-movement that no second
-moment can encode, so a cluster that crashes together---but only in the
-crash---de-duplicates in the tail (\Cref{prop:tail}). The winner of a race is an
+moment can encode, so a cluster that crashes together, but only in the
+crash, de-duplicates in the tail (\Cref{prop:tail}). The winner of a race is an
 order statistic of the joint draw, and an order statistic reads the tail copula
 where a covariance cannot.
 
@@ -89,8 +86,7 @@ turnover (\Cref{sec:properties,sec:smoothness}).
 \label{sec:capm}
 
 The passive industry defends capitalization weighting by appeal to the CAPM. We
-grant the CAPM in full; the point is that its support for the practice is
-superficial. What the model endorses is the efficiency of the whole-universe
+grant the CAPM in full. What the model endorses is the efficiency of the whole-universe
 market portfolio, a non-Lucian object the indexer never holds, and that
 endorsement does not transfer to the restricted universes where weighting
 decisions are made.
@@ -104,7 +100,7 @@ portfolio, market clearing forces it to equal the supply, the
 capitalization-weighted market, so $\mathrm{cap} \propto \Sigma^{-1}(\mu -
 r\mathbf{1})$ and the market portfolio is efficient.
 
-Capitalization weighting is optimal precisely \emph{because the covariance is
+Capitalization weighting is optimal \emph{because the covariance is
 shared and the universe is the
 whole world}: it is the one portfolio on which all investors, reasoning from a
 single $\Sigma$ over all assets, agree.\footnote{One wrinkle we do not dwell on:
@@ -162,20 +158,19 @@ equations in the one unknown $c$, which fail for generic $\Sigma_{SX} \neq 0$.
 The non-generic exceptions are a block-diagonal $\Sigma$ with $\Sigma_{SX} = 0$,
 and an excluded set whose market portfolio regresses identically on every retained
 asset, $\Sigma_{SX} m_X \propto \Sigma_{SS} m_S$. The wedge
-$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$---the regression of the retained assets on the
-excluded ones---is precisely the part of each cap weight that reflects covariance
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$, the regression of the retained assets on the
+excluded ones, is the part of each cap weight that reflects covariance
 with $U\setminus S$, irrelevant to the $S$-frontier yet baked into the full-market
 weight.
 \end{proof}
 
 The CAPM's support for the Lucian habit is therefore the single-point coincidence
 of \Cref{prop:restriction}: it endorses cap weighting on the whole-market universe
-alone, and is silent, indeed contrary, on the restricted universes where weighting
+alone, and is silent or contrary on the restricted universes where weighting
 decisions are actually made. This is the
 choice-theoretic form of Roll's critique \parencite{roll1977}: the only testable
 content of the CAPM is the efficiency of the \emph{true} market portfolio, and no
-proxy on a restricted universe inherits it \parencite{prono2009}. We do not
-contradict the CAPM, only decline to extend it past its premises. Fundamental
+proxy on a restricted universe inherits it \parencite{prono2009}. Fundamental
 indexing reaches cap weighting's sub-optimality by a different route, price
 inefficiency \parencite{hsu2006}, while shrinkage \parencite{ledoitwolf2004} and
 tracking-error analysis \parencite{roll1992} document the fragility of the inputs.
@@ -183,9 +178,7 @@ tracking-error analysis \parencite{roll1992} document the fragility of the input
 \subsection{Asset allocation as a choice}
 \label{sec:choice}
 
-If capitalization weighting is a Lucian \emph{habit} rather than a principle, what
-is an \emph{informationally modest} alternative to naive indexing? We read
-allocation as a \emph{choice}. The market, in aggregate, selects among assets, and
+We read allocation as a \emph{choice}. The market, in aggregate, selects among assets, and
 a portfolio weight is the probability with which an asset is chosen. Thurstone's
 law of comparative judgment \parencite{thurstone1927} is the canonical model of
 such a choice: each alternative $i$ carries a latent quality, an \emph{ability}
@@ -196,8 +189,8 @@ the property the Lucian (logit) model forbids by axiom. Two assets that move
 together compete with each other, not independently, and a choice model charges for
 that where a Lucian one cannot.
 
-Using these choice probabilities as weights is the construction of this paper:
-\Cref{sec:method} fixes the field's abilities by \emph{calibration} to a chosen
+To use these choice probabilities as weights, \Cref{sec:method} fixes the field's
+abilities by \emph{calibration} to a chosen
 benchmark, then \emph{tilts} by re-running the choice under the dependence actually
 realised.
 
@@ -224,15 +217,13 @@ Two developments lift the obstruction here. First, the forward race is cheap to
 \emph{simulate}: the winning frequencies of $10^4$ to $10^5$ correlated draws cost
 milliseconds, and a common-seed construction (\Cref{sec:smoothness}) makes the
 simulation \emph{smooth} in the dependence, so it can be re-used online without
-churning the weights. Second, and decisively for calibration, the \emph{Fast
+churning the weights. Second, the \emph{Fast
 Ability Transform} of \textcite{cotton2021} evaluates the forward and inverse maps
 of the independent race in \emph{linear time} on a lattice, convolving competitor
 densities and tracking tie multiplicity exactly, so the once-prohibitive inverse
-from target weights to abilities is now $O(n)$ and Monte-Carlo-free. A theoretical
-curiosity becomes a practical allocator.
+from target weights to abilities is now $O(n)$ and Monte-Carlo-free.
 
-The transform is the hinge of everything that follows. We develop several uses of
-the apparatus, with different benchmarks to anchor to, different reference
+We develop several uses of the apparatus, with different benchmarks to anchor to, different reference
 correlations, and target simulations carrying whatever dependence one wishes to
 match, but each routes through this one calibration map. None is practical without
 a fast, deterministic inverse from weights to abilities; with it, the rest is sampling.
@@ -272,22 +263,21 @@ tilt turns on.
 \subsection{The tail a covariance cannot see}
 \label{sec:tailmotiv}
 
-Concretely: how often do the Dow's constituents fall \emph{together}, and by how
-much? A multivariate Gaussian fit to their daily returns, pinning the means and the
+How often do the Dow's constituents fall \emph{together}, and by how much? A multivariate Gaussian fit to their daily returns, pinning the means and the
 full covariance, reproduces a shallow joint decline well enough, but its joint tail
 thins far too fast. All of them closing down on the same day is only mildly
 underpredicted; deepen the event and the gap widens without bound. Over
 2010--2024, days on which every name fell by more than two percent occurred about
 eighty times more often than the fitted Gaussian allows, and beyond three percent
-the Gaussian effectively never produces such a day, yet two did. The direction of
-the asymmetry is the fingerprint: the same fit underpredicts joint \emph{crashes}
-far more than joint \emph{rallies} (\Cref{tab:tail}).\footnote{Daily log returns of
+the Gaussian effectively never produces such a day, yet two did. The same fit
+underpredicts joint \emph{crashes} far more than joint \emph{rallies}
+(\Cref{tab:tail}).\footnote{Daily log returns of
 the 28 Dow names with full 2010--2024 history (Yahoo Finance; some $3{,}770$ trading days; average pairwise
 correlation $0.42$), against a Gaussian fit to their mean and covariance, the
 probabilities by $10^{8}$ Monte-Carlo draws. The deepest rows rest on two to four
 days, so the precise multiples are noisy; the monotone, asymmetric divergence is
-not.} The Gaussian gets the average right and the joint extreme catastrophically
-wrong, because the lower-tail dependence
+not.} The Gaussian gets the average right and the joint extreme wrong, because
+the lower-tail dependence
 \begin{equation}
   \lambda_L \;=\; \lim_{u\downarrow 0}\Prob\!\big(U_i < u \,\big|\, U_j < u\big)
   \label{eq:lambdaL}
@@ -303,7 +293,7 @@ moments.
   (2010--2024): empirical frequency, the frequency under a Gaussian fit to the
   mean and covariance, and their ratio. The Gaussian undercounts joint
   \emph{crashes} ever more steeply with depth, and far more than joint
-  \emph{rallies}---the lower-tail dependence a second moment cannot carry.}
+  \emph{rallies}: the lower-tail dependence a second moment cannot carry.}
   \label{tab:tail}
   \begin{tabular}{lccc@{\qquad}ccc}
     \toprule
@@ -314,7 +304,7 @@ moments.
     $1.0\%$ & $0.32\%$ & $0.080\%$  & $4\times$         & $0.24\%$ & $0.111\%$  & $2\times$  \\
     $1.5\%$ & $0.21\%$ & $0.012\%$  & $18\times$        & $0.13\%$ & $0.018\%$  & $7\times$  \\
     $2.0\%$ & $0.11\%$ & $0.0014\%$ & $77\times$        & $0.05\%$ & $0.0022\%$ & $25\times$ \\
-    $3.0\%$ & $0.05\%$ & ${\sim}0$  & ${>}10^{4}\times$ & $0\%$    & ${\sim}0$  & ---        \\
+    $3.0\%$ & $0.05\%$ & ${\sim}0$  & ${>}10^{4}\times$ & $0\%$    & ${\sim}0$  & n/a        \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -325,5 +315,4 @@ by the tail copula, not by the covariance. Drive the Thurstonian race with a
 simulation that carries lower-tail dependence and the weights respond to
 $\lambda_L$: assets that crash together are recognised as the near-duplicates they
 become in the tail, and their shares collapse to one, which no covariance-based
-allocator can arrange (\Cref{prop:tail}). With this in view we make the
-construction precise.
+allocator can arrange (\Cref{prop:tail}).
