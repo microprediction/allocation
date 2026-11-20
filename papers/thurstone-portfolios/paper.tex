@@ -34,11 +34,12 @@
 \maketitle
 
 \begin{abstract}
-This is the first paper to treat portfolio construction as a race. Each asset
-draws a noisy performance, and its weight is the probability that it finishes
-first. New algorithms for Thurstone's race model make this practical at scale: a
-fast deterministic inverse recovers abilities from benchmark weights, and a
-factor-form simulation re-runs the race under new dependence. Neither
+We introduce for the first time the use of relatively new contest inversion
+algorithms as a device for portfolio construction and augmentation. Each asset is
+a runner in a Thurstone race, drawing a noisy performance, and its weight is the
+probability that it finishes first. A fast deterministic inverse recovers
+abilities from benchmark weights, and a factor-form simulation re-runs the race
+under new dependence. Neither
 inverts a covariance or solves an optimization, and the cost is linear in the
 number of assets, so thousands of names fit in seconds. The result is a
 tail-sensitive Black--Litterman in which near-duplicates split a position rather
