@@ -1,4 +1,4 @@
-\section{Theoretical Properties}
+\section{Theoretical properties}
 \label{sec:properties}
 
 Throughout this section the abilities $a$ are fixed and we view the
@@ -389,7 +389,7 @@ geometry. It is not a coherent risk measure (neither variance nor
 CVaR), but the canonical Fenchel--Young regularizer of the perturbed argmax
 \parencite{berthet2020}.
 
-\subsection{Markowitz, reverse optimization, and the Thurstone inverse}
+\subsection{Markowitz and the Thurstone inverse}
 \label{sec:markowitz}
 
 The implied objective of \Cref{thm:objective} is a reverse-optimization analogue
@@ -398,10 +398,14 @@ rationalises it, and the risk or diversification geometry used to perturb it.
 
 \paragraph{The Markowitz inverse.}
 The long-only mean--variance problem
-$w^M = \argmaxop_{p\in\Delta}\{\mu^\top p - \tfrac{\gamma}{2}p^\top\Sigma p\}$ has
-first-order condition $\mu - \gamma\Sigma w^M - \lambda\mathbf 1 = 0$, that is
-$w^M = \gamma^{-1}\Sigma^{-1}(\mu - \lambda\mathbf 1)$ (ignoring binding
-inequalities). Expected returns are mapped to weights by the \emph{inverse}
+\[
+  w^M = \argmaxop_{p\in\Delta}\big\{\mu^\top p - \tfrac{\gamma}{2}p^\top\Sigma p\big\}
+\]
+has first-order condition $\mu - \gamma\Sigma w^M - \lambda\mathbf 1 = 0$, that is
+\[
+  w^M = \gamma^{-1}\Sigma^{-1}(\mu - \lambda\mathbf 1)
+\]
+when no inequality binds. Expected returns are mapped to weights by the \emph{inverse}
 covariance, and that inverse is the source of the method's fragility: a small
 eigenvalue of $\Sigma$ becomes a large eigenvalue of $\Sigma^{-1}$, so a small
 return component in a near-null direction can produce a large, unstable position.
@@ -451,9 +455,12 @@ $\mathbf 1^\top(p - w^0) = 0$. For a smooth perturbation $\Omega_{S_\phi} = \Ome
   w^T_\phi \approx \argminop_{p\in\Delta}\big\{ D_{\Omega_{S_0}}(p, w^0)
   + \phi\,\dot\Omega_{\Delta S}(p) \big\},
 \]
-the exact analogue of the reverse-Markowitz perturbation under
-$\tfrac{\gamma}{2}(p-w^0)^\top\Sigma_0(p-w^0) \leftrightarrow D_{\Omega_{S_0}}(p,w^0)$
-and $\tfrac{\gamma}{2}p^\top\Delta\Sigma\,p \leftrightarrow \dot\Omega_{\Delta S}(p)$.
+the exact analogue of the reverse-Markowitz perturbation under the correspondence
+\[
+  \tfrac{\gamma}{2}(p-w^0)^\top\Sigma_0(p-w^0) \leftrightarrow D_{\Omega_{S_0}}(p,w^0),
+  \qquad
+  \tfrac{\gamma}{2}p^\top\Delta\Sigma\,p \leftrightarrow \dot\Omega_{\Delta S}(p).
+\]
 Markowitz measures displacement from the benchmark by a quadratic form in
 $\Sigma_0$; the tilt measures it by the Bregman divergence of the reference race.
 
@@ -525,10 +532,14 @@ satisfies the selection form of Tweedie's formula \parencite{efron2011}
 derivatives in $\operatorname{range}(C)$, where ties have probability zero; along
 $\ker C$ a perturbation can break an exact tie deterministically and $w$ jumps.)
 \end{lemma}
-Both lines are the score identity: differentiating
-$w_i(\theta) = \int_{\{x_i = \max_k x_k\}} \varphi_C(x - \theta)\,dx$ under the
-integral sign gives $\nabla_\theta w_i = \int_{\{x_i = \max_k x_k\}}
-C^{-1}(x - \theta)\,\varphi_C(x - \theta)\,dx = w_i\, C^{-1}(\E[X \mid I = i] - \theta)$.
+Both lines are the score identity. Differentiating
+$w_i(\theta) = \int_{A_i} \varphi_C(x - \theta)\,dx$, where
+$A_i = \{x : x_i = \max_k x_k\}$, under the integral sign gives
+\[
+  \nabla_\theta w_i = \int_{A_i}
+  C^{-1}(x - \theta)\,\varphi_C(x - \theta)\,dx
+  = w_i\, C^{-1}\big(\E[X \mid I = i] - \theta\big).
+\]
 The score of the winning probability is the conditional displacement of the latent
 performance given that $i$ won; the Jacobian $\nabla_\theta w(\theta)$, whose
 inverse is the local penalty curvature, is a matrix of selection sensitivities.
@@ -557,7 +568,7 @@ perturbed by a covariance change; the tilt is benchmark-implied ability minus a
 race-induced convex penalty; and locally that penalty is Markowitz's, with
 $[\nabla_\theta w(\theta)]^{-1}$ replacing $\Sigma$.
 
-\section{Smoothness and Turnover}
+\section{Smoothness and turnover}
 \label{sec:smoothness}
 
 In the online (rebalancing) setting the correlation estimate moves slowly from

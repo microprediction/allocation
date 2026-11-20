@@ -7,6 +7,11 @@
 \usepackage{algpseudocode}
 \usepackage{graphicx}
 \usepackage{cleveref}
+\usepackage[raggedright]{titlesec}
+
+% Line-breaking slack: lets TeX stretch a loose line rather than overflow it.
+\setlength{\emergencystretch}{3em}
+\appto\bibsetup{\sloppy}
 
 \newtheorem{remark}{Remark}
 
