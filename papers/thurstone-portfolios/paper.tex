@@ -34,17 +34,17 @@
 \maketitle
 
 \begin{abstract}
-We tilt an allocation on the simplex under a view on dependence rather than
-returns. Each asset draws a noisy performance, and its weight is read as the
-probability that it comes out best. A fast deterministic inverse backs the
-abilities out of the benchmark, and the tilt re-runs the race under a richer
-dependence law. The result is a tail-sensitive analogue of Black--Litterman that
-inverts no covariance and solves no optimization. A near-duplicate asset splits a
-position rather than doubling it, as Luce-type rules such as capitalization
-weighting do. We prove feasibility, benchmark reproduction, redundancy and tail
-consistency, an implied convex objective, and a Lipschitz turnover bound. On the
-Dow constituents over 2010--2024 the tilt turns over four to nine times less than
-minimum variance and the clustering allocators.
+This is the first paper to treat portfolio construction as a race. Each asset
+draws a noisy performance, and its weight is the probability that it finishes
+first. New algorithms for Thurstone's race model make this practical at scale: a
+fast deterministic inverse recovers abilities from benchmark weights, and a
+factor-form simulation re-runs the race under new dependence. Neither
+inverts a covariance or solves an optimization, and the cost is linear in the
+number of assets, so thousands of names fit in seconds. The result is a
+tail-sensitive Black--Litterman in which near-duplicates split a position rather
+than double it. We prove benchmark reproduction, an implied
+convex objective and a turnover bound. On the Dow constituents it turns over four to
+nine times less than minimum variance.
 \end{abstract}
 
 % --- body split into sections/ for editing; see git log ---
