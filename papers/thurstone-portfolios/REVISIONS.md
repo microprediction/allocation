@@ -192,3 +192,24 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
       (M4 forecast cache absent).
 - [ ] Out-of-sample tail backtest of the downside tilt: not added, equities are not its natural home;
       abstract tempered instead.
+
+---
+
+## November 2026 revision (supersedes the entries above where they differ)
+
+The paper is now "Portfolio-Implied Contests, with an Application to Tail Risk". The
+checklist above describes the June to October text. Where it disagrees with the
+paper, the paper is right. In particular:
+
+- **Finite-path turnover.** The paper states `E‖Δŵ_M‖₁ = O(‖ΔC‖_F)` uniformly in `M`,
+  with standard deviation `O(√(‖ΔC‖_F / M))`. Earlier forms recorded above
+  (`O(‖ΔC‖_F) + O(1/√M)` and others) are obsolete.
+- **Theorem 2** carries an explicit constant, `1/(√2 λ)`, and the order `1/λ` is shown
+  to be attained. The earlier "power of `1/λ` not established" note is obsolete.
+- **Item 3b (fixed abilities versus recalibration).** The remark was removed. Calibration
+  reproduces whatever benchmark it is given, so comparing a post-clone benchmark with a
+  pre-clone weight compares two inputs.
+- **Structure.** Method first, then the comparison with covariance allocators, then the
+  choice model. Trivial propositions are remarks and simple ones are lemmas.
+- **Dow table.** Rerun with simple returns and drift-aware turnover
+  (`experiments/dow_study.py`, results in `experiments/results/`).
