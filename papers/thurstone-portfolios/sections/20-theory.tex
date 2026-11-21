@@ -265,26 +265,30 @@ $\sum_i p_i\log p_i$, or half the squared Euclidean norm \parencite{martins2016}
 \end{proof}
 
 So the portfolio maximizes an ability-weighted exposure $\langle\theta,p\rangle$
-minus a convex \emph{diversification penalty} $\Omega_C$ that is determined by
-the correlation. It is a mean--(convex-risk) allocator whose feasible set is the
+minus a convex \emph{diversification penalty} $\Omega_C$ that is determined by the
+correlation. It is a mean--(convex-risk) allocator whose feasible set is the
 simplex, which is why the solution is long-only and fully invested. This is the
 random-utility ``social-surplus'' / perturbed-optimizer construction
-\parencite{mcfadden1981, williams1977, berthet2020, papandreou2011}. The perturbation
-law indexes a whole \emph{family of dependence-aware entropies}: $\Omega_S(p)$ is
-the cost of concentrating choice probability on $p$ under dependence $S$, the
-information cost of a rationally inattentive chooser whose logit foundation is the
-Gumbel case \parencite{matejka2015, fosgerau2020}. Gumbel noise yields $\Omega = $ negative Shannon entropy and $w = $ softmax, a
+\parencite{mcfadden1981, williams1977, berthet2020, papandreou2011}.
+
+The perturbation law indexes a whole \emph{family of dependence-aware entropies}:
+$\Omega_S(p)$ is the cost of concentrating choice probability on $p$ under
+dependence $S$, the information cost of a rationally inattentive chooser whose logit
+foundation is the Gumbel case \parencite{matejka2015, fosgerau2020}.
+
+Gumbel noise yields $\Omega = $ negative Shannon entropy and $w = $ softmax, a
 \emph{correlation-blind} (Lucian) allocator, the Gumbel-softmax of the
-machine-learning literature \parencite{jang2017, maddison2017}; Gaussian noise with covariance $C$
-makes $\Omega_C$ \emph{correlation-aware}, which produces the
+machine-learning literature \parencite{jang2017, maddison2017}; Gaussian noise with
+covariance $C$ makes $\Omega_C$ \emph{correlation-aware}, which produces the
 redundancy consistency of \Cref{lem:redundancy}; a tail-dependent law makes it
-\emph{tail-aware} (\Cref{lem:tail}). Spreading across independent names is rewarded and
-spreading across comonotone names is not. Finally, since
-$w = \nabla G_C(\theta)$ is the gradient of a convex potential, it is
-smooth ($G_C$ is a smoothing of the max in the sense of
-\textcite{nesterov2005}), consistent with \Cref{thm:smooth}. (For general $C$ the
-regularizer $\Omega_C$ has no closed form, unlike the entropy/softmax special
-case, but it exists and is convex, which is all we use.)
+\emph{tail-aware} (\Cref{lem:tail}). Spreading across independent names is rewarded
+and spreading across comonotone names is not.
+
+Since $w = \nabla G_C(\theta)$ is the gradient of a convex potential, it is smooth
+($G_C$ is a smoothing of the max in the sense of \textcite{nesterov2005}),
+consistent with \Cref{thm:smooth}. For general $C$ the regularizer $\Omega_C$ has no
+closed form, unlike the entropy/softmax special case, but it exists and is convex,
+which is all we use.
 
 \subsection{Temperature and selection by strength}
 \label{sec:temperature}
