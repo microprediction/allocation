@@ -154,8 +154,8 @@ zero-weight assets are dropped or floored before calibration.
 \end{algorithmic}
 \end{algorithm}
 
-The reference correlation $C_{\mathrm{calib}}$ may come from any family that \textcite{cotton2026inversion}
-inverts deterministically. The simplest is the independent reference,
+The reference correlation $C_{\mathrm{calib}}$ may come from any family that can be
+inverted deterministically (ibid.). The simplest is the independent reference,
 $C_{\mathrm{calib}} = I$. A factor reference has one or a few factors common to all
 assets. The market reference is its one-factor case,
 $C_{\mathrm{calib}} = \beta\beta^\top + \mathrm{diag}(1-\beta_i^2)$, with $\beta_i$
@@ -194,7 +194,7 @@ We mention only the numerical steps not already considered in
 
 \paragraph{Calibration (deterministic).}
 The calibration step, the inverse map from target weights to abilities, is
-computed deterministically by the method of \textcite{cotton2026inversion}. A single survival field on a
+computed deterministically (ibid.). A single survival field on a
 lattice is shared across all assets, so one pass returns every winning
 probability, with no Monte-Carlo error and cost linear in $n$.
 
@@ -210,8 +210,8 @@ the only place quadrature enters.
 \paragraph{Tilt (Monte-Carlo).}
 The target law is an arbitrary sampler, so the race under it is evaluated by
 simulation. A Gaussian target whose covariance has the factor, block, nested or
-tree form of \textcite{cotton2026inversion} also admits a deterministic forward race, which we do not use
-here.
+tree form treated there also admits a deterministic forward race (ibid.), which we
+do not use here.
 
 The \texttt{allocation} package factors the race into a
 \emph{draw} (the sampler) and a \emph{scoring} step, the argmin win-frequency
