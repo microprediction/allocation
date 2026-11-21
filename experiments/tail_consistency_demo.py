@@ -124,8 +124,9 @@ def main():
     ax.legend(frameon=False, fontsize=9, loc="upper right")
     ax.grid(alpha=0.25)
     fig.tight_layout()
-    fig.savefig(FIG_PATH, dpi=140)
-    print(f"\nfigure -> {FIG_PATH}")
+    fig.savefig(FIG_PATH, dpi=300)
+    fig.savefig(FIG_PATH.replace(".png", ".pdf"))   # vector copy, used by the paper
+    print(f"\nfigure -> {FIG_PATH} (+ .pdf)")
 
 
 if __name__ == "__main__":
