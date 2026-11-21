@@ -269,8 +269,15 @@ the correlation-aware regularizer of \Cref{thm:objective}.
 \section{Discussion}
 \label{sec:discussion}
 
-The dependence tilt is long-only and feasible without optimization and never inverts
-a covariance. It reproduces a chosen benchmark by construction, tilts only in
+The notion of an implied race, or implied contest, for a portfolio is now practical
+for large portfolios and for a class of correlation structures: independent,
+factor, block, nested and tree \parencite{cotton2026inversion}. A long-only
+portfolio can be read as the winning probabilities of such a race, and the
+abilities behind it recovered at a cost linear in the number of assets.
+
+Dependence tilting to address tail risk is an application of this, and the one we
+have illustrated. The tilt is long-only and feasible without optimization and never
+inverts a covariance. It reproduces a chosen benchmark by construction, tilts only in
 response to correlation, and solves a correlation-aware regularized program
 (\Cref{thm:objective}) whose weights vary smoothly enough (\Cref{thm:smooth}) to
 bound turnover and allow cheap online updates and gradient-based tuning.
