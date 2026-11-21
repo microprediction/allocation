@@ -533,8 +533,9 @@ return views, can serve as the benchmark the tilt anchors to.
 
 The reverse step is nonlinear here. Black--Litterman's implied returns come from a linear first-order
 condition ($\mu = \gamma\Sigma_0 w^0$, no inverse), whereas the choice geometry
-requires the gradient inverse $(\nabla G_{S_0})^{-1}$, which the Fast Ability
-Transform \parencite{cotton2021} supplies deterministically and in linear time.
+requires the gradient inverse $(\nabla G_{S_0})^{-1}$, which the
+inversion of \textcite{cotton2026inversion} supplies deterministically and in
+linear time.
 Only the simple \emph{reference} law is inverted; the correlation- or
 tail-dependent target enters by forward sampling.
 
@@ -565,8 +566,7 @@ The
 Markowitz inverse is not replicated but \emph{displaced}, from return space to
 choice space: $\Sigma^{-1}$ maps returns to weights, whereas
 $[\nabla_\theta w(\theta)]^{-1}$ maps weight displacements to ability costs.
-The
-Fast Ability Transform is the global form of this inverse, from desired winning
+That inversion is the global form of this inverse, from desired winning
 probabilities to abilities under the reference race.
 
 The construction is therefore
