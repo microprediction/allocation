@@ -73,104 +73,9 @@ turnover (\Cref{sec:properties,sec:smoothness}).
 \section{Background}
 \label{sec:background}
 
-This section places the race against the allocators it competes with, first on
-conditioning and then on tails, and then sets out the choice-theoretic view of
-capitalization weighting and the tools that make a Thurstonian inverse
-practical.
-
-\subsection{Avoiding matrix inversion}
-\label{sec:robust}
-
-The operational fragility of mean--variance optimization is the inversion of an
-estimated covariance \parencite{markowitz1952}: as $\Sigma$ nears singularity,
-$\Sigma^{-1}$ and with it the weights explode. The discipline's responses are
-shrinkage toward a structured target \parencite{ledoitwolf2004} and, more
-radically, allocators that never form $\Sigma^{-1}$ at all (hierarchical risk
-parity \parencite{lopezdeprado2016}, the Schur-complementary family
-\parencite{cotton2024schur}, risk parity \parencite{maillard2010}), trading point
-optimality for stability and scale. The Thurstone race belongs to this inversion-free family: it
-\emph{samples} from a correlation rather than inverting one, so it stays well posed
-even when $\Sigma$ is singular or rank-deficient.
-
-Robustness to \emph{conditioning} is not robustness to \emph{tails}. Every method
-just named is a functional of the covariance, or of a correlation derived from it.
-A covariance is a second moment; it summarises how assets move together on average
-and says nothing about how they move together in the extreme. Two universes with
-identical covariance, hence identical minimum-variance, HRP, Schur, and
-risk-parity weights, can carry entirely different probabilities of a simultaneous
-crash. The quantity that separates them, tail dependence, is not a moment, and no
-re-estimation or shrinkage of $\Sigma$ recovers it.
-
-Two allocators do reach past the second moment without an inverse. Scenario CVaR
-minimisation \parencite{rockafellar2000} is a linear program over joint return
-draws, and the hierarchical equal-risk-contribution family \parencite{raffinot2018}
-bisects a cluster tree on a downside measure. Both see the tail. Neither anchors
-to a benchmark. The first re-solves a program at every step and the second
-re-clusters, so each lurches where the race moves smoothly (\Cref{thm:smooth}).
-Neither has the deterministic inverse from a benchmark to latent scores that the
-tilt turns on.
-
-\subsection{The tail a covariance cannot see}
-\label{sec:tailmotiv}
-
-How often do the Dow's constituents fall \emph{together}, and by how much? A multivariate Gaussian fit to their daily returns, pinning the means and the
-full covariance, reproduces a shallow joint decline well enough, but its joint tail
-thins far too fast. All of them closing down on the same day is only mildly
-underpredicted; deepen the event and the gap widens without bound. Over
-2010--2024, days on which every name fell by more than two percent occurred about
-eighty times more often than the fitted Gaussian allows, and beyond three percent
-the Gaussian effectively never produces such a day, yet two did. The same fit
-underpredicts joint \emph{crashes} far more than joint \emph{rallies}
-(\Cref{tab:tail}).\footnote{Daily log returns of
-the 28 Dow names with full 2010--2024 history (Yahoo Finance; some $3{,}770$ trading days; average pairwise
-correlation $0.42$), against a Gaussian fit to their mean and covariance, the
-probabilities by $10^{8}$ Monte-Carlo draws. The deepest rows rest on two to four
-days, so the precise multiples are noisy; the monotone, asymmetric divergence is
-not.} The table changes the marginals and the copula together, so by itself it
-shows only that the moment-matched Gaussian fails. Keeping each name's empirical
-marginal and making only the copula Gaussian (normal-scores correlation, $10^8$
-draws) does worse still: all down by more than $2\%$ has probability
-$5\times10^{-6}$, against $1.4\times10^{-5}$ for the full Gaussian fit and $0.11\%$
-observed. The shortfall lies in the dependence, not the marginals. One summary of
-such dependence is the lower-tail coefficient
-\begin{equation}
-  \lambda_L \;=\; \lim_{u\downarrow 0}\Prob\!\big(U_i < u \,\big|\, U_j < u\big)
-  \label{eq:lambdaL}
-\end{equation}
-with $U_i = F_i(R_i)$ the probability-integral transform of asset $i$'s return,
-which is zero for the Gaussian copula whatever its correlation. We do not claim
-the table identifies $\lambda_L$; it shows dependence in the joint tail that no
-Gaussian copula, and so no second moment, reproduces.
-
-\begin{table}[h]
-  \centering
-  \caption{All $28$ Dow constituents moving by more than $q$ on the same day
-  (2010--2024): empirical frequency, the frequency under a Gaussian fit to the
-  mean and covariance, and their ratio. The Gaussian undercounts joint
-  \emph{crashes} ever more steeply with depth, and far more than joint
-  \emph{rallies}: the lower-tail dependence a second moment cannot carry.}
-  \label{tab:tail}
-  \begin{tabular}{lccc@{\qquad}ccc}
-    \toprule
-    & \multicolumn{3}{c}{all down by ${>}q$} & \multicolumn{3}{c}{all up by ${>}q$} \\
-    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
-    $q$ & emp. & Gaussian & ratio & emp. & Gaussian & ratio \\
-    \midrule
-    $1.0\%$ & $0.32\%$ & $0.080\%$  & $4\times$         & $0.24\%$ & $0.111\%$  & $2\times$  \\
-    $1.5\%$ & $0.21\%$ & $0.012\%$  & $18\times$        & $0.13\%$ & $0.018\%$  & $7\times$  \\
-    $2.0\%$ & $0.11\%$ & $0.0014\%$ & $77\times$        & $0.05\%$ & $0.0022\%$ & $25\times$ \\
-    $3.0\%$ & $0.05\%$ & ${\sim}0$  & ${>}10^{4}\times$ & $0\%$    & ${\sim}0$  & n/a        \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-A choice among assets reads the joint extreme directly. The winner of a race is an
-\emph{order statistic} of the joint draw, and the law of an order statistic is set
-by the tail copula, not by the covariance. Drive the Thurstonian race with a
-simulation that carries lower-tail dependence and the weights respond to it:
-assets that crash together are recognised as the near-duplicates they
-become in the tail, and their shares collapse to one, which no covariance-based
-allocator can arrange (\Cref{lem:tail}).
+This section sets out the choice-theoretic view of capitalization weighting and
+the tools that make a Thurstonian inverse practical, then places the race against
+the allocators it competes with, on conditioning and on tails.
 
 \subsection{Why the CAPM does not rescue naive indexing}
 \label{sec:capm}
@@ -317,3 +222,97 @@ We develop several uses of the apparatus, with different benchmarks to anchor to
 correlations, and target simulations carrying whatever dependence one wishes to
 match, but each routes through this one calibration map. None is practical without
 a fast, deterministic inverse from weights to abilities; with it, the rest is sampling.
+
+\subsection{Avoiding matrix inversion}
+\label{sec:robust}
+
+The operational fragility of mean--variance optimization is the inversion of an
+estimated covariance \parencite{markowitz1952}: as $\Sigma$ nears singularity,
+$\Sigma^{-1}$ and with it the weights explode. The discipline's responses are
+shrinkage toward a structured target \parencite{ledoitwolf2004} and, more
+radically, allocators that never form $\Sigma^{-1}$ at all (hierarchical risk
+parity \parencite{lopezdeprado2016}, the Schur-complementary family
+\parencite{cotton2024schur}, risk parity \parencite{maillard2010}), trading point
+optimality for stability and scale. The Thurstone race belongs to this inversion-free family: it
+\emph{samples} from a correlation rather than inverting one, so it stays well posed
+even when $\Sigma$ is singular or rank-deficient.
+
+Robustness to \emph{conditioning} is not robustness to \emph{tails}. Every method
+just named is a functional of the covariance, or of a correlation derived from it.
+A covariance is a second moment; it summarises how assets move together on average
+and says nothing about how they move together in the extreme. Two universes with
+identical covariance, hence identical minimum-variance, HRP, Schur, and
+risk-parity weights, can carry entirely different probabilities of a simultaneous
+crash. The quantity that separates them, tail dependence, is not a moment, and no
+re-estimation or shrinkage of $\Sigma$ recovers it.
+
+Two allocators do reach past the second moment without an inverse. Scenario CVaR
+minimisation \parencite{rockafellar2000} is a linear program over joint return
+draws, and the hierarchical equal-risk-contribution family \parencite{raffinot2018}
+bisects a cluster tree on a downside measure. Both see the tail. Neither anchors
+to a benchmark. The first re-solves a program at every step and the second
+re-clusters, so each lurches where the race moves smoothly (\Cref{thm:smooth}).
+Neither has the deterministic inverse from a benchmark to latent scores that the
+tilt turns on.
+
+\subsection{The tail a covariance cannot see}
+\label{sec:tailmotiv}
+
+How often do the Dow's constituents fall \emph{together}, and by how much? A multivariate Gaussian fit to their daily returns, pinning the means and the
+full covariance, reproduces a shallow joint decline well enough, but its joint tail
+thins far too fast. All of them closing down on the same day is only mildly
+underpredicted; deepen the event and the gap widens without bound. Over
+2010--2024, days on which every name fell by more than two percent occurred about
+eighty times more often than the fitted Gaussian allows, and beyond three percent
+the Gaussian effectively never produces such a day, yet two did. The same fit
+underpredicts joint \emph{crashes} far more than joint \emph{rallies}
+(\Cref{tab:tail}).\footnote{Daily log returns of
+the 28 Dow names with full 2010--2024 history (Yahoo Finance; some $3{,}770$ trading days; average pairwise
+correlation $0.42$), against a Gaussian fit to their mean and covariance, the
+probabilities by $10^{8}$ Monte-Carlo draws. The deepest rows rest on two to four
+days, so the precise multiples are noisy; the monotone, asymmetric divergence is
+not.} The table changes the marginals and the copula together, so by itself it
+shows only that the moment-matched Gaussian fails. Keeping each name's empirical
+marginal and making only the copula Gaussian (normal-scores correlation, $10^8$
+draws) does worse still: all down by more than $2\%$ has probability
+$5\times10^{-6}$, against $1.4\times10^{-5}$ for the full Gaussian fit and $0.11\%$
+observed. The shortfall lies in the dependence, not the marginals. One summary of
+such dependence is the lower-tail coefficient
+\begin{equation}
+  \lambda_L \;=\; \lim_{u\downarrow 0}\Prob\!\big(U_i < u \,\big|\, U_j < u\big)
+  \label{eq:lambdaL}
+\end{equation}
+with $U_i = F_i(R_i)$ the probability-integral transform of asset $i$'s return,
+which is zero for the Gaussian copula whatever its correlation. We do not claim
+the table identifies $\lambda_L$; it shows dependence in the joint tail that no
+Gaussian copula, and so no second moment, reproduces.
+
+\begin{table}[h]
+  \centering
+  \caption{All $28$ Dow constituents moving by more than $q$ on the same day
+  (2010--2024): empirical frequency, the frequency under a Gaussian fit to the
+  mean and covariance, and their ratio. The Gaussian undercounts joint
+  \emph{crashes} ever more steeply with depth, and far more than joint
+  \emph{rallies}: the lower-tail dependence a second moment cannot carry.}
+  \label{tab:tail}
+  \begin{tabular}{lccc@{\qquad}ccc}
+    \toprule
+    & \multicolumn{3}{c}{all down by ${>}q$} & \multicolumn{3}{c}{all up by ${>}q$} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    $q$ & emp. & Gaussian & ratio & emp. & Gaussian & ratio \\
+    \midrule
+    $1.0\%$ & $0.32\%$ & $0.080\%$  & $4\times$         & $0.24\%$ & $0.111\%$  & $2\times$  \\
+    $1.5\%$ & $0.21\%$ & $0.012\%$  & $18\times$        & $0.13\%$ & $0.018\%$  & $7\times$  \\
+    $2.0\%$ & $0.11\%$ & $0.0014\%$ & $77\times$        & $0.05\%$ & $0.0022\%$ & $25\times$ \\
+    $3.0\%$ & $0.05\%$ & ${\sim}0$  & ${>}10^{4}\times$ & $0\%$    & ${\sim}0$  & n/a        \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+A choice among assets reads the joint extreme directly. The winner of a race is an
+\emph{order statistic} of the joint draw, and the law of an order statistic is set
+by the tail copula, not by the covariance. Drive the Thurstonian race with a
+simulation that carries lower-tail dependence and the weights respond to it:
+assets that crash together are recognised as the near-duplicates they
+become in the tail, and their shares collapse to one, which no covariance-based
+allocator can arrange (\Cref{lem:tail}).
