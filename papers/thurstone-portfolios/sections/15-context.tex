@@ -1,0 +1,253 @@
+\section{Comparison with covariance-based allocators}
+\label{sec:comparison}
+
+Minimum variance, hierarchical risk parity and their relatives are functions of a
+covariance matrix. The race differs from them in two respects. It never inverts
+the covariance, and it can respond to tail dependence.
+
+\subsection{Avoiding matrix inversion}
+\label{sec:robust}
+
+The operational fragility of mean--variance optimization is the inversion of an
+estimated covariance \parencite{markowitz1952}: as $\Sigma$ nears singularity,
+$\Sigma^{-1}$ and with it the weights explode.
+The discipline's responses are
+shrinkage toward a structured target \parencite{ledoitwolf2004} and, more
+radically, allocators that never form $\Sigma^{-1}$ at all (hierarchical risk
+parity \parencite{lopezdeprado2016}, risk parity \parencite{maillard2010}), trading point
+optimality for stability and scale.
+
+The Thurstone race belongs to this inversion-free family: it
+\emph{samples} from a correlation rather than inverting one, so it stays well posed
+even when $\Sigma$ is singular or rank-deficient.
+
+Covariance-based allocators also split a position between near-duplicates, but
+unstably. Mean--variance settles the split by inverting $\Sigma$, and the direction
+in which two assets become identical is exactly the direction in which $\Sigma$
+loses rank; so the population answer is right while its sample estimate, dividing
+through a vanishing eigenvalue, swings between the twins and flips sign with the
+data \parencite{markowitz1952}.
+
+The clustering allocators, such as hierarchical risk parity
+\parencite{lopezdeprado2016}, and the Schur-complementary family
+\parencite{cotton2024schur} that relates these to the minimum variance portfolio,
+de-duplicate by grouping instead, but discretely: the split jumps as cluster
+membership flips. The race de-duplicates \emph{smoothly}, with a closed
+characterization (\Cref{lem:redundancy}) and without ever forming $\Sigma^{-1}$.
+
+Redundancy is near-singularity, so robustness to ill-conditioning, low turnover
+(\Cref{thm:smooth}, \Cref{sec:experiments}) and the graceful split of redundant
+exposure are one behaviour. The weights move smoothly along the direction in which
+assets become collinear and a covariance inverse would explode.
+
+Robustness to \emph{conditioning} is not robustness to \emph{tails}.
+Every method
+just named is a functional of the covariance, or of a correlation derived from it.
+A covariance is a second moment; it summarises how assets move together on average
+and says nothing about how they move together in the extreme.
+
+Two universes with
+identical covariance, hence identical minimum-variance, HRP, Schur, and
+risk-parity weights, can carry entirely different probabilities of a simultaneous
+crash.
+The quantity that separates them, tail dependence, is not a moment, and no
+re-estimation or shrinkage of $\Sigma$ recovers it.
+
+\subsection{Empirical motivation}
+\label{sec:tailmotiv}
+
+That equity returns are more dependent in falling markets than a Gaussian model
+allows is well documented.
+\textcite{longinsolnik2001} reject normality for the
+joint lower tail of international equity returns but not for the upper tail, and
+\textcite{angchen2002} find that correlations between U.S. equity portfolios and
+the market are higher in downturns than a normal distribution implies.
+\textcite{embrechts2002} set out why correlation is an incomplete summary of
+dependence.
+
+\textcite{poon2004} distinguish asymptotic dependence from asymptotic
+independence in the joint tails of stock indices and show that traditional
+dependence measures can misstate portfolio risk, and \textcite{patton2004} finds
+economically significant gains from modelling asymmetric dependence in an
+asset-allocation problem.
+A standard summary is the lower-tail dependence
+coefficient
+\begin{equation}
+  \lambda_L \;=\; \lim_{u\downarrow 0}\Prob\!\big(U_i < u \,\big|\, U_j < u\big)
+  \label{eq:lambdaL}
+\end{equation}
+with $U_i = F_i(R_i)$ the probability-integral transform of asset $i$'s return,
+which is zero for every Gaussian copula with correlation below one
+\parencite{sibuya1960}.
+
+We add to this existing motivation a simple observation about the Dow 30. A
+multivariate Gaussian fit to the daily returns of its constituents, pinning the
+means and the full covariance, reproduces a shallow joint decline well enough, but
+its joint tail thins far too fast. All of them closing down on the same day is only
+mildly underpredicted; the gap widens sharply over the thresholds shown.
+
+Over 2010--2024, days on which every name fell by more than two percent occurred
+about eighty times more often than the fitted Gaussian allows, and beyond three
+percent the Gaussian effectively never produces such a day, yet two did. The same
+fit underpredicts joint \emph{crashes} far more than joint \emph{rallies}
+(\Cref{tab:tail}).\footnote{Daily log returns of
+the 28 Dow names with full 2010--2024 history (Yahoo Finance; some $3{,}770$ trading days; average pairwise
+correlation $0.42$), against a Gaussian fit to their mean and covariance, the
+probabilities by $10^{8}$ Monte-Carlo draws. The deepest rows rest on two to four
+days, so the precise multiples are noisy; the monotone, asymmetric divergence is
+not.}
+
+\begin{table}[ht]
+  \centering
+  \caption{All $28$ Dow constituents moving by more than $q$ on the same day
+  (2010--2024): empirical frequency, the frequency under a Gaussian fit to the
+  mean and covariance, and their ratio. The Gaussian undercounts joint
+  \emph{crashes} ever more steeply with depth, and far more than joint
+  \emph{rallies}.}
+  \label{tab:tail}
+  \begin{tabular}{lccc@{\qquad}ccc}
+    \toprule
+    & \multicolumn{3}{c}{all down by ${>}q$} & \multicolumn{3}{c}{all up by ${>}q$} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    $q$ & emp. & Gaussian & ratio & emp. & Gaussian & ratio \\
+    \midrule
+    $1.0\%$ & $0.32\%$ & $0.080\%$  & $4\times$         & $0.24\%$ & $0.111\%$  & $2\times$  \\
+    $1.5\%$ & $0.21\%$ & $0.012\%$  & $18\times$        & $0.13\%$ & $0.018\%$  & $7\times$  \\
+    $2.0\%$ & $0.11\%$ & $0.0014\%$ & $77\times$        & $0.05\%$ & $0.0022\%$ & $25\times$ \\
+    $3.0\%$ & $0.05\%$ & ${\sim}0$  & ${>}10^{4}\times$ & $0\%$    & ${\sim}0$  & n/a        \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The table changes the marginals and the copula together, so by itself it shows
+only that the moment-matched Gaussian fails. Keeping each name's empirical marginal
+and making only the copula Gaussian (normal-scores correlation, $10^8$ draws) does
+worse still: all down by more than $2\%$ has probability $5\times10^{-6}$, against
+$1.4\times10^{-5}$ for the full Gaussian fit and $0.11\%$ observed. The shortfall
+lies in the dependence, not the marginals.
+
+A race among assets reads the joint extreme directly. The winner of a race is an
+\emph{order statistic} of the joint draw, and the law of an order statistic is set
+by the tail copula, not by the covariance. Drive the race with a
+simulation that carries lower-tail dependence and the weights respond. What governs
+the response is the distribution of a cluster's worst performance relative to the
+rest of the field, not the pairwise coefficient $\lambda_L$ alone
+(\Cref{lem:tail}). An allocator that is a function of the
+covariance alone cannot respond at all.
+
+The race sees dependence only through relative performances, so a shock common to
+every asset leaves the weights unchanged. A response requires that losses fall on
+some names relative to others, as when a cluster crashes together and the rest of
+the field does not.
+
+
+\section{The race as a choice model}
+\label{sec:choicemodel}
+
+When the present methodology is applied to tilt capitalization-weighted indexes,
+the contrast has an interesting parallel to old debates in psychometry and
+preference. The race is Thurstone's model of choice. Capitalization weighting
+corresponds to the rival model, Luce's, and the two differ in how weights respond
+when the field of assets changes.
+
+\subsection{Asset allocation as a choice}
+\label{sec:choice}
+
+The race of \Cref{sec:method} is the law of comparative judgment of
+\textcite{thurstone1927}, the canonical model of probabilistic choice. Each
+alternative carries a latent ability and a noisy performance, and the one with the
+extreme performance is chosen. On this reading the market selects among assets, and
+a portfolio weight is the probability that an asset is chosen.
+
+The tilt is informationally modest. It needs only the dependence, no return
+forecast, and it \emph{anchors} to the benchmark, departing from the prevailing
+allocation only as far as the correlation warrants.
+
+\subsection{Luce's axiom and capitalization weighting}
+\label{sec:luce}
+
+The choice literature has a rival account, Luce's \parencite{luce1959}, whose
+multinomial form is the logit. Write $w_i(\mathcal U)$ for the weight a rule assigns to asset $i$ within a
+universe $\mathcal U$. Capitalization weighting sets $w_i(\mathcal U) =
+\mathrm{cap}_i / \sum_{j\in\mathcal U}\mathrm{cap}_j$, so the ratio
+$w_i(\mathcal U)/w_j(\mathcal U) = \mathrm{cap}_i/\mathrm{cap}_j$ does not depend on
+$\mathcal U$. That is Luce's choice axiom, independence of irrelevant
+alternatives, and we call such a rule \emph{Lucian}.
+
+Imagine you are a psychometrician trying to understand the market's choices, and
+how they change when assets are removed. Luce's axiom is one hypothesis about that.
+It would be reasonable to test a range of choice models against the market's
+behaviour, not only Luce's. In a Thurstonian race the response to a removal depends
+on how the removed asset co-moves with the rest (\Cref{lem:redundancy}).
+
+The Thurstonian family is the older and the more general of the
+two.\footnote{Luce's model is equivalent to a race with Gumbel performances
+\parencite{yellott1977}.} It lost the applied field to the logit on tractability:
+beyond two alternatives its Gaussian member, the probit, has no closed form, and
+recovering abilities from choice shares was considered prohibitive. The inversion
+of \Cref{sec:method} removes that obstacle.
+
+\subsection{Why the CAPM does not rescue naive indexing}
+\label{sec:capm}
+
+The passive industry defends capitalization weighting by appeal to the CAPM.
+We
+grant the CAPM in full.
+The standard argument \parencite{sharpe1964} is that every
+investor is a mean--variance optimizer who agrees on the expected returns $\mu$ and
+on the same covariance $\Sigma$, so each holds the risk-free asset together with the
+same tangency portfolio, proportional to $\Sigma^{-1}(\mu - r\mathbf{1})$.
+
+Market
+clearing forces that portfolio to equal the supply, the capitalization-weighted
+market, so $\mathrm{cap} \propto \Sigma^{-1}(\mu - r\mathbf{1})$ and the market
+portfolio is efficient.\footnote{One wrinkle we do not dwell on:
+investors have a well-established motivation to shrink the covariance
+\parencite{ledoitwolf2004}, and an aggregate of heterogeneous shrunk estimates
+need not clear to a mean--variance-efficient market portfolio, so even the
+equilibrium claim is not airtight.}
+
+That endorsement is for the whole-market universe and does not transfer to the
+restricted universes where weighting decisions are made. This is Roll's critique
+\parencite{roll1977}: the only testable content of the CAPM is the efficiency of
+the \emph{true} market portfolio, and no proxy on a restricted universe inherits it
+\parencite{prono2009}. The block calculation below states the point in the present
+notation. We do not claim it as new.
+
+\begin{lemma}[Capitalization weighting under restriction]
+\label{lem:restriction}
+Suppose the CAPM holds on the full asset world $U$ with a non-diagonal $\Sigma$, so
+that capitalization weighting is mean--variance efficient on $U$. On a strict
+sub-universe $S \subsetneq U$ of at least two assets the capitalization-weighted portfolio is generically
+inefficient, and the discrepancy is governed by the heterogeneity of the assets'
+covariances with the excluded set $U \setminus S$.
+\end{lemma}
+\begin{proof}
+Partition the market $U = S \cup X$ into the retained assets $S$ and the excluded
+$X = U\setminus S$, with market weights $m = (m_S, m_X)$. CAPM equilibrium reads
+$\mu - r\mathbf 1 = \gamma\,\Sigma_U\, m$ for some $\gamma > 0$; its $S$-block is
+$\mu_S - r\mathbf 1 = \gamma(\Sigma_{SS} m_S + \Sigma_{SX} m_X)$, so the
+restricted-universe tangency weights are
+\begin{equation*}
+  q_S \;\propto\; \Sigma_{SS}^{-1}(\mu_S - r\mathbf 1)
+  \;=\; \gamma\big(m_S + \Sigma_{SS}^{-1}\Sigma_{SX}\, m_X\big),
+\end{equation*}
+while restricted capitalization weighting uses $m_S$. The two coincide iff
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X = c\, m_S$ for some scalar $c > -1$, the sign
+keeping the normalised weights on the simplex. At the full universe
+$X = \varnothing$ and $c = 0$. On a strict sub-universe the condition is $|S|$
+equations in the one unknown $c$, which fail for generic $\Sigma_{SX} \neq 0$.
+
+The non-generic exceptions are a block-diagonal $\Sigma$ with $\Sigma_{SX} = 0$,
+and an excluded set whose market portfolio regresses identically on every retained
+asset, $\Sigma_{SX} m_X \propto \Sigma_{SS} m_S$. The wedge
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$, the coefficients from regressing the return of
+the excluded portfolio $m_X$ on the retained assets' returns, is the part of each cap weight that reflects covariance
+with $U\setminus S$, irrelevant to the $S$-frontier yet baked into the full-market
+weight.
+\end{proof}
+
+Fundamental indexing reaches cap weighting's sub-optimality by a different route,
+price inefficiency \parencite{hsu2006}, while shrinkage \parencite{ledoitwolf2004}
+and tracking-error analysis \parencite{roll1992} document the fragility of the
+inputs.

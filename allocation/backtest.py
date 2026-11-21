@@ -54,24 +54,30 @@ def load_returns_csv(path_or_url: str, skip_cols: int = 0):
     return np.asarray(rows, dtype=float)
 
 
-def walk_forward(factory, returns, warmup: int = 60):
+def walk_forward(factory, returns, warmup: int = 60, pnl_returns=None):
     """Run a fresh estimator from ``factory()`` forward over ``returns``.
 
     Fits on the first ``warmup`` rows, then for each later row earns the
     portfolio return with the weights held going in and updates on the realised
     row. Returns ``(port_returns, weight_path)``.
+
+    ``pnl_returns`` (same shape as ``returns``), if given, is what the portfolio
+    earns: pass simple returns here when the estimator is fitted on log returns,
+    since a weighted sum of log returns is not a portfolio return.
     """
     returns = np.asarray(returns, dtype=float)
+    pnl = returns if pnl_returns is None else np.asarray(pnl_returns, dtype=float)
+    if pnl.shape != returns.shape:
+        raise ValueError(f"pnl_returns has shape {pnl.shape}; expected {returns.shape}")
     T = returns.shape[0]
     est = factory()
     est.fit(returns[:warmup])
     w = np.asarray(est.weights_, dtype=float)
     rets, path = [], []
     for t in range(warmup, T):
-        r = returns[t]
-        rets.append(float(w @ r))
+        rets.append(float(w @ pnl[t]))
         path.append(w)
-        est.partial_fit(r)
+        est.partial_fit(returns[t])
         w = np.asarray(est.weights_, dtype=float)
     return np.array(rets), np.array(path)
 

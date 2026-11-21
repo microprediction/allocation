@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>A portfolio is a race — allocation</title>
+  <meta name="description" content="Watch a portfolio as a contest: each asset draws a performance, the lowest draw wins, and the share of wins is the weight. Calibrate the race to any benchmark, then change how the runners move together and see the weights respond.">
+  <style>
+    :root{--bg:#fafafa;--panel:#fff;--text:#1a1a1a;--muted:#5a5a5a;--faint:#9a9a9a;
+      --accent:#4a3aff;--border:#e2e2e2;--ink:#1f1d3d;--code-bg:#f3f3f7;
+      --grid:#e1e0d9;--axis:#c3c2b7;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      line-height:1.6;font-size:17px}
+    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+    header.site-header .nav-inner{max-width:980px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    main{max-width:980px;margin:32px auto;padding:0 16px 60px}
+    h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2} .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 20px}
+    h2{font-size:1.3rem;margin:34px 0 8px;border-bottom:1px solid var(--border);padding-bottom:5px}
+    p{margin:10px 0} .lead{font-size:1.05rem} .muted{color:var(--muted);font-size:.93rem}
+    code{background:var(--code-bg);padding:1px 5px;border-radius:3px;font-size:.9em;
+      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
+    footer{max-width:980px;margin:40px auto 24px;padding:16px 16px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+
+    .widget{border:1px solid var(--border);border-radius:10px;padding:14px 14px 12px;margin:16px 0;background:var(--panel)}
+    .square{width:100%;height:auto;display:block;max-width:760px;margin:4px auto 0}
+    .square .box{fill:#fff;stroke:var(--axis);stroke-width:1.2}
+    .square .box.on{stroke:var(--accent);stroke-width:2;fill:#f5f4ff}
+    .square text{font-size:16px;fill:var(--text);text-anchor:middle}
+    .square text.sub{font-size:13.5px;fill:var(--muted)}
+    .square .arr{stroke:var(--axis);stroke-width:1.5;fill:none}
+    .square .arr.on{stroke:var(--accent);stroke-width:2.4}
+    .square text.lab{font-size:14.5px;fill:var(--muted)}
+    .square text.lab.on{fill:var(--accent);font-weight:600}
+
+    .transport{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 8px}
+    button{font:inherit;font-size:.9rem;border:1px solid var(--border);background:#fff;color:var(--text);
+      border-radius:7px;padding:5px 12px;cursor:pointer}
+    button:hover{border-color:var(--accent)}
+    button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+    button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .transport .count{margin-left:auto;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+    .canvas-wrap{position:relative}
+    canvas{display:block;width:100%;touch-action:pan-y}
+    #race{cursor:default}
+    .tip{position:absolute;pointer-events:none;background:#1f1d3d;color:#fff;font-size:.8rem;line-height:1.45;
+      padding:7px 10px;border-radius:7px;white-space:nowrap;opacity:0;transition:opacity .12s;z-index:5;
+      font-variant-numeric:tabular-nums}
+    .tip b{font-weight:600}
+    .legend{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.82rem;color:var(--muted);margin:6px 2px 0}
+    .legend span{display:inline-flex;align-items:center;gap:6px}
+    .legend i{display:inline-block}
+    .lg-out{width:22px;height:12px;border:1.5px solid #52514e;border-radius:3px}
+    .lg-fill{width:22px;height:10px;background:#898781;border-radius:3px}
+    .lg-tick{width:2px;height:16px;background:#0b0b0b}
+    .lg-link{width:22px;height:0;border-top:2px solid #0b0b0b}
+    .lg-dia{width:9px;height:9px;border:1.5px solid #52514e;transform:rotate(45deg)}
+
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}
+    @media(max-width:860px){.cards{grid-template-columns:1fr}}
+    .card{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:14px 16px}
+    .card.on{border-color:var(--accent);box-shadow:0 2px 12px rgba(74,58,255,.08)}
+    .card h3{margin:0 0 4px;font-size:1.02rem}
+    .card h3 .num{display:inline-block;width:1.5em;height:1.5em;line-height:1.5em;text-align:center;border-radius:50%;
+      background:var(--ink);color:#fff;font-size:.8rem;margin-right:6px;vertical-align:1px}
+    .card p{font-size:.92rem;margin:6px 0;color:var(--muted)}
+    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+    .chips button{padding:3px 9px;font-size:.82rem;border-radius:999px}
+    .chips button .sw{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+    label.sl{display:block;font-size:.88rem;font-weight:600;margin-top:10px}
+    label.sl span{float:right;color:var(--accent);font-variant-numeric:tabular-nums}
+    input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0 0}
+    .read{font-size:.9rem;color:var(--text);margin-top:10px;font-variant-numeric:tabular-nums}
+    .read .big{font-size:1.25rem;font-weight:600}
+    .read small{color:var(--muted);font-size:.84rem;display:block;margin-top:4px}
+    .scatter-wrap{display:flex;gap:12px;align-items:flex-start;margin-top:10px}
+    #scatter{width:150px;height:150px;flex:0 0 150px;border:1px solid var(--border);border-radius:6px}
+    .scatter-cap{font-size:.82rem;color:var(--muted);line-height:1.45}
+    ol.try{padding-left:1.2em} ol.try li{margin:.5em 0}
+    table.tv{border-collapse:collapse;font-size:.9rem;margin:8px 0;width:100%;max-width:560px}
+    table.tv th,table.tv td{padding:5px 10px;border-bottom:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums}
+    table.tv th:first-child,table.tv td:first-child{text-align:left}
+    table.tv th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+    details summary{cursor:pointer;color:var(--accent);font-size:.92rem}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <a href="../../index.html#methods">Methods</a>
+      <a href="../../index.html#estimators">Estimators</a>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/tail-black-litterman.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>A portfolio is a race</h1>
+  <p class="subtitle">Portfolio-implied contests, running in your browser.</p>
+
+  <p class="lead">Give every asset a runner. In each race every runner draws a performance, and
+  the lowest draw wins. An asset's weight is the share of races it wins.</p>
+  <p>Read backwards, any long-only portfolio implies such a race: there is exactly one set of
+  abilities that makes the runners win in proportion to the weights. Once you have the abilities
+  you can hold them fixed, change how the runners move together, and run the race again. The new
+  win shares are the new portfolio.</p>
+
+  <div class="widget">
+    <svg class="square" id="square" viewBox="0 0 760 232" role="img"
+         aria-label="Diagram: benchmark weights are calibrated to abilities, the dependence is changed, and the simulated race returns the new weights.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#c3c2b7"/></marker>
+        <marker id="ahon" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#4a3aff"/></marker>
+      </defs>
+      <rect class="box" id="bx-bw" x="8" y="8" width="244" height="58" rx="7"/>
+      <text x="130" y="33">benchmark weights</text><text class="sub" x="130" y="53">the portfolio you hold</text>
+      <rect class="box" id="bx-pw" x="508" y="8" width="244" height="58" rx="7"/>
+      <text x="630" y="33">new weights</text><text class="sub" x="630" y="53">win shares under your view</text>
+      <rect class="box" id="bx-a0" x="8" y="166" width="244" height="58" rx="7"/>
+      <text x="130" y="191">abilities</text><text class="sub" x="130" y="211">racing independently</text>
+      <rect class="box" id="bx-a1" x="508" y="166" width="244" height="58" rx="7"/>
+      <text x="630" y="191">the same abilities</text><text class="sub" x="630" y="211">racing under your view</text>
+      <path class="arr" id="ar-cal" d="M130,68 L130,164" marker-end="url(#ah)"/>
+      <text class="lab" id="lb-cal" x="142" y="121" style="text-anchor:start">1. calibrate race</text>
+      <path class="arr" id="ar-dep" d="M254,197 L506,197" marker-end="url(#ah)"/>
+      <text class="lab" id="lb-dep" x="380" y="166">2. keep abilities, change</text>
+      <text class="lab" id="lb-dep2" x="380" y="185">how assets move together</text>
+      <path class="arr" id="ar-race" d="M630,164 L630,68" marker-end="url(#ah)"/>
+      <text class="lab" id="lb-race" x="618" y="121" style="text-anchor:end">3. simulate race</text>
+      <path class="arr" id="ar-pol" d="M254,37 L506,37" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+      <text class="lab" id="lb-pol" x="380" y="27">apply your view on dependence</text>
+    </svg>
+  </div>
+
+  <div class="widget">
+    <div class="transport">
+      <button id="play" aria-pressed="true">Pause</button>
+      <button class="spd on" data-s="1">1×</button>
+      <button class="spd" data-s="4">4×</button>
+      <button class="spd" data-s="0">Fast</button>
+      <span class="count" id="count">0 races</span>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="race" height="470" aria-label="Animated race. One lane per asset, with its performance distribution, the current draw, and its weight."></canvas>
+      <div class="tip" id="tip"></div>
+    </div>
+    <div class="legend">
+      <span><i class="lg-out"></i>benchmark weight (drag to change)</span>
+      <span><i class="lg-fill"></i>weight under your view</span>
+      <span><i class="lg-tick"></i>share of races won so far</span>
+      <span><i class="lg-link"></i>links the cluster's draws in one race</span>
+      <span id="lg-dia" style="display:none"><i class="lg-dia"></i>Gaussian race with the same correlation</span>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card" id="card1">
+      <h3><span class="num">1</span>Watch the race</h3>
+      <p>Each lane is an asset. The curve is where its draws fall, and its position is the
+      asset's ability: further left wins more often.</p>
+      <p>A line sweeps in from the left and stops at the first dot it meets. That runner wins
+      the race. After a few races a black tick on each bar shows the share of wins so far. It settles on the weight.</p>
+      <div class="read" id="read1"></div>
+    </div>
+
+    <div class="card" id="card2">
+      <h3><span class="num">2</span>Set the benchmark</h3>
+      <p>Drag the end of any bar, or pick a portfolio. The abilities are solved for at once, so
+      that an independent race reproduces the benchmark.</p>
+      <div class="row" id="presets">
+        <button data-p="cap" class="on">Index-like</button>
+        <button data-p="equal">Equal weight</button>
+        <button data-p="conc">Concentrated</button>
+      </div>
+      <div class="read" id="read2"></div>
+    </div>
+
+    <div class="card" id="card3">
+      <h3><span class="num">3</span>State a view on dependence</h3>
+      <p>Choose the assets you believe move together. Abilities stay where they are.</p>
+      <div class="row chips" id="chips"></div>
+      <label class="sl" for="rho">everyday correlation <span id="rhoV">0.00</span></label>
+      <input type="range" id="rho" min="0" max="0.99" step="0.01" value="0">
+      <label class="sl" for="tail">crash together: share of races the cluster shares one extreme draw <span id="tailV">0%</span></label>
+      <input type="range" id="tail" min="0" max="0.25" step="0.005" value="0">
+      <div class="row"><button id="reset">Clear the view</button></div>
+    </div>
+  </div>
+
+  <div class="widget">
+    <div class="read" id="read3"></div>
+    <div class="scatter-wrap">
+      <canvas id="scatter" width="150" height="150" aria-label="Scatter of two cluster members' draws"></canvas>
+      <div class="scatter-cap" id="scatcap"></div>
+    </div>
+    <details style="margin-top:10px"><summary>Weights as a table</summary>
+      <table class="tv" id="tv"></table>
+    </details>
+  </div>
+
+  <h2>Things to try</h2>
+  <ol class="try">
+    <li><strong>Leave the view empty.</strong> The filled bars sit exactly on the benchmark
+    outlines. With no change in dependence, the construction returns the portfolio you gave it.</li>
+    <li><strong>Raise the everyday correlation.</strong> The three banks' dots begin to arrive
+    together, so they compete for the same wins. Their combined weight falls and the others
+    pick it up. Near a correlation of one the banks are one runner: the pack holds what its
+    strongest member would win on its own, and that member keeps most of it.</li>
+    <li><strong>Set the correlation back to zero and raise the crash-together slider.</strong> Most races
+    look independent. In the rest the cluster lands on a single extreme draw, in the tail that
+    decides the race. The diamonds show a Gaussian race with the same correlation between the
+    cluster's members. It moves less, because a correlation does not say where the co-movement
+    happens.</li>
+    <li><strong>Drag a benchmark bar with a view in place.</strong> The curves slide to new
+    abilities and the same view is applied to the new portfolio.</li>
+  </ol>
+
+  <h2>What is computed</h2>
+  <p>The abilities come from a deterministic inverse of the independent race, by one-dimensional
+  quadrature. The weights under the view come from 60,000 simulated races on fixed seeds, as in
+  Algorithm 1 of the paper. The bar shows the benchmark plus the difference between the
+  simulated race under the view and the simulated race without it, so an empty view returns
+  the benchmark exactly.</p>
+  <p>Every asset's own distribution is a standard normal around its ability, with or without
+  the view. The view changes only the dependence between cluster members: a Gaussian copula
+  with the chosen correlation, and, on the chosen share of races, one shared draw in the lower
+  tail. The animated races are fresh draws from the same law.</p>
+  <p class="muted">The paper works at a different scale: the inverse there handles factor,
+  group and tree dependence in the reference race and hundreds of thousands of assets. The
+  eight assets here are made up. Paper:
+  <a href="../../papers/index.html">Portfolio-Implied Contests, with an Application to Tail Risk</a>.</p>
+</main>
+
+<footer>
+  Part of <a href="../../index.html">allocation</a> — online portfolio construction. MIT © Peter Cotton.
+</footer>
+
+<script>
+(function(){
+"use strict";
+/* ---------- assets ---------- */
+const NAMES = ["Bank A","Bank B","Bank C","Tech A","Tech B","Energy","Utility","Gold"];
+const COLORS = ["#2a78d6","#eb6834","#1baf7a","#eda100","#e87ba4","#008300","#6250d6","#e34948"];
+const n = NAMES.length;
+const PRESETS = {
+  cap:   [.16,.12,.08,.22,.14,.12,.06,.10],
+  equal: [.125,.125,.125,.125,.125,.125,.125,.125],
+  conc:  [.34,.05,.05,.30,.10,.07,.05,.04]
+};
+const INK="#0b0b0b", INK2="#52514e", MUTED="#898781", GRID="#e1e0d9", AXIS="#c3c2b7";
+
+/* ---------- normal distribution ---------- */
+const INV_SQRT_2PI = 0.3989422804014327;
+function phi(x){ return INV_SQRT_2PI*Math.exp(-0.5*x*x); }
+function Phi(x){
+  const t = 1/(1+0.2316419*Math.abs(x));
+  const p = phi(x)*t*(0.319381530+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429))));
+  return x>0 ? 1-p : p;
+}
+function PhiInv(p){
+  if (p<1e-12) p=1e-12; if (p>1-1e-12) p=1-1e-12;
+  const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239],
+        b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+        c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+        d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+  let q,r;
+  if (p<0.02425){ q=Math.sqrt(-2*Math.log(p));
+    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if (p>1-0.02425){ q=Math.sqrt(-2*Math.log(1-p));
+    return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  q=p-0.5; r=q*q;
+  return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+
+/* ---------- the deterministic inverse (independent reference race) ---------- */
+// win probabilities when X_i = a_i + N(0,1) independently and the minimum wins
+function winIndependent(a){
+  const p = new Float64Array(n), s = new Float64Array(n), h = 0.02;
+  let lo = Infinity; for (let i=0;i<n;i++) lo = Math.min(lo,a[i]);
+  for (let x=lo-8; x<=lo+6; x+=h){
+    let ls = 0;
+    for (let j=0;j<n;j++){ s[j] = Math.max(1-Phi(x-a[j]),1e-300); ls += Math.log(s[j]); }
+    for (let i=0;i<n;i++) p[i] += h*phi(x-a[i])*Math.exp(ls-Math.log(s[i]));
+  }
+  return p;
+}
+function calibrate(w, start){
+  const a = start ? Float64Array.from(start) : new Float64Array(n);
+  let it = 0, err = 1;
+  while (err>1e-7 && it<300){
+    const p = winIndependent(a); err = 0; let m = 0;
+    for (let i=0;i<n;i++){ err = Math.max(err,Math.abs(p[i]-w[i])); a[i] += 0.8*Math.log(p[i]/w[i]); m += a[i]; }
+    m /= n; for (let i=0;i<n;i++) a[i] -= m;
+    it++;
+  }
+  return {a, it, err};
+}
+
+/* ---------- the simulated race on fixed seeds ---------- */
+const M = 60000;
+function mulberry(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const Z = new Float32Array(M*n), ZC = new Float32Array(M), CU = new Float32Array(M);
+(function(){ const r = mulberry(20261121);
+  const g = () => { let u=0; while(u===0) u=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r()); };
+  for (let k=0;k<M*n;k++) Z[k]=g();
+  for (let m=0;m<M;m++){ ZC[m]=g(); CU[m]=r(); } })();
+
+// shock for a cluster member: Gaussian copula with correlation rho, and on a share t of
+// races one shared lower-tail draw. The marginal stays standard normal for every (rho,t).
+function race(a, G, rho, t, stats){
+  const w = new Float64Array(n), x = new Float64Array(n);
+  const sr = Math.sqrt(rho), s1 = Math.sqrt(1-rho);
+  let g0=-1, g1=-1; for (let i=0;i<n;i++) if (G[i]){ if (g0<0) g0=i; else if (g1<0) g1=i; }
+  let sx=0,sy=0,sxx=0,syy=0,sxy=0;
+  for (let m=0;m<M;m++){
+    const tailDraw = CU[m] < t, qc = tailDraw ? PhiInv(CU[m]) : 0, zc = ZC[m], base = m*n;
+    for (let i=0;i<n;i++){
+      let e = Z[base+i];
+      if (G[i]){
+        if (tailDraw) e = qc;
+        else { e = sr*zc + s1*e; if (t>0) e = PhiInv(t+(1-t)*Phi(e)); }
+      }
+      x[i] = e;
+    }
+    if (stats && g1>=0){ const u=x[g0], v=x[g1]; sx+=u; sy+=v; sxx+=u*u; syy+=v*v; sxy+=u*v; }
+    let bv = Infinity;
+    for (let i=0;i<n;i++){ const v = a[i]+x[i]; x[i]=v; if (v<bv) bv=v; }
+    let c = 0; for (let i=0;i<n;i++) if (x[i]===bv) c++;
+    for (let i=0;i<n;i++) if (x[i]===bv) w[i] += 1/c;
+  }
+  for (let i=0;i<n;i++) w[i] /= M;
+  if (stats && g1>=0){ const mx=sx/M,my=sy/M;
+    stats.corr = (sxy/M-mx*my)/Math.sqrt((sxx/M-mx*mx)*(syy/M-my*my)); }
+  return w;
+}
+
+/* ---------- state ---------- */
+const S = {
+  wb: Float64Array.from(PRESETS.cap), a: new Float64Array(n), aShow: new Float64Array(n),
+  G: [true,true,true,false,false,false,false,false], rho: 0, t: 0,
+  wp: new Float64Array(n), wg: null, corr: 0, calib: null,
+  speed: 1, playing: true, stage: "race"
+};
+const NONE = new Array(n).fill(false);
+function viewActive(){ return S.G.filter(Boolean).length>=2 && (S.rho>0 || S.t>0); }
+function combine(wb, w1, w0){
+  const out = new Float64Array(n); let s = 0;
+  for (let i=0;i<n;i++){ out[i] = Math.max(wb[i]+w1[i]-w0[i],0); s += out[i]; }
+  for (let i=0;i<n;i++) out[i] /= s; return out;
+}
+function recompute(recal){
+  if (recal || !S.calib){ S.calib = calibrate(S.wb, S.calib ? S.a : null); S.a = S.calib.a; }
+  S.wg = null; S.corr = 0;
+  if (viewActive()){
+    const w0 = race(S.a, NONE, 0, 0), st = {};
+    const w1 = race(S.a, S.G, S.rho, S.t, st);
+    S.wp = combine(S.wb, w1, w0); S.corr = st.corr;
+    if (S.t>0){
+      const rg = Math.min(Math.max(st.corr,0),0.9999);
+      S.wg = combine(S.wb, race(S.a, S.G, rg, 0), w0);
+    }
+  } else { S.wp = Float64Array.from(S.wb); }
+  resetTally(); updateText(); drawScatter();
+}
+
+/* ---------- live races for the animation ---------- */
+let spare = null;
+function randn(){ if (spare!==null){ const s=spare; spare=null; return s; }
+  let u=0; while(u===0) u=Math.random(); const v=Math.random(), r=Math.sqrt(-2*Math.log(u));
+  spare = r*Math.sin(2*Math.PI*v); return r*Math.cos(2*Math.PI*v); }
+function liveRace(){
+  const act = viewActive(), x = new Float64Array(n);
+  const tailDraw = act && S.t>0 && Math.random()<S.t;
+  const qc = tailDraw ? PhiInv(Math.random()*S.t) : 0, zc = randn();
+  const sr = Math.sqrt(S.rho), s1 = Math.sqrt(1-S.rho);
+  let wi = 0;
+  for (let i=0;i<n;i++){
+    let e = randn();
+    if (act && S.G[i]){ if (tailDraw) e = qc; else { e = sr*zc+s1*e; if (S.t>0) e = PhiInv(S.t+(1-S.t)*Phi(e)); } }
+    x[i] = S.a[i]+e; if (x[i]<x[wi]) wi = i;
+  }
+  return {x, winner: wi, tailDraw, jit: (Math.random()-0.5)*8};
+}
+let tally = new Float64Array(n), total = 0, trail = [], cur = null, curStart = 0, counted = false;
+function resetTally(){ tally = new Float64Array(n); total = 0; trail = []; cur = null; }
+
+/* ---------- canvas ---------- */
+const cv = document.getElementById("race"), ctx = cv.getContext("2d");
+const tip = document.getElementById("tip");
+let L = null, barScale = 0.3, dragLane = -1, hoverLane = -1;
+const XMIN = -4.6, XMAX = 4.6, H = 470;
+function layout(){
+  const W = cv.clientWidth || 900, dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); cv.style.height = H+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const narrow = W < 620;
+  const gut = narrow ? 62 : 92, barsW = narrow ? Math.max(120, W*0.38) : Math.min(290, W*0.31);
+  const top = 30, bottom = 30, laneH = (H-top-bottom)/n;
+  const trackL = gut, trackR = W-barsW-10;
+  const barL = W-barsW+8, txtW = narrow ? 44 : 92, barLen = barsW-8-txtW-6;
+  L = {W, narrow, gut, top, bottom, laneH, trackL, trackR, barL, barLen, txtW};
+}
+function px(v){ return L.trackL + (v-XMIN)/(XMAX-XMIN)*(L.trackR-L.trackL); }
+function laneBase(i){ return L.top + (i+1)*L.laneH - 9; }
+function laneMid(i){ return L.top + (i+0.5)*L.laneH; }
+function wToPx(w){ return L.barL + Math.min(w/barScale,1)*L.barLen; }
+function setBarScale(){
+  let m = 0.2; for (let i=0;i<n;i++) m = Math.max(m, S.wb[i], S.wp[i]);
+  barScale = Math.ceil(m*1.12*20)/20;
+}
+function rrect(x,y,w,h,r){ r = Math.min(r,Math.abs(w)/2,h/2); ctx.beginPath();
+  ctx.moveTo(x,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x,y+h); ctx.closePath(); }
+
+function draw(now){
+  const {W, top, laneH, trackL, trackR, narrow} = L;
+  ctx.clearRect(0,0,W,H);
+  ctx.textBaseline = "middle";
+  const act = viewActive();
+
+  // race progress
+  let prog = 0, sweepX = null, decided = false;
+  if (cur && S.speed>0){
+    const dur = 1000/S.speed; prog = Math.min((now-curStart)/dur,1);
+    const xw = px(cur.x[cur.winner]);
+    if (prog>=0.15){ const u = Math.min((prog-0.15)/0.4,1), e = 1-Math.pow(1-u,3);
+      sweepX = trackL + (xw-trackL)*e; decided = u>=1; }
+  }
+
+  // axis
+  ctx.strokeStyle = GRID; ctx.lineWidth = 1;
+  ctx.font = "12px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+  ctx.fillStyle = MUTED; ctx.textAlign = "center";
+  for (let v=-4; v<=4; v+=2){ const x = Math.round(px(v))+0.5;
+    ctx.beginPath(); ctx.moveTo(x,top); ctx.lineTo(x,H-L.bottom); ctx.stroke();
+    ctx.fillText(v===0?"0":(v>0?"+"+v:"−"+(-v)), x, H-L.bottom+11); }
+  ctx.textAlign = "left"; ctx.fillStyle = INK2;
+  ctx.fillText("← lowest draw wins", trackL+2, 13);
+  ctx.textAlign = "right"; ctx.fillStyle = MUTED;
+  if (!narrow) ctx.fillText("performance draw", trackR, 13);
+  ctx.textAlign = "left"; ctx.fillStyle = INK2;
+  ctx.fillText("weight", L.barL, 13);
+
+  // lanes
+  for (let i=0;i<n;i++){
+    const yb = laneBase(i), ym = laneMid(i), col = COLORS[i];
+    if (decided && cur.winner===i){ ctx.fillStyle = col; ctx.globalAlpha = 0.09;
+      ctx.fillRect(trackL, L.top+i*laneH+1, trackR-trackL, laneH-2); ctx.globalAlpha = 1; }
+    if (hoverLane===i){ ctx.fillStyle = "#000"; ctx.globalAlpha = 0.035;
+      ctx.fillRect(0, L.top+i*laneH, W, laneH); ctx.globalAlpha = 1; }
+    // baseline
+    ctx.strokeStyle = AXIS; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.moveTo(trackL, Math.round(yb)+0.5); ctx.lineTo(trackR, Math.round(yb)+0.5); ctx.stroke();
+    // bell
+    const hmax = laneH-18; ctx.beginPath(); ctx.moveTo(px(S.aShow[i]-3.6), yb);
+    for (let z=-3.6; z<=3.61; z+=0.15) ctx.lineTo(px(S.aShow[i]+z), yb-hmax*Math.exp(-0.5*z*z));
+    ctx.lineTo(px(S.aShow[i]+3.6), yb);
+    ctx.fillStyle = col; ctx.globalAlpha = 0.16; ctx.fill(); ctx.globalAlpha = 0.9;
+    ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.stroke(); ctx.globalAlpha = 1;
+    // ability marker
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(px(S.aShow[i]), yb); ctx.lineTo(px(S.aShow[i]), yb+5); ctx.stroke();
+    // label
+    ctx.textAlign = "left"; ctx.font = (S.G[i]?"600 ":"")+"13.5px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(9, ym, 4.5, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = INK; ctx.fillText(narrow ? NAMES[i].replace("Utility","Util.") : NAMES[i], 19, ym);
+    if (S.G[i]){ ctx.fillStyle = INK; ctx.fillRect(0, L.top+i*laneH+6, 2.5, laneH-12); }
+  }
+
+  // trail dots
+  for (let k=0;k<trail.length;k++){
+    const r = trail[k], al = 0.07 + 0.28*(k+1)/trail.length;
+    for (let i=0;i<n;i++){ const x = px(r.x[i]); if (x<trackL||x>trackR) continue;
+      ctx.globalAlpha = al; ctx.fillStyle = COLORS[i];
+      ctx.beginPath(); ctx.arc(x, laneBase(i)-7+r.jit, 2.2, 0, 6.2832); ctx.fill(); }
+  }
+  ctx.globalAlpha = 1;
+
+  // current race
+  if (cur && S.speed>0){
+    const pop = Math.min(prog/0.15,1), ease = 1-Math.pow(1-pop,3);
+    const pts = [];
+    for (let i=0;i<n;i++){
+      const xt = Math.max(trackL, Math.min(trackR, px(cur.x[i])));
+      const x0 = px(S.aShow[i]); pts.push([x0+(xt-x0)*ease, laneBase(i)-7]);
+    }
+    // cluster link
+    if (act){
+      ctx.strokeStyle = INK; ctx.lineWidth = cur.tailDraw ? 2.6 : 1.4; ctx.globalAlpha = cur.tailDraw ? 0.85 : 0.45;
+      ctx.beginPath(); let first = true, topPt = null;
+      for (let i=0;i<n;i++) if (S.G[i]){ if (first){ ctx.moveTo(pts[i][0],pts[i][1]); first=false; topPt = pts[i]; }
+        else ctx.lineTo(pts[i][0],pts[i][1]); }
+      ctx.stroke(); ctx.globalAlpha = 1;
+      if (cur.tailDraw && topPt && pop>=1){
+        ctx.font = "600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"; ctx.fillStyle = INK;
+        const lx = Math.min(topPt[0]+10, trackR-120); ctx.textAlign = "left";
+        ctx.fillText("joint tail draw", lx, topPt[1]-L.laneH*0.55);
+      }
+    }
+    if (sweepX!==null){
+      ctx.strokeStyle = INK; ctx.globalAlpha = decided ? 0.55 : 0.8; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(sweepX, L.top); ctx.lineTo(sweepX, H-L.bottom); ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    for (let i=0;i<n;i++){
+      ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], 6.5, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = COLORS[i]; ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], 4.5, 0, 6.2832); ctx.fill();
+    }
+    if (decided){
+      const p = pts[cur.winner], u = Math.min((prog-0.55)/0.25,1);
+      ctx.strokeStyle = COLORS[cur.winner]; ctx.lineWidth = 2.5; ctx.globalAlpha = 1-0.45*u;
+      ctx.beginPath(); ctx.arc(p[0], p[1], 7+7*u, 0, 6.2832); ctx.stroke(); ctx.globalAlpha = 1;
+      ctx.font = "600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"; ctx.fillStyle = INK;
+      ctx.textAlign = p[0] > trackR-60 ? "right" : "left";
+      ctx.fillText("wins", p[0] + (p[0] > trackR-60 ? -18 : 18), p[1]-9);
+    }
+  }
+
+  // bars
+  const bh = Math.min(15, laneH*0.3);
+  for (let i=0;i<n;i++){
+    const ym = laneMid(i), xb = wToPx(S.wb[i]), xp = wToPx(S.wp[i]);
+    ctx.fillStyle = COLORS[i]; rrect(L.barL, ym-bh/2, Math.max(xp-L.barL,1), bh, 4); ctx.fill();
+    ctx.strokeStyle = INK2; ctx.lineWidth = 1.5; rrect(L.barL, ym-bh/2-4, Math.max(xb-L.barL,1), bh+8, 4); ctx.stroke();
+    if (dragLane===i || hoverLane===i){ ctx.fillStyle = INK2; ctx.fillRect(xb-2, ym-bh/2-7, 4, bh+14); }
+    if (S.wg){ const xg = wToPx(S.wg[i]); ctx.save(); ctx.translate(xg, ym+bh/2+8); ctx.rotate(Math.PI/4);
+      ctx.fillStyle = "#fff"; ctx.fillRect(-3.5,-3.5,7,7); ctx.strokeStyle = INK2; ctx.lineWidth = 1.5; ctx.strokeRect(-3.5,-3.5,7,7); ctx.restore(); }
+    if (total>=25){ const xt = wToPx(tally[i]/total);
+      ctx.fillStyle = "#fff"; ctx.fillRect(xt-2.5, ym-bh/2-9, 5, bh+18);
+      ctx.fillStyle = INK; ctx.fillRect(xt-1, ym-bh/2-9, 2, bh+18); }
+    // numbers
+    ctx.textAlign = "right"; ctx.fillStyle = INK;
+    ctx.font = "600 13.5px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+    const d = 100*(S.wp[i]-S.wb[i]);
+    if (narrow || Math.abs(d)<0.05){ ctx.fillText((100*S.wp[i]).toFixed(1)+"%", W-2, ym); }
+    else {
+      ctx.fillText((100*S.wp[i]).toFixed(1)+"%", W-2, ym-7);
+      ctx.font = "12px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"; ctx.fillStyle = INK2;
+      ctx.fillText((d>0?"▲ +":"▼ −")+Math.abs(d).toFixed(1)+" pts", W-2, ym+8);
+    }
+  }
+}
+
+/* ---------- animation loop ---------- */
+function finishRace(r){ tally[r.winner]++; total++; trail.push(r); if (trail.length>45) trail.shift(); }
+function frame(now){
+  // ease the curves toward the solved abilities
+  let moving = false;
+  for (let i=0;i<n;i++){ const d = S.a[i]-S.aShow[i]; if (Math.abs(d)>1e-3){ S.aShow[i] += d*0.22; moving = true; } else S.aShow[i] = S.a[i]; }
+  if (S.playing){
+    if (S.speed===0){
+      for (let k=0;k<120;k++){ const r = liveRace(); tally[r.winner]++; total++; if (k===0){ trail.push(r); if (trail.length>45) trail.shift(); } }
+      cur = null;
+    } else {
+      if (!cur){ cur = liveRace(); curStart = now; counted = false; }
+      const prog = (now-curStart)/(1000/S.speed);
+      if (prog>=0.55 && !counted){ tally[cur.winner]++; total++; counted = true; }
+      if (prog>=1){ trail.push(cur); if (trail.length>45) trail.shift(); cur = null; }
+    }
+  }
+  draw(now);
+  document.getElementById("count").textContent = total.toLocaleString()+" race"+(total===1?"":"s");
+  requestAnimationFrame(frame);
+}
+
+/* ---------- text ---------- */
+const pc = v => (100*v).toFixed(1)+"%";
+function stage(s){
+  S.stage = s;
+  const sets = { cal:["ar-cal","lb-cal","bx-bw","bx-a0"],
+                 view:["ar-dep","lb-dep","lb-dep2","ar-race","lb-race","ar-pol","lb-pol","bx-a1","bx-pw"] };
+  const on = s==="race" ? (viewActive() ? sets.view : sets.cal) : sets[s];
+  document.querySelectorAll("#square .on").forEach(e => e.classList.remove("on"));
+  on.forEach(id => document.getElementById(id).classList.add("on"));
+  document.querySelectorAll("#square .arr").forEach(e => e.setAttribute("marker-end", e.classList.contains("on") ? "url(#ahon)" : "url(#ah)"));
+  ["card1","card2","card3"].forEach((c,k) => document.getElementById(c).classList.toggle("on", ["race","cal","view"][k]===s));
+}
+function updateText(){
+  setBarScale();
+  let best = 0; for (let i=1;i<n;i++) if (S.a[i]<S.a[best]) best = i;
+  document.getElementById("read1").innerHTML =
+    `Strongest runner: <b>${NAMES[best]}</b>, ability ${S.a[best].toFixed(2)}.` +
+    `<small>Abilities are on the scale of one standard deviation of a draw. Only their differences matter.</small>`;
+  document.getElementById("read2").innerHTML =
+    `Inverse solved in <b>${S.calib.it}</b> iterations.` +
+    `<small>Largest gap between the benchmark and the race at those abilities: ${S.calib.err.toExponential(0).replace("e-","×10⁻").replace(/⁻(\d+)/,(m,d)=>"⁻"+d.split("").map(c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[+c]).join(""))}.</small>`;
+  const members = NAMES.filter((_,i)=>S.G[i]);
+  const sum = w => { let s=0; for (let i=0;i<n;i++) if (S.G[i]) s+=w[i]; return s; };
+  const r3 = document.getElementById("read3");
+  document.getElementById("lg-dia").style.display = S.wg ? "" : "none";
+  if (members.length<2){
+    r3.innerHTML = `<span class="big">No view.</span><small>Choose at least two assets for the cluster. The weights are the benchmark.</small>`;
+  } else if (!viewActive()){
+    r3.innerHTML = `<span class="big">No view: the weights are the benchmark.</span>` +
+      `<small>Cluster: ${members.join(", ")}, holding ${pc(sum(S.wb))} together. Move a slider in panel 3.</small>`;
+  } else {
+    const b = sum(S.wb), p = sum(S.wp);
+    let h = `<span class="big">${members.join(" + ")}: ${pc(b)} → ${pc(p)}</span>` +
+      `<small>Combined weight of the cluster, benchmark to your view. Abilities are unchanged; only the dependence moved.</small>` +
+      `<small>Correlation between any two cluster members under this view: <b>${S.corr.toFixed(2)}</b>.`;
+    if (S.wg) h += ` A Gaussian race with that same correlation and no joint tail would leave the cluster at <b>${pc(sum(S.wg))}</b> (diamonds).`;
+    r3.innerHTML = h + `</small>`;
+  }
+  // table view
+  let t = `<tr><th>asset</th><th>ability</th><th>benchmark</th><th>your view</th><th>change</th></tr>`;
+  for (let i=0;i<n;i++){ const d = 100*(S.wp[i]-S.wb[i]);
+    t += `<tr><td>${NAMES[i]}${S.G[i]?" ·":""}</td><td>${S.a[i].toFixed(2)}</td><td>${pc(S.wb[i])}</td><td>${pc(S.wp[i])}</td><td>${(d>=0?"+":"−")+Math.abs(d).toFixed(1)}</td></tr>`; }
+  document.getElementById("tv").innerHTML = t;
+  document.getElementById("rhoV").textContent = S.rho.toFixed(2);
+  document.getElementById("tailV").textContent = (100*S.t).toFixed(1).replace(".0","")+"%";
+}
+
+/* ---------- scatter of two cluster members ---------- */
+function drawScatter(){
+  const c = document.getElementById("scatter"), g = c.getContext("2d"), dpr = window.devicePixelRatio||1, sz = 150;
+  c.width = sz*dpr; c.height = sz*dpr; g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,sz,sz);
+  const idx = []; for (let i=0;i<n;i++) if (S.G[i]) idx.push(i);
+  const cap = document.getElementById("scatcap");
+  const m = v => 8 + (v+3.6)/7.2*(sz-16);
+  g.strokeStyle = GRID; g.lineWidth = 1; g.beginPath(); g.moveTo(m(0),6); g.lineTo(m(0),sz-6); g.moveTo(6,m(0)); g.lineTo(sz-6,m(0)); g.stroke();
+  if (idx.length<2){ cap.textContent = "Pick two or more assets to see how their draws move together."; return; }
+  const act = viewActive(), sr = Math.sqrt(S.rho), s1 = Math.sqrt(1-S.rho), tt = act ? S.t : 0;
+  const pt = [], tl = [];
+  for (let k=0;k<900;k++){
+    const base = k*n, td = CU[k]<tt; let u, v;
+    if (td){ u = v = PhiInv(CU[k]); }
+    else { u = Z[base+idx[0]]; v = Z[base+idx[1]];
+      if (act){ u = sr*ZC[k]+s1*u; v = sr*ZC[k]+s1*v; if (tt>0){ u = PhiInv(tt+(1-tt)*Phi(u)); v = PhiInv(tt+(1-tt)*Phi(v)); } } }
+    (td ? tl : pt).push([u,v]);
+  }
+  g.fillStyle = MUTED; g.globalAlpha = 0.5;
+  for (const [u,v] of pt){ g.beginPath(); g.arc(m(u), sz-m(v), 1.5, 0, 6.2832); g.fill(); }
+  g.globalAlpha = 0.9; g.fillStyle = INK;
+  for (const [u,v] of tl){ g.beginPath(); g.arc(m(u), sz-m(v), 2, 0, 6.2832); g.fill(); }
+  g.globalAlpha = 1;
+  cap.innerHTML = `<b style="color:#1a1a1a">${NAMES[idx[0]]} against ${NAMES[idx[1]]}</b>, one dot per race, abilities removed. ` +
+    `Lower left is the corner where races are won.` +
+    (tl.length ? ` Black dots are joint tail draws: both land on the same value.` : ``) +
+    ` Each asset's own spread is the same in every setting.`;
+}
+
+/* ---------- controls ---------- */
+const chips = document.getElementById("chips");
+NAMES.forEach((nm,i) => { const b = document.createElement("button");
+  b.innerHTML = `<span class="sw" style="background:${COLORS[i]}"></span>${nm}`;
+  b.setAttribute("aria-pressed", S.G[i]); b.classList.toggle("on", S.G[i]);
+  b.addEventListener("click", () => toggleMember(i)); chips.appendChild(b); });
+function toggleMember(i){ S.G[i] = !S.G[i];
+  chips.children[i].classList.toggle("on", S.G[i]); chips.children[i].setAttribute("aria-pressed", S.G[i]);
+  stage("view"); recompute(false); }
+document.getElementById("rho").addEventListener("input", e => { S.rho = +e.target.value; stage("view"); recompute(false); });
+document.getElementById("tail").addEventListener("input", e => { S.t = +e.target.value; stage("view"); recompute(false); });
+document.getElementById("reset").addEventListener("click", () => { S.rho = 0; S.t = 0;
+  document.getElementById("rho").value = 0; document.getElementById("tail").value = 0; stage("race"); recompute(false); });
+document.querySelectorAll("#presets button").forEach(b => b.addEventListener("click", () => {
+  S.wb = Float64Array.from(PRESETS[b.dataset.p]);
+  document.querySelectorAll("#presets button").forEach(x => x.classList.toggle("on", x===b));
+  stage("cal"); recompute(true); }));
+const playB = document.getElementById("play");
+playB.addEventListener("click", () => { S.playing = !S.playing; playB.textContent = S.playing ? "Pause" : "Play";
+  playB.setAttribute("aria-pressed", S.playing); if (S.playing) stage("race"); });
+document.querySelectorAll(".spd").forEach(b => b.addEventListener("click", () => { S.speed = +b.dataset.s; cur = null;
+  document.querySelectorAll(".spd").forEach(x => x.classList.toggle("on", x===b));
+  if (!S.playing){ S.playing = true; playB.textContent = "Pause"; } stage("race"); }));
+
+/* pointer: drag a benchmark bar, click a label, hover for values */
+function laneAt(y){ const i = Math.floor((y-L.top)/L.laneH); return i>=0 && i<n ? i : -1; }
+function pos(e){ const r = cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
+function setWeight(i, w){
+  w = Math.max(0.01, Math.min(0.7, w));
+  const rest = 1-S.wb[i], f = (1-w)/rest; let s = 0;
+  for (let j=0;j<n;j++){ if (j!==i) S.wb[j] = Math.max(S.wb[j]*f, 0.004); }
+  S.wb[i] = w; for (let j=0;j<n;j++) s += S.wb[j];
+  for (let j=0;j<n;j++) S.wb[j] /= s;
+}
+cv.addEventListener("pointerdown", e => { const [x,y] = pos(e), i = laneAt(y); if (i<0) return;
+  if (x>=L.barL-6){ dragLane = i; cv.setPointerCapture(e.pointerId); cv.style.touchAction = "none";
+    document.querySelectorAll("#presets button").forEach(b => b.classList.remove("on"));
+    stage("cal"); setWeight(i, (x-L.barL)/L.barLen*barScale); const bs = barScale; recompute(true); barScale = bs; e.preventDefault(); }
+  else if (x<L.gut){ toggleMember(i); } });
+cv.addEventListener("pointermove", e => { const [x,y] = pos(e);
+  if (dragLane>=0){ const bs = barScale; setWeight(dragLane, (x-L.barL)/L.barLen*barScale); recompute(true); barScale = bs; }
+  const i = laneAt(y); hoverLane = i;
+  cv.style.cursor = i<0 ? "default" : (x>=L.barL-6 ? "ew-resize" : (x<L.gut ? "pointer" : "default"));
+  if (i<0){ tip.style.opacity = 0; return; }
+  const d = 100*(S.wp[i]-S.wb[i]);
+  tip.innerHTML = `<b>${NAMES[i]}</b>${S.G[i]?" · in cluster":""}<br>ability ${S.a[i].toFixed(2)}<br>benchmark ${pc(S.wb[i])}` +
+    `<br>your view ${pc(S.wp[i])} (${(d>=0?"+":"−")+Math.abs(d).toFixed(1)} pts)` +
+    (S.wg ? `<br>same-correlation Gaussian ${pc(S.wg[i])}` : ``) +
+    (total>0 ? `<br>won ${pc(tally[i]/total)} of ${total.toLocaleString()} races` : ``);
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  tip.style.left = Math.max(4, Math.min(L.W-tw-4, x+14))+"px";
+  tip.style.top = Math.max(4, Math.min(H-th-4, y-th-10))+"px"; tip.style.opacity = 1; });
+function endDrag(){ if (dragLane>=0){ dragLane = -1; cv.style.touchAction = "pan-y"; setBarScale(); } }
+cv.addEventListener("pointerup", endDrag); cv.addEventListener("pointercancel", endDrag);
+cv.addEventListener("pointerleave", () => { hoverLane = -1; tip.style.opacity = 0; });
+window.addEventListener("resize", () => { layout(); drawScatter(); });
+
+/* ---------- start ---------- */
+// optional starting view from the address, e.g. #rho=0.5&tail=0.1
+const hp = new URLSearchParams(location.hash.slice(1));
+if (hp.has("rho")){ S.rho = Math.max(0, Math.min(0.99, +hp.get("rho")||0)); document.getElementById("rho").value = S.rho; }
+if (hp.has("tail")){ S.t = Math.max(0, Math.min(0.25, +hp.get("tail")||0)); document.getElementById("tail").value = S.t; }
+layout(); recompute(true); S.aShow = Float64Array.from(S.a); stage(viewActive() ? "view" : "race");
+if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  S.playing = false; playB.textContent = "Play"; playB.setAttribute("aria-pressed", false);
+}
+window.__demo = {S, race, calibrate, recompute, NONE};
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
