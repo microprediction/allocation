@@ -8,39 +8,19 @@ The vehicle is a race among assets: each asset draws a noisy performance, and a
 weight is the probability that it comes out best. The abilities driving the race
 are backed out of the benchmark by a fast deterministic inverse, and the polish is
 what happens when those same abilities are re-raced under a richer dependence law.
-The race has a second reading as a Thurstonian model of choice, which we set against
-the passive industry's capitalization weighting and its implicit appeal to Luce's
-choice axiom. That Lucian habit is only superficially supported by the Capital
-Asset Pricing Model (CAPM): what the CAPM endorses is the efficiency of the
-whole-universe market portfolio, a non-Lucian object no investor on a restricted
-universe actually holds (\Cref{sec:capm}).
+The construction is loosely analogous to Black--Litterman, and could be used in
+conjunction with it (\Cref{sec:markowitz}).
 
-The reason to read allocation as a Thurstonian rather than a Lucian choice is a
-single property, \emph{clone consistency}: cloning an option should not create
-value. The same axiom is named in social choice, where it is Tideman's
-\emph{independence of clones} \parencite{tideman1987}. Add a second asset that
-behaves almost exactly like one already held, and a
-sensible rule should \emph{split} the position across the two near-duplicates and
-leave the rest of the book untouched; it must not let the duplicated exposure count
-twice. Robustness without inverting a covariance, low turnover and feasibility at
-scale all follow from meeting this one axiom with a smooth order-statistic race
-rather than a hard clustering or an inverse. This is the portfolio form of
-the red-bus/blue-bus problem that unseated the logit model in discrete choice
-\parencite{mcfadden1974}. The logit inherits that paradox from its noise:
-independence of irrelevant alternatives holds exactly when the race is driven by
-Gumbel errors \parencite{yellott1977}, so a race under any other law escapes it by
-construction. A Lucian rule, capitalization weighting included, fixes
-the ratio of any two weights independently of the rest of the field, so inserting a
-near-duplicate inflates the duplicated exposure and drains weight from everything
-else (\Cref{prop:restriction,prop:redundancy}). A Thurstonian race does not: two
-assets that move together compete with \emph{each other}, and in the limit a
-co-moving pair collapses to a single horse that holds their combined weight.
-That statement is about the race at fixed abilities. Recalibrating the abilities
-to a renormalised benchmark after a clone enters does not commute with it exactly
-(\Cref{rem:fixedability}).
+The property that does most of the work is how the race treats near-duplicates.
+Add a second asset that behaves almost exactly like one already held, and the
+race splits the position across the two and leaves the rest of the book nearly
+untouched: two assets that move together compete with \emph{each other}, and in
+the limit a co-moving pair collapses to a single horse that holds their combined
+weight (\Cref{lem:redundancy} and \Cref{prop:monotone}). In social choice the same
+requirement is Tideman's \emph{independence of clones} \parencite{tideman1987}.
 
-Covariance-based allocators reach the same de-duplication, but unstably. Mean--variance settles the split between near-
-duplicates by inverting $\Sigma$, and the direction in which two assets become
+Covariance-based allocators reach the same de-duplication, but unstably. Mean--variance settles the split between
+near-duplicates by inverting $\Sigma$, and the direction in which two assets become
 identical is exactly the direction in which $\Sigma$ loses rank; so the population
 answer is right while its sample estimate, dividing through a vanishing eigenvalue,
 swings between the twins and flips sign with the data \parencite{markowitz1952}.
@@ -48,7 +28,7 @@ The inversion-free clustering allocators (hierarchical risk parity
 \parencite{lopezdeprado2016}, the Schur-complementary family
 \parencite{cotton2024schur}) de-duplicate by grouping instead, but discretely: the
 split jumps as cluster membership flips. The race de-duplicates \emph{smoothly},
-with a closed characterization (\Cref{prop:redundancy}) and without ever forming
+with a closed characterization (\Cref{lem:redundancy}) and without ever forming
 $\Sigma^{-1}$.
 
 Redundancy is near-singularity, so three properties usually treated apart are one. The race is robust to
@@ -63,16 +43,31 @@ a covariance inverse would explode.
 A fourth property is not about conditioning. Unlike any covariance functional, the race admits \emph{tail dependence}: driven by
 a tail-dependent simulation it responds to lower-tail co-movement that no second
 moment can encode, so a cluster that crashes together, but only in the
-crash, de-duplicates in the tail (\Cref{prop:tail}). The winner of a race is an
+crash, de-duplicates in the tail (\Cref{lem:tail}). The winner of a race is an
 order statistic of the joint draw, and an order statistic reads the tail copula
 where a covariance cannot.
+
+The race also has a second reading, as a model of choice. Imagine you are a
+psychometrician trying to understand the market's choices: capitalization weights
+are the shares with which the market chooses each asset, and the question is how
+those shares change when assets are removed, or when the menu is cut down to a
+sub-universe. Capitalization weighting answers with Luce's choice axiom
+\parencite{luce1959}: renormalise what remains and leave every ratio unchanged.
+We call a rule with that property \emph{Lucian}. It is one hypothesis among many. The choice literature offers a range of
+alternatives, among them Thurstone's law of comparative judgment
+\parencite{thurstone1927}, in which the response to a removal depends on how the removed asset
+co-moves with the rest, and it would be reasonable to test a range of choice
+models against the market's behaviour rather than assume Luce's. The CAPM does
+not settle the matter: what it endorses is the efficiency of the whole-universe
+market portfolio, not the renormalisation a restricted index applies
+(\Cref{sec:capm}).
 
 Read the other way, a winning probability is a credit as much as a weight: a
 redundancy-aware attribution of credit among correlated contributors. The same
 machinery combines forecasts, where stable combinations are known to beat the
 least-squares-optimal one, and we report a first study (\Cref{sec:combination}).
 
-These rest on properties established below: feasibility on the simplex with
+The claims above rest on properties established below: feasibility on the simplex with
 neither optimization nor inversion, exact reproduction of the benchmark when the
 reference and target laws agree, redundancy consistency and diversification
 monotonicity, tail consistency, an implied mean--(convex-regularizer) objective
@@ -81,152 +76,6 @@ turnover (\Cref{sec:properties,sec:smoothness}).
 
 \section{Background}
 \label{sec:background}
-
-\subsection{Why the CAPM does not rescue naive indexing}
-\label{sec:capm}
-
-The passive industry defends capitalization weighting by appeal to the CAPM. We
-grant the CAPM in full. What the model endorses is the efficiency of the whole-universe
-market portfolio, a non-Lucian object the indexer never holds, and that
-endorsement does not transfer to the restricted universes where weighting
-decisions are made.
-
-Under the CAPM every investor is a mean--variance optimizer who agrees on the
-expected returns $\mu$ and on the \emph{same} covariance $\Sigma$. Two-fund
-separation then has each investor hold the risk-free
-asset together with the \emph{same} tangency portfolio, proportional to
-$\Sigma^{-1}(\mu - r\mathbf{1})$. Since all investors hold the identical risky
-portfolio, market clearing forces it to equal the supply, the
-capitalization-weighted market, so $\mathrm{cap} \propto \Sigma^{-1}(\mu -
-r\mathbf{1})$ and the market portfolio is efficient.
-
-Capitalization weighting is optimal \emph{because the covariance is
-shared and the universe is the
-whole world}: it is the one portfolio on which all investors, reasoning from a
-single $\Sigma$ over all assets, agree.\footnote{One wrinkle we do not dwell on:
-investors have a well-established motivation to shrink the covariance
-\parencite{ledoitwolf2004}, and an aggregate of heterogeneous shrunk estimates
-need not clear to a mean--variance-efficient market portfolio, so even the
-equilibrium claim is not airtight.}
-
-\paragraph{Choice and efficiency.}
-Given these imperfections it is natural to ask whether allocation admits other,
-less normative models. The choice literature offers a rich menu, and in particular
-two accounts long viewed as rivals in the heyday of psychometric choice theory:
-Thurstone's law of comparative judgment \parencite{thurstone1927} and the Lucian
-(logit) model. They part on whether the relative standing of two options may
-depend on the rest of the field, and that fault line is the one that matters here.
-
-Write $w_i(\mathcal U)$ for the weight a rule assigns to asset $i$ within a
-universe $\mathcal U$. Capitalization weighting sets $w_i(\mathcal U) =
-\mathrm{cap}_i / \sum_{j\in\mathcal U}\mathrm{cap}_j$, so the ratio
-$w_i(\mathcal U)/w_j(\mathcal U) = \mathrm{cap}_i/\mathrm{cap}_j$ does not depend on
-$\mathcal U$. That is Luce's choice axiom \parencite{luce1959}, independence of
-irrelevant alternatives, and we call such a rule \emph{Lucian}. Efficiency has no
-such invariance: the tangency weights on $\mathcal U$ are $w^{*}(\mathcal U)
-\propto \Sigma_{\mathcal U}^{-1}(\mu_{\mathcal U} - r\mathbf{1})$, whose ratios turn
-on the entire inverse covariance $\Sigma_{\mathcal U}^{-1}$ and move when an asset
-enters or leaves $\mathcal U$ (unless $\Sigma_{\mathcal U}$ is diagonal). The CAPM
-makes the two objects coincide at a single universe, the whole world, where
-clearing fixes $\mathrm{cap}\propto\Sigma^{-1}(\mu-r\mathbf 1)$.
-
-\begin{proposition}[Lucian weighting is inconsistent under restriction]
-\label{prop:restriction}
-Capitalization weighting is the Lucian rule with values $\mathrm{cap}_i$. If
-returns are correlated (non-diagonal $\Sigma$), then generically a Lucian rule
-coincides with mean--variance efficiency on at most one universe in a nested
-family. Under the CAPM that universe is the full asset world $U$; on any strict
-sub-universe $S \subsetneq U$ the capitalization-weighted portfolio is generically
-inefficient, and the discrepancy is governed by the heterogeneity of the assets'
-covariances with the excluded set $U \setminus S$.
-\end{proposition}
-\begin{proof}
-Partition the market $U = S \cup X$ into the retained assets $S$ and the excluded
-$X = U\setminus S$, with market weights $m = (m_S, m_X)$. CAPM equilibrium reads
-$\mu - r\mathbf 1 = \gamma\,\Sigma_U\, m$ for some $\gamma > 0$; its $S$-block is
-$\mu_S - r\mathbf 1 = \gamma(\Sigma_{SS} m_S + \Sigma_{SX} m_X)$, so the
-restricted-universe tangency weights are
-\begin{equation*}
-  q_S \;\propto\; \Sigma_{SS}^{-1}(\mu_S - r\mathbf 1)
-  \;=\; \gamma\big(m_S + \Sigma_{SS}^{-1}\Sigma_{SX}\, m_X\big),
-\end{equation*}
-while restricted capitalization weighting uses $m_S$. The two coincide iff
-$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X = c\, m_S$ for some scalar $c > -1$, the sign
-keeping the normalised weights on the simplex. At the full universe
-$X = \varnothing$ and $c = 0$. On a strict sub-universe the condition is $|S|$
-equations in the one unknown $c$, which fail for generic $\Sigma_{SX} \neq 0$.
-The non-generic exceptions are a block-diagonal $\Sigma$ with $\Sigma_{SX} = 0$,
-and an excluded set whose market portfolio regresses identically on every retained
-asset, $\Sigma_{SX} m_X \propto \Sigma_{SS} m_S$. The wedge
-$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$, the regression of the retained assets on the
-excluded ones, is the part of each cap weight that reflects covariance
-with $U\setminus S$, irrelevant to the $S$-frontier yet baked into the full-market
-weight.
-\end{proof}
-
-The CAPM's support for the Lucian habit is therefore the single-point coincidence
-of \Cref{prop:restriction}: it endorses cap weighting on the whole-market universe
-alone, and is silent or contrary on the restricted universes where weighting
-decisions are actually made. This is the
-choice-theoretic form of Roll's critique \parencite{roll1977}: the only testable
-content of the CAPM is the efficiency of the \emph{true} market portfolio, and no
-proxy on a restricted universe inherits it \parencite{prono2009}. Fundamental
-indexing reaches cap weighting's sub-optimality by a different route, price
-inefficiency \parencite{hsu2006}, while shrinkage \parencite{ledoitwolf2004} and
-tracking-error analysis \parencite{roll1992} document the fragility of the inputs.
-
-\subsection{Asset allocation as a choice}
-\label{sec:choice}
-
-We read allocation as a \emph{choice}. The market, in aggregate, selects among assets, and
-a portfolio weight is the probability with which an asset is chosen. Thurstone's
-law of comparative judgment \parencite{thurstone1927} is the canonical model of
-such a choice: each alternative $i$ carries a latent quality, an \emph{ability}
-$a_i$, and a noisy \emph{performance} $X_i = a_i + \varepsilon_i$, and the
-alternative with the extreme performance is chosen. The probability that $i$ is
-chosen depends on the whole field and on the dependence among the performances,
-the property the Lucian (logit) model forbids by axiom. Two assets that move
-together compete with each other, not independently, and a choice model charges for
-that where a Lucian one cannot.
-
-To use these choice probabilities as weights, \Cref{sec:method} fixes the field's
-abilities by \emph{calibration} to a chosen
-benchmark, then \emph{tilts} by re-running the choice under the dependence actually
-realised.
-
-The tilt is informationally modest.
-It needs only that dependence, no return forecast, and it \emph{anchors} to the
-benchmark, departing from the prevailing allocation only as far as the correlation
-warrants. Treating the market as at least weakly efficient is the prudent default;
-discarding that anchor to bet against the index on thin evidence is the error that
-undid many entrants in the M6 forecasting competition \parencite{makridakis2025m6}.
-
-\subsection{Thurstone's eclipse and the Fast Ability Transform}
-\label{sec:fat}
-
-The Thurstonian (probit) choice model is older and strictly more general than the
-Lucian (logit) one, and it does not assume independence of irrelevant
-alternatives. It lost the applied field on a single axis, tractability. With more
-than two alternatives the choice probabilities are Gaussian orthant integrals with
-no closed form, and the \emph{inverse} problem, recovering latent abilities from
-observed choice shares, was considered prohibitive. Logit has closed-form
-probabilities and a trivial inverse, and so came to dominate discrete choice,
-ranking, and learning-to-rank, carrying its IIA assumption with it.
-
-Two developments lift the obstruction here. First, the forward race is cheap to
-\emph{simulate}: the winning frequencies of $10^4$ to $10^5$ correlated draws cost
-milliseconds, and a common-seed construction (\Cref{sec:smoothness}) makes the
-simulation \emph{smooth} in the dependence, so it can be re-used online without
-churning the weights. Second, the \emph{Fast
-Ability Transform} of \textcite{cotton2021} evaluates the forward and inverse maps
-of the independent race in \emph{linear time} on a lattice, convolving competitor
-densities and tracking tie multiplicity exactly, so the once-prohibitive inverse
-from target weights to abilities is now $O(n)$ and Monte-Carlo-free.
-
-We develop several uses of the apparatus, with different benchmarks to anchor to, different reference
-correlations, and target simulations carrying whatever dependence one wishes to
-match, but each routes through this one calibration map. None is practical without
-a fast, deterministic inverse from weights to abilities; with it, the rest is sampling.
 
 \subsection{Avoiding matrix inversion}
 \label{sec:robust}
@@ -315,4 +164,150 @@ by the tail copula, not by the covariance. Drive the Thurstonian race with a
 simulation that carries lower-tail dependence and the weights respond to
 $\lambda_L$: assets that crash together are recognised as the near-duplicates they
 become in the tail, and their shares collapse to one, which no covariance-based
-allocator can arrange (\Cref{prop:tail}).
+allocator can arrange (\Cref{lem:tail}).
+
+\subsection{Why the CAPM does not rescue naive indexing}
+\label{sec:capm}
+
+The passive industry defends capitalization weighting by appeal to the CAPM. We
+grant the CAPM in full. What the model endorses is the efficiency of the whole-universe
+market portfolio, a non-Lucian object the indexer never holds, and that
+endorsement does not transfer to the restricted universes where weighting
+decisions are made.
+
+Under the CAPM every investor is a mean--variance optimizer who agrees on the
+expected returns $\mu$ and on the \emph{same} covariance $\Sigma$. Two-fund
+separation then has each investor hold the risk-free
+asset together with the \emph{same} tangency portfolio, proportional to
+$\Sigma^{-1}(\mu - r\mathbf{1})$. Since all investors hold the identical risky
+portfolio, market clearing forces it to equal the supply, the
+capitalization-weighted market, so $\mathrm{cap} \propto \Sigma^{-1}(\mu -
+r\mathbf{1})$ and the market portfolio is efficient.
+
+Capitalization weighting is optimal \emph{because the covariance is
+shared and the universe is the
+whole world}: it is the one portfolio on which all investors, reasoning from a
+single $\Sigma$ over all assets, agree.\footnote{One wrinkle we do not dwell on:
+investors have a well-established motivation to shrink the covariance
+\parencite{ledoitwolf2004}, and an aggregate of heterogeneous shrunk estimates
+need not clear to a mean--variance-efficient market portfolio, so even the
+equilibrium claim is not airtight.}
+
+\paragraph{Choice and efficiency.}
+Given these imperfections it is natural to ask whether allocation admits other,
+less normative models. The choice literature offers a rich menu, and in particular
+two accounts long viewed as rivals in the heyday of psychometric choice theory:
+Thurstone's law of comparative judgment \parencite{thurstone1927} and the Lucian
+(logit) model. They part on whether the relative standing of two options may
+depend on the rest of the field, and that fault line is the one that matters here.
+
+Write $w_i(\mathcal U)$ for the weight a rule assigns to asset $i$ within a
+universe $\mathcal U$. Capitalization weighting sets $w_i(\mathcal U) =
+\mathrm{cap}_i / \sum_{j\in\mathcal U}\mathrm{cap}_j$, so the ratio
+$w_i(\mathcal U)/w_j(\mathcal U) = \mathrm{cap}_i/\mathrm{cap}_j$ does not depend on
+$\mathcal U$. That is Luce's choice axiom \parencite{luce1959}, independence of
+irrelevant alternatives, the Lucian property of \Cref{sec:intro}. Efficiency has no
+such invariance: the tangency weights on $\mathcal U$ are $w^{*}(\mathcal U)
+\propto \Sigma_{\mathcal U}^{-1}(\mu_{\mathcal U} - r\mathbf{1})$, whose ratios turn
+on the entire inverse covariance $\Sigma_{\mathcal U}^{-1}$ and move when an asset
+enters or leaves $\mathcal U$ (unless $\Sigma_{\mathcal U}$ is diagonal). The CAPM
+makes the two objects coincide at a single universe, the whole world, where
+clearing fixes $\mathrm{cap}\propto\Sigma^{-1}(\mu-r\mathbf 1)$.
+
+\begin{lemma}[Lucian weighting is inconsistent under restriction]
+\label{lem:restriction}
+Capitalization weighting is the Lucian rule with values $\mathrm{cap}_i$. If
+returns are correlated (non-diagonal $\Sigma$), then generically a Lucian rule
+coincides with mean--variance efficiency on at most one universe in a nested
+family. Under the CAPM that universe is the full asset world $U$; on any strict
+sub-universe $S \subsetneq U$ the capitalization-weighted portfolio is generically
+inefficient, and the discrepancy is governed by the heterogeneity of the assets'
+covariances with the excluded set $U \setminus S$.
+\end{lemma}
+\begin{proof}
+Partition the market $U = S \cup X$ into the retained assets $S$ and the excluded
+$X = U\setminus S$, with market weights $m = (m_S, m_X)$. CAPM equilibrium reads
+$\mu - r\mathbf 1 = \gamma\,\Sigma_U\, m$ for some $\gamma > 0$; its $S$-block is
+$\mu_S - r\mathbf 1 = \gamma(\Sigma_{SS} m_S + \Sigma_{SX} m_X)$, so the
+restricted-universe tangency weights are
+\begin{equation*}
+  q_S \;\propto\; \Sigma_{SS}^{-1}(\mu_S - r\mathbf 1)
+  \;=\; \gamma\big(m_S + \Sigma_{SS}^{-1}\Sigma_{SX}\, m_X\big),
+\end{equation*}
+while restricted capitalization weighting uses $m_S$. The two coincide iff
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X = c\, m_S$ for some scalar $c > -1$, the sign
+keeping the normalised weights on the simplex. At the full universe
+$X = \varnothing$ and $c = 0$. On a strict sub-universe the condition is $|S|$
+equations in the one unknown $c$, which fail for generic $\Sigma_{SX} \neq 0$.
+The non-generic exceptions are a block-diagonal $\Sigma$ with $\Sigma_{SX} = 0$,
+and an excluded set whose market portfolio regresses identically on every retained
+asset, $\Sigma_{SX} m_X \propto \Sigma_{SS} m_S$. The wedge
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$, the regression of the retained assets on the
+excluded ones, is the part of each cap weight that reflects covariance
+with $U\setminus S$, irrelevant to the $S$-frontier yet baked into the full-market
+weight.
+\end{proof}
+
+The CAPM's support for the Lucian habit is therefore the single-point coincidence
+of \Cref{lem:restriction}: it endorses cap weighting on the whole-market universe
+alone, and is silent or contrary on the restricted universes where weighting
+decisions are actually made. This is the
+choice-theoretic form of Roll's critique \parencite{roll1977}: the only testable
+content of the CAPM is the efficiency of the \emph{true} market portfolio, and no
+proxy on a restricted universe inherits it \parencite{prono2009}. Fundamental
+indexing reaches cap weighting's sub-optimality by a different route, price
+inefficiency \parencite{hsu2006}, while shrinkage \parencite{ledoitwolf2004} and
+tracking-error analysis \parencite{roll1992} document the fragility of the inputs.
+
+\subsection{Asset allocation as a choice}
+\label{sec:choice}
+
+We read allocation as a \emph{choice}. The market, in aggregate, selects among assets, and
+a portfolio weight is the probability with which an asset is chosen. Thurstone's
+law of comparative judgment \parencite{thurstone1927} is the canonical model of
+such a choice: each alternative $i$ carries a latent quality, an \emph{ability}
+$a_i$, and a noisy \emph{performance} $X_i = a_i + \varepsilon_i$, and the
+alternative with the extreme performance is chosen. The probability that $i$ is
+chosen depends on the whole field and on the dependence among the performances,
+the property the Lucian (logit) model forbids by axiom. Two assets that move
+together compete with each other, not independently, and a choice model charges for
+that where a Lucian one cannot.
+
+To use these choice probabilities as weights, \Cref{sec:method} fixes the field's
+abilities by \emph{calibration} to a chosen
+benchmark, then \emph{tilts} by re-running the choice under the dependence actually
+realised.
+
+The tilt is informationally modest.
+It needs only that dependence, no return forecast, and it \emph{anchors} to the
+benchmark, departing from the prevailing allocation only as far as the correlation
+warrants. Treating the market as at least weakly efficient is the prudent default;
+discarding that anchor to bet against the index on thin evidence is the error that
+undid many entrants in the M6 forecasting competition \parencite{makridakis2025m6}.
+
+\subsection{Thurstone's eclipse and the Fast Ability Transform}
+\label{sec:fat}
+
+The Thurstonian (probit) choice model is older and strictly more general than the
+Lucian (logit) one, and it does not assume independence of irrelevant
+alternatives. It lost the applied field on a single axis, tractability. With more
+than two alternatives the choice probabilities are Gaussian orthant integrals with
+no closed form, and the \emph{inverse} problem, recovering latent abilities from
+observed choice shares, was considered prohibitive. Logit has closed-form
+probabilities and a trivial inverse, and so came to dominate discrete choice,
+ranking, and learning-to-rank, carrying its IIA assumption with it.
+
+Two developments lift the obstruction here. First, the forward race is cheap to
+\emph{simulate}: the winning frequencies of $10^4$ to $10^5$ correlated draws cost
+milliseconds, and a common-seed construction (\Cref{sec:smoothness}) makes the
+simulation \emph{smooth} in the dependence, so it can be re-used online without
+churning the weights. Second, the \emph{Fast
+Ability Transform} of \textcite{cotton2021} evaluates the forward and inverse maps
+of the independent race in \emph{linear time} on a lattice, convolving competitor
+densities and tracking tie multiplicity exactly, so the once-prohibitive inverse
+from target weights to abilities is now $O(n)$ and Monte-Carlo-free.
+
+We develop several uses of the apparatus, with different benchmarks to anchor to, different reference
+correlations, and target simulations carrying whatever dependence one wishes to
+match, but each routes through this one calibration map. None is practical without
+a fast, deterministic inverse from weights to abilities; with it, the rest is sampling.

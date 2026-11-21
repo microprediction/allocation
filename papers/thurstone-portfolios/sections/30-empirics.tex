@@ -127,7 +127,7 @@ is a strong, stable baseline. Across the swept sample sizes the ability tilt is 
 comparable quality and the fitting data is scarce (M4 Yearly at five to ten series,
 Quarterly at five). Where one method dominates the pool, concentration wins and
 stacking takes over, as the redundancy property
-(\Cref{prop:redundancy}) predicts. The tilt is a stable small-sample member of the
+(\Cref{lem:redundancy}) predicts. The tilt is a stable small-sample member of the
 combination family, not a uniformly better combiner.
 
 \begin{figure}[h]
@@ -196,7 +196,7 @@ the \emph{entropic} member: it returns simplex weights under a dependence-adjust
 entropy regularizer (\Cref{thm:objective}) rather than an $\ell_1$/$\ell_2$ penalty,
 and obtains them without solving the constrained least-squares program. The same
 machinery is a general tool for stable non-negative (simplex) regression: it shares
-weight among collinear regressors (\Cref{prop:redundancy}), stays smooth under
+weight among collinear regressors (\Cref{lem:redundancy}), stays smooth under
 streaming updates (\Cref{thm:smooth}), and is well-posed when regressors outnumber
 observations. Forecast combination and model stacking \parencite{breiman1996,
 timmermann2006}, where stable combinations are known to beat the
@@ -225,10 +225,10 @@ Open questions include the choice of reference correlation $C_{\mathrm{calib}}$
 abilities, a Thurstonian analogue of covariance shrinkage; and using
 $C_{\mathrm{tilt}}$ to express an explicit correlation view rather than the sample
 estimate. The concentration of the allocation is governed by the temperature of
-\Cref{prop:temperature}, which trades the weight that leaks to weak names against
+\Cref{lem:temperature}, which trades the weight that leaks to weak names against
 the turnover bound of \Cref{thm:smooth}.
 
-The tail-consistency result (\Cref{prop:tail}, \Cref{rem:anysim}) suggests driving
+The tail-consistency result (\Cref{lem:tail}, \Cref{rem:anysim}) suggests driving
 the race with an online \emph{downside} covariance (lower-partial-moment) estimator,
 which \Cref{fig:tail} shows recovers almost all of the effect, with the full
 tail-dependent simulation reserved for the residual. Two problems remain open:
