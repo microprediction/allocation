@@ -55,25 +55,16 @@ exchangeable along the approach.
 
 At the independent extreme a duplicate is a \emph{fresh} draw, so the pair's
 combined weight strictly exceeds $w_k^{\setminus}$ and draws share from every
-other asset. This is the independence-of-irrelevant-alternatives (``red bus / blue
-bus'') paradox.
-
-The CAPM equilibrium is not the culprit: at the whole-universe portfolio the cap
-weights \emph{are} the efficient weights $\Sigma^{-1}(\mu - r\mathbf{1})$, which
-already price a duplicate correctly through the inverse covariance. The paradox
-appears only when capitalization weighting is applied as a \emph{Lucian} rule,
-normalised over a restricted universe as in practice, where it no longer re-solves
-for the redundancy it carries (\Cref{sec:capm}). As the duplicate's correlation
-rises from $0$ to $1$, \Cref{thm:smooth} guarantees the pair's share moves
-\emph{continuously} from that Lucian value to the redundancy-coherent
-$w_k^{\setminus}$. \Cref{tab:redundancy} shows this for three equal-ability assets.
+other asset. As the duplicate's correlation rises from $0$ to $1$,
+\Cref{thm:smooth} guarantees the pair's share moves \emph{continuously} from that
+independent value to the redundancy-coherent $w_k^{\setminus}$. \Cref{tab:redundancy} shows this for three equal-ability assets.
 
 \begin{table}[h]
   \centering
   \caption{Redundancy consistency and diversification monotonicity. Three
   equal-ability assets; assets $1,2$ are duplicates with mutual correlation
   $\rho_{12}$, asset $0$ independent of them ($M = 4\times10^5$). The duplicated
-  pair's share falls monotonically from the Lucian $2/3$ to the
+  pair's share falls monotonically from the independent $2/3$ to the
   redundancy-coherent $1/2$.}
   \label{tab:redundancy}
   \begin{tabular}{ccc}
