@@ -136,6 +136,8 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
   (fixed seeds, boundary-density condition): `E‖ŵ(C+ΔC)−ŵ(C)‖_1 = O(‖ΔC‖)+O(‖ΔC‖/√M)`. It inherits
   **low turnover in expectation/high probability**, not literal smoothness. *We already corrected Thm 2
   toward the O(1/√M) term in the empirics; make sure the Theorem 2 statement itself carries this.*
+  **The bound as the paper now states it ("Finite paths"):** `E‖Δŵ_M‖_1 = O(‖ΔC‖_F + √(‖ΔC‖_F/M))`;
+  the two forms above are superseded.
 
 - [x] **[S] 10. Markowitz analogy — warning sentence DONE** ("Not a return forecast" para now states
   the geometry is a diversification geometry induced by `S`, not a risk geometry in return space;
@@ -159,3 +161,55 @@ Severity: **[B]** blocker before wide circulation · **[S]** should-fix · **[N]
 3. Item **5** — restate tail consistency via the group-minimum stochastic-order theorem.
 4. Items **2, 9, 11** — calibration existence theorem, CAPM block-matrix wedge, Tweedie lemma.
 5. Items **7, 7-bis, 7-ter, 8, 12, 4, 10** — regularity regimes, smoothness cleanup, wording softenings.
+
+---
+
+# Second referee pass (October 2026)
+
+- [x] Abstract cut to results only; Dow claim limited to turnover; "fast deterministic inverse".
+- [x] Sign convention: `eq:popmap` sets `η = −ε`; §tail uses return-signed shocks (minimum wins reads
+      the crash tail, the winner is the worst performer); `fig:tail` caption and `rem:twolayers` match
+      `experiments/tail_consistency_demo.py`.
+- [x] Clone consistency qualified in the introduction (fixed abilities; recalibration does not commute).
+- [x] `prop:restriction` proof: `c > −1`, generic failure for `Σ_SX ≠ 0`, the two non-generic exceptions named.
+- [x] `alg:tilt` line 3 splits ties explicitly; `w(C) := W_{N(0,C)}(−a)` identified.
+- [x] §computation: `winning` package, not `thurstone`; one-factor inverse described as implemented
+      (preconditioned fixed point, `|β| ≤ 0.99`, floor `1e-12`); low-rank seeds `(k+n)`-dimensional,
+      fixed-projection range finder, rotation caveat.
+- [x] `thm:smooth` proof: `∇φ` on faces after one divergence pass, `φ` on ridges after a second;
+      convexity for the mean-value step. Finite-path bound `O(‖ΔC‖_F + √(‖ΔC‖_F/M))`; only the sampling
+      component vanishes with `M`.
+- [x] `lem:tweedie`: score derivation; singular-`C` caveat restricted to `range(C)`. Bregman gradient on
+      the tangent space. `thm:objective` states `C ≻ 0`.
+- [x] `tab:dow` configuration stated (EWMA 60d, equal-weight target, market reference, `φ = β = 1`,
+      `M = 2^16`, abilities held after warm-up; MinVar unconstrained with 10% shrinkage; baselines cited).
+- [x] `tab:scale`: factor MinVar defined (Woodbury, `ψ` floor), `M = 2^16` constant, `√(n/M)` precision note.
+- [x] §combination protocol as implemented: six-model comparable pool, scaled errors, inverse-variance
+      benchmark, `φ = 1`, `M = 2^14`, 25 draws, 200 held-out series; sign immaterial in the Gaussian tilt.
+- [x] Related work: benchmark-relative and tail-aware paragraph (BL, entropy pooling, CVaR, HERC);
+      HRP, Schur, risk parity, max-div, M6, Tweedie cited; four Crossref-verified entries in `refs.bib`.
+- [ ] `fig:combine` legend labels fixed in `experiments/m4_combination.py`; figure not regenerated
+      (M4 forecast cache absent).
+- [ ] Out-of-sample tail backtest of the downside tilt: not added, equities are not its natural home;
+      abstract tempered instead.
+
+---
+
+## November 2026 revision (supersedes the entries above where they differ)
+
+The paper is now "Portfolio-Implied Contests, with an Application to Tail Risk". The
+checklist above describes the June to October text. Where it disagrees with the
+paper, the paper is right. In particular:
+
+- **Finite-path turnover.** The paper states `E‖Δŵ_M‖₁ = O(‖ΔC‖_F)` uniformly in `M`,
+  with standard deviation `O(√(‖ΔC‖_F / M))`. Earlier forms recorded above
+  (`O(‖ΔC‖_F) + O(1/√M)` and others) are obsolete.
+- **Theorem 2** carries an explicit constant, `1/(√2 λ)`, and the order `1/λ` is shown
+  to be attained. The earlier "power of `1/λ` not established" note is obsolete.
+- **Item 3b (fixed abilities versus recalibration).** The remark was removed. Calibration
+  reproduces whatever benchmark it is given, so comparing a post-clone benchmark with a
+  pre-clone weight compares two inputs.
+- **Structure.** Method first, then the comparison with covariance allocators, then the
+  choice model. Trivial propositions are remarks and simple ones are lemmas.
+- **Dow table.** Rerun with simple returns and drift-aware turnover
+  (`experiments/dow_study.py`, results in `experiments/results/`).

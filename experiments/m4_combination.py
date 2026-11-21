@@ -178,3 +178,4 @@ def figure(results, path):
 if __name__ == "__main__":
     res = run()
     figure(res, os.path.join(os.path.dirname(__file__), "m4_combination.png"))
+    figure(res, os.path.join(os.path.dirname(__file__), "m4_combination.pdf"))   # vector copy, used by the paper
