@@ -1,6 +1,9 @@
 \section{The Thurstonian model of a field}
 \label{sec:model}
 
+This section defines the race that every later construction runs, and the
+forward and inverse maps between abilities and winning probabilities.
+
 Consider a universe of $n$ assets. Each asset has a latent ability $a_i\in\R$ and
 a noisy \emph{performance}
 \begin{equation}
@@ -155,6 +158,10 @@ monotonicity, and objective properties are established in \Cref{sec:properties}.
 
 \section{Computation}
 \label{sec:computation}
+
+This section describes how the two steps of \Cref{alg:tilt} are computed: a
+deterministic calibration, a Monte-Carlo tilt, and the online and low-rank
+variants that let it scale.
 
 \paragraph{Calibration (deterministic).}
 The calibration step, the inverse map from target weights to abilities, is
