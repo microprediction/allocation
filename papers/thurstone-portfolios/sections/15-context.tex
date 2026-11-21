@@ -172,35 +172,24 @@ on how the removed asset co-moves with the rest (\Cref{lem:redundancy}).
 \label{sec:capm}
 
 The passive industry defends capitalization weighting by appeal to the CAPM. We
-grant the CAPM in full. What the model endorses is the efficiency of the
-whole-universe market portfolio. That endorsement does not transfer to the
-restricted universes where weighting decisions are made.
-
-Under the CAPM every investor is a mean--variance optimizer who agrees on the
-expected returns $\mu$ and on the \emph{same} covariance $\Sigma$. Two-fund
-separation then has each investor hold the risk-free
-asset together with the \emph{same} tangency portfolio, proportional to
-$\Sigma^{-1}(\mu - r\mathbf{1})$. Since all investors hold the identical risky
-portfolio, market clearing forces it to equal the supply, the
-capitalization-weighted market, so $\mathrm{cap} \propto \Sigma^{-1}(\mu -
-r\mathbf{1})$ and the market portfolio is efficient.
-
-Capitalization weighting is optimal \emph{because the covariance is
-shared and the universe is the
-whole world}: it is the one portfolio on which all investors, reasoning from a
-single $\Sigma$ over all assets, agree.\footnote{One wrinkle we do not dwell on:
+grant the CAPM in full. The standard argument \parencite{sharpe1964} is that every
+investor is a mean--variance optimizer who agrees on the expected returns $\mu$ and
+on the same covariance $\Sigma$, so each holds the risk-free asset together with the
+same tangency portfolio, proportional to $\Sigma^{-1}(\mu - r\mathbf{1})$. Market
+clearing forces that portfolio to equal the supply, the capitalization-weighted
+market, so $\mathrm{cap} \propto \Sigma^{-1}(\mu - r\mathbf{1})$ and the market
+portfolio is efficient.\footnote{One wrinkle we do not dwell on:
 investors have a well-established motivation to shrink the covariance
 \parencite{ledoitwolf2004}, and an aggregate of heterogeneous shrunk estimates
 need not clear to a mean--variance-efficient market portfolio, so even the
 equilibrium claim is not airtight.}
 
-Efficiency has no invariance of the Lucian kind. The tangency weights on
-$\mathcal U$ are $w^{*}(\mathcal U) \propto \Sigma_{\mathcal U}^{-1}(\mu_{\mathcal U}
-- r\mathbf{1})$, whose ratios turn on the entire inverse covariance
-$\Sigma_{\mathcal U}^{-1}$ and move when an asset enters or leaves $\mathcal U$
-(unless $\Sigma_{\mathcal U}$ is diagonal). The CAPM makes the two objects coincide
-at a single universe, the whole world, where clearing fixes
-$\mathrm{cap}\propto\Sigma^{-1}(\mu-r\mathbf 1)$.
+That endorsement is for the whole-market universe and does not transfer to the
+restricted universes where weighting decisions are made. This is Roll's critique
+\parencite{roll1977}: the only testable content of the CAPM is the efficiency of
+the \emph{true} market portfolio, and no proxy on a restricted universe inherits it
+\parencite{prono2009}. The block calculation below states the point in the present
+notation. We do not claim it as new.
 
 \begin{lemma}[Lucian weighting is inconsistent under restriction]
 \label{lem:restriction}
@@ -237,16 +226,10 @@ with $U\setminus S$, irrelevant to the $S$-frontier yet baked into the full-mark
 weight.
 \end{proof}
 
-The CAPM's support for the Lucian habit is therefore the single-point coincidence
-of \Cref{lem:restriction}: it endorses cap weighting on the whole-market universe
-alone, and is silent or contrary on the restricted universes where weighting
-decisions are actually made. This is the
-choice-theoretic form of Roll's critique \parencite{roll1977}: the only testable
-content of the CAPM is the efficiency of the \emph{true} market portfolio, and no
-proxy on a restricted universe inherits it \parencite{prono2009}. Fundamental
-indexing reaches cap weighting's sub-optimality by a different route, price
-inefficiency \parencite{hsu2006}, while shrinkage \parencite{ledoitwolf2004} and
-tracking-error analysis \parencite{roll1992} document the fragility of the inputs.
+Fundamental indexing reaches cap weighting's sub-optimality by a different route,
+price inefficiency \parencite{hsu2006}, while shrinkage \parencite{ledoitwolf2004}
+and tracking-error analysis \parencite{roll1992} document the fragility of the
+inputs.
 
 \subsection{Thurstone's eclipse and the fast inverse}
 \label{sec:fat}
