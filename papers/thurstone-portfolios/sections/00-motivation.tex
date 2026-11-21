@@ -27,9 +27,10 @@ near-duplicates by inverting $\Sigma$, and the direction in which two assets bec
 identical is exactly the direction in which $\Sigma$ loses rank; so the population
 answer is right while its sample estimate, dividing through a vanishing eigenvalue,
 swings between the twins and flips sign with the data \parencite{markowitz1952}.
-The inversion-free clustering allocators (hierarchical risk parity
-\parencite{lopezdeprado2016}, the Schur-complementary family
-\parencite{cotton2024schur}) de-duplicate by grouping instead, but discretely: the
+
+The clustering allocators, hierarchical risk parity \parencite{lopezdeprado2016}
+and the Schur-complementary family \parencite{cotton2024schur} that bridges the
+two, de-duplicate by grouping instead, but discretely: the
 split jumps as cluster membership flips. The race de-duplicates \emph{smoothly},
 with a closed characterization (\Cref{lem:redundancy}) and without ever forming
 $\Sigma^{-1}$.
