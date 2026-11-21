@@ -169,6 +169,13 @@ It would be reasonable to test a range of choice models against the market's
 behaviour, not only Luce's. In a Thurstonian race the response to a removal depends
 on how the removed asset co-moves with the rest (\Cref{lem:redundancy}).
 
+The Thurstonian family is the older and the more general of the
+two.\footnote{Luce's model is equivalent to a race with Gumbel performances
+\parencite{yellott1977}.} It lost the applied field to the logit on tractability:
+beyond two alternatives its Gaussian member, the probit, has no closed form, and
+recovering abilities from choice shares was considered prohibitive. The inversion
+of \Cref{sec:method} removes that obstacle.
+
 \subsection{Why the CAPM does not rescue naive indexing}
 \label{sec:capm}
 
@@ -231,19 +238,3 @@ Fundamental indexing reaches cap weighting's sub-optimality by a different route
 price inefficiency \parencite{hsu2006}, while shrinkage \parencite{ledoitwolf2004}
 and tracking-error analysis \parencite{roll1992} document the fragility of the
 inputs.
-
-\subsection{Thurstone's eclipse and the fast inverse}
-\label{sec:fat}
-
-The Thurstonian family of choice models is older and strictly more general than
-the Lucian (logit) one,\footnote{Luce's model is equivalent to a race with Gumbel
-performances \parencite{yellott1977}.} and it does not assume independence of irrelevant
-alternatives. It lost the applied field on a single axis, tractability. With more
-than two alternatives the choice probabilities of its Gaussian member, the probit,
-are orthant integrals with no closed form, and the \emph{inverse} problem, recovering latent abilities from
-observed choice shares, was considered prohibitive. Logit has closed-form
-probabilities and a trivial inverse, and so came to dominate discrete choice,
-ranking, and learning-to-rank, carrying its IIA assumption with it.
-
-The deterministic inverse of \textcite{cotton2026inversion} lifts the obstruction, for independent races and
-for the factor and hierarchical races of \Cref{sec:method}.
