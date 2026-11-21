@@ -46,18 +46,39 @@ risk-parity weights, can carry entirely different probabilities of a simultaneou
 crash. The quantity that separates them, tail dependence, is not a moment, and no
 re-estimation or shrinkage of $\Sigma$ recovers it.
 
-\subsection{The tail a covariance cannot see}
+\subsection{Empirical motivation}
 \label{sec:tailmotiv}
 
-How often do the Dow's constituents fall \emph{together}, and by how much? A multivariate Gaussian fit to their daily returns, pinning the means and the
-full covariance, reproduces a shallow joint decline well enough, but its joint tail
-thins far too fast. All of them closing down on the same day is only mildly
-underpredicted; deepen the event and the gap widens without bound.
+That equity returns are more dependent in falling markets than a Gaussian model
+allows is well documented. \textcite{longinsolnik2001} reject normality for the
+joint lower tail of international equity returns but not for the upper tail, and
+\textcite{angchen2002} find that correlations between U.S. equity portfolios and
+the market are higher in downturns than a normal distribution implies.
+\textcite{embrechts2002} set out why correlation is an incomplete summary of
+dependence. \textcite{poon2004} distinguish asymptotic dependence from asymptotic
+independence in the joint tails of stock indices and show that traditional
+dependence measures can misstate portfolio risk, and \textcite{patton2004} finds
+economically significant gains from modelling asymmetric dependence in an
+asset-allocation problem. A standard summary is the lower-tail dependence
+coefficient
+\begin{equation}
+  \lambda_L \;=\; \lim_{u\downarrow 0}\Prob\!\big(U_i < u \,\big|\, U_j < u\big)
+  \label{eq:lambdaL}
+\end{equation}
+with $U_i = F_i(R_i)$ the probability-integral transform of asset $i$'s return,
+which is zero for every Gaussian copula with correlation below one
+\parencite{sibuya1960}.
 
-Over 2010--2024, days on which every name fell by more than two percent occurred about
-eighty times more often than the fitted Gaussian allows, and beyond three percent
-the Gaussian effectively never produces such a day, yet two did. The same fit
-underpredicts joint \emph{crashes} far more than joint \emph{rallies}
+We add to this existing motivation a simple observation about the Dow 30. A
+multivariate Gaussian fit to the daily returns of its constituents, pinning the
+means and the full covariance, reproduces a shallow joint decline well enough, but
+its joint tail thins far too fast. All of them closing down on the same day is only
+mildly underpredicted; deepen the event and the gap widens without bound.
+
+Over 2010--2024, days on which every name fell by more than two percent occurred
+about eighty times more often than the fitted Gaussian allows, and beyond three
+percent the Gaussian effectively never produces such a day, yet two did. The same
+fit underpredicts joint \emph{crashes} far more than joint \emph{rallies}
 (\Cref{tab:tail}).\footnote{Daily log returns of
 the 28 Dow names with full 2010--2024 history (Yahoo Finance; some $3{,}770$ trading days; average pairwise
 correlation $0.42$), against a Gaussian fit to their mean and covariance, the
@@ -92,14 +113,7 @@ only that the moment-matched Gaussian fails. Keeping each name's empirical margi
 and making only the copula Gaussian (normal-scores correlation, $10^8$ draws) does
 worse still: all down by more than $2\%$ has probability $5\times10^{-6}$, against
 $1.4\times10^{-5}$ for the full Gaussian fit and $0.11\%$ observed. The shortfall
-lies in the dependence, not the marginals. One summary of such dependence is the
-lower-tail coefficient
-\begin{equation}
-  \lambda_L \;=\; \lim_{u\downarrow 0}\Prob\!\big(U_i < u \,\big|\, U_j < u\big)
-  \label{eq:lambdaL}
-\end{equation}
-with $U_i = F_i(R_i)$ the probability-integral transform of asset $i$'s return,
-which is zero for the Gaussian copula whatever its correlation.
+lies in the dependence, not the marginals.
 
 A race among assets reads the joint extreme directly. The winner of a race is an
 \emph{order statistic} of the joint draw, and the law of an order statistic is set
@@ -131,8 +145,7 @@ The race of \Cref{sec:method} is the law of comparative judgment of
 \textcite{thurstone1927}, the canonical model of probabilistic choice. Each
 alternative carries a latent ability and a noisy performance, and the one with the
 extreme performance is chosen. On this reading the market selects among assets, and
-a portfolio weight is the probability that an asset is chosen. That probability
-depends on the whole field and on the dependence among the performances.
+a portfolio weight is the probability that an asset is chosen.
 
 The tilt is informationally modest. It needs only the dependence, no return
 forecast, and it \emph{anchors} to the benchmark, departing from the prevailing
@@ -142,23 +155,18 @@ allocation only as far as the correlation warrants.
 \label{sec:luce}
 
 The choice literature has a rival account, Luce's \parencite{luce1959}, whose
-multinomial form is the logit. The two part on whether the relative standing of two
-options may depend on the rest of the field.
-
-Write $w_i(\mathcal U)$ for the weight a rule assigns to asset $i$ within a
+multinomial form is the logit. Write $w_i(\mathcal U)$ for the weight a rule assigns to asset $i$ within a
 universe $\mathcal U$. Capitalization weighting sets $w_i(\mathcal U) =
 \mathrm{cap}_i / \sum_{j\in\mathcal U}\mathrm{cap}_j$, so the ratio
 $w_i(\mathcal U)/w_j(\mathcal U) = \mathrm{cap}_i/\mathrm{cap}_j$ does not depend on
-$\mathcal U$. That is Luce's choice axiom \parencite{luce1959}, independence of
-irrelevant alternatives, and we call such a rule \emph{Lucian}.
+$\mathcal U$. That is Luce's choice axiom, independence of irrelevant
+alternatives, and we call such a rule \emph{Lucian}.
 
 Imagine you are a psychometrician trying to understand the market's choices, and
-how they change when assets are removed. Luce's axiom is one hypothesis about that:
-renormalise what remains and leave every ratio unchanged. It would be reasonable to
-test a range of choice models against the market's behaviour, not only Luce's. In a
-Thurstonian race the response to a removal depends on how the removed asset
-co-moves with the rest, because two assets that move together compete with
-\emph{each other} (\Cref{lem:redundancy}).
+how they change when assets are removed. Luce's axiom is one hypothesis about that.
+It would be reasonable to test a range of choice models against the market's
+behaviour, not only Luce's. In a Thurstonian race the response to a removal depends
+on how the removed asset co-moves with the rest (\Cref{lem:redundancy}).
 
 \subsection{Why the CAPM does not rescue naive indexing}
 \label{sec:capm}
