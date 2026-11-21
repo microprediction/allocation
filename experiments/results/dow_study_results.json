@@ -1,0 +1,44 @@
+{
+ "Equal weight": {
+  "turnover": 0.004002603160757828,
+  "target_turnover": 0.0,
+  "sharpe": 0.9428654192154324,
+  "net_sharpe": 0.9306121488122671
+ },
+ "Inverse variance": {
+  "turnover": 0.006332074768583278,
+  "target_turnover": 0.005280532737562429,
+  "sharpe": 0.9546591666932729,
+  "net_sharpe": 0.9330372848377602
+ },
+ "Risk parity": {
+  "turnover": 0.0052869862357669195,
+  "target_turnover": 0.0036888934004324584,
+  "sharpe": 0.9677711833097926,
+  "net_sharpe": 0.9503448871881307
+ },
+ "Minimum variance": {
+  "turnover": 0.045674652831736245,
+  "target_turnover": 0.04463508773862103,
+  "sharpe": 0.8822612654123402,
+  "net_sharpe": 0.7046668721748551
+ },
+ "HRP": {
+  "turnover": 0.03470413476067904,
+  "target_turnover": 0.0340598360491299,
+  "sharpe": 0.9692415805792874,
+  "net_sharpe": 0.8488162293324022
+ },
+ "Schur(0.5)": {
+  "turnover": 0.07077924880673529,
+  "target_turnover": 0.07054113415951829,
+  "sharpe": 0.9519132995798074,
+  "net_sharpe": 0.7014018823801664
+ },
+ "Thurstone": {
+  "turnover": 0.008060728225444446,
+  "target_turnover": 0.006938764133653914,
+  "sharpe": 0.9148767552820011,
+  "net_sharpe": 0.8901601272874078
+ }
+}

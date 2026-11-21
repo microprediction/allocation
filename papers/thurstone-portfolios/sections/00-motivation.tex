@@ -130,16 +130,21 @@ the 28 Dow names with full 2010--2024 history (Yahoo Finance; some $3{,}770$ tra
 correlation $0.42$), against a Gaussian fit to their mean and covariance, the
 probabilities by $10^{8}$ Monte-Carlo draws. The deepest rows rest on two to four
 days, so the precise multiples are noisy; the monotone, asymmetric divergence is
-not.} The Gaussian gets the average right and the joint extreme wrong, because
-the lower-tail dependence
+not.} The table changes the marginals and the copula together, so by itself it
+shows only that the moment-matched Gaussian fails. Keeping each name's empirical
+marginal and making only the copula Gaussian (normal-scores correlation, $10^8$
+draws) does worse still: all down by more than $2\%$ has probability
+$5\times10^{-6}$, against $1.4\times10^{-5}$ for the full Gaussian fit and $0.11\%$
+observed. The shortfall lies in the dependence, not the marginals. One summary of
+such dependence is the lower-tail coefficient
 \begin{equation}
   \lambda_L \;=\; \lim_{u\downarrow 0}\Prob\!\big(U_i < u \,\big|\, U_j < u\big)
   \label{eq:lambdaL}
 \end{equation}
 with $U_i = F_i(R_i)$ the probability-integral transform of asset $i$'s return,
-is zero for the Gaussian copula and substantial in markets. No shrinkage or
-re-estimation of $\Sigma$ moves $\lambda_L$ off zero; it is invisible to second
-moments.
+which is zero for the Gaussian copula whatever its correlation. We do not claim
+the table identifies $\lambda_L$; it shows dependence in the joint tail that no
+Gaussian copula, and so no second moment, reproduces.
 
 \begin{table}[h]
   \centering
@@ -166,8 +171,8 @@ moments.
 A choice among assets reads the joint extreme directly. The winner of a race is an
 \emph{order statistic} of the joint draw, and the law of an order statistic is set
 by the tail copula, not by the covariance. Drive the Thurstonian race with a
-simulation that carries lower-tail dependence and the weights respond to
-$\lambda_L$: assets that crash together are recognised as the near-duplicates they
+simulation that carries lower-tail dependence and the weights respond to it:
+assets that crash together are recognised as the near-duplicates they
 become in the tail, and their shares collapse to one, which no covariance-based
 allocator can arrange (\Cref{lem:tail}).
 
@@ -247,8 +252,8 @@ equations in the one unknown $c$, which fail for generic $\Sigma_{SX} \neq 0$.
 The non-generic exceptions are a block-diagonal $\Sigma$ with $\Sigma_{SX} = 0$,
 and an excluded set whose market portfolio regresses identically on every retained
 asset, $\Sigma_{SX} m_X \propto \Sigma_{SS} m_S$. The wedge
-$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$, the regression of the retained assets on the
-excluded ones, is the part of each cap weight that reflects covariance
+$\Sigma_{SS}^{-1}\Sigma_{SX}\, m_X$, the coefficients from regressing the return of
+the excluded portfolio $m_X$ on the retained assets' returns, is the part of each cap weight that reflects covariance
 with $U\setminus S$, irrelevant to the $S$-frontier yet baked into the full-market
 weight.
 \end{proof}

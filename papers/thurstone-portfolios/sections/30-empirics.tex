@@ -4,8 +4,11 @@
 Two of the properties show in a plain walk-forward: low turnover (\Cref{thm:smooth}) and well-posedness when names outnumber
 observations. For turnover we trade each estimator forward over the $28$ Dow
 constituents with full 2010--2024 daily history (Yahoo Finance) from a $252$-day
-warm-up, updating online each day; turnover is the mean one-way fraction of the
-book traded per day, the net Sharpe charging $10$ basis points on it.
+warm-up, updating online each day. Covariances are estimated from log returns and
+the portfolio earns simple returns. Turnover is the mean one-way fraction of the
+book traded per day, counting the trades that restore the targets after prices
+move, and the net Sharpe charges $10$ basis points on every unit bought or sold,
+that is $20$ basis points per unit of reported turnover.
 
 Every method sees the same covariance, an exponentially weighted estimate with a
 $60$-day half-life updated daily. The Thurstone tilt anchors to the equal-weight
@@ -22,31 +25,31 @@ risk parity is \textcite{lopezdeprado2016}, Schur is the $\gamma = 0.5$ member o
 \begin{table}[h]
   \centering
   \caption{Walk-forward over $28$ Dow constituents, 2010--2024. Turnover is the
-  mean one-way fraction of the book traded per day; net Sharpe charges $10$ basis
-  points on it.}
+  mean one-way fraction of the book traded per day, drift included; net Sharpe
+  charges $10$ basis points on each side of every trade.}
   \label{tab:dow}
   \begin{tabular}{lccc}
     \toprule
     Method & Turnover & Sharpe & Net Sharpe \\
     \midrule
-    Equal weight              & $0.000$ & $0.74$ & $0.74$ \\
-    Inverse variance          & $0.005$ & $0.78$ & $0.76$ \\
-    Risk parity               & $0.004$ & $0.78$ & $0.76$ \\
-    Minimum variance          & $0.045$ & $0.77$ & $0.60$ \\
-    Hierarchical risk parity  & $0.034$ & $0.79$ & $0.67$ \\
-    Schur ($\gamma=0.5$)      & $0.071$ & $0.78$ & $0.53$ \\
-    Thurstone tilt            & $0.008$ & $0.71$ & $0.69$ \\
+    Equal weight              & $0.004$ & $0.94$ & $0.93$ \\
+    Inverse variance          & $0.006$ & $0.95$ & $0.93$ \\
+    Risk parity               & $0.005$ & $0.97$ & $0.95$ \\
+    Minimum variance          & $0.046$ & $0.88$ & $0.70$ \\
+    Hierarchical risk parity  & $0.035$ & $0.97$ & $0.85$ \\
+    Schur ($\gamma=0.5$)      & $0.071$ & $0.95$ & $0.70$ \\
+    Thurstone tilt            & $0.008$ & $0.91$ & $0.89$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The tilt turns over four to nine times less than the seriation-smoothed Schur and
-HRP and than minimum variance, in line with \Cref{thm:smooth}: its weights move
-with the correlation, not with the re-clustering or re-seriation those methods
-incur each step. Inverse variance and risk parity turn over less still. The tilt's
-gross Sharpe, $0.71$, is the lowest in the table, and its net Sharpe, $0.69$, is
-below that of inverse variance and risk parity ($0.76$) and above that of minimum
-variance, HRP and Schur.
+The tilt turns over four to nine times less than HRP, minimum variance and the
+seriation-smoothed Schur. Of its $0.008$, the motion of the targets themselves,
+which \Cref{thm:smooth} bounds, is $0.007$; the rest restores the targets after
+prices move. Equal weight, inverse variance and risk parity turn over less still.
+The tilt's gross Sharpe, $0.91$, is the lowest in the table, and its net Sharpe,
+$0.89$, is below that of equal weight, inverse variance and risk parity and above
+that of minimum variance, HRP and Schur.
 
 \paragraph{Scale.}
 The second practical property is feasibility. Beyond a few hundred names ($n > T$)
@@ -110,20 +113,26 @@ base pool is six comparable statistical forecasters (automatic ETS, complex
 exponential smoothing, two Theta variants, random walk with drift, and a window
 average), fitted to $500$ Yearly, $500$ Quarterly and $400$ Monthly series. Each
 series' per-horizon errors are scaled by its mean absolute level and pooled across
-the fitting series to form the $K \times K$ error covariance. The tilt is
-\Cref{alg:tilt} with the inverse-error-variance portfolio as benchmark, the
-independent reference, $\phi = 1$ and $M = 2^{14}$ paths. Bates--Granger uses the
-pseudoinverse of that covariance, and stacking is non-negative least squares on
+the fitting series. Bates--Granger uses the pseudoinverse of the sample covariance
+of these pooled errors. The tilt is \Cref{alg:tilt} with the inverse-error-variance
+portfolio as benchmark, the independent reference, $\phi = 1$ and $M = 2^{14}$
+paths, and it estimates the error covariance with the package's default
+exponentially weighted estimator (half-life $60$ rows) run over the stacked errors,
+so its estimate depends on the order in which the sampled series are stacked. The
+two methods therefore differ in their covariance estimator as well as in the
+combination rule. Stacking is non-negative least squares on
 the scaled forecasts, projected to the simplex. Weights are estimated on $5$,
-$10$, $20$, $50$ or $200$ fitting series, drawn $25$ times at random, and scored
+$10$, $20$, $50$ or $200$ fitting series, drawn $25$ times at random (once for
+Monthly at $200$, where that is the whole fitting pool), and scored
 by sMAPE on $200$ held-out series (\Cref{fig:combine}). The number of fitting
 series is varied because the puzzle is a small-sample effect. The results show a
 bias--variance crossover. The variance-optimal Bates--Granger
 combination ($w \propto \Sigma_e^{-1}\mathbf 1$) is wild when series are few and
 settles only once the error covariance is well estimated; the equal-weight
 average is dominated; non-negative least-squares stacking \parencite{breiman1996}
-is a strong, stable baseline. Across the swept sample sizes the ability tilt is the
-\emph{lowest-variance} combiner, and competitive on level when forecasters are of
+is a strong, stable baseline. Across the swept sample sizes the ability tilt has the lowest variability of
+held-out sMAPE across fitting draws among the fitted combiners (the equal-weight
+average, which uses no fitting data, has none), and competitive on level when forecasters are of
 comparable quality and the fitting data is scarce (M4 Yearly at five to ten series,
 Quarterly at five). Where one method dominates the pool, concentration wins and
 stacking takes over, as the redundancy property
@@ -136,7 +145,7 @@ combination family, not a uniformly better combiner.
   \caption{Forecast combination on M4. Held-out sMAPE against the number of series
   used to estimate the combination weights, over a comparable-quality base pool;
   mean $\pm$ one standard deviation across random fitting draws. The ability tilt
-  (Thurstone, green) has the tightest variance throughout and is best in the
+  (Thurstone, green) varies least across fitting draws among the fitted combiners and is best in the
   small-sample corner; non-negative least-squares stacking (blue) is the strong
   general baseline; the variance-optimal Bates--Granger combination (red) overfits
   badly when series are few; the equal-weight average (grey) is dominated.}
@@ -227,9 +236,9 @@ Open questions include the choice of reference correlation $C_{\mathrm{calib}}$
 (diagonal versus market) and of $\phi$; the treatment of estimation error in the
 abilities, a Thurstonian analogue of covariance shrinkage; and using
 $C_{\mathrm{tilt}}$ to express an explicit correlation view rather than the sample
-estimate. The concentration of the allocation is governed by the temperature of
-\Cref{lem:temperature}, which trades the weight that leaks to weak names against
-the turnover bound of \Cref{thm:smooth}.
+estimate. The temperature of \Cref{lem:temperature} sharpens selection by strength
+and so limits the weight that leaks to weak names, at the cost of greater
+sensitivity to the strengths, not to the correlation.
 
 The tail-consistency result (\Cref{lem:tail}, \Cref{rem:anysim}) suggests driving
 the race with an online \emph{downside} covariance (lower-partial-moment) estimator,

@@ -47,9 +47,19 @@ equal, $X_{k'} = X_{k''}$ a.s., so the field minimum, and hence every other
 asset's winning event, is unchanged, while the pair ties exactly when $k$ would
 have won. The even split halves that shared probability. This is a boundary case:
 mutual correlation $1$ makes the correlation matrix singular, so the statement is
-read in the positive-semidefinite limit (equivalently, by continuity as the
-mutual correlation $\uparrow 1$, with exact tie-splitting at the limit).
+read at the positive-semidefinite boundary, with exact tie-splitting there.
 \end{proof}
+\noindent The boundary allocation is not a path-independent limit of interior
+ones. Along any interior path to the duplicate, the pair's \emph{combined} weight
+converges to $w_k^{\setminus}$, but the split between the two need not converge to
+even halves. With $Y,Z,E_1,E_2$ independent standard normals,
+$X_0=Y$ and $X_{1,2}=(Z\pm dY+d^2E_{1,2})/\sqrt{1+d^2+d^4}$, every correlation
+matrix is positive definite for $d>0$ and $(X_0,X_1,X_2)\to(Y,Z,Z)$ as $d\downarrow0$,
+yet the minimum-wins weights tend to $(\tfrac12,\tfrac18,\tfrac38)$ rather than
+$(\tfrac12,\tfrac14,\tfrac14)$. A path that treats the pair symmetrically, such as
+the equicorrelated one of \Cref{tab:redundancy}, does give the even split. Exposure
+to a nearly duplicated position is therefore stable, while the allocation between
+its two listings can move a great deal.
 
 At the independent extreme a duplicate is a
 \emph{fresh} draw, so the pair's combined weight strictly exceeds
@@ -134,14 +144,15 @@ co-movement rather than to average correlation. We call this \emph{tail consiste
 \label{lem:tail}
 Let $G$ be a subgroup of equal-ability assets, write
 $M_G = \min_{i\in G} X_i$ and $Y = \min_{j\notin G} X_j$ with $Y$ independent of
-$G$, so the subgroup's combined weight is $w_G = \Prob(M_G < Y)$. Then:
+$G$ and $\Prob(M_G = Y) = 0$, so the subgroup's combined weight is
+$w_G = \Prob(M_G < Y)$. Then:
 \begin{enumerate}
 \item[\textup{(i)}] If a change in the subgroup's joint law raises $M_G$ in
   first-order stochastic order while fixing $Y$, then $w_G$ does not increase.
 \item[\textup{(ii)}] In the comonotone limit $X_i = Z_G$ for all $i\in G$,
   $M_G = Z_G$, so $w_G$ equals the winning probability of a single competitor with
   performance $Z_G$, independent of $|G|$, and exchangeability splits it equally,
-  each member receiving $|G|^{-1}$.
+  each member receiving $w_G/|G|$.
 \end{enumerate}
 \end{lemma}
 \begin{proof}
@@ -243,8 +254,8 @@ $\partial G_C/\partial\theta_i = \Prob(i = \argmaxop_k(\theta_k + \eta_k)) = w_i
 i.e.\ $w = \nabla G_C$ (the Williams--Daly--Zachary identity
 \parencite{williams1977, mcfadden1981}). Equation~\eqref{eq:regularized} is the
 Fenchel--Young duality for the convex $G_C$ \parencite{blondel2020}; softmax and
-sparsemax are the special cases where $\Omega$ is Shannon entropy or the squared
-Euclidean norm \parencite{martins2016}.
+sparsemax are the special cases where $\Omega$ is negative Shannon entropy,
+$\sum_i p_i\log p_i$, or half the squared Euclidean norm \parencite{martins2016}.
 \end{proof}
 
 So the portfolio maximizes an ability-weighted exposure $\langle\theta,p\rangle$
@@ -256,7 +267,7 @@ random-utility ``social-surplus'' / perturbed-optimizer construction
 law indexes a whole \emph{family of dependence-aware entropies}: $\Omega_S(p)$ is
 the cost of concentrating choice probability on $p$ under dependence $S$, the
 information cost of a rationally inattentive chooser whose logit foundation is the
-Gumbel case \parencite{matejka2015, fosgerau2020}. Gumbel noise yields $\Omega = $ Shannon entropy and $w = $ softmax, a
+Gumbel case \parencite{matejka2015, fosgerau2020}. Gumbel noise yields $\Omega = $ negative Shannon entropy and $w = $ softmax, a
 \emph{correlation-blind} (Lucian) allocator, the Gumbel-softmax of the
 machine-learning literature \parencite{jang2017, maddison2017}; Gaussian noise with covariance $C$
 makes $\Omega_C$ \emph{correlation-aware}, which produces the
@@ -269,21 +280,26 @@ smooth ($G_C$ is a smoothing of the max in the sense of
 regularizer $\Omega_C$ has no closed form, unlike the entropy/softmax special
 case, but it exists and is convex, which is all we use.)
 
-\subsection{Temperature and concentration}
+\subsection{Temperature and selection by strength}
 \label{sec:temperature}
 
-The program \eqref{eq:regularized} carries a free concentration parameter. Scaling
+The program \eqref{eq:regularized} carries a free temperature. Scaling
 the strengths by an inverse temperature $\beta > 0$,
 \begin{equation}
   w^{\beta} = \nabla G_C(\beta\theta)
   = \argmaxop_{p\in\Delta}\Big\{\langle\theta, p\rangle - \tfrac{1}{\beta}\,\Omega_C(p)\Big\},
   \label{eq:temperature}
 \end{equation}
-reweights the diversification penalty: $\beta = 1$ is the calibrated tilt, larger
-$\beta$ down-weights $\Omega_C$ and concentrates, smaller $\beta$ enforces it and
-diversifies.
+reweights the diversification penalty against the linear reward: $\beta = 1$ is
+the calibrated tilt, and larger $\beta$ sharpens selection by strength. That is not
+the same as monotone concentration in the usual portfolio sense. With
+$C$ having $\rho_{12}=0.99$ and asset~3 independent, and $\theta=(0.1,0.1,0)$, the
+weights are $(0.272, 0.272, 0.456)$ at $\beta=1$, exactly equal at
+$\beta\approx5.52$, and $(0.386, 0.386, 0.227)$ at $\beta=10$, tending to
+$(\tfrac12,\tfrac12,0)$: raising $\beta$ from $1$ first makes the allocation more
+even before it concentrates on the stronger pair.
 
-\begin{lemma}[Concentration with redundancy preserved]
+\begin{lemma}[Selection by strength, redundancy preserved]
 \label{lem:temperature}
 For every $\beta > 0$ the map $w^{\beta} = \nabla G_C(\beta\theta)$ is a simplex
 allocation, and
@@ -308,14 +324,17 @@ since $\theta_{j^\star} - \theta_i > 0$. For~(iii), $G_C$ is $C^1$, so
 $\nabla G_C(\beta\theta) \to \nabla G_C(0)$ as $\beta\to 0$.
 \end{proof}
 
-Temperature is the knob for the construction's one residual cost. When a cluster
+Temperature addresses the construction's one residual cost. When a cluster
 de-duplicates, the freed weight is shared with the rest of the field, including weak
 competitors; by \Cref{lem:temperature}(ii) that leak to sub-maximal names falls to
 zero as $\beta$ grows, while the even split among the duplicates is left intact
-by~(i). The price is smoothness: as $\beta\to\infty$ the map approaches a hard
-$\argmaxop$ and the Lipschitz bound of \Cref{thm:smooth} degrades, so $\beta$ trades
-concentration against turnover. The calibrated $\beta = 1$ sits at the smooth,
-benchmark-reproducing end.
+by~(i). Two sensitivities should be kept apart. Sensitivity to the
+\emph{correlation} does not worsen with $\beta$: the bound of \Cref{thm:smooth}
+is uniform in the strengths, hence in $\beta$, and with a unique strongest
+competitor a large $\beta$ makes the weights nearly insensitive to dependence.
+Sensitivity to the \emph{strengths} does grow with $\beta$, sharply so near tied
+strengths, as the map approaches a hard $\argmaxop$. The calibrated $\beta = 1$
+reproduces the benchmark.
 
 \subsection{Any simulation, and the implied penalty}
 \label{rem:anysim}
@@ -337,25 +356,32 @@ has a unique solution. (ii) A \emph{singular or tie-prone} $S$ (atoms, determini
 ties, duplicated coordinates) leaves $G_S$ convex but possibly non-differentiable;
 the tie-split weights are then a selected subgradient $w\in\partial G_S(\theta)$, and
 uniqueness or smoothness may fail. This is the regime of the exact duplicate in
-\Cref{lem:redundancy}. (iii) A \emph{finite Monte-Carlo} $S$ gives a
+\Cref{lem:redundancy}, and there the tie-splitting convention matters: a group tied
+with an outsider is not covered by \Cref{lem:tail}, which assumes no such ties. (iii) A \emph{finite Monte-Carlo} $S$ gives a
 piecewise-linear empirical $G_{S,M}$ whose weights are step functions of the
-parameters. The redundancy and tail results hold throughout, being statements about
-$\partial G_S$; differentiability and the unique optimizer belong to regime~(i).
+parameters. \Cref{lem:redundancy} holds in all three regimes, and \Cref{lem:tail}
+wherever the group never ties the rest of the field; differentiability and the
+unique optimizer belong to regime~(i).
 
 In this sense the portfolio is optimal for an arbitrary simulation, though
-$\Omega_S$ is not in general a \emph{named} risk measure: only the Gumbel
-(Shannon entropy, softmax) and Gaussian (correlation-aware $\Omega_C$) cases are
-closed-form, and in general $\Omega_S$ is implicit. Tail consistency
+$\Omega_S$ is not in general a \emph{named} risk measure: only the Gumbel case
+(negative Shannon entropy, softmax) is closed-form, and in general $\Omega_S$,
+the Gaussian $\Omega_C$ included, is implicit. Tail consistency
 (\Cref{lem:tail}) says that $\Omega_S$ charges for tail
 co-movement when $S$ carries it.
 
 As the social-surplus conjugate, $\Omega_S$ is a \emph{generalized entropy}: it
 rewards spreading across \emph{independent} options but counts only the
 dependence-effective number of bets, so it will not reward spreading across
-comonotone names (\Cref{lem:redundancy,lem:tail}). Locally it is quadratic, its
-Hessian the \emph{inverse} of the winning-probability Jacobian on the simplex
-tangent space (\Cref{sec:markowitz}), hence a Mahalanobis penalty in the choice
-geometry. It is not a coherent risk measure (neither variance nor
+comonotone names (\Cref{lem:redundancy,lem:tail}). For the Gaussian race, or any
+law whose winning-probability Jacobian is nondegenerate on the simplex tangent
+space, it is locally quadratic, its Hessian the \emph{inverse} of that Jacobian
+(\Cref{sec:markowitz}), hence a Mahalanobis penalty in the choice geometry. This
+does not extend to every continuous full-rank law. Independent noises
+$\eta_1\sim\tfrac12\,\mathrm{U}[-3,-2]+\tfrac12\,\mathrm{U}[2,3]$ and
+$\eta_2\sim\mathrm{U}[-0.1,0.1]$ give $w=(\tfrac12,\tfrac12)$ whenever
+$|\theta_1-\theta_2|<1.9$, so the Jacobian vanishes on an open set and has no
+inverse. It is not a coherent risk measure (neither variance nor
 CVaR), but the canonical Fenchel--Young regularizer of the perturbed argmax
 \parencite{berthet2020}.
 
@@ -546,13 +572,14 @@ with $\varphi_C$ the $\mathcal{N}(0,C)$ density.
 \begin{theorem}[Smoothness]
 \label{thm:smooth}
 On the open cone of positive-definite correlation matrices, $w_i(C)$ is
-$C^\infty$ in $C$ (and in $a$). Moreover, on any compact subset whose smallest
-eigenvalue is bounded below by $\lambda > 0$, the map is Lipschitz:
+$C^\infty$ in $C$ (and in $a$). Moreover, if $C_0$ and $C_1$ both have smallest
+eigenvalue at least $\lambda > 0$, then
 \begin{equation}
-  \|w(C_1) - w(C_0)\|_1 \;\le\; L_\lambda \,\|C_1 - C_0\|_F,
-  \qquad L_\lambda < \infty,\ \ L_\lambda \to \infty \text{ as } \lambda \downarrow 0.
+  \|w(C_1) - w(C_0)\|_1 \;\le\; \frac{1}{\sqrt2\,\lambda}\,\|C_1 - C_0\|_F,
   \label{eq:lip}
 \end{equation}
+uniformly in the abilities $a$. The order $1/\lambda$ cannot be improved in
+general.
 \end{theorem}
 
 \begin{proof}
@@ -561,25 +588,32 @@ positive-definite cone $\det C$ and $C^{-1}$ are real-analytic, so
 $(C, y) \mapsto \varphi_C(y)$ is $C^\infty$ in $C$; its $C$-derivatives are
 polynomials in $y$ times $\varphi_C(y)$, which are integrable and locally
 dominated uniformly on compact sets. Differentiation under the integral sign
-then gives $w_i \in C^\infty$. For the gradient, Price's theorem
-\parencite{price1958}, the Gaussian identity
-$\partial \varphi_C/\partial C_{jk} = \partial^2 \varphi_C/\partial y_j\,\partial y_k$
-for $j \neq k$, followed by the divergence theorem over the cone $A_i$ rewrites
-$\partial w_i/\partial C_{jk}$ as an integral of the first derivative
-$\nabla_y\varphi_C = -C^{-1}y\,\varphi_C$ over the boundary faces of $A_i$ (the
-pairwise-tie hyperplanes). A second integration by parts along the faces reduces
-it to $\varphi_C$ itself on the codimension-two ridges where two faces meet, plus
-face normal-derivative terms when $i \in \{j, k\}$. Each is finite, so the gradient
-is bounded on the compact set; that set is convex, so the mean-value theorem gives
-\eqref{eq:lip}. The conditioning of $C$ controls the tie-boundary density, so the
-bound deteriorates as $\lambda\downarrow0$. (The exact power of $1/\lambda$ is not established; the square-root recolouring
-below suggests the milder $1/\sqrt\lambda$.)
+then gives $w_i \in C^\infty$.
+
+For the bound, take a symmetric direction $H$ and write $Y = C^{1/2}Z$ with
+$Z\sim\mathcal N(0,I)$ and $A = C^{-1/2}HC^{-1/2}$. The derivative of the
+Gaussian log-density in direction $H$ is the score
+$s_H = \tfrac12\big(Z^\top A Z - \operatorname{tr}A\big)$, so
+$Dw_i(C)[H] = \E\big[\mathbf 1[Y\in A_i]\,s_H\big]$. The cones $A_i$ partition
+the sample space up to null ties, hence
+\[
+  \sum_i \big|Dw_i(C)[H]\big| \;\le\; \E|s_H| \;\le\; \sqrt{\E\, s_H^2}
+  \;=\; \frac{\|A\|_F}{\sqrt2} \;\le\; \frac{\|H\|_F}{\sqrt2\,\lambda_{\min}(C)} .
+\]
+The smallest eigenvalue is concave in $C$, so it stays at least $\lambda$ along
+the segment from $C_0$ to $C_1$, and integrating along it gives \eqref{eq:lip}.
+None of this depends on $a$. For the order, take three equal-ability assets. Then
+$w_1 = \tfrac14 + \tfrac1{2\pi}\arcsin\!\big((1-\rho_{12}-\rho_{13}+\rho_{23})
+/(2\sqrt{(1-\rho_{12})(1-\rho_{13})})\big)$, and at an equicorrelation $\rho$,
+$\partial w_1/\partial\rho_{23} = 1/\big(2\pi\sqrt3\,(1-\rho)\big)$, while
+$\lambda_{\min}(C) = 1-\rho$.
 \end{proof}
 
-The Lipschitz constant degrades as $C$ approaches singularity
-($\lambda \to 0$), because near-degenerate correlation makes
-ties, and hence weights, sensitive. This motivates keeping $C$ well-conditioned
-and regenerating the path ensemble when its effective sample size collapses.
+The Lipschitz constant grows like $1/\lambda$ as $C$ approaches singularity,
+because near-degenerate correlation concentrates the density on the tie
+boundaries and makes the weights sensitive. This motivates keeping $C$
+well-conditioned and regenerating the path ensemble when its effective sample
+size collapses.
 
 \paragraph{Finite paths.}
 \Cref{thm:smooth} is a statement about the population map $w(C)$. The realized
@@ -612,10 +646,10 @@ a valid degenerate race whose winning frequencies still lie on the simplex.
 Moreover we only ever \emph{multiply} by $C^{1/2}$, never solve with it, and
 $\operatorname{cond}(C^{1/2}) = \sqrt{\operatorname{cond}(C)}$, so ill-conditioning
 does not propagate. What degrades near degeneracy is thus not the allocation but
-the turnover bound: $C^{1/2}$ is continuous through coincident eigenvalues yet only
-H\"older-$\tfrac12$ there ($\partial_\lambda\sqrt\lambda \sim \lambda^{-1/2}$), the
-$\lambda\downarrow0$ degradation of \eqref{eq:lip} (and the reason we do not pin its
-power tightly). The factor route of
+the turnover bound, whose constant grows like $1/\lambda$. (The symmetric root
+$C^{1/2}$ is smooth on the whole positive-definite cone, repeated eigenvalues
+included; it loses regularity only as an eigenvalue reaches zero, where it is
+H\"older-$\tfrac12$.) The factor route of
 \Cref{sec:computation} removes even this: with
 $C = BB^\top + D$, $D = \operatorname{diag}(\psi)$, the idiosyncratic floor bounds
 $\lambda_{\min}\ge\min_i\psi_i$, regularizing both the root and the Lipschitz
@@ -644,9 +678,12 @@ differences, leaving only the (smaller) crossing term, which shrinks with the pa
 budget $M$; this is the mechanism behind the incremental (online) update. The
 realized turnover is therefore not zero at finite $M$. Its sampling component is
 far below fresh resampling and vanishes with the path budget, leaving the
-population turnover $\|w(C+\Delta C) - w(C)\|_1$. (Quasi-Monte-Carlo sharpens the
-\emph{level} of each $\widehat{w}(C)$, but not this difference, whose noise is set
-by the moved decision boundary rather than by integration error.)
+population turnover $\|w(C+\Delta C) - w(C)\|_1$. (Quasi-Monte-Carlo can sharpen this difference as well as the level of each
+$\widehat{w}(C)$: a moved-boundary difference is itself an integral. For a two-asset
+race shared midpoint points give a difference error of at most $1/M$, against a
+standard deviation of order $\sqrt{\delta/M}$ for shared iid draws, with $\delta$ the
+population change. For many assets and complicated moving boundaries the gain is
+not guaranteed.)
 
 \Cref{tab:turnover} shows both along a $60$-step
 convex path between two random correlation matrices.
