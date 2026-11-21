@@ -44,11 +44,15 @@ expresses a view. The view is on how assets move together, with $\phi$ its
 confidence. ``These names crash together more than the benchmark assumes'' is a
 view of this kind (\Cref{sec:markowitz}).
 
-\Cref{sec:comparison} compares the race with covariance-based allocators. The race
-is Thurstone's model of choice, and capitalization weighting is Luce's: it fixes
-the ratio of any two weights whatever else is in the field. \Cref{sec:choicemodel}
-sets the two against each other and shows that the Capital Asset Pricing Model
-(CAPM) supports capitalization weighting on the whole-market universe only.
+\Cref{sec:comparison} compares the race with covariance-based allocators. The
+race differs from them in two respects: it never inverts the covariance, and it
+can respond to tail dependence.
+
+\Cref{sec:choicemodel} reads the race as a model of choice. The race is
+Thurstone's model, and capitalization weighting is Luce's: it fixes the ratio of
+any two weights whatever else is in the field. The section sets the two against
+each other and shows that the Capital Asset Pricing Model (CAPM) supports
+capitalization weighting on the whole-market universe only.
 
 On the Dow constituents the polished portfolio turns over four to nine times less
 than hierarchical risk parity, minimum variance and Schur allocation
