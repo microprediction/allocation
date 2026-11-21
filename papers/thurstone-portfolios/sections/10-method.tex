@@ -1,8 +1,9 @@
-\section{The Thurstonian model of a field}
+\section{The race and the ability tilt}
+\label{sec:method}
 \label{sec:model}
 
-This section defines the race that every later construction runs, and the
-forward and inverse maps between abilities and winning probabilities.
+This section defines the race, the map between abilities and weights, and the
+two-step construction built on it.
 
 Consider a universe of $n$ assets. Each asset has a latent ability $a_i\in\R$ and
 a noisy \emph{performance}
@@ -11,51 +12,26 @@ a noisy \emph{performance}
   \sim S,
   \label{eq:performance}
 \end{equation}
-where $S$ is any centered joint law, the \emph{simulation} that drives the
-race, and we adopt the convention that the \emph{minimum} performance wins, so
-that a smaller ability denotes a stronger competitor. The Gaussian
-$S = \mathcal{N}(0, \Sigma_\varepsilon)$ is the workhorse, and the only case in
-which the calibration and smoothness results below are closed-form. The
-construction and the implementation treat $S$ as a black-box sampler, so a
-copula with genuine tail dependence, a fat-tailed or skewed law, or a structured
-generator are equally admissible (\Cref{lem:tail} and \Cref{rem:anysim}). The \emph{state price} (winning
-probability) of asset $i$ is
+where $S$ is any centered joint law, the \emph{simulation} that drives the race,
+and may be correlated across assets. We adopt the convention that the
+\emph{minimum} performance wins, so that a smaller ability denotes a stronger
+competitor. Each asset is a \emph{competitor} in the race, and its portfolio weight
+is synonymous with its \emph{winning probability},
 \begin{equation}
   p_i \;=\; \Prob\!\left( X_i = \min_{k} X_k \right).
   \label{eq:stateprice}
 \end{equation}
-When the performances are independent ($\Sigma_\varepsilon$ diagonal) the
-$p_i$ are determined by the abilities alone through the distribution of the first
-order statistic, and $p$ is a smooth, monotone function of $a$
-\parencite{cotton2021}. Two maps are then of interest:
-\begin{align}
-  \text{forward:}\quad & a \;\longmapsto\; p, \label{eq:forward}\\
-  \text{inverse:}\quad & p \;\longmapsto\; a. \label{eq:inverse}
-\end{align}
-The inverse \eqref{eq:inverse}, the \emph{Fast Ability Transform}, recovers
-abilities (up to an additive constant) from a target set of winning
-probabilities.
 
-\section{Thurstone portfolios via the ability tilt}
-\label{sec:method}
-
-We treat portfolio \emph{weights} as winning probabilities and \emph{assets} as
-competitors. The construction uses two simulations, a \emph{reference} law and a
-\emph{target} law. We first \emph{calibrate} latent abilities so that the race
-under the reference law reproduces a target allocation $w^{\mathrm{target}}$ (a
-benchmark such as capitalization weights); we then re-run the race under the
-target law and read off the winning probabilities as the tilted weights. In the
-Gaussian workhorse the two laws are two correlation matrices, a reference
-$C_{\mathrm{calib}}$ and the estimated return correlation $C_{\mathrm{tilt}}$, and
-the tilt is the portfolio's response to $C_{\mathrm{tilt}} - C_{\mathrm{calib}}$
-(\Cref{rem:fixedpoint}); but any pair of centered samplers may be used, with the
-target law in particular carrying dependence (tail dependence included) that the
-reference does not.
+The Gaussian $S = \mathcal{N}(0, \Sigma_\varepsilon)$ is the workhorse, and the
+only case in which the calibration and smoothness results below are closed-form.
+The construction and the implementation treat $S$ as a black-box sampler, so a
+copula with genuine tail dependence, a fat-tailed or skewed law, or a structured
+generator are equally admissible (\Cref{lem:tail} and \Cref{rem:anysim}).
 
 \paragraph{The population map.}
-Write $\theta = -a$ and
-$\eta = -\varepsilon$, so a larger $\theta_i$ denotes a stronger competitor and
-$\max_i(\theta_i + \eta_i) = -\min_i(a_i + \varepsilon_i)$, and let
+Write $\theta = -a$ and $\eta = -\varepsilon$, so a larger $\theta_i$ denotes a
+stronger competitor and $\max_i(\theta_i + \eta_i) = -\min_i(a_i + \varepsilon_i)$,
+and let
 \begin{equation}
   G_S(\theta) = \E\Big[\max_i(\theta_i + \eta_i)\Big], \quad
   \eta = -\varepsilon,\ \ \varepsilon\sim S, \qquad
@@ -66,21 +42,74 @@ so $W_S(\theta)$ is the vector of winning probabilities \eqref{eq:stateprice} (t
 gradient identity is \Cref{thm:objective}). The reflection $\eta = -\varepsilon$ is
 immaterial for a symmetric $S$. For a skewed or tail-asymmetric law it is what
 keeps the maximum in \eqref{eq:popmap} reading the same tail as the minimum in
-\eqref{eq:stateprice}. Calibration to a benchmark
-$w^{\mathrm{target}}\in\operatorname{int}\Delta$ under a reference law $S_0$ inverts
-this map, $\theta^0 = W_{S_0}^{-1}(w^{\mathrm{target}})$ up to an additive constant
-(\Cref{lem:calib}), and the ability tilt is the composition
+\eqref{eq:stateprice}.
+
+The forward map $W_S$ takes abilities to weights. Its inverse recovers abilities
+from weights, up to an additive constant. Both are computed deterministically, at
+cost linear in $n$, by the method of \textcite{cotton2026inversion}.\footnote{An earlier version of this
+technique used the original lattice method of \textcite{cotton2021}. The 2026
+methodology, which uses a shared field, is preferred.} It covers independent
+performances and performances correlated through a factor, block, nested or tree
+covariance.
+
+\paragraph{The ability tilt.}
+The construction uses two laws, a \emph{reference} $S_0$ and a \emph{target} $S_1$.
+Calibration to a benchmark $w^{\mathrm{target}}\in\operatorname{int}\Delta$ under
+the reference inverts the population map,
+$\theta^0 = W_{S_0}^{-1}(w^{\mathrm{target}})$ up to an additive constant
+(\Cref{lem:calib}). The \emph{ability tilt} re-runs the race under the target at
+the same abilities,
 \begin{equation}
   T_{S_0\to S_1}(w^{\mathrm{target}}) \;=\; W_{S_1}\!\big(W_{S_0}^{-1}(w^{\mathrm{target}})\big).
   \label{eq:tiltmap}
 \end{equation}
+
+In the Gaussian workhorse the two laws are two correlation matrices, a reference
+$C_{\mathrm{calib}}$ and the estimated return correlation $C_{\mathrm{tilt}}$, and
+the tilt is the portfolio's response to $C_{\mathrm{tilt}} - C_{\mathrm{calib}}$
+(\Cref{rem:fixedpoint}). The target law may carry dependence, tail dependence
+included, that the reference does not.
+
 Almost everything below is a property of \eqref{eq:tiltmap}: index reproduction is
 $T_{S_0\to S_0} = \mathrm{id}$ (\Cref{rem:fixedpoint}); the implied objective is
 the Fenchel dual of $G_{S_1}$ (\Cref{thm:objective}); redundancy and tail
 consistency are properties of $W_{S_1}$ at the fixed $\theta^0$
 (\Cref{lem:redundancy,lem:tail}); and the tilt's smoothness is that of $W_{S_1}$
 (\Cref{thm:smooth}). The Gaussian instance, in which $S_0, S_1$ are two correlation
-matrices, is \Cref{alg:tilt} below.
+matrices, is \Cref{alg:tilt} below. \Cref{fig:square} lays the composition out as a
+square.
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}[
+      font=\small,
+      box/.style={draw, rounded corners=2pt, align=center, inner sep=6pt},
+      >={Stealth[length=2.2mm]}]
+    \node[box] (bw) at (0,0)
+      {benchmark weights\\ $w^{\mathrm{target}}\in\operatorname{int}\Delta$};
+    \node[box] (pw) at (8.0,0)
+      {polished weights\\ $w = T_{S_0\to S_1}(w^{\mathrm{target}})$};
+    \node[box] (a0) at (0,-3.3)
+      {abilities $\theta^0$\\ racing under reference $S_0$};
+    \node[box] (a1) at (8.0,-3.3)
+      {abilities $\theta^0$\\ racing under target $S_1$};
+    \draw[->, dashed] (bw) -- node[above, align=center]
+      {polish\\ $T_{S_0\to S_1}$} (pw);
+    \draw[->] (bw) -- node[left, align=center]
+      {calibrate\\ $W_{S_0}^{-1}$} (a0);
+    \draw[->] (a0) -- node[below, align=center]
+      {hold abilities,\\ replace dependence} (a1);
+    \draw[->] (a1) -- node[right, align=center]
+      {race\\ $W_{S_1}$} (pw);
+  \end{tikzpicture}
+  \caption{The ability tilt \eqref{eq:tiltmap}. The benchmark is calibrated to
+  abilities under the reference law $S_0$, by the deterministic inverse. The
+  abilities are held while the dependence is replaced by the target law $S_1$, and
+  the race under $S_1$ returns the polished weights. The dashed arrow is the
+  composite. When $S_1 = S_0$ the lower arrow changes nothing and the square
+  returns the benchmark (\Cref{rem:fixedpoint}).}
+  \label{fig:square}
+\end{figure}
 
 \begin{lemma}[Calibration]
 \label{lem:calib}
@@ -125,28 +154,29 @@ zero-weight assets are dropped or floored before calibration.
 \end{algorithmic}
 \end{algorithm}
 
-Two choices of the reference correlation give the practical flavours:
-\begin{itemize}
-  \item \textbf{Diagonal} ($C_{\mathrm{calib}} = I$). Calibration is the
-        deterministic order-statistic inverse of \Cref{sec:model} (the Fast Ability
-        Transform), and the tilt then injects the estimated correlation. The
-        target may be any benchmark: the variance-only diagonal portfolio,
-        capitalization weights, or equal weight.
-  \item \textbf{One-factor market}
-        ($C_{\mathrm{calib}} = \beta\beta^\top + \mathrm{diag}(1-\beta_i^2)$). The
-        reference is a single market factor with loadings $\beta_i$, each the
-        correlation of asset $i$ with the benchmark-weighted portfolio, so
-        $|\beta_i| < 1$ and the idiosyncratic variances are positive; calibration
-        reproduces the benchmark \emph{given} that market correlation, so the
-        tilt's deviation is driven by the residual (non-market) correlation in
-        $C_{\mathrm{tilt}}$.
-\end{itemize}
+The reference correlation $C_{\mathrm{calib}}$ may come from any family that \textcite{cotton2026inversion}
+inverts deterministically. The simplest is the independent reference,
+$C_{\mathrm{calib}} = I$. A factor reference has one or a few factors common to all
+assets. The market reference is its one-factor case,
+$C_{\mathrm{calib}} = \beta\beta^\top + \mathrm{diag}(1-\beta_i^2)$, with $\beta_i$
+the correlation of asset $i$ with the benchmark-weighted portfolio. A grouped
+reference has a factor within each cluster of assets, such as a sector, and a
+nested reference adds a common factor across the clusters. A hierarchical
+reference is a tree of shared effects, such as market, sector and industry.
 
-\noindent In the Gaussian workhorse a scalar $\phi \in [0,1]$ sets
-$C_{\mathrm{tilt}} = (1-\phi)\,C_{\mathrm{calib}} + \phi\,\widehat{C}$, dialling
-the estimated correlation $\widehat{C}$ in continuously: $\phi = 0$ reproduces the
-benchmark (\Cref{rem:fixedpoint}) and $\phi = 1$ uses the full estimate. The
-construction never inverts a covariance. It needs only a valid correlation for
+Under the independent reference the tilt injects the whole of the estimated
+correlation. Under a structured reference the benchmark is reproduced \emph{given}
+that structure, and the tilt responds only to the residual correlation in
+$C_{\mathrm{tilt}}$. The experiment of \Cref{sec:experiments} uses the one-factor
+market reference, and the forecast-combination study of \Cref{sec:combination} the
+independent one.
+
+In the Gaussian workhorse a scalar $\phi \in [0,1]$ sets
+$C_{\mathrm{tilt}} = (1-\phi)\,C_{\mathrm{calib}} + \phi\,\widehat{C}$. Then
+$\phi = 0$ reproduces the benchmark (\Cref{rem:fixedpoint}) and $\phi = 1$ uses the
+full estimate $\widehat{C}$.
+
+The construction never inverts a covariance. It needs only a valid correlation for
 sampling, repaired if necessary to the nearest correlation matrix, so the
 \emph{target} race tolerates ill-conditioned or singular estimates (a singular
 $C_{\mathrm{tilt}}$ merely makes some assets effective duplicates, with tie
@@ -159,19 +189,18 @@ monotonicity, and objective properties are established in \Cref{sec:properties}.
 \section{Computation}
 \label{sec:computation}
 
-This section describes how the two steps of \Cref{alg:tilt} are computed: a
-deterministic calibration, a Monte-Carlo tilt, and the online and low-rank
-variants that let it scale.
+The primary numerical challenge, the inverse from weights to abilities, was
+overcome by \textcite{cotton2021} and \textcite{cotton2026inversion}. The rest is a simulation of the race
+under the target law, updated online as the correlation estimate moves.
 
 \paragraph{Calibration (deterministic).}
 The calibration step, the inverse map from target weights to abilities, is
-computed deterministically with the lattice machinery of the \texttt{winning}
-package, which builds the distribution of the first order statistic by convolving
-competitor densities and tracking conditional multiplicity for ties
-\parencite{cotton2021}. For a diagonal reference this is the order-statistic
-inverse \eqref{eq:inverse}, with no Monte-Carlo error and cost linear in $n$. For
-the one-factor reference the assets are conditionally independent given the
-market factor, so the same lattice race is evaluated at Gauss--Hermite nodes and
+computed deterministically by the method of \textcite{cotton2026inversion}. A single survival field on a
+lattice is shared across all assets, so one pass returns every winning
+probability, with no Monte-Carlo error and cost linear in $n$.
+
+For the one-factor reference the assets are conditionally independent given the
+market factor, so the same race is evaluated at Gauss--Hermite nodes and
 integrated over the factor. The inverse is then a preconditioned fixed-point
 iteration on this forward map, warm-started from the independent inverse and run
 until the race reproduces the benchmark to $10^{-8}$; the loadings are clipped to
@@ -180,8 +209,12 @@ calibration, and the floored name's ability is then a one-sided bound. This is
 the only place quadrature enters.
 
 \paragraph{Tilt (Monte-Carlo).}
-The race under a general target law has no tractable analytic form, so it is
-evaluated by sampling. The \texttt{allocation} package factors the race into a
+The target law is an arbitrary sampler, so the race under it is evaluated by
+simulation. A Gaussian target whose covariance has the factor, block, nested or
+tree form of \textcite{cotton2026inversion} also admits a deterministic forward race, which we do not use
+here.
+
+The \texttt{allocation} package factors the race into a
 \emph{draw} (the sampler) and a \emph{scoring} step, the argmin win-frequency
 core, so the sampler is a plug-in: the Gaussian default recolours a fixed
 standard-normal ensemble by $C_{\mathrm{tilt}}^{1/2}$ (a quasi-Monte-Carlo ensemble may be substituted to sharpen the win frequencies, and often their step-to-step differences, \Cref{sec:smoothness}); a Student-$t$ and a low-rank
@@ -195,12 +228,15 @@ At rebalancing the correlation estimate moves slowly, and \Cref{sec:smoothness}
 shows the weights move smoothly with it. We exploit this by holding the
 standard-normal seeds fixed and \emph{transporting} the path ensemble to the new
 correlation (recolouring by the updated square root), so turnover tracks genuine
-correlation change rather than sampling noise. For large universes the dense
-correlation is never formed. A low-rank factor model $C = BB^\top + D$,
+correlation change rather than sampling noise.
+
+For large universes the dense correlation is never formed. A low-rank factor model $C = BB^\top + D$,
 $D = \mathrm{diag}(\psi)$, draws $X^{(m)} = a + B Z_f^{(m)} + D^{1/2} Z_\epsilon^{(m)}$
 from fixed $k$-dimensional factor seeds and $n$-dimensional idiosyncratic seeds,
 so the transport and the argmin are streaming and cost $O(Mnk)$, scaling to
-thousands of assets. A factor basis is identified only up to rotation, and a
+thousands of assets.
+
+A factor basis is identified only up to rotation, and a
 rotation between steps would re-colour the factor seeds and register as turnover.
 The loadings are therefore taken from a randomized range finder with a fixed
 projection, which holds the basis steady except at eigenvalue crossings and sign
@@ -208,4 +244,3 @@ flips; aligning each step's loadings to the last by a Procrustes rotation is the
 general cure. The covariance estimate itself is supplied by any external online
 estimator, so the method interoperates with standard covariance-forecasting
 tooling.
-

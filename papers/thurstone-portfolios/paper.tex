@@ -6,6 +6,8 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
 \usepackage{cleveref}
 \usepackage[raggedright]{titlesec}
 
@@ -34,22 +36,23 @@
 \maketitle
 
 \begin{abstract}
-We use a recently developed contest inversion algorithm as a device for
-portfolio construction and augmentation. Each asset is
-a runner in a Thurstone race, drawing a noisy performance, and its weight is the
-probability that it finishes first. A fast deterministic inverse recovers
-abilities from benchmark weights, and a factor-form simulation re-runs the race
-under new dependence. Neither
-inverts a covariance or solves an optimization, and the cost is linear in the
-number of assets, so thousands of names fit in seconds. Near-duplicates split a
-position rather than double it. We prove benchmark reproduction, an implied
-convex objective and a turnover bound. On the Dow constituents it trades four to nine
-times less than minimum variance, hierarchical risk parity and Schur allocation.
+We use a recently developed contest inversion algorithm as a device for portfolio
+construction and augmentation, and in particular we demonstrate how an investor can
+inject views about tail dependence into an existing portfolio by this means. Each
+asset is a runner in a Thurstone race whose noisy performances may be correlated
+through factor or hierarchical structure, and its weight is the probability that it
+finishes first. A fast deterministic inverse recovers abilities from benchmark
+weights, and a simulation re-runs the race under new dependence. Neither inverts a
+covariance or solves an optimization. Given a factor model the cost is linear in the
+number of assets, and thousands of names fit in seconds. Near-duplicates split a
+position rather than double it. We prove benchmark reproduction, an implied convex
+objective and a turnover bound.
 \end{abstract}
 
 % --- body split into sections/ for editing; see git log ---
 \input{sections/00-motivation}
 \input{sections/10-method}
+\input{sections/15-context}
 \input{sections/20-theory}
 \input{sections/30-empirics}
 

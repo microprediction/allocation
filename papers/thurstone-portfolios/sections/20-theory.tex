@@ -47,33 +47,33 @@ equal, $X_{k'} = X_{k''}$ a.s., so the field minimum, and hence every other
 asset's winning event, is unchanged, while the pair ties exactly when $k$ would
 have won. The even split halves that shared probability. This is a boundary case:
 mutual correlation $1$ makes the correlation matrix singular, so the statement is
-read at the positive-semidefinite boundary, with exact tie-splitting there.
+read in the positive-semidefinite limit. Along any approach with mutual
+correlation $\uparrow 1$ the pair's combined weight converges to
+$w_k^{\setminus}$, and the even split is the limit when the two copies are
+exchangeable along the approach.
 \end{proof}
-\noindent The boundary allocation is not a path-independent limit of interior
-ones. Along any interior path to the duplicate, the pair's \emph{combined} weight
-converges to $w_k^{\setminus}$, but the split between the two need not converge to
-even halves. With $Y,Z,E_1,E_2$ independent standard normals,
-$X_0=Y$ and $X_{1,2}=(Z\pm dY+d^2E_{1,2})/\sqrt{1+d^2+d^4}$, every correlation
-matrix is positive definite for $d>0$ and $(X_0,X_1,X_2)\to(Y,Z,Z)$ as $d\downarrow0$,
-yet the minimum-wins weights tend to $(\tfrac12,\tfrac18,\tfrac38)$ rather than
-$(\tfrac12,\tfrac14,\tfrac14)$. A path that treats the pair symmetrically, such as
-the equicorrelated one of \Cref{tab:redundancy}, does give the even split. Exposure
-to a nearly duplicated position is therefore stable, while the allocation between
-its two listings can move a great deal.
 
-At the independent extreme a duplicate is a
-\emph{fresh} draw, so the pair's combined weight strictly exceeds
-$w_k^{\setminus}$ and draws share from every other asset. As the duplicate's
-correlation rises from $0$ to $1$, \Cref{thm:smooth} guarantees the pair's share
-moves \emph{continuously} from that independent value to the redundancy-coherent $w_k^{\setminus}$. \Cref{tab:redundancy} shows this for
-three equal-ability assets.
+At the independent extreme a duplicate is a \emph{fresh} draw, so the pair's
+combined weight strictly exceeds $w_k^{\setminus}$ and draws share from every
+other asset. This is the independence-of-irrelevant-alternatives (``red bus / blue
+bus'') paradox.
+
+The CAPM equilibrium is not the culprit: at the whole-universe portfolio the cap
+weights \emph{are} the efficient weights $\Sigma^{-1}(\mu - r\mathbf{1})$, which
+already price a duplicate correctly through the inverse covariance. The paradox
+appears only when capitalization weighting is applied as a \emph{Lucian} rule,
+normalised over a restricted universe as in practice, where it no longer re-solves
+for the redundancy it carries (\Cref{sec:capm}). As the duplicate's correlation
+rises from $0$ to $1$, \Cref{thm:smooth} guarantees the pair's share moves
+\emph{continuously} from that Lucian value to the redundancy-coherent
+$w_k^{\setminus}$. \Cref{tab:redundancy} shows this for three equal-ability assets.
 
 \begin{table}[h]
   \centering
   \caption{Redundancy consistency and diversification monotonicity. Three
   equal-ability assets; assets $1,2$ are duplicates with mutual correlation
   $\rho_{12}$, asset $0$ independent of them ($M = 4\times10^5$). The duplicated
-  pair's share falls monotonically from the independent $2/3$ to the
+  pair's share falls monotonically from the Lucian $2/3$ to the
   redundancy-coherent $1/2$.}
   \label{tab:redundancy}
   \begin{tabular}{ccc}
@@ -93,31 +93,35 @@ The monotone descent in \Cref{tab:redundancy} holds more generally.
 
 \begin{proposition}[Diversification monotonicity]
 \label{prop:monotone}
-Let $T$ be a subgroup of equal-ability assets, independent of the rest of the
-field, with common pairwise correlation $\rho$ within $T$. Then the subgroup's
-combined weight $\sum_{i\in T} w_i$ is non-increasing in $\rho$, falling from its
-independent value at $\rho = 0$ to a single asset's weight at $\rho = 1$.
+In a Gaussian race, raise any of the covariances between members of a group $T$,
+holding fixed the variances, the abilities and every other covariance. Then the
+weight of every asset outside $T$ weakly increases, and the group's combined weight
+$\sum_{i\in T} w_i$ weakly decreases. The members of $T$ need not have equal
+abilities, and the assets outside may be correlated with the group.
 \end{proposition}
 \begin{proof}
-Write the within-group performances in common-factor form
-$X_i = a + \sqrt{\rho}\,Z + \sqrt{1-\rho}\,\varepsilon_i$ ($i \in T$), with
-$Z, \varepsilon_i$ independent standard normals. By Slepian's inequality
-\parencite{slepian1962}, raising the off-diagonal correlations of a Gaussian
-vector while fixing its marginals raises $\Prob(\min_{i\in T} X_i > t)$ for every
-$t$, so $\min_{i\in T} X_i$ is stochastically increasing in $\rho$. Since $T$ is
-independent of the remaining field, the subgroup wins exactly when its minimum
-falls below the ($\rho$-independent) minimum of the complement; that probability
-is therefore non-increasing in $\rho$. At $\rho = 0$ the group has $|T|$
-independent chances to win; at $\rho = 1$ it collapses to one
-(\Cref{lem:redundancy} is the case $|T| = 2$, $\rho = 1$).
+Fix $j \notin T$. Asset $j$ wins when $D_i = X_i - X_j > 0$ for every $i \neq j$.
+The vector $D$ is Gaussian with
+$\operatorname{Cov}(D_i, D_k) = \operatorname{Cov}(X_i, X_k)
+- \operatorname{Cov}(X_i, X_j) - \operatorname{Cov}(X_k, X_j)
++ \operatorname{Var}(X_j)$. Raising $\operatorname{Cov}(X_i, X_k)$ for
+$i, k \in T$ raises the corresponding entries and leaves the means, the variances
+and the other entries unchanged.
+
+By Slepian's inequality \parencite{slepian1962} the orthant probability
+$\Prob(D_i > 0\ \forall i)$ is non-decreasing in the off-diagonal covariances at
+fixed means and variances. So $w_j$ weakly increases for each $j \notin T$, and the
+group's combined weight, one minus their sum, weakly decreases. For an
+equal-ability group independent of the field with common correlation $\rho$, the
+combined weight falls from its independent value at $\rho = 0$ to a single asset's
+weight at $\rho = 1$ (\Cref{lem:redundancy} is the case $|T| = 2$, $\rho = 1$).
 \end{proof}
 
 \noindent This is the diversification content of the tilt: correlated clusters
 are progressively de-weighted as their internal correlation rises, with no
-explicit risk term. The result covers an equal-ability subgroup, independent of
-the complement, with a single equicorrelation parameter raised. It does not cover
-arbitrary clusters, correlation changes that also touch the group's dependence with
-the complement, or non-Gaussian laws.
+explicit risk term. The result allows unequal abilities and outsiders correlated
+with the group. It does not cover correlation changes that also touch the group's
+dependence with the complement, or non-Gaussian laws.
 
 \subsection{Tail consistency}
 \label{sec:tail}
@@ -164,20 +168,29 @@ the winning event of a single competitor; this does not depend on $|G|$, and
 exchangeability within $G$ splits it equally.
 \end{proof}
 
-\Cref{lem:tail} is the tail analogue of \Cref{prop:monotone}. The race responds to not the pairwise tail-dependence coefficient $\lambda_L$,
-which does not order copulas, but the whole \emph{distribution of the group minimum}
-$M_G$, whose lower tail is fixed by the joint lower-tail copula. As that lower-tail
-co-movement deepens, with $M_G$ rising stochastically while the marginals and even the
-full correlation are held fixed, the subgroup's combined weight falls from the
-head-count value toward the single-competitor value, so its \emph{tail-effective}
-cardinality runs from $|G|$ to $1$. For one independent asset racing a symmetric
-cluster that limit is $\tfrac12$ regardless of $|G|$. The
-\emph{effective number of bets is state-dependent}: in calm states $|G|$ names may be
-$|G|$ partial bets, while in a crash they are one. A covariance averages across
-states and cannot represent that collapse; an order-statistic race can, because the
-winning event is itself a tail event. Whether a given parametric family (Clayton,
-say, at fixed margins) deepens $M_G$ monotonically is a family-specific question;
-\Cref{fig:tail} shows that it does for the family used there.
+\Cref{lem:tail} is the tail analogue of \Cref{prop:monotone}. The race responds to
+not the pairwise tail-dependence coefficient $\lambda_L$, which does not order
+copulas, but the whole \emph{distribution of the group minimum} $M_G$, whose lower
+tail is fixed by the joint lower-tail copula.
+
+As that lower-tail co-movement deepens, with $M_G$ rising stochastically while the
+marginals and even the full correlation are held fixed, the subgroup's combined
+weight falls from the head-count value toward the single-competitor value, so its
+\emph{tail-effective} cardinality runs from $|G|$ to $1$. For one independent asset
+racing a symmetric cluster that limit is $\tfrac12$ regardless of $|G|$.
+
+The \emph{effective number of bets is state-dependent}: in calm states $|G|$ names
+may be $|G|$ partial bets, while in a crash they are one. A covariance averages
+across states and cannot represent that collapse; an order-statistic race can,
+because the winning event is itself a tail event. Whether a given parametric
+family deepens $M_G$ monotonically is a family-specific question. For the Clayton
+family of \Cref{fig:tail} it does: the family increases in the supermodular order
+with its parameter \parencite{weihu2002, mullerscarsini2005}, so the group minimum
+rises in stochastic order.
+
+The response is to the law of $M_G$ and not to tail asymmetry as such. For an
+exchangeable pair racing an independent outsider, exchanging lower-tail for
+upper-tail dependence leaves the weights unchanged.
 
 \begin{figure}[h]
   \centering
@@ -203,9 +216,11 @@ downside semicovariance captures the asymmetry but is still a second moment,
 dominated by moderate losses; the exact object is the law of
 $M_G = \min_{i\in G} X_i$, set by the lower-tail copula, which the argmin reads
 directly from a tail-dependent simulation and which no covariance summary
-represents. A Gaussian race driven by the downside semicovariance moves because
-that matrix differs from the full correlation when the law is asymmetric, not
-because the Gaussian sampler carries any tail asymmetry of its own. In the race of
+represents.
+
+A Gaussian race driven by the downside semicovariance moves because that matrix
+differs from the full correlation when the law is asymmetric, not because the
+Gaussian sampler carries any tail asymmetry of its own. In the race of
 \Cref{fig:tail} the second-moment shadow is a close approximation (orange versus
 green), so a downside-covariance estimator suffices in practice, with the
 simulation path as the exact limit.
