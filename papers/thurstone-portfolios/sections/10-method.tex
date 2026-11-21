@@ -5,7 +5,8 @@
 This section defines the race, the map between abilities and weights, and the
 two-step construction built on it.
 
-Consider a universe of $n$ assets. Each asset has a latent ability $a_i\in\R$ and
+Consider a universe of $n$ assets.
+Each asset has a latent ability $a_i\in\R$ and
 a noisy \emph{performance}
 \begin{equation}
   X_i = a_i + \varepsilon_i, \qquad \varepsilon = (\varepsilon_1,\dots,\varepsilon_n)
@@ -13,9 +14,12 @@ a noisy \emph{performance}
   \label{eq:performance}
 \end{equation}
 where $S$ is any centered joint law, the \emph{simulation} that drives the race,
-and may be correlated across assets. We adopt the convention that the
+and may be correlated across assets.
+
+We adopt the convention that the
 \emph{minimum} performance wins, so that a smaller ability denotes a stronger
-competitor. Each asset is a \emph{competitor} in the race, and its portfolio weight
+competitor.
+Each asset is a \emph{competitor} in the race, and its portfolio weight
 is synonymous with its \emph{winning probability},
 \begin{equation}
   p_i \;=\; \Prob\!\left( X_i = \min_{k} X_k \right).
@@ -39,8 +43,11 @@ and let
   \label{eq:popmap}
 \end{equation}
 so $W_S(\theta)$ is the vector of winning probabilities \eqref{eq:stateprice} (the
-gradient identity is \Cref{thm:objective}). The reflection $\eta = -\varepsilon$ is
-immaterial for a symmetric $S$. For a skewed or tail-asymmetric law it is what
+gradient identity is \Cref{thm:objective}).
+
+The reflection $\eta = -\varepsilon$ is
+immaterial for a symmetric $S$.
+For a skewed or tail-asymmetric law it is what
 keeps the maximum in \eqref{eq:popmap} reading the same tail as the minimum in
 \eqref{eq:stateprice}.
 
@@ -155,13 +162,19 @@ zero-weight assets are dropped or floored before calibration.
 \end{algorithm}
 
 The reference correlation $C_{\mathrm{calib}}$ may come from any family that can be
-inverted deterministically (ibid.). The simplest is the independent reference,
-$C_{\mathrm{calib}} = I$. A factor reference has one or a few factors common to all
-assets. The market reference is its one-factor case,
+inverted deterministically (ibid.).
+The simplest is the independent reference,
+$C_{\mathrm{calib}} = I$.
+A factor reference has one or a few factors common to all
+assets.
+The market reference is its one-factor case,
 $C_{\mathrm{calib}} = \beta\beta^\top + \mathrm{diag}(1-\beta_i^2)$, with $\beta_i$
-the correlation of asset $i$ with the benchmark-weighted portfolio. A grouped
+the correlation of asset $i$ with the benchmark-weighted portfolio.
+
+A grouped
 reference has a factor within each cluster of assets, such as a sector, and a
-nested reference adds a common factor across the clusters. A hierarchical
+nested reference adds a common factor across the clusters.
+A hierarchical
 reference is a tree of shared effects, such as market, sector and industry.
 
 Under the independent reference the tilt injects the whole of the estimated
@@ -200,11 +213,15 @@ probability, with no Monte-Carlo error and cost linear in $n$.
 
 For the one-factor reference the assets are conditionally independent given the
 market factor, so the same race is evaluated at Gauss--Hermite nodes and
-integrated over the factor. The inverse is then a preconditioned fixed-point
+integrated over the factor.
+The inverse is then a preconditioned fixed-point
 iteration on this forward map, warm-started from the independent inverse and run
 until the race reproduces the benchmark to $10^{-8}$; the loadings are clipped to
-$|\beta_i| \le 0.99$. A zero benchmark weight is floored at $10^{-12}$ before
-calibration, and the floored name's ability is then a one-sided bound. This is
+$|\beta_i| \le 0.99$.
+
+A zero benchmark weight is floored at $10^{-12}$ before
+calibration, and the floored name's ability is then a one-sided bound.
+This is
 the only place quadrature enters.
 
 \paragraph{Tilt (Monte-Carlo).}

@@ -10,12 +10,15 @@ the covariance, and it can respond to tail dependence.
 
 The operational fragility of mean--variance optimization is the inversion of an
 estimated covariance \parencite{markowitz1952}: as $\Sigma$ nears singularity,
-$\Sigma^{-1}$ and with it the weights explode. The discipline's responses are
+$\Sigma^{-1}$ and with it the weights explode.
+The discipline's responses are
 shrinkage toward a structured target \parencite{ledoitwolf2004} and, more
 radically, allocators that never form $\Sigma^{-1}$ at all (hierarchical risk
 parity \parencite{lopezdeprado2016}, the Schur-complementary family
 \parencite{cotton2024schur}, risk parity \parencite{maillard2010}), trading point
-optimality for stability and scale. The Thurstone race belongs to this inversion-free family: it
+optimality for stability and scale.
+
+The Thurstone race belongs to this inversion-free family: it
 \emph{samples} from a correlation rather than inverting one, so it stays well posed
 even when $\Sigma$ is singular or rank-deficient.
 
@@ -38,29 +41,37 @@ Redundancy is near-singularity, so robustness to ill-conditioning, low turnover
 exposure are one behaviour. The weights move smoothly along the direction in which
 assets become collinear and a covariance inverse would explode.
 
-Robustness to \emph{conditioning} is not robustness to \emph{tails}. Every method
+Robustness to \emph{conditioning} is not robustness to \emph{tails}.
+Every method
 just named is a functional of the covariance, or of a correlation derived from it.
 A covariance is a second moment; it summarises how assets move together on average
-and says nothing about how they move together in the extreme. Two universes with
+and says nothing about how they move together in the extreme.
+
+Two universes with
 identical covariance, hence identical minimum-variance, HRP, Schur, and
 risk-parity weights, can carry entirely different probabilities of a simultaneous
-crash. The quantity that separates them, tail dependence, is not a moment, and no
+crash.
+The quantity that separates them, tail dependence, is not a moment, and no
 re-estimation or shrinkage of $\Sigma$ recovers it.
 
 \subsection{Empirical motivation}
 \label{sec:tailmotiv}
 
 That equity returns are more dependent in falling markets than a Gaussian model
-allows is well documented. \textcite{longinsolnik2001} reject normality for the
+allows is well documented.
+\textcite{longinsolnik2001} reject normality for the
 joint lower tail of international equity returns but not for the upper tail, and
 \textcite{angchen2002} find that correlations between U.S. equity portfolios and
 the market are higher in downturns than a normal distribution implies.
 \textcite{embrechts2002} set out why correlation is an incomplete summary of
-dependence. \textcite{poon2004} distinguish asymptotic dependence from asymptotic
+dependence.
+
+\textcite{poon2004} distinguish asymptotic dependence from asymptotic
 independence in the joint tails of stock indices and show that traditional
 dependence measures can misstate portfolio risk, and \textcite{patton2004} finds
 economically significant gains from modelling asymmetric dependence in an
-asset-allocation problem. A standard summary is the lower-tail dependence
+asset-allocation problem.
+A standard summary is the lower-tail dependence
 coefficient
 \begin{equation}
   \lambda_L \;=\; \lim_{u\downarrow 0}\Prob\!\big(U_i < u \,\big|\, U_j < u\big)
@@ -179,11 +190,15 @@ of \Cref{sec:method} removes that obstacle.
 \subsection{Why the CAPM does not rescue naive indexing}
 \label{sec:capm}
 
-The passive industry defends capitalization weighting by appeal to the CAPM. We
-grant the CAPM in full. The standard argument \parencite{sharpe1964} is that every
+The passive industry defends capitalization weighting by appeal to the CAPM.
+We
+grant the CAPM in full.
+The standard argument \parencite{sharpe1964} is that every
 investor is a mean--variance optimizer who agrees on the expected returns $\mu$ and
 on the same covariance $\Sigma$, so each holds the risk-free asset together with the
-same tangency portfolio, proportional to $\Sigma^{-1}(\mu - r\mathbf{1})$. Market
+same tangency portfolio, proportional to $\Sigma^{-1}(\mu - r\mathbf{1})$.
+
+Market
 clearing forces that portfolio to equal the supply, the capitalization-weighted
 market, so $\mathrm{cap} \propto \Sigma^{-1}(\mu - r\mathbf{1})$ and the market
 portfolio is efficient.\footnote{One wrinkle we do not dwell on:
