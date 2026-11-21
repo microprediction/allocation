@@ -9,3 +9,6 @@
 *.run.xml
 *.synctex.gz
 *.toc
+
+# arXiv packaging scratch
+arxiv/build/
