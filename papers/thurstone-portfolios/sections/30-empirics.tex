@@ -70,8 +70,8 @@ formulas} for minimum-variance and maximum-diversification
 undefined; the long-only quadratic program
 $\min_{p\in\Delta} p^\top\Sigma p$ still has a solution (the simplex constraints can
 remove null directions), though it can be non-unique or unstable.
-Only the
-inversion-free methods stay well-behaved.
+Only
+methods that avoid the dense inverse stay well-behaved.
 
 The factor-form
 race never inverts and costs $O(Mnk)$, staying well-posed
@@ -166,11 +166,9 @@ The dependence tilt is best on level where forecasters are of comparable quality
 and the fitting data is scarce (M4 Yearly at five and ten series, Quarterly at
 five), and there it also varies less across fitting draws than stacking. On
 Monthly, and wherever fitting data is plentiful, stacking or Bates--Granger is
-better and at least as stable.
+better.
 
-Where one method dominates the pool, concentration wins and
-stacking takes over, as the redundancy property
-(\Cref{lem:redundancy}) predicts.
+Where one method dominates the pool, concentration wins and stacking takes over.
 The tilt is a stable small-sample member of the
 combination family, not a uniformly better combiner.
 
@@ -281,7 +279,7 @@ have illustrated. The tilt is long-only and feasible without optimization and ne
 inverts a covariance. It reproduces a chosen benchmark by construction, tilts only in
 response to correlation, and solves a correlation-aware regularized program
 (\Cref{thm:objective}) whose weights vary smoothly enough (\Cref{thm:smooth}) to
-bound turnover and allow cheap online updates and gradient-based tuning.
+bound turnover and allow cheap online updates.
 
 Open questions include the choice of reference correlation $C_{\mathrm{calib}}$
 (diagonal versus market) and of $\phi$; the treatment of estimation error in the

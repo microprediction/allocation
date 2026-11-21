@@ -14,8 +14,7 @@ $\Sigma^{-1}$ and with it the weights explode.
 The discipline's responses are
 shrinkage toward a structured target \parencite{ledoitwolf2004} and, more
 radically, allocators that never form $\Sigma^{-1}$ at all (hierarchical risk
-parity \parencite{lopezdeprado2016}, the Schur-complementary family
-\parencite{cotton2024schur}, risk parity \parencite{maillard2010}), trading point
+parity \parencite{lopezdeprado2016}, risk parity \parencite{maillard2010}), trading point
 optimality for stability and scale.
 
 The Thurstone race belongs to this inversion-free family: it
@@ -85,7 +84,7 @@ We add to this existing motivation a simple observation about the Dow 30. A
 multivariate Gaussian fit to the daily returns of its constituents, pinning the
 means and the full covariance, reproduces a shallow joint decline well enough, but
 its joint tail thins far too fast. All of them closing down on the same day is only
-mildly underpredicted; deepen the event and the gap widens without bound.
+mildly underpredicted; the gap widens sharply over the thresholds shown.
 
 Over 2010--2024, days on which every name fell by more than two percent occurred
 about eighty times more often than the fitted Gaussian allows, and beyond three
@@ -104,7 +103,7 @@ not.}
   (2010--2024): empirical frequency, the frequency under a Gaussian fit to the
   mean and covariance, and their ratio. The Gaussian undercounts joint
   \emph{crashes} ever more steeply with depth, and far more than joint
-  \emph{rallies}: the lower-tail dependence a second moment cannot carry.}
+  \emph{rallies}.}
   \label{tab:tail}
   \begin{tabular}{lccc@{\qquad}ccc}
     \toprule
@@ -133,7 +132,8 @@ by the tail copula, not by the covariance. Drive the race with a
 simulation that carries lower-tail dependence and the weights respond. What governs
 the response is the distribution of a cluster's worst performance relative to the
 rest of the field, not the pairwise coefficient $\lambda_L$ alone
-(\Cref{lem:tail}). No covariance-based allocator can respond at all.
+(\Cref{lem:tail}). An allocator that is a function of the
+covariance alone cannot respond at all.
 
 The race sees dependence only through relative performances, so a shock common to
 every asset leaves the weights unchanged. A response requires that losses fall on
@@ -214,13 +214,11 @@ the \emph{true} market portfolio, and no proxy on a restricted universe inherits
 \parencite{prono2009}. The block calculation below states the point in the present
 notation. We do not claim it as new.
 
-\begin{lemma}[Lucian weighting is inconsistent under restriction]
+\begin{lemma}[Capitalization weighting under restriction]
 \label{lem:restriction}
-Capitalization weighting is the Lucian rule with values $\mathrm{cap}_i$. If
-returns are correlated (non-diagonal $\Sigma$), then generically a Lucian rule
-coincides with mean--variance efficiency on at most one universe in a nested
-family. Under the CAPM that universe is the full asset world $U$; on any strict
-sub-universe $S \subsetneq U$ the capitalization-weighted portfolio is generically
+Suppose the CAPM holds on the full asset world $U$ with a non-diagonal $\Sigma$, so
+that capitalization weighting is mean--variance efficient on $U$. On a strict
+sub-universe $S \subsetneq U$ of at least two assets the capitalization-weighted portfolio is generically
 inefficient, and the discrepancy is governed by the heterogeneity of the assets'
 covariances with the excluded set $U \setminus S$.
 \end{lemma}

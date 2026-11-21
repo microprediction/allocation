@@ -19,12 +19,14 @@ and may be correlated across assets.
 We adopt the convention that the
 \emph{minimum} performance wins, so that a smaller ability denotes a stronger
 competitor.
-Each asset is a \emph{competitor} in the race, and its portfolio weight
-is synonymous with its \emph{winning probability},
+Each asset is a \emph{competitor} in the race, and its portfolio weight is
+synonymous with its \emph{winning probability},
 \begin{equation}
-  p_i \;=\; \Prob\!\left( X_i = \min_{k} X_k \right).
+  p_i \;=\; \Prob\!\left( X_i = \min_{k} X_k \right),
   \label{eq:stateprice}
 \end{equation}
+with any tie split evenly among the tied. Ties have probability zero for a Gaussian
+law with positive-definite covariance.
 
 The Gaussian $S = \mathcal{N}(0, \Sigma_\varepsilon)$ is the workhorse, and the
 only case in which the calibration and smoothness results below are closed-form.
@@ -43,7 +45,7 @@ and let
   \label{eq:popmap}
 \end{equation}
 so $W_S(\theta)$ is the vector of winning probabilities \eqref{eq:stateprice} (the
-gradient identity is \Cref{thm:objective}).
+gradient identity is \Cref{thm:objective}, for an almost surely unique maximiser).
 
 The reflection $\eta = -\varepsilon$ is
 immaterial for a symmetric $S$.
@@ -192,12 +194,12 @@ full estimate $\widehat{C}$.
 The construction never inverts a covariance. It needs only a valid correlation for
 sampling, repaired if necessary to the nearest correlation matrix, so the
 \emph{target} race tolerates ill-conditioned or singular estimates (a singular
-$C_{\mathrm{tilt}}$ merely makes some assets effective duplicates, with tie
-splitting). The \emph{reference} law is different: the calibration bijection
-(\Cref{lem:calib}) and the smooth sensitivity theory (\Cref{thm:smooth}) require a
-positive-definite $C_{\mathrm{calib}}$; under a singular reference one works with
-limits or selected subgradients. Its feasibility, fixed-point, redundancy,
-monotonicity, and objective properties are established in \Cref{sec:properties}.
+$C_{\mathrm{tilt}}$ merely makes the performances linearly dependent; duplicated
+assets, with tie splitting, are one case). The \emph{reference} law is different: the calibration bijection
+(\Cref{lem:calib}) requires a positive-definite $C_{\mathrm{calib}}$, and the smooth
+sensitivity theory (\Cref{thm:smooth}) positive-definite target correlations; under
+a singular reference one works with limits or selected subgradients. The construction's feasibility, fixed-point,
+redundancy, monotonicity, and objective properties are established in \Cref{sec:properties}.
 
 \section{Computation}
 \label{sec:computation}
