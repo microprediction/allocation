@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minimum variance — allocation</title>
+  <meta name="description" content="MinimumVariance and FactorMinimumVariance: closed-form minimum variance with shrinkage, and a Woodbury factor version for large universes.">
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Documentation">
+    <p class="side-h">Methods</p>
+    <ul>
+      <li><a href="../../methods/index.html">Overview</a></li>
+      <li><a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></li>
+      <li><a href="../../methods/schur-bridge/index.html">Schur bridge</a></li>
+      <li><a href="../../methods/schur-complementary/index.html">Schur-complementary</a></li>
+      <li><a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a></li>
+      <li><a href="../../methods/risk-parity/index.html">Risk parity</a></li>
+      <li><a class="cur" aria-current="page" href="../../methods/minimum-variance/index.html">Minimum variance</a></li>
+      <li><a href="../../methods/maximum-diversification/index.html">Maximum diversification</a></li>
+      <li><a href="../../methods/mean-variance/index.html">Mean–variance</a></li>
+      <li><a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a></li>
+    </ul>
+    <p class="side-h">Guides</p>
+    <ul>
+      <li><a href="../../guides/streaming/index.html">Streaming and changing universes</a></li>
+      <li><a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a></li>
+      <li><a href="../../guides/comparing-methods/index.html">Comparing methods</a></li>
+    </ul>
+  </aside>
+  <main>
+<p class="crumb"><a href="../index.html">Methods</a></p>
+  <h1>Minimum variance</h1>
+  <p class="subtitle">The lowest-variance portfolio, in closed form.</p>
+<dl class="facts">
+    <div><dt>Batch</dt><dd><code>MinimumVariance</code>, <code>FactorMinimumVariance</code></dd></div>
+    <div><dt>Streaming</dt><dd><code>StreamingMinimumVariance</code></dd></div>
+    <div><dt>Weights</dt><dd>Signed, sum to one</dd></div>
+    <div><dt>Covariance inverse</dt><dd>Yes</dd></div>
+  </dl>
+  <p class="eq"><i>w</i> &prop; &Sigma;<sup>&minus;1</sup><b>1</b></p>
+  <p class="lead">The weights that minimize portfolio variance when short positions are allowed.
+    They sum to one and can be negative.</p>
+
+  <h2 id="what">What to watch for</h2>
+  <p>The formula is a smooth function of the covariance, so the weights move only as the
+    covariance estimate moves. Two things spoil that.</p>
+  <p><strong>Conditioning.</strong> When the covariance is close to singular its inverse is
+    large and a small change in the estimate swings the weights. <code>shrinkage</code> blends
+    the covariance toward a scaled identity before inverting. At <code>shrinkage=1</code> the
+    result is equal weight.</p>
+  <p><strong>More assets than observations.</strong> The covariance is then rank-deficient and
+    the minimum-variance portfolio is not defined. The estimator returns a least-squares
+    solution and sets <code>singular_</code> to <code>True</code>. With <code>strict=True</code>
+    it raises.</p>
+
+  <h2 id="use">Use</h2>
+<pre><code>from allocation import MinimumVariance
+
+est = MinimumVariance(shrinkage=0.1).fit(returns)
+est.weights_        # may contain negative entries
+est.singular_       # True if the covariance could not be inverted reliably</code></pre>
+  <h2 id="factor">Large universes</h2>
+  <p><code>FactorMinimumVariance</code> writes the covariance as a factor model,
+    <span class="m">&Sigma; = <i>BB</i><sup>T</sup> + diag(<i>&psi;</i>)</span>, and inverts it
+    with the Woodbury identity. The cost is linear in the number of assets. A floor on the
+    idiosyncratic variances bounds the condition number, so the inverse always exists.</p>
+<pre><code>from allocation import FactorMinimumVariance
+
+FactorMinimumVariance(factors=5).fit(returns).weights_</code></pre>
+  <h2 id="longonly">If you need long-only weights</h2>
+  <p>A long-only minimum-variance program is not provided. Its solution has a kink each time an
+    asset reaches zero weight, which produces turnover. The alternatives here:</p>
+  <ul>
+    <li><a href="../schur-bridge/index.html">Schur bridge</a> with <code>long_only=True</code>, which approaches minimum variance from hierarchical risk parity and stops before any weight turns negative.</li>
+    <li><a href="../../guides/constraints-and-costs/index.html"><code>BoxConstrained</code></a> around <code>MinimumVariance</code>, which applies bounds smoothly.</li>
+    <li><a href="../../guides/comparing-methods/index.html#shorts"><code>negative_weight_diagnostic</code></a>, which tests whether the short positions earn anything out of sample.</li>
+  </ul>
+
+  <h2 id="params">Parameters</h2>
+<div class="table-wrap"><table class="params">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>shrinkage</code></td><td><code>0.0</code></td><td>Blend toward a scaled identity, from 0 to 1.</td></tr>
+        <tr><td><code>strict</code></td><td><code>False</code></td><td>Raise when the covariance is rank-deficient or ill-conditioned.</td></tr>
+        <tr><td><code>covariance_estimator</code></td><td><code>None</code></td><td>Any online estimator with <code>partial_fit</code> and <code>covariance_</code>. <code>None</code> uses an exponentially weighted covariance.</td></tr>
+        <tr><td><code>halflife</code></td><td><code>60.0</code></td><td>Half-life of the default covariance, in observations.</td></tr>
+      </tbody></table></div>
+  <p><code>FactorMinimumVariance</code> takes <code>factors</code> (default 5) and
+    <code>floor</code> (default 0.001, as a fraction of mean variance). A covariance estimator
+    that exposes <code>loadings_</code> and <code>idiosyncratic_</code> is used directly.</p>
+
+  </main>
+</div>
+
+<footer>
+  <a href="../../methods/index.html">Methods</a> ·
+  <a href="../../papers/index.html">Papers</a> ·
+  <a href="../../demos/index.html">Demos</a> ·
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
+  &nbsp;·&nbsp; MIT © Peter Cotton
+</footer>
+
+</body>
+</html>

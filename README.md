@@ -5,7 +5,7 @@ scikit-learn / [skfolio](https://skfolio.org)-compatible estimators
 (`fit` / `partial_fit` / `predict` / `weights_`), on top of a keyed
 dynamic-universe layer so they survive reconstituting universes.
 
-📖 **[allocation.microprediction.org](https://allocation.microprediction.org)**
+📖 **[allocation.microprediction.org](https://allocation.microprediction.org)** — documentation for every method
 &nbsp;·&nbsp; 🤖 **[SKILL.md](SKILL.md)** — when to reach for `allocation` (for LLMs / code review)
 
 ```python
@@ -41,117 +41,51 @@ This is all MIT-licensed and anyone is welcome to take anything here.
 
 ## Methods
 
-| Estimator | Status | Notes |
-|-----------|--------|-------|
-| `ThurstonePortfolio` | working | Ability tilt: weights are winning probabilities of a correlated race; calibrate to a benchmark under a reference correlation, tilt under the estimate; smooth common-seed transport for `partial_fit`. Calibration and racing run through [`winning`](https://github.com/microprediction/winning). |
-| `SchurComplementary` | working | The **collapsed encoding** of the HRP bridge, matching skfolio to machine precision: HRP at `gamma=0`, moving *toward* min-variance as `gamma→1` when the min-variance portfolio is long-only, without reaching it (`SchurBridge` is the exact one). Over a smooth **Fiedler seriation** instead of a dendrogram, so `partial_fit` is low-turnover. |
-| `SchurBridge` | working | **Bridges named by their endpoints, one engine underneath**: `hrp_to_min_variance(gamma)`, `hmv_to_min_variance`, `herc_to_min_variance(gamma, eta, n_clusters)`, `nco_to_min_variance(gamma, n_clusters)`, `inverse_variance_to_min_variance(eta)`, each exact at both ends with the default sibling conditioning; `companion='vol'`/`'mean'` lands on maximum diversification / tangency instead. See below. |
-| `HierarchicalRiskParity` | working | Dynamic HRP — the `gamma=0` special case of the Schur construction (recursive-bisection risk parity over the Fiedler order); named for recognisability. |
-| `RiskParity` | working | Equal-risk-contribution (ERC); interior convex solution, solved by coordinate descent **warm-started from the previous weights** so updates stay smooth. |
-| `EqualWeight`, `InverseVariance` | working | Smooth baselines for benchmarking (`1/n`; `w ∝ 1/σ²`). |
-| `MinimumVariance`, `MaximumDiversification` | working | Closed-form `Σ⁻¹1` / `Σ⁻¹σ` with optional `shrinkage` for conditioning. Unconstrained (signed) so they stay smooth — a long-only QP would kink. |
+Each method has a documentation page with its parameters and an example.
 
-Each has a river-style streaming twin for a *changing* universe — `StreamingThurstone`, `StreamingSchur`, `StreamingSchurBridge`, `StreamingHRP`, `StreamingRiskParity`, `StreamingEqualWeight`, `StreamingInverseVariance`, `StreamingMinimumVariance`, `StreamingMaximumDiversification`, `StreamingMaximumDecorrelation`, `StreamingMeanVariance` — with `learn_one({id: ret})` / `predict_one() → {id: weight}`.
+| Method | Batch class | Streaming class | Weights |
+|--------|-------------|-----------------|---------|
+| [Thurstone portfolio polishing](https://allocation.microprediction.org/methods/thurstone-portfolio-polishing/) | `ThurstonePortfolio` | `StreamingThurstone` | long-only |
+| [Schur bridge](https://allocation.microprediction.org/methods/schur-bridge/) | `SchurBridge` | `StreamingSchurBridge` | signed unless `long_only=True` |
+| [Schur-complementary](https://allocation.microprediction.org/methods/schur-complementary/) | `SchurComplementary` | `StreamingSchur` | long-only |
+| [Hierarchical risk parity](https://allocation.microprediction.org/methods/hierarchical-risk-parity/) | `HierarchicalRiskParity` | `StreamingHRP` | long-only |
+| [Risk parity](https://allocation.microprediction.org/methods/risk-parity/) | `RiskParity` | `StreamingRiskParity` | long-only |
+| [Minimum variance](https://allocation.microprediction.org/methods/minimum-variance/) | `MinimumVariance`, `FactorMinimumVariance` | `StreamingMinimumVariance` | signed |
+| [Maximum diversification](https://allocation.microprediction.org/methods/maximum-diversification/) | `MaximumDiversification`, `MaximumDecorrelation`, `FactorMaximumDiversification` | `StreamingMaximumDiversification`, `StreamingMaximumDecorrelation` | signed |
+| [Mean–variance](https://allocation.microprediction.org/methods/mean-variance/) | `MeanVariance` | `StreamingMeanVariance` | signed |
+| [Equal weight and inverse variance](https://allocation.microprediction.org/methods/equal-weight-and-inverse-variance/) | `EqualWeight`, `InverseVariance` | `StreamingEqualWeight`, `StreamingInverseVariance` | long-only |
 
-**On smoothness.** Each method is written so that `partial_fit` over a drifting covariance moves weights only as much as the covariance moved. It helps to see `weights = allocator(cov_estimator(data))` as a product of two factors:
+The first three were developed here. The rest are standard methods, implemented so
+that `partial_fit` over a drifting covariance moves the weights no more than the
+covariance moved.
 
-- For the **closed-form linear allocators** (`MinimumVariance`, `MaximumDiversification`, `InverseVariance`) the allocator factor is already a smooth (rational) function of `Σ`, so weight-smoothness *is* covariance-smoothness — pair them with a smooth online covariance (the default EWMA, a shrinkage estimator, or a `precise` skater) and you're done. Caveats: keep `Σ` well-conditioned (use `shrinkage`, since `Σ⁻¹` swings near a vanishing eigenvalue) and avoid hard long-only QPs (they kink at the zero bound — the smooth long-only min-variance is `SchurComplementary` as `gamma→1`).
-- The package's distinctive work is the **other** family, where the allocator factor itself is rough no matter how smooth `Σ` is. Three sources, three primitives: sampling noise → common-seed transport (Thurstone); combinatorial ordering → Fiedler seriation (Schur/HRP); active-set kinks → keep the solution interior (ERC is interior by construction).
+- **Thurstone portfolio polishing** reads a long-only benchmark as the winning
+  probabilities of a race among its assets, calibrates the race, changes the
+  dependence between the assets, and races again. It needs no return forecast and
+  inverts no covariance. Calibration and racing run through
+  [`winning`](https://github.com/microprediction/winning).
+- **Schur bridge** runs from a hierarchical heuristic (HRP, HERC, NCO, inverse
+  variance) to an optimizer (minimum variance, maximum diversification, tangency),
+  and is exact at both ends: `SchurBridge.hrp_to_min_variance(gamma)`.
+- **Schur-complementary** is the form of the HRP bridge that matches skfolio to
+  machine precision. It is HRP at `gamma=0` and moves toward minimum variance
+  without reaching it.
 
-### Bridges, named by their endpoints
+## Guides
 
-Schur conditioning is a technique; what matters is what it connects. Block
-inversion writes the global direction `Σ⁻¹u` cluster by cluster: each cluster's
-block is a minimum-variance direction on its covariance *conditional on everything
-else*, with budget the inverse of that conditional variance. Every hierarchical
-or clustered heuristic drops conditioning somewhere. `SchurBridge` puts it back by
-degrees with two dials, `gamma` (cluster on the outside) and `eta` (asset on its
-cluster mates), and a bridge earns its name only if **both ends are exact**:
-
-```python
-from allocation import SchurBridge
-
-SchurBridge.hrp_to_min_variance(gamma=0.5)                      # HRP -> min-variance, one dial
-SchurBridge.hmv_to_min_variance(gamma=0.5)                      # hierarchical min-var (Cotton 2024) -> min-variance
-SchurBridge.herc_to_min_variance(gamma=0.5, eta=0.5, n_clusters=8)   # HERC -> min-variance, the square
-SchurBridge.nco_to_min_variance(gamma=0.5, n_clusters=8)        # NCO -> min-variance
-SchurBridge.inverse_variance_to_min_variance(eta=0.5)           # inverse variance -> min-variance (Stevens' path)
-SchurBridge.hrp_to_min_variance(0.5, companion="vol")           # ... -> maximum diversification
-SchurBridge.hrp_to_min_variance(0.5, companion="mean")          # ... -> tangency
-est.endpoints_                                                  # e.g. ('HRP', 'minimum variance')
-```
-
-The HRP bridge needs a split rule that moves with the dial: the variance of the
-child's `eta`-damped naive portfolio on its conditioned pair (`split='dial'`). HRP's
-own naive split (`split='hrp'`, the rule inside `SchurComplementary` and skfolio)
-starts at HRP but does not reach minimum variance; the min-variance split
-(`split='minvar'`) reaches it but starts at hierarchical minimum variance. Which
-published "Schur" is which is tabulated on the
-[taxonomy page](https://schur.microprediction.org/taxonomy.html).
-
-Two facts make the bridge the streaming choice. Everything after the partition is a
-closed-form, continuous function of the covariance. And at the far end the weights
-do not depend on the partition at all, so the turnover caused by a cluster
-membership change shrinks to zero as the dials approach it (checked in
-`experiments/bridge_churn_and_scale.py`): the dials that damp estimation noise damp
-reclustering churn. The partition is the Fiedler order, which changes only when two
-coordinates cross, bisected
-(`n_clusters=None`) or cut into contiguous blocks (`n_clusters=k`), or a fixed label
-vector (`clusters=`) such as sectors.
-
-`conditioning` picks the path: `'siblings'` composes down the bisection tree
-(exact, one half-size solve at the root), `'all'` conditions on every other asset
-(exact, expensive), and `'factor'` conditions on one factor-mimicking portfolio per
-other cluster, exact when cross-cluster dependence runs through one latent factor
-per cluster and costing only cluster-sized solves; on a generic covariance it is
-approximate at the far end, so the named constructors default to `'siblings'`. `long_only=True` caps `eta` at
-each cluster's closed-form long-only frontier, and raises rather than return a
-short position when the companion or outer layer would still produce one. The exact-arithmetic theory behind
-the corners is in the papers at [schur.microprediction.org](https://schur.microprediction.org).
-
-### Very large universes (e.g. Russell 3000)
-
-Where the covariance is rank-deficient, every inversion-based allocator (min-variance,
-max-diversification, …) is *undefined* (`is_singular()` flags it; `strict=True` refuses).
-The robust large-universe methods are the ones that never invert `Σ`: inverse-variance,
-HRP/Schur, and the **Thurstone tilt** — benchmark-anchored, no inversion, low turnover.
-`ThurstonePortfolio(factors=k)` runs the tilt with a `k`-factor (low-rank) correlation and
-an `O(M·n·k)` race instead of the dense `O(M·n²)+O(n³)` one, so it scales to thousands of
-names (a few seconds per rebalance at n=3000 with the default path budget; fewer paths
-trade accuracy for speed).
-
-To make *minimum-variance itself* well-posed at scale, `FactorMinimumVariance` /
-`FactorMaximumDiversification` invert a factor covariance `Σ = BBᵀ + diag(ψ)` via the
-**Woodbury identity** (`O(n·k²)`, condition number bounded by an idiosyncratic floor, so the
-inverse always exists). Supply a factor covariance (`loadings_` / `idiosyncratic_`, e.g. an
-adapted `precise.FactorCovariance`) for the `O(n·k)` path, or let it factor a dense covariance.
-And `SchurComplementary(ridge=…)` regularizes the cross-block solve so `gamma>0` stays
-well-posed (and self-tempers toward HRP) when blocks are rank-deficient.
-
-### Trading costs
-
-`TurnoverPenalty(estimator, cost=λ)` wraps any estimator with a quadratic trading
-cost (market-impact model). Minimising `‖w − w*‖² + λ‖w − w_prev‖²` gives the smooth,
-budget-preserving blend `w_t = α w* + (1−α) w_prev` with `α = 1/(1+λ)`, so each step's
-turnover is scaled exactly by `α`. This explicit damping composes with the implicit
-turnover control (smooth target) and has a streaming twin `StreamingTurnoverPenalty`.
-
-### Linear constraints
-
-`BoxConstrained(estimator, lower=, upper=, groups=, group_caps=)` imposes per-asset
-bounds and (disjoint) group caps on any estimator via a **log-barrier**, not a QP.
-The barrier's domain *is* the constraint set, so the result is feasible for
-any `tau>0` (strictly, except for coordinates that a bound or cap pins exactly) —
-feasibility never depends on tuning. Infeasible or malformed constraints raise. The operator stays C¹ (no
-active-set kinks), so turnover stays low. Streaming twin: `StreamingBoxConstrained`.
-
-## Comparing methods
-
-`allocation.backtest` is a numpy-only walk-forward harness: it trades each
-estimator forward (form weights → earn next period → update) and tabulates
-out-of-sample Sharpe, **turnover**, concentration, and Sharpe net of a
-proportional cost. Turnover and cost are charged on the trades needed to return
-drifted holdings to each new target.
+- [Streaming and changing universes](https://allocation.microprediction.org/guides/streaming/): the batch interface
+  (`fit` / `partial_fit` / `weights_`), the river-style interface
+  (`learn_one({id: ret})` / `predict_one()`), and covariance estimators
+  (`EwmaCovariance`, `DownsideSemicovariance`, or your own via
+  `covariance_estimator=`).
+- [Constraints and trading costs](https://allocation.microprediction.org/guides/constraints-and-costs/):
+  `BoxConstrained` for position bounds and group caps by log-barrier, and
+  `TurnoverPenalty` for a quadratic trading cost. Both wrap any estimator and have
+  streaming twins.
+- [Comparing methods](https://allocation.microprediction.org/guides/comparing-methods/): `allocation.backtest`, a
+  numpy-only walk-forward harness reporting Sharpe, turnover, net Sharpe and tail
+  metrics, and `negative_weight_diagnostic` for testing whether a signed method's
+  short positions earn anything.
 
 ```python
 from allocation import SchurComplementary, TurnoverPenalty, MinimumVariance
@@ -159,20 +93,24 @@ from allocation.backtest import compare, format_table, make_panel
 
 panel = make_panel()                       # synthetic; or any (n_obs, n_assets) array
 print(format_table(compare({
-    "schur":   lambda: SchurComplementary(gamma=0.5),
-    "schur+λ": lambda: TurnoverPenalty(SchurComplementary(gamma=0.5), cost=3.0),
-    "minvar":  lambda: MinimumVariance(shrinkage=0.1),
+    "schur":         lambda: SchurComplementary(gamma=0.5),
+    "schur, damped": lambda: TurnoverPenalty(SchurComplementary(gamma=0.5), cost=3.0),
+    "minvar":        lambda: MinimumVariance(shrinkage=0.1),
 }, panel)))
 ```
 
-No data is shipped (to avoid bloat); `compare()` takes any array, and
-`load_returns_csv(url)` can pull a raw CSV from a data repo at runtime.
+## Why the weights move smoothly
 
-For a robust, universe-independent comparison, `compare_random_subsets(...)` runs
-a Monte-Carlo over random name-subsets and windows, reporting each method's mean
-± sd net Sharpe, mean turnover, and **win rate** (fraction of trials it had the
-best net Sharpe) — averaging out the single-backtest dependence on which names
-and period you happened to pick.
+Read `weights = allocator(cov_estimator(data))` as two factors. For the closed-form
+allocators (`MinimumVariance`, `MaximumDiversification`, `InverseVariance`) the
+allocator is a smooth function of `Σ`, so a smooth online covariance is enough,
+provided `Σ` is kept well-conditioned (`shrinkage`).
+
+Three other things make weights jump, and each has a remedy here: sampling noise
+(fixed random seeds, re-coloured as the correlation moves, in Thurstone), re-clustering
+(a spectral ordering in place of a dendrogram, in Schur and HRP), and bounds that
+start or stop binding (interior solutions and a log-barrier, in risk parity and
+`BoxConstrained`).
 
 ## Design
 
@@ -193,19 +131,21 @@ allocation/
 
 Covariance is pluggable: the default is a light EWMA, but any online estimator
 exposing `partial_fit` and `covariance_` (e.g. a `precise` skater) can be passed
-via `covariance=`.
+via `covariance_estimator=`.
 
 ## Papers
 
 The two novel methods are written up as working papers.
 
-- **Thurstone Portfolios: Allocation as Winning Probability** — long-only
-  allocation as the winning probabilities of a correlated race: free of the
-  duplication paradox, tail-consistent when the race is driven by a
-  downside-dependent simulation, with an implied regularized objective and a
-  smoothness/turnover bound. Draft in
-  [`papers/thurstone-portfolios/`](papers/thurstone-portfolios), built on
-  [`thurstone`](https://github.com/microprediction/thurstone).
+- **Portfolio-Implied Contests, with an Application to Tail Risk**
+  ([PDF](https://allocation.microprediction.org/papers/thurstone-portfolios/paper.pdf),
+  [SSRN](https://ssrn.com/abstract=7737202),
+  [talk slides](https://allocation.microprediction.org/papers/thurstone-portfolios/talk.pdf),
+  [demo](https://allocation.microprediction.org/demos/portfolio-contest/)). A long-only portfolio read as the winning
+  probabilities of a correlated race: redundant assets share one position, the
+  weights respond to tail dependence when the race is driven by a simulation that
+  has it, and there is an implied regularized objective and a smoothness bound on
+  turnover. Source in [`papers/thurstone-portfolios/`](papers/thurstone-portfolios).
 - **Schur-complementary allocation** — robust, inversion-light allocation along a
   spectral (Fiedler) seriation; background and bibliography at
   [schur.microprediction.org](https://schur.microprediction.org).
@@ -215,9 +155,9 @@ The two novel methods are written up as working papers.
 Early. The Thurstone, Schur/HRP, and risk-parity estimators all work and are
 tested, batch and streaming; the keyed dynamic-universe layer for the *batch*
 estimators (so `partial_fit` survives a changing asset count, as the streaming
-twins already do) is next. The theory behind the Thurstone method (feasibility,
-redundancy consistency, the implied regularized objective, smoothness/turnover)
-is written up in the accompanying paper.
+twins already do) is next. The theory behind Thurstone portfolio polishing
+(redundancy consistency, tail consistency, the implied regularized objective,
+smoothness and turnover) is in the paper above.
 
 ## License
 

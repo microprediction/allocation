@@ -4,64 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>allocation — online portfolio construction</title>
-  <meta name="description" content="Online (streaming) portfolio estimators: scikit-learn / skfolio-compatible, over a keyed dynamic universe. Two novel methods (Thurstone, Schur) plus the standard toolkit, all kept smooth.">
-  <style>
-    :root{
-      --bg:#fafafa; --panel:#fff; --text:#1a1a1a; --muted:#5a5a5a; --faint:#9a9a9a;
-      --accent:#4a3aff; --accent-soft:#ecebfb; --border:#e2e2e2; --ink:#1f1d3d;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-      line-height:1.6;font-size:17px}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-
-    header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
-    header.site-header .nav-inner{max-width:860px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-    header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
-    header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
-    header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem}
-    header.site-header nav a:hover{opacity:1}
-
-    main{max-width:860px;margin:32px auto;padding:0 24px 60px}
-    h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2}
-    .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 24px}
-    .lead{font-size:1.07rem}
-    h2{font-size:1.3rem;margin:2.2em 0 .6em;border-bottom:1px solid var(--border);padding-bottom:4px}
-    h3{font-size:1.05rem;margin:1.4em 0 .4em}
-    p{margin:.8em 0}
-    .muted{color:var(--muted)}
-
-    code{background:#f3f3f7;padding:1px 5px;border-radius:3px;font-size:.92em;
-      font-family:"SFMono-Regular",Menlo,Consolas,monospace}
-    pre{background:#f3f3f7;border-radius:6px;padding:14px 16px;overflow-x:auto;margin:16px 0}
-    pre code{background:none;padding:0;font-size:.88em}
-
-    .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
-    @media(max-width:640px){.cards{grid-template-columns:1fr}}
-    .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
-    .card h3{margin:0 0 6px}
-    .card p{margin:0;font-size:.96rem;color:var(--muted)}
-
-    .table-wrap{overflow-x:auto;margin:18px 0}
-    table.impl{width:100%;border-collapse:collapse;font-size:.95rem}
-    table.impl th,table.impl td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:top}
-    table.impl thead th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
-      font-weight:600;border-bottom:2px solid var(--border)}
-    table.impl tbody td:first-child{font-weight:600;white-space:nowrap}
-    table.impl tr:last-child td{border-bottom:none}
-    .kind-novel{color:var(--accent);font-weight:600}
-    .kind-std{color:var(--faint)}
-    table.rmap td{text-align:center}
-    table.rmap td.lab{text-align:right;font-weight:600;color:var(--muted);white-space:nowrap}
-    .c-mv{background:#f1f1f6}
-    .c-fmv{background:var(--accent-soft);color:var(--accent);font-weight:600}
-    .c-iv{background:#edf4ec}
-
-    footer{max-width:860px;margin:40px auto 24px;padding:16px 24px;font-size:.85rem;
-      color:var(--muted);border-top:1px solid var(--border)}
-  </style>
+  <meta name="description" content="Online (streaming) portfolio estimators for Python, compatible with scikit-learn and skfolio, over a universe whose members change.">
+  <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
 
@@ -69,115 +13,112 @@
   <div class="nav-inner">
     <a class="brand" href="index.html">allocation</a>
     <nav>
-      <a href="index.html#methods">Methods</a>
-      <a href="index.html#estimators">Estimators</a>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="methods/risk-parity/index.html">Risk parity</a>
+          <a href="methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="methods/mean-variance/index.html">Mean–variance</a>
+          <a href="methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
       <a href="papers/index.html">Papers</a>
       <a href="demos/index.html">Demos</a>
-      <a href="maps/tail-black-litterman.html">Map</a>
+      <a href="maps/portfolio-implied-contests.html">Map</a>
       <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
       <a href="https://github.com/microprediction/allocation">GitHub</a>
     </nav>
   </div>
 </header>
 
-<main>
-  <h1>allocation</h1>
-  <p class="subtitle">Online (streaming) portfolio construction.</p>
+<main class="wide">
 
-  <p class="lead">
-    scikit-learn / <a href="https://skfolio.org">skfolio</a>-compatible estimators
-    (<code>fit</code> / <code>partial_fit</code> / <code>weights_</code> / <code>predict</code>)
-    on a keyed dynamic-universe layer, so they survive reconstituting universes where assets
-    come and go. Two methods are <strong>novel</strong>; the rest are the <strong>standard</strong>
-    toolkit, re-engineered to stay smooth under streaming updates.
-  </p>
-
-  <h2 id="methods">Methods</h2>
-
-  <h3>Novel</h3>
-  <div class="cards">
-    <div class="card">
-      <h3>Thurstone portfolio</h3>
-      <p>Weights are the winning probabilities of a Thurstonian race. Abilities calibrate the
-      race to a benchmark; the tilt re-runs it under the estimated correlation. A common-seed
-      transport keeps streaming updates low-turnover.</p>
+  <div class="hero">
+    <div>
+      <h1>allocation</h1>
+      <p class="subtitle">Portfolio construction that updates as data arrives.</p>
+      <p>Python estimators that follow scikit-learn and <a href="https://skfolio.org">skfolio</a>
+        conventions. Each one updates its weights from new observations without starting again,
+        and works when assets enter and leave the universe.</p>
+      <div class="btns">
+        <a class="btn primary" href="methods/index.html">Browse the methods</a>
+        <a class="btn" href="guides/streaming/index.html">How it works</a>
+        <a class="btn" href="https://github.com/microprediction/allocation">GitHub</a>
+      </div>
     </div>
-    <div class="card">
-      <h3>Schur bridges, named by their endpoints</h3>
-      <p>One engine of which HERC, HRP, hierarchical minimum variance, NCO, minimum variance,
-      maximum diversification and tangency are corners. A partition, two Schur dials
-      (<code>gamma</code>: cluster on the outside, <code>eta</code>: asset on its cluster mates),
-      a companion vector, and an inverse-variance budget rule. A bridge earns its name only if
-      both ends are exact, which the named constructors are with their default sibling conditioning: <code>SchurBridge.hrp_to_min_variance(gamma)</code> is HRP at 0 and
-      minimum variance at 1, to machine precision, which no earlier variant achieved. At the far
-      end the weights do not depend on the partition, so reclustering churn is damped by the
-      same dials that damp estimation noise. Which published &ldquo;Schur&rdquo; is which:
-      <a href="https://schur.microprediction.org/taxonomy.html">the taxonomy</a>;
-      one picture: <a href="https://schur.microprediction.org/all-roads.html">all roads lead to minimum variance</a>.</p>
-    </div>
-    <div class="card">
-      <h3>Schur-complementary, collapsed encoding</h3>
-      <p>The port that matches skfolio's <code>SchurComplementary</code> to machine precision: HRP at <code>gamma=0</code>,
-      moving <em>toward</em> minimum variance as <code>gamma&rarr;1</code> when the minimum-variance portfolio is long-only, without reaching it, ordered
-      by <em>Fiedler seriation</em> instead of a dendrogram, which reorders only when two Fiedler
-      coordinates cross (each crossing a finite jump; lower turnover is an empirical result, not a continuity theorem). Kept for parity; the exact bridge is <code>SchurBridge</code>.
-      Background and bibliography at
-      <a href="https://schur.microprediction.org">schur.microprediction.org</a>.</p>
+    <div>
+<pre><code>pip install allocation
+
+from allocation import ThurstonePortfolio, SchurBridge
+
+est = ThurstonePortfolio(calib=&quot;market&quot;)
+est.fit(returns).weights_      # long-only, sums to one
+est.partial_fit(new_rows)      # update, do not refit
+
+bridge = SchurBridge.hrp_to_min_variance(0.5)
+bridge.fit(returns).weights_</code></pre>
     </div>
   </div>
 
-  <h3>Standard, kept smooth</h3>
-  <p class="muted">
-    Read <code>weights = allocator(cov(data))</code> as two factors. For the closed-form linear
-    allocators (minimum variance, max diversification / decorrelation, inverse variance,
-    mean&ndash;variance) the allocator is already smooth in the covariance &mdash; pair them with a
-    smooth online covariance and you are done. The novelty in Thurstone and Schur is the cases
-    where the allocator itself is rough: sampling noise (common-seed transport), combinatorial
-    ordering (Fiedler seriation), and long-only kinks (kept interior).
-  </p>
-
-  <h2 id="estimators">Estimators</h2>
-  <p class="muted">Every method has a batch estimator and a streaming twin
-  (<code>Streaming&hellip;</code>) for a changing universe.</p>
-  <div class="table-wrap">
-    <table class="impl">
-      <thead><tr><th>Batch</th><th>Streaming</th><th>Kind</th><th>Notes</th></tr></thead>
-      <tbody>
-        <tr><td>ThurstonePortfolio</td><td>StreamingThurstone</td><td class="kind-novel">novel</td><td>ability tilt; common-seed transport</td></tr>
-        <tr><td>SchurBridge</td><td>StreamingSchurBridge</td><td class="kind-novel">novel</td><td>bridges named by endpoints: <code>hrp_to_min_variance</code>, <code>hmv_to_min_variance</code>, <code>herc_to_min_variance</code>, <code>nco_to_min_variance</code>, <code>inverse_variance_to_min_variance</code>; companion <code>'vol'</code>/<code>'mean'</code>; paths <code>siblings</code>/<code>all</code>/<code>factor</code></td></tr>
-        <tr><td>SchurComplementary</td><td>StreamingSchur</td><td class="kind-novel">novel(ish)</td><td>collapsed encoding of the HRP bridge, skfolio parity; Fiedler seriation</td></tr>
-        <tr><td>HierarchicalRiskParity</td><td>StreamingHRP</td><td class="kind-std">standard</td><td>HRP; the <code>gamma=0</code> case of Schur</td></tr>
-        <tr><td>RiskParity</td><td>StreamingRiskParity</td><td class="kind-std">standard</td><td>equal risk contribution; interior, warm-started</td></tr>
-        <tr><td>MinimumVariance</td><td>StreamingMinimumVariance</td><td class="kind-std">standard</td><td><code>&Sigma;&#8315;&sup1;1</code>; <code>shrinkage</code>; signed</td></tr>
-        <tr><td>MaximumDiversification</td><td>StreamingMaximumDiversification</td><td class="kind-std">standard</td><td><code>&Sigma;&#8315;&sup1;&sigma;</code>; signed</td></tr>
-        <tr><td>MaximumDecorrelation</td><td>StreamingMaximumDecorrelation</td><td class="kind-std">standard</td><td>min-variance on the correlation; signed</td></tr>
-        <tr><td>MeanVariance</td><td>StreamingMeanVariance</td><td class="kind-std">standard</td><td>tangency <code>&Sigma;&#8315;&sup1;&mu;</code>; &mu; from EWMA mean or supplied</td></tr>
-        <tr><td>EqualWeight</td><td>StreamingEqualWeight</td><td class="kind-std">standard</td><td><code>1/n</code></td></tr>
-        <tr><td>InverseVariance</td><td>StreamingInverseVariance</td><td class="kind-std">standard</td><td><code>w &prop; 1/&sigma;&sup2;</code></td></tr>
-      </tbody>
-    </table>
+  <h2 id="methods">Methods developed here</h2>
+  <div class="cards big">
+    <a class="card" href="methods/thurstone-portfolio-polishing/index.html"><h3>Thurstone portfolio polishing</h3><p>Adjust a long-only benchmark for a view about dependence, tail dependence included.</p><span class="tag">long-only</span></a>
+    <a class="card" href="methods/schur-bridge/index.html"><h3>Schur bridge</h3><p>One dial, or two, from a hierarchical heuristic to an optimizer, exact at both ends.</p><span class="tag">signed unless long_only=True</span></a>
+    <a class="card" href="methods/schur-complementary/index.html"><h3>Schur-complementary</h3><p>Hierarchical risk parity with a dial toward minimum variance. Matches skfolio.</p><span class="tag">long-only</span></a>
   </div>
 
-  <h2>Usage</h2>
-  <pre><code>pip install allocation
+  <h2 id="standard">Standard methods</h2>
+  <p class="muted">The usual toolkit, implemented so that an update moves the weights no more
+    than the covariance estimate moved.</p>
+  <div class="cards big">
+    <a class="card" href="methods/hierarchical-risk-parity/index.html"><h3>Hierarchical risk parity</h3><p>Recursive bisection over a spectral ordering of the assets.</p><span class="tag">long-only</span></a>
+    <a class="card" href="methods/risk-parity/index.html"><h3>Risk parity</h3><p>Every asset contributes the same share of portfolio risk.</p><span class="tag">long-only</span></a>
+    <a class="card" href="methods/minimum-variance/index.html"><h3>Minimum variance</h3><p>The lowest-variance portfolio, in closed form, with shrinkage and a factor version for scale.</p><span class="tag">signed</span></a>
+    <a class="card" href="methods/maximum-diversification/index.html"><h3>Maximum diversification</h3><p>Maximizes the diversification ratio. Includes maximum decorrelation.</p><span class="tag">signed</span></a>
+    <a class="card" href="methods/mean-variance/index.html"><h3>Mean–variance</h3><p>The tangency portfolio for a supplied or estimated vector of expected returns.</p><span class="tag">signed</span></a>
+    <a class="card" href="methods/equal-weight-and-inverse-variance/index.html"><h3>Equal weight and inverse variance</h3><p>The two baselines every comparison should include.</p><span class="tag">long-only</span></a>
+  </div>
+  <p><a href="methods/index.html">All methods, with their class names &rarr;</a></p>
 
-from allocation import SchurBridge, SchurComplementary, RiskParity, MinimumVariance
+  <h2 id="guides">Guides</h2>
+  <div class="cards big">
+    <a class="card" href="guides/streaming/index.html"><h3>Streaming and changing universes</h3><p>The two interfaces, covariance estimators, and assets that enter and leave.</p></a>
+    <a class="card" href="guides/constraints-and-costs/index.html"><h3>Constraints and trading costs</h3><p>Position bounds, group caps and a turnover penalty around any estimator.</p></a>
+    <a class="card" href="guides/comparing-methods/index.html"><h3>Comparing methods</h3><p>A walk-forward harness that reports Sharpe, turnover and tail metrics.</p></a>
+  </div>
 
-SchurBridge.hrp_to_min_variance(0.5).fit(returns).weights_   # HRP -> min-variance, exact at both ends
-SchurBridge.herc_to_min_variance(0.5, 0.5, n_clusters=8).fit(returns).weights_   # the HERC square
-SchurComplementary(gamma=0.5).fit(returns).weights_    # collapsed encoding (skfolio parity)
-RiskParity().fit(returns).weights_                     # standard
-MinimumVariance(shrinkage=0.1).fit(returns).weights_
+  <h2 id="smooth">Why the weights move smoothly</h2>
+  <p>Weights are a function of a covariance estimate, which is a function of the data. For
+    minimum variance and its relatives the first function is smooth, so a smooth covariance
+    estimate is enough.</p>
+  <p>Three other things make weights jump, and each has a remedy here.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Source of jumps</th><th>Remedy</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Simulation noise</td><td>Keep the random seeds fixed and re-colour the same paths</td><td><a href="methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></td></tr>
+      <tr><td>Re-clustering</td><td>Order assets along a spectral coordinate, not a dendrogram</td><td><a href="methods/schur-bridge/index.html">Schur bridge</a>, <a href="methods/hierarchical-risk-parity/index.html">hierarchical risk parity</a></td></tr>
+      <tr><td>Bounds that start or stop binding</td><td>Keep solutions in the interior; apply bounds with a barrier</td><td><a href="methods/risk-parity/index.html">Risk parity</a>, <a href="guides/constraints-and-costs/index.html">constraints</a></td></tr>
+    </tbody></table></div>
 
-# streaming, over a changing universe
-from allocation import StreamingSchur
-est = StreamingSchur(gamma=0.5)
-for x in stream:               # x = {asset_id: return}
-    est.learn_one(x)           # assets may enter / leave
-    w = est.predict_one()      # {asset_id: weight}</code></pre>
+  <h2 id="more">Papers and demos</h2>
+  <div class="cards big">
+    <a class="card" href="papers/index.html"><h3>Papers</h3><p>The theory behind the methods developed here, including <em>Portfolio-Implied Contests, with an Application to Tail Risk</em>.</p></a>
+    <a class="card" href="demos/index.html"><h3>Demos</h3><p>Interactive pages: a portfolio as a race, one slider from hierarchical risk parity to minimum variance, and more.</p></a>
+    <a class="card" href="maps/portfolio-implied-contests.html"><h3>Literature map</h3><p>Where Thurstone portfolio polishing sits among related work.</p></a>
+  </div>
 
-  <h2>Why a separate package</h2>
-  <p><strong>Hi Max and Hugo.</strong> skfolio is the scikit-learn-native portfolio library, but
+  <h2 id="why">Why a separate package</h2>
+  <p>(<em>Hi Max and Hugo.</em>) skfolio is the scikit-learn-native portfolio library, but
   it is <em>batch</em>: a changing universe is handled by NaN/incomplete-data mechanics, not by
   carrying per-asset state across streaming updates. <strong>allocation</strong> is the online
   complement &mdash; <code>partial_fit</code>, a keyed dynamic universe (in the spirit of
@@ -187,14 +128,15 @@ for x in stream:               # x = {asset_id: return}
   the same here; and note also the <a href="https://github.com/online-ml/river">river</a>-compatible
   methods (<code>learn_one</code> / <code>predict_one</code>) for changing universes. It is all
   MIT-licensed and meant to be upstreamed &mdash; take anything here and improve on it.</p>
+
 </main>
 
 <footer>
+  <a href="methods/index.html">Methods</a> ·
+  <a href="papers/index.html">Papers</a> ·
+  <a href="demos/index.html">Demos</a> ·
   <a href="https://github.com/microprediction/allocation">GitHub</a> ·
-  <a href="https://github.com/microprediction/thurstone">thurstone</a> ·
-  <a href="https://schur.microprediction.org">schur</a> ·
-  <a href="https://skfolio.org">skfolio</a> ·
-  <a href="https://github.com/microprediction/precise">precise</a>
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
   &nbsp;·&nbsp; MIT © Peter Cotton
 </footer>
 

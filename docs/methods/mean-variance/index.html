@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mean–variance — allocation</title>
+  <meta name="description" content="MeanVariance: the tangency portfolio for supplied or estimated expected returns.">
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Documentation">
+    <p class="side-h">Methods</p>
+    <ul>
+      <li><a href="../../methods/index.html">Overview</a></li>
+      <li><a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></li>
+      <li><a href="../../methods/schur-bridge/index.html">Schur bridge</a></li>
+      <li><a href="../../methods/schur-complementary/index.html">Schur-complementary</a></li>
+      <li><a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a></li>
+      <li><a href="../../methods/risk-parity/index.html">Risk parity</a></li>
+      <li><a href="../../methods/minimum-variance/index.html">Minimum variance</a></li>
+      <li><a href="../../methods/maximum-diversification/index.html">Maximum diversification</a></li>
+      <li><a class="cur" aria-current="page" href="../../methods/mean-variance/index.html">Mean–variance</a></li>
+      <li><a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a></li>
+    </ul>
+    <p class="side-h">Guides</p>
+    <ul>
+      <li><a href="../../guides/streaming/index.html">Streaming and changing universes</a></li>
+      <li><a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a></li>
+      <li><a href="../../guides/comparing-methods/index.html">Comparing methods</a></li>
+    </ul>
+  </aside>
+  <main>
+<p class="crumb"><a href="../index.html">Methods</a></p>
+  <h1>Mean&ndash;variance</h1>
+  <p class="subtitle">The tangency portfolio for a vector of expected returns.</p>
+<dl class="facts">
+    <div><dt>Batch</dt><dd><code>MeanVariance</code></dd></div>
+    <div><dt>Streaming</dt><dd><code>StreamingMeanVariance</code></dd></div>
+    <div><dt>Weights</dt><dd>Signed, sum to one</dd></div>
+    <div><dt>Covariance inverse</dt><dd>Yes</dd></div>
+  </dl>
+  <p class="eq"><i>w</i> &prop; &Sigma;<sup>&minus;1</sup><i>&mu;</i></p>
+  <p class="lead">The Markowitz tangency portfolio, with short positions allowed. The weights
+    are scaled to sum to one.</p>
+
+  <h2 id="what">What to watch for</h2>
+  <p>The formula is smooth in both inputs. The difficulty is the expected-return vector
+    <span class="m"><i>&mu;</i></span>, which is hard to estimate. The weights are only as
+    stable as whatever supplies it.</p>
+  <p>If <code>expected_returns</code> is not given, the estimator uses the running exponentially
+    weighted mean of the returns. That keeps the estimator self-contained. It is not a forecast
+    worth trading on.</p>
+
+  <h2 id="use">Use</h2>
+<pre><code>from allocation import MeanVariance
+
+MeanVariance(expected_returns=mu, shrinkage=0.1).fit(returns).weights_
+MeanVariance(shrinkage=0.1).fit(returns).weights_      # mu from the running mean</code></pre>
+  <h2 id="params">Parameters</h2>
+<div class="table-wrap"><table class="params">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>expected_returns</code></td><td><code>None</code></td><td>The vector <span class="m"><i>&mu;</i></span>. <code>None</code> uses the covariance estimator's running mean. The streaming twin takes a dict keyed by asset.</td></tr>
+        <tr><td><code>shrinkage</code></td><td><code>0.0</code></td><td>Blend the covariance toward a scaled identity, from 0 to 1.</td></tr>
+        <tr><td><code>strict</code></td><td><code>False</code></td><td>Raise when the covariance is rank-deficient or ill-conditioned.</td></tr>
+        <tr><td><code>covariance_estimator</code></td><td><code>None</code></td><td>Any online estimator with <code>partial_fit</code> and <code>covariance_</code>. <code>None</code> uses an exponentially weighted covariance.</td></tr>
+        <tr><td><code>halflife</code></td><td><code>60.0</code></td><td>Half-life of the default covariance, in observations.</td></tr>
+      </tbody></table></div>
+  <h2 id="more">Related</h2>
+  <ul>
+    <li>The <a href="../schur-bridge/index.html">Schur bridge</a> with <code>companion="mean"</code> approaches this portfolio from hierarchical risk parity.</li>
+    <li><a href="../thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a> adjusts a benchmark without a return forecast.</li>
+  </ul>
+
+  </main>
+</div>
+
+<footer>
+  <a href="../../methods/index.html">Methods</a> ·
+  <a href="../../papers/index.html">Papers</a> ·
+  <a href="../../demos/index.html">Demos</a> ·
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
+  &nbsp;·&nbsp; MIT © Peter Cotton
+</footer>
+
+</body>
+</html>
