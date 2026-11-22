@@ -24,6 +24,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Fetch demo video from release assets
+        # Kept out of git to avoid bloating the repo; served at /portfolio-contest.mp4
+        run: |
+          curl -fsSL -o docs/portfolio-contest.mp4 \
+            https://github.com/microprediction/allocation/releases/download/v0.0.3/portfolio_implied_contests_demo.mp4
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
