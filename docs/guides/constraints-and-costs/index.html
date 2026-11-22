@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Constraints and trading costs — allocation</title>
+  <meta name="description" content="BoxConstrained and TurnoverPenalty: smooth position bounds, group caps and a quadratic turnover penalty around any allocation estimator.">
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Documentation">
+    <p class="side-h">Methods</p>
+    <ul>
+      <li><a href="../../methods/index.html">Overview</a></li>
+      <li><a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></li>
+      <li><a href="../../methods/schur-bridge/index.html">Schur bridge</a></li>
+      <li><a href="../../methods/schur-complementary/index.html">Schur-complementary</a></li>
+      <li><a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a></li>
+      <li><a href="../../methods/risk-parity/index.html">Risk parity</a></li>
+      <li><a href="../../methods/minimum-variance/index.html">Minimum variance</a></li>
+      <li><a href="../../methods/maximum-diversification/index.html">Maximum diversification</a></li>
+      <li><a href="../../methods/mean-variance/index.html">Mean–variance</a></li>
+      <li><a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a></li>
+    </ul>
+    <p class="side-h">Guides</p>
+    <ul>
+      <li><a href="../../guides/streaming/index.html">Streaming and changing universes</a></li>
+      <li><a class="cur" aria-current="page" href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a></li>
+      <li><a href="../../guides/comparing-methods/index.html">Comparing methods</a></li>
+    </ul>
+  </aside>
+  <main>
+<p class="crumb">Guides</p>
+  <h1>Constraints and trading costs</h1>
+  <p class="subtitle">Two wrappers that go around any estimator.</p>
+
+  <h2 id="bounds">Position bounds and group caps</h2>
+  <p><code>BoxConstrained</code> imposes a lower and upper bound on each weight and an upper
+    bound on the total weight of each group, such as a sector. Groups must not overlap.</p>
+<pre><code>from allocation import BoxConstrained, MinimumVariance
+
+est = BoxConstrained(
+    MinimumVariance(shrinkage=0.1),
+    lower=0.0, upper=0.10,                    # long-only, at most 10% per asset
+    groups=[[0, 1, 2], [3, 4]], group_caps=[0.30, 0.25],
+)
+est.fit(returns).weights_</code></pre>
+  <p>The usual way to impose bounds is to project onto them, which gives weights a kink each
+    time a bound starts or stops binding. This wrapper uses a logarithmic barrier instead. It
+    returns the point closest to the unconstrained weights after a penalty that grows without
+    limit at each bound.</p>
+  <ul>
+    <li>The result satisfies the constraints for any barrier strength <code>tau</code>.</li>
+    <li>A smaller <code>tau</code> (default 0.0001) lets weights sit closer to a bound.</li>
+    <li>The result varies smoothly with the unconstrained weights.</li>
+    <li>Constraints that cannot all hold raise <code>ValueError</code>.</li>
+  </ul>
+  <p><code>StreamingBoxConstrained</code> takes bounds as numbers or dicts keyed by asset,
+    <code>groups</code> as a dict from asset to group label, and <code>group_caps</code> as a
+    dict from label to cap.</p>
+
+  <h2 id="turnover">A turnover penalty</h2>
+  <p><code>TurnoverPenalty</code> charges a quadratic cost for moving away from the weights
+    currently held. With cost <span class="m"><i>&lambda;</i></span> the result is a blend of the
+    estimator's new target and the previous weights:</p>
+  <p class="eq"><i>w<sub>t</sub></i> = <i>&alpha;</i> <i>w</i><sup>target</sup> + (1 &minus; <i>&alpha;</i>) <i>w</i><sub><i>t</i>&minus;1</sub>, &nbsp; <i>&alpha;</i> = 1 / (1 + <i>&lambda;</i>)</p>
+  <p>Each step therefore covers a fraction <span class="m"><i>&alpha;</i></span> of the distance
+    to the target. The weights still sum to one.</p>
+<pre><code>from allocation import TurnoverPenalty, SchurComplementary
+
+est = TurnoverPenalty(SchurComplementary(gamma=0.5), cost=3.0)   # a quarter of each step
+est.fit(returns)
+est.partial_fit(new_rows)
+est.alpha_          # 0.25</code></pre>
+  <p><code>StreamingTurnoverPenalty</code> does the same for the streaming classes. An asset
+    that has just entered is taken at its target weight, since there is no earlier weight to
+    blend with.</p>
+
+  <h2 id="order">Combining them</h2>
+  <p>The wrappers nest. Apply the turnover penalty first and the bounds last, so the bounds hold
+    on the weights you trade.</p>
+<pre><code>BoxConstrained(TurnoverPenalty(MinimumVariance(shrinkage=0.1), cost=2.0), lower=0.0, upper=0.10)</code></pre>
+  </main>
+</div>
+
+<footer>
+  <a href="../../methods/index.html">Methods</a> ·
+  <a href="../../papers/index.html">Papers</a> ·
+  <a href="../../demos/index.html">Demos</a> ·
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
+  &nbsp;·&nbsp; MIT © Peter Cotton
+</footer>
+
+</body>
+</html>

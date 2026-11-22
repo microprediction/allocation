@@ -18,6 +18,18 @@
     header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
     header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
     header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    header.site-header .dd{position:relative}
+    header.site-header .dd>button{background:none;border:0;padding:0;margin:0;color:#fff;opacity:.85;
+      font:inherit;font-size:.95rem;line-height:inherit;cursor:pointer}
+    header.site-header .dd:hover>button,header.site-header .dd:focus-within>button{opacity:1}
+    header.site-header .dd-m{display:none;position:absolute;top:100%;left:-14px;z-index:50;min-width:270px;
+      padding:6px 0;background:#1f1d3d;border:1px solid #15132a;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+    header.site-header .dd:hover .dd-m,header.site-header .dd:focus-within .dd-m,
+    header.site-header .dd.open .dd-m{display:block}
+    header.site-header .dd-m a{display:block;padding:6px 14px;white-space:nowrap}
+    header.site-header .dd-m a:hover{background:rgba(255,255,255,.08);text-decoration:none}
+    header.site-header .dd-m a.dd-all{border-top:1px solid rgba(255,255,255,.16);margin-top:6px;padding-top:10px}
+    header.site-header nav{align-items:center}
     main{max-width:860px;margin:32px auto;padding:0 24px 60px}
     h1{font-size:2.1rem;margin:0 0 4px;line-height:1.2}
     .subtitle{color:var(--muted);font-size:1.12rem;margin:0 0 24px}
@@ -44,11 +56,28 @@
   <div class="nav-inner">
     <a class="brand" href="../../index.html">allocation</a>
     <nav>
-      <a href="../../index.html#methods">Methods</a>
-      <a href="../../index.html#estimators">Estimators</a>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
       <a href="../../papers/index.html">Papers</a>
       <a href="../../demos/index.html">Demos</a>
-      <a href="../../maps/tail-black-litterman.html">Map</a>
+      <a href="../../maps/portfolio-implied-contests.html">Map</a>
       <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
       <a href="https://github.com/microprediction/allocation">GitHub</a>
     </nav>

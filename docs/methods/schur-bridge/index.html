@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Schur bridge — allocation</title>
+  <meta name="description" content="SchurBridge: a family of allocations running from hierarchical risk parity, HERC, NCO or inverse variance to minimum variance, exact at both ends.">
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Documentation">
+    <p class="side-h">Methods</p>
+    <ul>
+      <li><a href="../../methods/index.html">Overview</a></li>
+      <li><a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></li>
+      <li><a class="cur" aria-current="page" href="../../methods/schur-bridge/index.html">Schur bridge</a></li>
+      <li><a href="../../methods/schur-complementary/index.html">Schur-complementary</a></li>
+      <li><a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a></li>
+      <li><a href="../../methods/risk-parity/index.html">Risk parity</a></li>
+      <li><a href="../../methods/minimum-variance/index.html">Minimum variance</a></li>
+      <li><a href="../../methods/maximum-diversification/index.html">Maximum diversification</a></li>
+      <li><a href="../../methods/mean-variance/index.html">Mean–variance</a></li>
+      <li><a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a></li>
+    </ul>
+    <p class="side-h">Guides</p>
+    <ul>
+      <li><a href="../../guides/streaming/index.html">Streaming and changing universes</a></li>
+      <li><a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a></li>
+      <li><a href="../../guides/comparing-methods/index.html">Comparing methods</a></li>
+    </ul>
+  </aside>
+  <main>
+<p class="crumb"><a href="../index.html">Methods</a></p>
+  <h1>Schur bridge</h1>
+  <p class="subtitle">One dial, or two, from a hierarchical heuristic to an optimizer, exact at both ends.</p>
+<dl class="facts">
+    <div><dt>Batch</dt><dd><code>SchurBridge</code></dd></div>
+    <div><dt>Streaming</dt><dd><code>StreamingSchurBridge</code></dd></div>
+    <div><dt>Weights</dt><dd>Signed. Long-only with <code>long_only=True</code></dd></div>
+    <div><dt>Covariance inverse</dt><dd>By blocks, damped by the dials</dd></div>
+  </dl>
+  <p class="lead">Hierarchical risk parity is stable and ignores most of the covariance. Minimum
+    variance uses all of it and is fragile. A Schur bridge is a path between the two. At one end
+    it is exactly the heuristic and at the other it is exactly the optimizer.</p>
+
+  <h2 id="idea">The idea</h2>
+  <p>Split the assets into clusters. Block inversion writes the minimum-variance direction
+    <span class="m">&Sigma;<sup>&minus;1</sup><b>1</b></span> one cluster at a time. Inside each
+    cluster it is a minimum-variance portfolio on that cluster's covariance <em>conditional on
+    every other asset</em>. Across clusters, the budget is the inverse of that conditional
+    variance.</p>
+  <p>Hierarchical and clustered heuristics drop the conditioning. The bridge puts it back by
+    degrees, with two dials:</p>
+  <ul>
+    <li><code>gamma</code> conditions each cluster on the assets outside it.</li>
+    <li><code>eta</code> conditions each asset on the other members of its cluster.</li>
+  </ul>
+  <p>With both dials at 1 the weights equal
+    <span class="m">&Sigma;<sup>&minus;1</sup><b>1</b></span>, normalized, for any partition.</p>
+
+  <h2 id="bridges">The named bridges</h2>
+  <p>Each constructor names its two ends. Both ends are reproduced to machine precision with the
+    default settings.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Constructor</th><th>Dials at 0</th><th>Dials at 1</th></tr></thead>
+    <tbody>
+      <tr><td><code>hrp_to_min_variance(gamma)</code></td><td><a href="../hierarchical-risk-parity/index.html">Hierarchical risk parity</a></td><td><a href="../minimum-variance/index.html">Minimum variance</a></td></tr>
+      <tr><td><code>hmv_to_min_variance(gamma)</code></td><td>Hierarchical minimum variance</td><td>Minimum variance</td></tr>
+      <tr><td><code>herc_to_min_variance(gamma, eta, n_clusters)</code></td><td>Hierarchical equal risk contribution</td><td>Minimum variance</td></tr>
+      <tr><td><code>nco_to_min_variance(gamma, n_clusters)</code></td><td>Nested clustered optimization</td><td>Minimum variance</td></tr>
+      <tr><td><code>inverse_variance_to_min_variance(eta)</code></td><td><a href="../equal-weight-and-inverse-variance/index.html">Inverse variance</a></td><td>Minimum variance</td></tr>
+    </tbody></table></div>
+  <p>The far end can be a different optimizer. Pass <code>companion="vol"</code> to land on
+    <a href="../maximum-diversification/index.html">maximum diversification</a>, or
+    <code>companion="mean"</code> to land on the
+    <a href="../mean-variance/index.html">tangency portfolio</a>.</p>
+
+  <h2 id="use">Use</h2>
+<pre><code>from allocation import SchurBridge
+
+est = SchurBridge.hrp_to_min_variance(gamma=0.5).fit(returns)
+est.weights_
+est.endpoints_      # (&#x27;HRP&#x27;, &#x27;minimum variance&#x27;)
+
+SchurBridge.herc_to_min_variance(gamma=0.5, eta=0.5, n_clusters=8)
+SchurBridge.nco_to_min_variance(gamma=0.5, n_clusters=8)
+SchurBridge.inverse_variance_to_min_variance(eta=0.5)
+SchurBridge.hrp_to_min_variance(0.5, companion=&quot;vol&quot;)     # to max diversification
+SchurBridge.hrp_to_min_variance(0.5, long_only=True)      # refuse short positions</code></pre>
+  <p>Away from the heuristic end the weights can be negative, as minimum-variance weights can.
+    <code>long_only=True</code> caps <code>eta</code> at each cluster's long-only limit and raises
+    <code>ValueError</code> if a short position would remain.</p>
+
+  <h2 id="partition">Where the clusters come from</h2>
+  <p>By default the assets are ordered along the Fiedler vector of their correlation graph, and
+    the order is either bisected down to single assets or cut into <code>n_clusters</code>
+    contiguous blocks. The order changes only when two assets' coordinates cross. Pass
+    <code>clusters=</code> to fix the partition yourself, for example by sector.</p>
+  <p>Everything after the partition is a closed-form, continuous function of the covariance. At
+    the far end the weights do not depend on the partition. So the jump in weights caused by an
+    asset changing cluster shrinks to zero as the dials approach 1.</p>
+
+  <h2 id="params">Parameters</h2>
+<div class="table-wrap"><table class="params">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>gamma</code></td><td><code>0.5</code></td><td>Conditioning of each cluster on the assets outside it, from 0 to 1.</td></tr>
+        <tr><td><code>eta</code></td><td><code>1.0</code></td><td>Conditioning of each asset on its cluster mates. 0 holds inverse variance inside a cluster. 1 holds the cluster's minimum-variance portfolio.</td></tr>
+        <tr><td><code>n_clusters</code></td><td><code>None</code></td><td>Cut the order into this many contiguous clusters. <code>None</code> bisects down to single assets.</td></tr>
+        <tr><td><code>clusters</code></td><td><code>None</code></td><td>A fixed label per asset. Overrides the spectral ordering.</td></tr>
+        <tr><td><code>conditioning</code></td><td><code>"siblings"</code></td><td><code>"siblings"</code> conditions each block on its sibling down the tree. <code>"all"</code> conditions each cluster on every other asset, which is exact and costly. <code>"factor"</code> conditions on one portfolio per other cluster, which is exact when cross-cluster dependence runs through one factor per cluster, and scales.</td></tr>
+        <tr><td><code>split</code></td><td><code>"dial"</code></td><td>How budget is divided between sibling clusters. <code>"dial"</code> starts at hierarchical risk parity. <code>"minvar"</code> starts at hierarchical minimum variance. <code>"hrp"</code> is the rule used by <a href="../schur-complementary/index.html">Schur-complementary</a>, which does not reach minimum variance.</td></tr>
+        <tr><td><code>outer</code></td><td><code>"stack"</code></td><td><code>"optimize"</code> runs a minimum-variance step across clusters, as nested clustered optimization does.</td></tr>
+        <tr><td><code>companion</code></td><td><code>"ones"</code></td><td>The vector <span class="m"><i>u</i></span> in the far end <span class="m">&Sigma;<sup>&minus;1</sup><i>u</i></span>: <code>"ones"</code>, <code>"vol"</code>, <code>"mean"</code>, or an array.</td></tr>
+        <tr><td><code>long_only</code></td><td><code>False</code></td><td>Cap <code>eta</code> to keep weights non-negative, and raise if they still are not.</td></tr>
+        <tr><td><code>ridge</code></td><td><code>0.0</code></td><td>Regularization added to every block solve.</td></tr>
+        <tr><td><code>knn, prior, prior_weight</code></td><td></td><td>Options for the ordering: sparsify the similarity graph to nearest neighbours, or blend in a prior similarity such as sectors.</td></tr>
+        <tr><td><code>covariance_estimator</code></td><td><code>None</code></td><td>Any online estimator with <code>partial_fit</code> and <code>covariance_</code>. <code>None</code> uses an exponentially weighted covariance.</td></tr>
+        <tr><td><code>halflife</code></td><td><code>60.0</code></td><td>Half-life of the default covariance, in observations.</td></tr>
+      </tbody></table></div>
+  <p>After fitting: <code>weights_</code>, <code>endpoints_</code>, <code>order_</code>,
+    <code>fiedler_</code>, <code>clusters_</code>.</p>
+
+  <h2 id="more">Background</h2>
+  <ul>
+    <li><a href="../../demos/schur-gamma/index.html">Demo: one slider from hierarchical risk parity to minimum variance</a></li>
+    <li><a href="https://arxiv.org/abs/2411.05807">Schur-Complementary Allocation</a> (arXiv 2411.05807), the original construction</li>
+    <li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7480738">Nested Clustered Optimization Is One End of a Schur Bridge</a> (SSRN 7480738)</li>
+    <li><a href="https://schur.microprediction.org/taxonomy.html">Which published &ldquo;Schur&rdquo; method is which</a>, on the Schur research site</li>
+  </ul>
+
+  </main>
+</div>
+
+<footer>
+  <a href="../../methods/index.html">Methods</a> ·
+  <a href="../../papers/index.html">Papers</a> ·
+  <a href="../../demos/index.html">Demos</a> ·
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
+  &nbsp;·&nbsp; MIT © Peter Cotton
+</footer>
+
+</body>
+</html>

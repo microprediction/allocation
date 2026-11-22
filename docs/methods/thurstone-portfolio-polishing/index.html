@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Thurstone portfolio polishing — allocation</title>
+  <meta name="description" content="Thurstone portfolio polishing: read a long-only portfolio as the winning probabilities of a race, calibrate the race, change the dependence between assets, and race again.">
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Documentation">
+    <p class="side-h">Methods</p>
+    <ul>
+      <li><a href="../../methods/index.html">Overview</a></li>
+      <li><a class="cur" aria-current="page" href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></li>
+      <li><a href="../../methods/schur-bridge/index.html">Schur bridge</a></li>
+      <li><a href="../../methods/schur-complementary/index.html">Schur-complementary</a></li>
+      <li><a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a></li>
+      <li><a href="../../methods/risk-parity/index.html">Risk parity</a></li>
+      <li><a href="../../methods/minimum-variance/index.html">Minimum variance</a></li>
+      <li><a href="../../methods/maximum-diversification/index.html">Maximum diversification</a></li>
+      <li><a href="../../methods/mean-variance/index.html">Mean–variance</a></li>
+      <li><a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a></li>
+    </ul>
+    <p class="side-h">Guides</p>
+    <ul>
+      <li><a href="../../guides/streaming/index.html">Streaming and changing universes</a></li>
+      <li><a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a></li>
+      <li><a href="../../guides/comparing-methods/index.html">Comparing methods</a></li>
+    </ul>
+  </aside>
+  <main>
+
+  <p class="crumb"><a href="../index.html">Methods</a></p>
+  <h1>Thurstone portfolio polishing</h1>
+  <p class="subtitle">Adjust a long-only portfolio for a view about how its assets move together.</p>
+
+  <p class="lead">
+    A long-only portfolio can be read as the winning probabilities of a race among its assets.
+    Polishing calibrates that race to the portfolio, changes the dependence between the assets,
+    and runs the race again. The view may be about joint crashes, which a covariance matrix
+    cannot express.
+  </p>
+  <p>The method is set out in
+    <a href="../../papers/thurstone-portfolios/paper.pdf">Portfolio-Implied Contests, with an
+    Application to Tail Risk</a>, where it is called the dependence tilt.</p>
+
+  <dl class="facts">
+    <div><dt>Batch</dt><dd><code>ThurstonePortfolio</code></dd></div>
+    <div><dt>Streaming</dt><dd><code>StreamingThurstone</code></dd></div>
+    <div><dt>Weights</dt><dd>Long-only, sum to one</dd></div>
+    <div><dt>Covariance inverse</dt><dd>None</dd></div>
+  </dl>
+
+  <h2 id="race">The race</h2>
+  <p>Each asset <span class="m"><i>i</i></span> has an ability
+    <span class="m"><i>a<sub>i</sub></i></span> and, in each race, a noisy performance</p>
+  <p class="eq"><i>X<sub>i</sub></i> = <i>a<sub>i</sub></i> + <i>&epsilon;<sub>i</sub></i></p>
+  <p>The lowest performance wins. An asset's weight is the probability that it wins:</p>
+  <p class="eq"><i>w<sub>i</sub></i> = P( <i>X<sub>i</sub></i> = min<sub><i>k</i></sub> <i>X<sub>k</sub></i> )</p>
+  <p>The noise <span class="m"><i>&epsilon;</i></span> is drawn from a joint law
+    <span class="m"><i>S</i></span>, which may be correlated across assets. A Gaussian law is the
+    usual case. Any law that can be simulated is allowed, including a copula with tail dependence.</p>
+
+  <h2 id="steps">Calibrate, change the dependence, race again</h2>
+  <figure>
+    <svg viewBox="0 0 760 300" role="img" aria-label="A square of four boxes. Benchmark weights are calibrated down to abilities under the reference law. The abilities are held while the dependence is replaced. The race under the target law returns the polished weights. A dashed arrow from benchmark weights to polished weights is the composite.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1f1d3d"/></marker>
+        <marker id="ahd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5a5a5a"/></marker>
+      </defs>
+      <g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif" font-size="14" fill="#1a1a1a">
+        <g fill="#fff" stroke="#1f1d3d" stroke-width="1.5">
+          <rect x="10" y="20" width="230" height="62" rx="6"/>
+          <rect x="520" y="20" width="230" height="62" rx="6"/>
+          <rect x="10" y="218" width="230" height="62" rx="6"/>
+          <rect x="520" y="218" width="230" height="62" rx="6"/>
+        </g>
+        <g text-anchor="middle">
+          <text x="125" y="47" font-weight="600">Benchmark weights</text>
+          <text x="125" y="67" fill="#5a5a5a" font-size="13">an index, or any long-only portfolio</text>
+          <text x="635" y="47" font-weight="600">Polished weights</text>
+          <text x="635" y="67" fill="#5a5a5a" font-size="13">each asset's share of the wins</text>
+          <text x="125" y="245" font-weight="600">Abilities</text>
+          <text x="125" y="265" fill="#5a5a5a" font-size="13">racing under the reference law</text>
+          <text x="635" y="245" font-weight="600">The same abilities</text>
+          <text x="635" y="265" fill="#5a5a5a" font-size="13">racing under the target law</text>
+        </g>
+        <line x1="125" y1="84" x2="125" y2="214" stroke="#1f1d3d" stroke-width="1.8" marker-end="url(#ah)"/>
+        <line x1="242" y1="249" x2="516" y2="249" stroke="#1f1d3d" stroke-width="1.8" marker-end="url(#ah)"/>
+        <line x1="635" y1="216" x2="635" y2="86" stroke="#1f1d3d" stroke-width="1.8" marker-end="url(#ah)"/>
+        <line x1="242" y1="51" x2="516" y2="51" stroke="#5a5a5a" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#ahd)"/>
+        <text x="137" y="146" font-weight="600">1. Calibrate</text>
+        <text x="137" y="165" fill="#5a5a5a" font-size="13">deterministic inverse</text>
+        <text x="379" y="238" text-anchor="middle" font-weight="600">2. Change the dependence</text>
+        <text x="379" y="270" text-anchor="middle" fill="#5a5a5a" font-size="13">abilities held fixed</text>
+        <text x="623" y="146" text-anchor="end" font-weight="600">3. Race again</text>
+        <text x="623" y="165" text-anchor="end" fill="#5a5a5a" font-size="13">Monte Carlo</text>
+        <text x="379" y="40" text-anchor="middle" fill="#5a5a5a">polish</text>
+      </g>
+    </svg>
+    <figcaption>The three steps. The dashed arrow is their composition. If the target law equals
+    the reference law, the square returns the benchmark.</figcaption>
+  </figure>
+
+  <p><strong>Calibrate.</strong> Choose a reference law
+    <span class="m"><i>S</i><sub>0</sub></span> and find the abilities whose race under it
+    reproduces the benchmark weights. The inverse is deterministic and its cost is linear in the
+    number of assets
+    (<a href="https://doi.org/10.1137/19M1276261">Cotton 2021</a>;
+    <a href="https://arxiv.org/abs/2609.01133">Cotton 2026</a>). The reference may be independent,
+    or correlated through a factor, group, nested or tree structure.</p>
+  <p><strong>Change the dependence.</strong> Hold the abilities and replace the reference with a
+    target law <span class="m"><i>S</i><sub>1</sub></span>. The target carries the view: an
+    estimated correlation, or a law in which some assets crash together.</p>
+  <p><strong>Race again.</strong> Simulate the race under the target law. Each asset's share of the
+    wins is its polished weight.</p>
+  <p>Writing <span class="m"><i>W<sub>S</sub></i></span> for the map from abilities to weights
+    under law <span class="m"><i>S</i></span>, the polished portfolio is</p>
+  <p class="eq"><i>w</i> = <i>W</i><sub><i>S</i><sub>1</sub></sub>( <i>W</i><sub><i>S</i><sub>0</sub></sub><sup>&minus;1</sup>( <i>w</i><sup>bench</sup> ) )</p>
+  <p>In the Gaussian case the two laws are two correlation matrices, and a scalar
+    <span class="m"><i>&phi;</i></span> in [0,&nbsp;1] sets the strength of the view:</p>
+  <p class="eq"><i>C</i><sub>tilt</sub> = (1 &minus; <i>&phi;</i>) <i>C</i><sub>calib</sub> + <i>&phi;</i> <i>&Ccirc;</i></p>
+  <p>At <span class="m"><i>&phi;</i> = 0</span> the benchmark is returned. At
+    <span class="m"><i>&phi;</i> = 1</span> the race uses the full estimate
+    <span class="m"><i>&Ccirc;</i></span>.</p>
+
+  <h2 id="properties">Properties</h2>
+  <p class="muted">Each is stated and proved in the paper. The calibration and smoothness results
+    are for Gaussian laws.</p>
+  <dl class="props">
+    <dt>The benchmark is a fixed point</dt>
+    <dd>With no change of view the method returns the portfolio it was given.</dd>
+    <dt>No covariance is inverted and no program is solved</dt>
+    <dd>The target correlation is only sampled from, so it may be ill-conditioned or singular.
+      The reference correlation must be positive definite.</dd>
+    <dt>Duplicates share one position</dt>
+    <dd>Replace an asset by two perfect duplicates and they split its weight equally. Every
+      other weight is unchanged.</dd>
+    <dt>More dependence within a group lowers its weight</dt>
+    <dd>In a Gaussian race, raising a covariance between two members of a group weakly lowers
+      the group's combined weight and weakly raises every weight outside it.</dd>
+    <dt>Tail consistency</dt>
+    <dd>For a group of equal-ability assets independent of the rest, a change in the group's
+      joint law that makes its best performance stochastically worse does not raise the group's
+      combined weight. In the limit where the group moves as one, it holds the weight of a
+      single asset.</dd>
+    <dt>Implied objective</dt>
+    <dd>The weights solve a regularized program on the simplex,
+      <p class="eq"><i>w</i> = arg max<sub><i>p</i> &isin; &Delta;</sub> { &lang;<i>&theta;</i>, <i>p</i>&rang; &minus; &Omega;<sub><i>C</i></sub>(<i>p</i>) }</p>
+      where <span class="m"><i>&theta;</i> = &minus;<i>a</i></span> and
+      <span class="m">&Omega;<sub><i>C</i></sub></span> is the convex conjugate of
+      <span class="m"><i>G<sub>C</sub></i>(<i>&theta;</i>) = E[ max<sub><i>i</i></sub>(<i>&theta;<sub>i</sub></i> + <i>&eta;<sub>i</sub></i>) ]</span>.</dd>
+    <dt>Smoothness in the correlation</dt>
+    <dd>If two correlation matrices have smallest eigenvalue at least
+      <span class="m"><i>&lambda;</i></span>, then
+      <p class="eq">&#8214;<i>w</i>(<i>C</i><sub>1</sub>) &minus; <i>w</i>(<i>C</i><sub>0</sub>)&#8214;<sub>1</sub> &le; &#8214;<i>C</i><sub>1</sub> &minus; <i>C</i><sub>0</sub>&#8214;<sub><i>F</i></sub> / (&radic;2 <i>&lambda;</i>)</p>
+      whatever the abilities. This bounds turnover by the size of the change of view.</dd>
+  </dl>
+
+  <h2 id="evidence">Turnover on the Dow</h2>
+  <p>The paper trades each method forward daily over the 28 Dow constituents with full
+    2010&ndash;2024 history. Every method sees the same exponentially weighted covariance. The
+    tilt anchors to equal weight under a one-factor market reference with
+    <span class="m"><i>&phi;</i> = 1</span>.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Method</th><th class="num">Turnover</th><th class="num">Sharpe</th><th class="num">Net Sharpe</th></tr></thead>
+      <tbody>
+        <tr><td>Equal weight</td><td class="num">0.004</td><td class="num">0.94</td><td class="num">0.93</td></tr>
+        <tr><td>Inverse variance</td><td class="num">0.006</td><td class="num">0.95</td><td class="num">0.93</td></tr>
+        <tr><td>Risk parity</td><td class="num">0.005</td><td class="num">0.97</td><td class="num">0.95</td></tr>
+        <tr><td>Minimum variance</td><td class="num">0.046</td><td class="num">0.88</td><td class="num">0.70</td></tr>
+        <tr><td>Hierarchical risk parity</td><td class="num">0.035</td><td class="num">0.97</td><td class="num">0.85</td></tr>
+        <tr><td>Schur (&gamma; = 0.5)</td><td class="num">0.071</td><td class="num">0.95</td><td class="num">0.70</td></tr>
+        <tr class="hi"><td>Thurstone tilt</td><td class="num">0.008</td><td class="num">0.91</td><td class="num">0.89</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">Turnover is the mean one-way fraction of the book traded per day. Net Sharpe
+    charges 10 basis points on each side of every trade.</p>
+  <p>The tilt turns over four to nine times less than hierarchical risk parity, minimum variance
+    and Schur. Equal weight, inverse variance and risk parity turn over less. The tilt's gross
+    Sharpe is below every method in the table except minimum variance.</p>
+
+  <h2 id="limits">Limits</h2>
+  <ul>
+    <li>The weights are winning probabilities, so the portfolio is long-only and fully invested.</li>
+    <li>Benchmark weights must be strictly positive. Zero weights are dropped or floored before
+      calibration.</li>
+    <li>The race sees only relative performance. A shock common to every asset leaves the weights
+      unchanged.</li>
+    <li>The paper does not test whether a tail view improves drawdown or expected shortfall out
+      of sample.</li>
+    <li>The choice of reference law and of <span class="m"><i>&phi;</i></span>, and the treatment
+      of estimation error in the abilities, are open.</li>
+  </ul>
+
+  <h2 id="use">Use</h2>
+<pre><code>from allocation import ThurstonePortfolio
+
+est = ThurstonePortfolio(calib=&quot;market&quot;, phi=1.0)
+est.fit(returns)            # returns: (n_obs, n_assets)
+est.weights_                # long-only weights that sum to one
+
+for batch in stream:        # rebalancing
+    est.partial_fit(batch)  # same random seeds, new correlation
+    w = est.weights_</code></pre>
+  <p><code>partial_fit</code> keeps the simulation's random seeds fixed and re-colours the same
+    paths with the new correlation. The weights then move with the correlation and not with
+    sampling noise.</p>
+<div class="table-wrap"><table class="params">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>target</code></td><td><code>"diagonal"</code></td><td>The benchmark. <code>"diagonal"</code> is inverse variance, <code>"equal"</code> is equal weight, and an array is used as given, for example capitalization weights.</td></tr>
+        <tr><td><code>calib</code></td><td><code>"diagonal"</code></td><td>The reference correlation. <code>"diagonal"</code> is independence. <code>"market"</code> is a one-factor market model fitted from the covariance.</td></tr>
+        <tr><td><code>phi</code></td><td><code>1.0</code></td><td>Strength of the view, from 0 to 1. At 0 the benchmark is returned, up to Monte Carlo error.</td></tr>
+        <tr><td><code>sampler</code></td><td><code>"gaussian"</code></td><td><code>"gaussian"</code>, <code>"student_t"</code>, or a function <code>(ability, corr, seeds) -> X</code> for any other law. A custom sampler must be a deterministic function of the seeds.</td></tr>
+        <tr><td><code>nu</code></td><td><code>7.0</code></td><td>Degrees of freedom for <code>"student_t"</code>. Smaller values give heavier tails and more tail dependence.</td></tr>
+        <tr><td><code>n_paths</code></td><td><code>65536</code></td><td>Number of simulated races.</td></tr>
+        <tr><td><code>factors</code></td><td><code>None</code></td><td>If set to <code>k</code>, the race uses a <code>k</code>-factor correlation and never forms the dense matrix. For universes of thousands of assets.</td></tr>
+        <tr><td><code>seed</code></td><td><code>42</code></td><td>Seed for the fixed set of paths.</td></tr>
+        <tr><td><code>covariance_estimator</code></td><td><code>None</code></td><td>Any online estimator with <code>partial_fit</code> and <code>covariance_</code>. <code>None</code> uses an exponentially weighted covariance.</td></tr>
+        <tr><td><code>halflife</code></td><td><code>60.0</code></td><td>Half-life of the default covariance, in observations.</td></tr>
+      </tbody></table></div>
+  <h3>Expressing a tail view</h3>
+  <p>Two built-in routes. A Student-t race gives every pair of assets tail dependence. A downside
+    covariance makes the race respond to how assets move together when they fall.</p>
+<pre><code>from allocation import ThurstonePortfolio, DownsideSemicovariance
+
+ThurstonePortfolio(sampler=&quot;student_t&quot;, nu=4).fit(returns).weights_
+ThurstonePortfolio(covariance_estimator=DownsideSemicovariance()).fit(returns).weights_</code></pre>
+  <h3>The three steps as functions</h3>
+<pre><code>import numpy as np
+from allocation import abilities_from_weights, weights_from_abilities, tilt_weights
+
+w = np.array([0.4, 0.25, 0.2, 0.15])
+a = abilities_from_weights(w)      # calibrate: weights to abilities
+weights_from_abilities(a)          # race: returns w to within 1e-8
+
+tilt_weights(benchmark, cov, phi=0.5)   # all three steps on any long-only benchmark</code></pre>
+  <p>The streaming twin, <code>StreamingThurstone</code>, takes <code>calib</code>,
+    <code>phi</code>, <code>n_paths</code>, <code>halflife</code> and <code>seed</code>. See
+    <a href="../../guides/streaming/index.html">Streaming and changing universes</a>.</p>
+
+  <h2 id="more">Paper, talk and demo</h2>
+  <ul>
+    <li><a href="../../papers/thurstone-portfolios/paper.pdf">Paper (PDF)</a>, also on
+      <a href="https://ssrn.com/abstract=7737202">SSRN</a>;
+      <a href="https://github.com/microprediction/allocation/tree/main/papers/thurstone-portfolios">source</a></li>
+    <li><a href="../../papers/thurstone-portfolios/talk.pdf">Talk slides</a> and a shorter
+      <a href="../../papers/thurstone-portfolios/intro-presentation.pdf">introductory presentation</a></li>
+    <li><a href="../../demos/portfolio-contest/index.html">Interactive demo</a>: eight assets, the three steps in the browser</li>
+    <li><a href="../../maps/portfolio-implied-contests.html">Literature map</a></li>
+    <li>The inverse: <a href="https://doi.org/10.1137/19M1276261">Cotton (2021)</a>, independent
+      performances; <a href="https://arxiv.org/abs/2609.01133">Cotton (2026)</a>, correlated
+      performances</li>
+  </ul>
+
+  </main>
+</div>
+
+<footer>
+  <a href="../../methods/index.html">Methods</a> ·
+  <a href="../../papers/index.html">Papers</a> ·
+  <a href="../../demos/index.html">Demos</a> ·
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
+  &nbsp;·&nbsp; MIT © Peter Cotton
+</footer>
+
+</body>
+</html>

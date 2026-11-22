@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Comparing methods — allocation</title>
+  <meta name="description" content="allocation.backtest: a numpy-only walk-forward comparison of portfolio estimators, with turnover, net Sharpe and tail metrics.">
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Documentation">
+    <p class="side-h">Methods</p>
+    <ul>
+      <li><a href="../../methods/index.html">Overview</a></li>
+      <li><a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></li>
+      <li><a href="../../methods/schur-bridge/index.html">Schur bridge</a></li>
+      <li><a href="../../methods/schur-complementary/index.html">Schur-complementary</a></li>
+      <li><a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a></li>
+      <li><a href="../../methods/risk-parity/index.html">Risk parity</a></li>
+      <li><a href="../../methods/minimum-variance/index.html">Minimum variance</a></li>
+      <li><a href="../../methods/maximum-diversification/index.html">Maximum diversification</a></li>
+      <li><a href="../../methods/mean-variance/index.html">Mean–variance</a></li>
+      <li><a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a></li>
+    </ul>
+    <p class="side-h">Guides</p>
+    <ul>
+      <li><a href="../../guides/streaming/index.html">Streaming and changing universes</a></li>
+      <li><a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a></li>
+      <li><a class="cur" aria-current="page" href="../../guides/comparing-methods/index.html">Comparing methods</a></li>
+    </ul>
+  </aside>
+  <main>
+<p class="crumb">Guides</p>
+  <h1>Comparing methods</h1>
+  <p class="subtitle">A walk-forward harness that needs only numpy.</p>
+
+  <h2 id="compare">Run a comparison</h2>
+  <p><code>compare</code> trades each estimator forward through a panel of returns. At each
+    period it earns the return on the weights already held and then updates the estimator with
+    that period's data.</p>
+<pre><code>from allocation import SchurComplementary, MinimumVariance, TurnoverPenalty
+from allocation.backtest import compare, format_table, make_panel
+
+panel = make_panel()             # synthetic; or any (n_obs, n_assets) array
+rows = compare({
+    &quot;schur&quot;:       lambda: SchurComplementary(gamma=0.5),
+    &quot;schur, damped&quot;: lambda: TurnoverPenalty(SchurComplementary(gamma=0.5), cost=3.0),
+    &quot;minvar&quot;:      lambda: MinimumVariance(shrinkage=0.1),
+}, panel, warmup=60, cost_bps=10.0)
+print(format_table(rows))</code></pre>
+  <p>Each entry is a function that builds a fresh estimator. The table reports:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>Sharpe</code></td><td>Annualized out-of-sample Sharpe ratio, before costs.</td></tr>
+      <tr><td><code>net</code></td><td>Sharpe ratio after charging <code>cost_bps</code> on every unit traded.</td></tr>
+      <tr><td><code>vol</code></td><td>Annualized volatility.</td></tr>
+      <tr><td><code>turnover</code></td><td>Mean fraction of the book traded per period, including the trades that restore the targets after prices move.</td></tr>
+      <tr><td><code>max_w</code></td><td>Largest single weight, on average.</td></tr>
+      <tr><td><code>eff_N</code></td><td>Effective number of holdings.</td></tr>
+    </tbody></table></div>
+  <p>The rows returned by <code>compare</code> also carry expected shortfall at 95% and 99%,
+    maximum drawdown and the Sortino ratio.</p>
+  <p>No data ships with the package. <code>load_returns_csv(path_or_url)</code> reads a numeric
+    panel from a CSV file.</p>
+  <p>If the estimators are fitted on log returns, pass simple returns as
+    <code>pnl_returns</code> to <code>walk_forward</code>, since a weighted sum of log returns is
+    not a portfolio return.</p>
+
+  <h2 id="subsets">Many universes at once</h2>
+  <p>A single backtest depends on which assets and which period you chose.
+    <code>compare_random_subsets</code> repeats the comparison on random subsets of the assets,
+    and optionally random windows of time, and reports each method's mean and standard deviation
+    of net Sharpe, mean turnover, and the fraction of trials it won.</p>
+<pre><code>from allocation.backtest import compare_random_subsets
+
+compare_random_subsets(factories, returns, k=50, window=500, n_trials=100)</code></pre>
+  <h2 id="shorts">Are the short positions earning anything?</h2>
+  <p>A signed method such as <a href="../../methods/minimum-variance/index.html">minimum
+    variance</a> may hold short positions that are only estimation noise.
+    <code>negative_weight_diagnostic</code> walks the method forward, then re-prices the same
+    path of weights with the shorts removed, and compares.</p>
+<pre><code>from allocation import MinimumVariance, negative_weight_diagnostic
+
+d = negative_weight_diagnostic(lambda: MinimumVariance(shrinkage=0.1), returns)
+d[&quot;sharpe_gain_from_shorts&quot;]   # net Sharpe with shorts minus net Sharpe without
+d[&quot;sign_flip_rate&quot;]            # how often a shorted asset changes sign
+d[&quot;shorts_needed&quot;]             # True only if the gain is clear and the shorts are stable</code></pre>
+  </main>
+</div>
+
+<footer>
+  <a href="../../methods/index.html">Methods</a> ·
+  <a href="../../papers/index.html">Papers</a> ·
+  <a href="../../demos/index.html">Demos</a> ·
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
+  &nbsp;·&nbsp; MIT © Peter Cotton
+</footer>
+
+</body>
+</html>

@@ -6,8 +6,8 @@ Abilities are calibrated so that the race under a reference correlation
 the estimated correlation ``C_tilt``. ``partial_fit`` transports a fixed seed
 ensemble to the updated correlation, so weights move smoothly (low turnover).
 
-See the paper *Thurstone Portfolios: Long-Only Allocation by Inverting Winning
-Probabilities* for the theory (feasibility, redundancy consistency, the implied
+See the paper *Portfolio-Implied Contests, with an Application to Tail Risk*
+for the theory (feasibility, redundancy consistency, the implied
 regularized objective, and the smoothness/turnover bound).
 """
 
@@ -82,11 +82,11 @@ class ThurstonePortfolio(BaseOnlinePortfolio):
         exact dense transport.
     seed : int, default 42
         Seed for the fixed path ensemble.
-    covariance : estimator or None, default None
+    covariance_estimator : estimator or None, default None
         Online covariance estimator (``partial_fit`` / ``covariance_``). None uses
         a built-in EWMA with ``halflife``.
     halflife : float, default 60.0
-        EWMA halflife when ``covariance is None``.
+        EWMA halflife when ``covariance_estimator is None``.
     """
 
     def __init__(

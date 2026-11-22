@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Methods — allocation</title>
+  <meta name="description" content="Every portfolio method in the allocation package, with its batch and streaming classes.">
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../papers/index.html">Papers</a>
+      <a href="../demos/index.html">Demos</a>
+      <a href="../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Documentation">
+    <p class="side-h">Methods</p>
+    <ul>
+      <li><a class="cur" aria-current="page" href="../methods/index.html">Overview</a></li>
+      <li><a href="../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></li>
+      <li><a href="../methods/schur-bridge/index.html">Schur bridge</a></li>
+      <li><a href="../methods/schur-complementary/index.html">Schur-complementary</a></li>
+      <li><a href="../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a></li>
+      <li><a href="../methods/risk-parity/index.html">Risk parity</a></li>
+      <li><a href="../methods/minimum-variance/index.html">Minimum variance</a></li>
+      <li><a href="../methods/maximum-diversification/index.html">Maximum diversification</a></li>
+      <li><a href="../methods/mean-variance/index.html">Mean–variance</a></li>
+      <li><a href="../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a></li>
+    </ul>
+    <p class="side-h">Guides</p>
+    <ul>
+      <li><a href="../guides/streaming/index.html">Streaming and changing universes</a></li>
+      <li><a href="../guides/constraints-and-costs/index.html">Constraints and trading costs</a></li>
+      <li><a href="../guides/comparing-methods/index.html">Comparing methods</a></li>
+    </ul>
+  </aside>
+  <main>
+
+  <h1>Methods</h1>
+  <p class="subtitle">Every estimator in the package, and what each one is for.</p>
+  <p>Each method has a batch class with <code>fit</code>, <code>partial_fit</code> and
+    <code>weights_</code>, and a streaming class with <code>learn_one</code> and
+    <code>predict_one</code> for a universe whose members change. The two interfaces are
+    described in <a href="../guides/streaming/index.html">Streaming and changing universes</a>.</p>
+
+  <h2 id="new">Developed here</h2>
+<ul class="mlist">
+    <li><div><a class="mname" href="thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a><p>Adjust a long-only benchmark for a view about dependence, tail dependence included.</p></div><dl><div><dt>Batch</dt><dd><code>ThurstonePortfolio</code></dd></div><div><dt>Streaming</dt><dd><code>StreamingThurstone</code></dd></div><div><dt>Weights</dt><dd>Long-only</dd></div></dl></li>
+    <li><div><a class="mname" href="schur-bridge/index.html">Schur bridge</a><p>One dial, or two, from a hierarchical heuristic to an optimizer, exact at both ends.</p></div><dl><div><dt>Batch</dt><dd><code>SchurBridge</code></dd></div><div><dt>Streaming</dt><dd><code>StreamingSchurBridge</code></dd></div><div><dt>Weights</dt><dd>Signed unless <code>long_only=True</code></dd></div></dl></li>
+    <li><div><a class="mname" href="schur-complementary/index.html">Schur-complementary</a><p>Hierarchical risk parity with a dial toward minimum variance. Matches skfolio.</p></div><dl><div><dt>Batch</dt><dd><code>SchurComplementary</code></dd></div><div><dt>Streaming</dt><dd><code>StreamingSchur</code></dd></div><div><dt>Weights</dt><dd>Long-only</dd></div></dl></li>
+  </ul>
+  <h2 id="standard">Standard methods</h2>
+  <p class="muted">Implemented so that an update moves the weights no more than the covariance
+    estimate moved.</p>
+<ul class="mlist">
+    <li><div><a class="mname" href="hierarchical-risk-parity/index.html">Hierarchical risk parity</a><p>Recursive bisection over a spectral ordering of the assets.</p></div><dl><div><dt>Batch</dt><dd><code>HierarchicalRiskParity</code></dd></div><div><dt>Streaming</dt><dd><code>StreamingHRP</code></dd></div><div><dt>Weights</dt><dd>Long-only</dd></div></dl></li>
+    <li><div><a class="mname" href="risk-parity/index.html">Risk parity</a><p>Every asset contributes the same share of portfolio risk.</p></div><dl><div><dt>Batch</dt><dd><code>RiskParity</code></dd></div><div><dt>Streaming</dt><dd><code>StreamingRiskParity</code></dd></div><div><dt>Weights</dt><dd>Long-only</dd></div></dl></li>
+    <li><div><a class="mname" href="minimum-variance/index.html">Minimum variance</a><p>The lowest-variance portfolio, in closed form, with shrinkage and a factor version for scale.</p></div><dl><div><dt>Batch</dt><dd><code>MinimumVariance</code></dd></div><div><dt>Streaming</dt><dd><code>StreamingMinimumVariance</code></dd></div><div><dt>Weights</dt><dd>Signed</dd></div></dl></li>
+    <li><div><a class="mname" href="maximum-diversification/index.html">Maximum diversification</a><p>Maximizes the diversification ratio. Includes maximum decorrelation.</p></div><dl><div><dt>Batch</dt><dd><code>MaximumDiversification</code></dd></div><div><dt>Streaming</dt><dd><code>StreamingMaximumDiversification</code></dd></div><div><dt>Weights</dt><dd>Signed</dd></div></dl></li>
+    <li><div><a class="mname" href="mean-variance/index.html">Mean–variance</a><p>The tangency portfolio for a supplied or estimated vector of expected returns.</p></div><dl><div><dt>Batch</dt><dd><code>MeanVariance</code></dd></div><div><dt>Streaming</dt><dd><code>StreamingMeanVariance</code></dd></div><div><dt>Weights</dt><dd>Signed</dd></div></dl></li>
+    <li><div><a class="mname" href="equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a><p>The two baselines every comparison should include.</p></div><dl><div><dt>Batch</dt><dd><code>EqualWeight</code><br><code>InverseVariance</code></dd></div><div><dt>Streaming</dt><dd><code>StreamingEqualWeight</code><br><code>StreamingInverseVariance</code></dd></div><div><dt>Weights</dt><dd>Long-only</dd></div></dl></li>
+  </ul>
+  <h2 id="choose">Choosing</h2>
+  <ul>
+    <li><strong>You hold a benchmark and have a view about which assets fall together.</strong>
+      <a href="thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>.</li>
+    <li><strong>You want something between hierarchical risk parity and minimum variance.</strong>
+      <a href="schur-bridge/index.html">Schur bridge</a>, or
+      <a href="schur-complementary/index.html">Schur-complementary</a> if you need to match skfolio.</li>
+    <li><strong>More assets than observations.</strong> Methods that need no full inverse:
+      <a href="thurstone-portfolio-polishing/index.html">Thurstone</a> with <code>factors=k</code>,
+      <a href="hierarchical-risk-parity/index.html">hierarchical risk parity</a>,
+      <a href="equal-weight-and-inverse-variance/index.html">inverse variance</a>, or
+      <a href="minimum-variance/index.html#factor"><code>FactorMinimumVariance</code></a>.</li>
+    <li><strong>Long-only weights are required.</strong> Use a method marked long-only above, or
+      wrap a signed one in <a href="../guides/constraints-and-costs/index.html"><code>BoxConstrained</code></a>.</li>
+  </ul>
+
+  <h2 id="tools">Around the estimators</h2>
+  <div class="cards">
+    <a class="card" href="../guides/streaming/index.html"><h3>Streaming and changing universes</h3><p>The two interfaces, covariance estimators, and assets that enter and leave.</p></a>
+    <a class="card" href="../guides/constraints-and-costs/index.html"><h3>Constraints and trading costs</h3><p>Position bounds, group caps and a turnover penalty around any estimator.</p></a>
+    <a class="card" href="../guides/comparing-methods/index.html"><h3>Comparing methods</h3><p>A walk-forward harness that reports Sharpe, turnover and tail metrics.</p></a>
+  </div>
+
+  </main>
+</div>
+
+<footer>
+  <a href="../methods/index.html">Methods</a> ·
+  <a href="../papers/index.html">Papers</a> ·
+  <a href="../demos/index.html">Demos</a> ·
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
+  &nbsp;·&nbsp; MIT © Peter Cotton
+</footer>
+
+</body>
+</html>

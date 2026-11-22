@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Streaming and changing universes — allocation</title>
+  <meta name="description" content="The batch and streaming interfaces of the allocation package, its covariance estimators, and how a changing asset universe is handled.">
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Documentation">
+    <p class="side-h">Methods</p>
+    <ul>
+      <li><a href="../../methods/index.html">Overview</a></li>
+      <li><a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></li>
+      <li><a href="../../methods/schur-bridge/index.html">Schur bridge</a></li>
+      <li><a href="../../methods/schur-complementary/index.html">Schur-complementary</a></li>
+      <li><a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a></li>
+      <li><a href="../../methods/risk-parity/index.html">Risk parity</a></li>
+      <li><a href="../../methods/minimum-variance/index.html">Minimum variance</a></li>
+      <li><a href="../../methods/maximum-diversification/index.html">Maximum diversification</a></li>
+      <li><a href="../../methods/mean-variance/index.html">Mean–variance</a></li>
+      <li><a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a></li>
+    </ul>
+    <p class="side-h">Guides</p>
+    <ul>
+      <li><a class="cur" aria-current="page" href="../../guides/streaming/index.html">Streaming and changing universes</a></li>
+      <li><a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a></li>
+      <li><a href="../../guides/comparing-methods/index.html">Comparing methods</a></li>
+    </ul>
+  </aside>
+  <main>
+<p class="crumb">Guides</p>
+  <h1>Streaming and changing universes</h1>
+  <p class="subtitle">Two interfaces, the covariance behind them, and assets that enter and leave.</p>
+
+  <h2 id="batch">The batch interface</h2>
+  <p>Every estimator follows scikit-learn and <a href="https://skfolio.org">skfolio</a>
+    conventions. <code>returns</code> is an array with one row per period and one column per
+    asset.</p>
+<pre><code>from allocation import SchurComplementary
+
+est = SchurComplementary(gamma=0.5)
+est.fit(returns)             # estimate from scratch
+est.weights_                 # one weight per column, summing to one
+
+est.partial_fit(new_rows)    # update with new observations
+est.predict(returns)         # portfolio return per row
+est.score(returns)           # per-period Sharpe ratio</code></pre>
+  <p><code>partial_fit</code> updates the covariance estimate and then updates the weights from
+    their previous state. It does not start again. That is what keeps turnover low.</p>
+  <p>With <code>pip install allocation[skfolio]</code>, <code>est.to_portfolio(returns)</code>
+    returns a skfolio <code>Portfolio</code> for use with skfolio's metrics and cross-validation.</p>
+
+  <h2 id="streaming">The streaming interface</h2>
+  <p>The batch classes assume the same assets in every row. The <code>Streaming&hellip;</code>
+    classes do not. Each observation is a dict from asset identifier to return, as in
+    <a href="https://github.com/online-ml/river">river</a>, and the set of keys may change from
+    one observation to the next.</p>
+<pre><code>from allocation import StreamingSchur
+
+est = StreamingSchur(gamma=0.5)
+for x in stream:                 # x = {&quot;AAPL&quot;: 0.012, &quot;MSFT&quot;: -0.004, ...}
+    est.learn_one(x)             # assets may appear or disappear
+    w = est.predict_one()        # {&quot;AAPL&quot;: 0.31, &quot;MSFT&quot;: 0.22, ...}</code></pre>
+  <p>State is kept per asset. An asset that stays keeps its state and its weight moves smoothly.
+    A new asset is given weight only after it has been seen <code>min_obs</code> times
+    (default 20). An asset that leaves drops out and the rest are renormalized.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Batch</th><th>Streaming</th></tr></thead>
+    <tbody>
+      <tr><td><code>ThurstonePortfolio</code></td><td><code>StreamingThurstone</code></td></tr>
+      <tr><td><code>SchurBridge</code></td><td><code>StreamingSchurBridge</code></td></tr>
+      <tr><td><code>SchurComplementary</code></td><td><code>StreamingSchur</code></td></tr>
+      <tr><td><code>HierarchicalRiskParity</code></td><td><code>StreamingHRP</code></td></tr>
+      <tr><td><code>RiskParity</code></td><td><code>StreamingRiskParity</code></td></tr>
+      <tr><td><code>MinimumVariance</code></td><td><code>StreamingMinimumVariance</code></td></tr>
+      <tr><td><code>MaximumDiversification</code></td><td><code>StreamingMaximumDiversification</code></td></tr>
+      <tr><td><code>MeanVariance</code></td><td><code>StreamingMeanVariance</code></td></tr>
+      <tr><td><code>EqualWeight</code><br><code>InverseVariance</code></td><td><code>StreamingEqualWeight</code><br><code>StreamingInverseVariance</code></td></tr>
+      <tr><td><code>TurnoverPenalty</code></td><td><code>StreamingTurnoverPenalty</code></td></tr>
+      <tr><td><code>BoxConstrained</code></td><td><code>StreamingBoxConstrained</code></td></tr>
+    </tbody></table></div>
+  <p>The streaming classes take fewer options than their batch counterparts. Each method's page
+    lists what its streaming class accepts.</p>
+
+  <h2 id="covariance">Covariance estimators</h2>
+  <p>The batch estimators read a covariance from a separate object, which can be replaced.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Estimator</th><th>What it estimates</th></tr></thead>
+    <tbody>
+      <tr><td><code>EwmaCovariance(halflife=60)</code></td><td>Exponentially weighted mean and covariance. The default.</td></tr>
+      <tr><td><code>DownsideSemicovariance(halflife=60, threshold=None)</code></td><td>Covariance of the returns' shortfalls below a threshold. The threshold is the running mean, or a fixed number such as 0. Assets that fall together and rise independently show a high downside correlation.</td></tr>
+      <tr><td>Your own</td><td>Any object with <code>partial_fit(X)</code> and a <code>covariance_</code> attribute, for example an estimator from <a href="https://github.com/microprediction/precise">precise</a>.</td></tr>
+    </tbody></table></div>
+<pre><code>from allocation import RiskParity, DownsideSemicovariance
+
+RiskParity(covariance_estimator=DownsideSemicovariance(threshold=0.0)).fit(returns).weights_</code></pre>
+  <p>The streaming classes use <code>KeyedEwmaCovariance</code>, the same estimate held in a
+    dict keyed by asset.</p>
+
+  </main>
+</div>
+
+<footer>
+  <a href="../../methods/index.html">Methods</a> ·
+  <a href="../../papers/index.html">Papers</a> ·
+  <a href="../../demos/index.html">Demos</a> ·
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
+  &nbsp;·&nbsp; MIT © Peter Cotton
+</footer>
+
+</body>
+</html>

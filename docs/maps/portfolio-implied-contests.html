@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio-Implied Contests: literature map</title>
+<meta name="description" content="A map of the literatures around Portfolio-Implied Contests and Thurstone portfolio polishing: reverse optimization, choice models and share inversion, the Thurstonian race, entropy and copula pooling, non-normal Black-Litterman, tail-aware allocation, regularized regression and perturbed optimizers.">
+<style>
+  :root{--bg:#fafafa;--text:#1a1a1a;--muted:#5a5a5a;--accent:#4a3aff;--border:#e2e2e2;--ink:#1f1d3d;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.6}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  header.site-header{background:var(--ink);color:#fff;padding:14px 24px;border-bottom:1px solid #15132a}
+  header.site-header .nav-inner{max-width:1100px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  header.site-header .brand{font-weight:600;font-size:1.1rem;color:#fff}
+  header.site-header nav{display:flex;flex-wrap:wrap;gap:0 18px;margin-left:auto}
+  header.site-header nav a{color:#fff;opacity:.85;font-size:.95rem} header.site-header nav a:hover{opacity:1}
+    header.site-header .dd{position:relative}
+    header.site-header .dd>button{background:none;border:0;padding:0;margin:0;color:#fff;opacity:.85;
+      font:inherit;font-size:.95rem;line-height:inherit;cursor:pointer}
+    header.site-header .dd:hover>button,header.site-header .dd:focus-within>button{opacity:1}
+    header.site-header .dd-m{display:none;position:absolute;top:100%;left:-14px;z-index:50;min-width:270px;
+      padding:6px 0;background:#1f1d3d;border:1px solid #15132a;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+    header.site-header .dd:hover .dd-m,header.site-header .dd:focus-within .dd-m,
+    header.site-header .dd.open .dd-m{display:block}
+    header.site-header .dd-m a{display:block;padding:6px 14px;white-space:nowrap}
+    header.site-header .dd-m a:hover{background:rgba(255,255,255,.08);text-decoration:none}
+    header.site-header .dd-m a.dd-all{border-top:1px solid rgba(255,255,255,.16);margin-top:6px;padding-top:10px}
+    header.site-header nav{align-items:center}
+  #map-wrap{max-width:1100px;margin:18px auto;padding:0 24px 40px}
+  h1{font-size:1.9rem;margin:.2em 0 .3em}
+  #graph{width:100%;height:980px;border:1px solid var(--border);background:#fdfdfc;border-radius:6px}
+  .legend{font-size:.85em;color:#444;display:flex;flex-wrap:wrap;gap:10px 20px;margin:12px 0}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .line{width:26px;height:0;border-top:2.5px solid #999;display:inline-block}
+  #tooltip{position:absolute;pointer-events:none;background:rgba(34,34,34,.95);color:#eee;
+    padding:8px 11px;border-radius:4px;font-size:13px;max-width:340px;display:none;line-height:1.35;z-index:10}
+  text.nodelabel{font:11px sans-serif;fill:#222;pointer-events:none}
+  text.edgelabel{font:italic 9.5px sans-serif;pointer-events:none;
+    paint-order:stroke;stroke:#fdfdfc;stroke-width:3.5px;stroke-linejoin:round}
+  .hint{color:#666;font-size:.9em}
+  h2{font-size:1.2rem;margin:1.6em 0 .4em}
+  #map-wrap ul{padding-left:20px;margin:.4em 0}
+  #map-wrap li{margin:3px 0}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../papers/index.html">Papers</a>
+      <a href="../demos/index.html">Demos</a>
+      <a href="../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div id="map-wrap">
+  <h1>Portfolio-Implied Contests: literature map</h1>
+  <p>The paper <a href="../papers/thurstone-portfolios/paper.pdf">Portfolio-Implied Contests,
+  with an Application to Tail Risk</a> reads a long-only portfolio as the winning probabilities
+  of a race, and uses that reading to adjust a benchmark for a view about dependence. The
+  adjustment is <a href="../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio
+  polishing</a>. This map places both among the work they draw on and the work they differ from.</p>
+  <p>Each node is a paper. Colours are literatures. Hover a node or an edge for a one-line
+  summary, click a node to open the reference, and drag to rearrange.</p>
+  <div class="legend" id="cluster-legend"></div>
+  <div class="legend">
+    <span><span class="line" style="border-color:#888"></span> builds on</span>
+    <span><span class="line" style="border-color:#2471a3;border-top-width:3.5px"></span> same object, two readings</span>
+    <span><span class="line" style="border-color:#1e8449"></span> special case</span>
+    <span><span class="line" style="border-top-style:dotted;border-color:#7d3c98"></span> a different approach to the same problem</span>
+    <span><span class="line" style="border-top-style:dashed;border-color:#c0392b"></span> a step the cited work does not take</span>
+  </div>
+  <div id="graph"></div>
+
+  <h2>Where the method sits</h2>
+  <ul>
+    <li>Reverse optimization recovers expected returns from a portfolio, with the covariance
+    given. Polishing recovers abilities, with the dependence given, and then changes the
+    dependence.</li>
+    <li>Entropy pooling and copula versions of Black–Litterman accept views about tails. They
+    re-weight or simulate scenarios and then solve a program for the weights.</li>
+    <li>Share inversion in the choice literature is closed form for the logit and iterative for
+    correlated tastes. The inverse used here is deterministic for independent, factor, group,
+    nested and tree dependence.</li>
+    <li>Hierarchical and scenario methods reach the tail without inverting a covariance. They
+    carry no benchmark anchor and no inverse map.</li>
+  </ul>
+
+  <h2>Open questions in the paper</h2>
+  <ul>
+    <li>The choice of reference law and of the strength of the view.</li>
+    <li>Estimation error in the abilities, a counterpart of covariance shrinkage.</li>
+    <li>A robust online estimate of downside covariance to drive the race.</li>
+    <li>Whether a tail view improves drawdown or expected shortfall out of sample.</li>
+  </ul>
+
+  <p class="hint">Sources: the related-work section of the paper, the
+  <a href="../papers/thurstone-portfolios/talk.pdf">talk</a>, and two earlier literature
+  sweeps. The same list as text:
+  <a href="https://github.com/microprediction/allocation/blob/main/papers/thurstone-portfolios/LITERATURE-MAP.md">LITERATURE-MAP.md</a>.
+  See also the <a href="../demos/portfolio-contest/index.html">interactive demo</a>.</p>
+</div>
+<div id="tooltip"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const CLUSTERS = {
+  core: {label:"This paper and its inverse", color:"#222222"},
+  reverseopt: {label:"Reverse and inverse optimization", color:"#2980b9"},
+  choice: {label:"Choice models and share inversion", color:"#8e44ad"},
+  thurstone: {label:"Thurstonian race and probit computation", color:"#27ae60"},
+  meucci: {label:"Entropy and copula pooling", color:"#16a085"},
+  blnn: {label:"Higher-moment, skew and copula Black–Litterman", color:"#d68910"},
+  taildep: {label:"Tail-aware allocation", color:"#c0392b"},
+  comparators: {label:"Inversion-free and covariance-based allocators", color:"#7f8c8d"},
+  regreg: {label:"Long-only allocation as regularized regression", color:"#a04000"},
+  perturbed: {label:"Perturbed optimizers", color:"#2e4053"},
+  empirical: {label:"Empirical premise", color:"#5d6d7e"}
+};
+
+const NODES = [
+ {"id": "paper", "label": "PORTFOLIO-IMPLIED CONTESTS", "year": 2026, "c": "core", "url": "../papers/thurstone-portfolios/paper.pdf", "note": "Cotton 2026, 'Portfolio-Implied Contests, with an Application to Tail Risk' (SSRN 7737202). A long-only portfolio is read as the winning probabilities of a race among its assets, and the abilities behind it are recovered at a cost linear in the number of assets.", "r": 17},
+ {"id": "polish", "label": "Thurstone portfolio polishing", "year": 2026, "c": "core", "url": "../methods/thurstone-portfolio-polishing/index.html", "note": "The paper's application, which it calls the dependence tilt. Calibrate a race to a benchmark under a reference law, hold the abilities, replace the dependence with a target law that may carry tail dependence, and race again. No covariance is inverted and no program is re-solved.", "r": 13},
+ {"id": "c2026", "label": "Cotton 2026 (correlated inverse)", "year": 2026, "c": "core", "url": "https://arxiv.org/abs/2609.01133", "note": "'Scalable Inversion of Contests with Correlated Performances' (arXiv:2609.01133). One survival field shared by all competitors gives every winning probability in one pass. Factor, group, nested and tree dependence are handled by conditioning. The inverse is an iteration on this forward map.", "r": 12},
+ {"id": "c2021", "label": "Cotton 2021 (lattice inverse)", "year": 2021, "c": "core", "url": "https://doi.org/10.1137/19M1276261", "note": "'Inferring Relative Ability from Winning Probability in Multientrant Contests', SIAM J. Financial Math. 12(1):295-317. Winning probabilities to abilities on a lattice with exact tie handling, for independent performances.", "r": 12},
+ {"id": "sharpe1974", "label": "Sharpe 1974", "year": 1974, "c": "reverseopt", "url": "https://scholar.google.com/scholar?q=Sharpe+1974+Imputing+Expected+Security+Returns+from+Portfolio+Composition", "note": "JFQA 9(3):463-472. Imputes the expected returns that make held weights mean-variance optimal. The covariance is given."},
+ {"id": "bl1992", "label": "Black–Litterman 1992", "year": 1992, "c": "reverseopt", "url": "https://doi.org/10.2469/faj.v48.n5.28", "note": "FAJ 48(5):28-43. Implied returns from the market portfolio, then a Bayesian update on views. Both the reverse step and the views are on returns; the covariance is an input."},
+ {"id": "idzorek2005", "label": "Idzorek 2005", "year": 2005, "c": "reverseopt", "url": "https://scholar.google.com/scholar?q=Idzorek+step-by-step+guide+Black-Litterman+model", "note": "Practitioner guide to Black-Litterman, with a method for setting view confidence. Views are on returns."},
+ {"id": "qiangorman2001", "label": "Qian–Gorman 2001", "year": 2001, "c": "reverseopt", "url": "https://doi.org/10.2469/faj.v57.n2.2432", "note": "FAJ 57(2):44-51. Black-Litterman with views on volatilities and correlations, giving a conditional covariance. The view is on second moments and the weights still come from inverting a covariance."},
+ {"id": "ahuja2001", "label": "Ahuja–Orlin 2001", "year": 2001, "c": "reverseopt", "url": "https://doi.org/10.1287/opre.49.5.771.10607", "note": "Oper. Res. 49(5):771-783. Inverse optimization: recover the objective that makes an observed solution optimal."},
+ {"id": "bertsimas2012", "label": "Bertsimas et al 2012", "year": 2012, "c": "reverseopt", "url": "https://doi.org/10.1287/opre.1120.1115", "note": "Oper. Res. 60(6):1389-1403. Recasts Black-Litterman as inverse optimization and extends it to coherent risk measures. The inverse is a conic program on returns and risk."},
+ {"id": "yuwangdong2023", "label": "Yu–Wang–Dong 2023", "year": 2023, "c": "reverseopt", "url": "https://doi.org/10.1016/j.ribaf.2023.101879", "note": "Res. Int. Bus. Finance 64:101879. Learns an investor's risk preference from holdings by inverting the mean-variance optimizer."},
+ {"id": "bradleyterry1952", "label": "Bradley–Terry 1952", "year": 1952, "c": "choice", "url": "https://doi.org/10.1093/biomet/39.3-4.324", "note": "Biometrika 39:324-345. Paired-comparison model in which the odds of one item beating another are the ratio of their strengths."},
+ {"id": "luce1959", "label": "Luce 1959", "year": 1959, "c": "choice", "url": "https://scholar.google.com/scholar?q=Luce+1959+Individual+Choice+Behavior+A+Theoretical+Analysis", "note": "Luce's choice axiom, independence of irrelevant alternatives. Capitalization weighting obeys it: the ratio of two weights does not depend on the rest of the universe."},
+ {"id": "plackett1975", "label": "Plackett 1975", "year": 1975, "c": "choice", "url": "https://doi.org/10.2307/2346567", "note": "Applied Statistics 24(2):193-202. Extends Luce's model from choices to full rankings."},
+ {"id": "yellott1977", "label": "Yellott 1977", "year": 1977, "c": "choice", "url": "https://doi.org/10.1016/0022-2496(77)90026-8", "note": "J. Math. Psych. 15(2):109-144. Luce's model is equivalent to a race with independent Gumbel performances."},
+ {"id": "mcfadden1974", "label": "McFadden 1974", "year": 1974, "c": "choice", "url": "https://scholar.google.com/scholar?q=McFadden+1974+conditional+logit+analysis+of+qualitative+choice+behavior", "note": "Conditional logit. The inverse from shares to utilities is closed form, log share differences, under independence."},
+ {"id": "berry1994", "label": "Berry 1994", "year": 1994, "c": "choice", "url": "https://doi.org/10.2307/2555829", "note": "RAND 25(2):242-262. Logit and nested-logit share systems invert in closed form to mean utilities."},
+ {"id": "blp1995", "label": "Berry et al 1995 (BLP)", "year": 1995, "c": "choice", "url": "https://doi.org/10.2307/2171802", "note": "Econometrica 63(4):841-890. With random coefficients the share inverse has no closed form and is computed by a contraction mapping."},
+ {"id": "bgh2013", "label": "Berry et al 2013", "year": 2013, "c": "choice", "url": "https://doi.org/10.3982/ECTA10135", "note": "Econometrica 81(5):2087-2111. 'Connected substitutes' conditions for a share system to be globally invertible."},
+ {"id": "thurstone1927", "label": "Thurstone 1927", "year": 1927, "c": "thurstone", "url": "https://scholar.google.com/scholar?q=Thurstone+1927+A+law+of+comparative+judgment", "note": "Psych. Rev. 34:273-286. The law of comparative judgment: each alternative has a latent ability and a noisy performance, and the extreme performance is chosen."},
+ {"id": "mosteller1951", "label": "Mosteller 1951", "year": 1951, "c": "thurstone", "url": "https://scholar.google.com/scholar?q=Mosteller+1951+Remarks+on+the+method+of+paired+comparisons+least+squares+equal+standard+deviations+equal+correlations", "note": "Psychometrika 16:3-9. Least-squares solution of Thurstone's model with equal variances and equal correlations."},
+ {"id": "clark1961", "label": "Clark 1961", "year": 1961, "c": "thurstone", "url": "https://doi.org/10.1287/opre.9.2.145", "note": "Oper. Res. 9(2):145-162. Moment-matching approximation to the maximum of correlated Gaussians."},
+ {"id": "harville1973", "label": "Harville 1973", "year": 1973, "c": "thurstone", "url": "https://doi.org/10.1080/01621459.1973.10482425", "note": "JASA 68:312-316. Assigns probabilities to the finishing orders of a multi-entry competition from the winning probabilities."},
+ {"id": "butler1982", "label": "Butler–Moffitt 1982", "year": 1982, "c": "thurstone", "url": "https://scholar.google.com/scholar?q=Butler+Moffitt+1982+computationally+efficient+quadrature+procedure+one-factor+multinomial+probit", "note": "Econometrica 50(3):761-764. One-factor multinomial probit by quadrature over the factor."},
+ {"id": "ghk", "label": "GHK simulator", "year": 1994, "c": "thurstone", "url": "https://scholar.google.com/scholar?q=GHK+simulator+Geweke+Hajivassiliou+Keane+multivariate+normal+rectangle+probabilities", "note": "Geweke (1989), Keane (1994), Hajivassiliou, McFadden and Ruud (1996). Simulates multivariate normal rectangle probabilities by sequential conditioning. The standard way to compute probit choice probabilities."},
+ {"id": "maydeu2005", "label": "Maydeu-Olivares 2005", "year": 2005, "c": "thurstone", "url": "https://scholar.google.com/scholar?q=Maydeu-Olivares+Bockenholt+2005+structural+equation+modeling+of+paired+comparison+and+ranking+data", "note": "Psych. Methods 10(3):285-304. Estimates Thurstonian models of paired-comparison and ranking data by structural equation methods."},
+ {"id": "meucci2006", "label": "Meucci 2006", "year": 2006, "c": "meucci", "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=848407", "note": "Risk 19(9). Views on realizations of the market, with marginals joined by a copula. The posterior distribution is passed to an optimizer."},
+ {"id": "meucci2008", "label": "Meucci 2008", "year": 2008, "c": "meucci", "url": "https://arxiv.org/abs/1012.2848", "note": "Risk 21(10). Views on means, correlations, CVaR, tail probabilities or rankings are constraints on scenario probabilities, and the posterior is the minimum relative entropy projection. A separate optimizer turns the posterior into weights."},
+ {"id": "giacometti2007", "label": "Giacometti et al 2007", "year": 2007, "c": "blnn", "url": "https://scholar.google.com/scholar?q=Giacometti+Bertocchi+Rachev+Fabozzi+stable+distributions+Black-Litterman", "note": "Quant. Finance 7(4):423-433. Black-Litterman with stable and Student-t priors and VaR or CVaR as the risk measure."},
+ {"id": "harvey2010", "label": "Harvey et al 2010", "year": 2010, "c": "blnn", "url": "https://doi.org/10.1080/14697681003756877", "note": "Quant. Finance 10(5):469-485. Bayesian portfolio selection under a skew-normal likelihood, by MCMC and utility maximization."},
+ {"id": "parknguyen2025", "label": "Park–Nguyen 2025", "year": 2025, "c": "blnn", "url": "https://doi.org/10.1007/s11579-025-00387-1", "note": "Math. Financial Econ. 19(2):407-444. The Black-Litterman posterior under hidden truncation is skew-normal in closed form, and is optimized with Simaan's three-moment risk model."},
+ {"id": "martellini2010", "label": "Martellini–Ziemann 2010", "year": 2010, "c": "blnn", "url": "https://doi.org/10.1093/rfs/hhp099", "note": "RFS 23(4):1467-1502. Improved estimators of coskewness and cokurtosis for allocation with higher moments."},
+ {"id": "sahamkhadam2022", "label": "Sahamkhadam et al 2022", "year": 2022, "c": "blnn", "url": "https://doi.org/10.1016/j.ejor.2021.06.015", "note": "EJOR 297(3):1055-1070. Black-Litterman with R-vine copulas, followed by mean-CVaR optimization. The copula supplies return scenarios; the reverse step is on returns."},
+ {"id": "kraus1976", "label": "Kraus–Litzenberger 1976", "year": 1976, "c": "blnn", "url": "https://doi.org/10.1111/j.1540-6261.1976.tb01961.x", "note": "J. Finance 31(4):1085-1100. Three-moment CAPM: coskewness with the market is priced."},
+ {"id": "harveysiddique2000", "label": "Harvey–Siddique 2000", "year": 2000, "c": "blnn", "url": "https://doi.org/10.1111/0022-1082.00247", "note": "J. Finance 55(3):1263-1295. Conditional coskewness carries a premium in the cross-section."},
+ {"id": "simaan1993", "label": "Simaan 1993", "year": 1993, "c": "blnn", "url": "https://doi.org/10.1287/mnsc.39.5.568", "note": "Mgmt Science 39(5):568-577. A three-parameter framework that admits skewness preference without the full comoment tensor."},
+ {"id": "lai1991", "label": "Lai 1991", "year": 1991, "c": "blnn", "url": "https://doi.org/10.1007/BF02408382", "note": "Rev. Quant. Finance Acc. 1(3):293-305. Polynomial goal programming for mean-variance-skewness portfolios."},
+ {"id": "briec2007", "label": "Briec et al 2007", "year": 2007, "c": "blnn", "url": "https://doi.org/10.1287/mnsc.1060.0596", "note": "Mgmt Science 53(1):135-149. A shortage function measures mean-variance-skewness efficiency."},
+ {"id": "boudt2020", "label": "Boudt et al 2020", "year": 2020, "c": "blnn", "url": "https://doi.org/10.1093/jjfinec/nby022", "note": "J. Financial Econometrics 18(1):1-23. Shrinks the sample coskewness matrix toward structured targets."},
+ {"id": "rockafellar2000", "label": "Rockafellar–Uryasev 2000", "year": 2000, "c": "taildep", "url": "https://doi.org/10.21314/JOR.2000.038", "note": "J. Risk 2(3):21-41. Minimizes CVaR over scenarios by a linear program. Reaches the tail without inverting a covariance."},
+ {"id": "raffinot2018", "label": "Raffinot 2018 (HERC)", "year": 2018, "c": "taildep", "url": "https://scholar.google.com/scholar?q=Raffinot+2018+The+Hierarchical+Equal+Risk+Contribution+Portfolio", "note": "Hierarchical equal risk contribution. Allocates down a cluster tree and admits downside risk measures."},
+ {"id": "lohre2020", "label": "Lohre et al 2020", "year": 2020, "c": "taildep", "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3513399", "note": "Hierarchical risk parity with lower-tail dependence as the linkage. Re-weights by recursive bisection with no covariance inversion. There is no view and no inverse map."},
+ {"id": "taildepclust2018", "label": "Tail-dependence clustering 2018", "year": 2018, "c": "taildep", "url": "https://doi.org/10.3390/risks6040115", "note": "Risks 6(4):115. Clusters assets by lower-tail dependence, following De Luca and Zuccolotto (2011)."},
+ {"id": "tailriskparity", "label": "Tail-risk parity", "year": 2017, "c": "taildep", "url": "https://scholar.google.com/scholar?q=tail+risk+parity+expected+shortfall+contributions", "note": "Equalizes expected-shortfall contributions across assets."},
+ {"id": "lopezdeprado2016", "label": "López de Prado 2016 (HRP)", "year": 2016, "c": "comparators", "url": "https://doi.org/10.3905/jpm.2016.42.4.059", "note": "J. Portfolio Mgmt 42(4):59-69. Hierarchical risk parity: clusters, orders and bisects, with no covariance inversion."},
+ {"id": "cotton2024schur", "label": "Cotton 2024 (Schur)", "year": 2024, "c": "comparators", "url": "https://arxiv.org/abs/2411.05807", "note": "Schur-complementary allocation (arXiv:2411.05807). A one-parameter family between hierarchical risk parity and minimum variance."},
+ {"id": "maillard2010", "label": "Maillard et al 2010", "year": 2010, "c": "comparators", "url": "https://doi.org/10.3905/jpm.2010.36.4.060", "note": "J. Portfolio Mgmt 36(4):60-70. Equal risk contribution (risk parity)."},
+ {"id": "choueifaty2008", "label": "Choueifaty–Coignard 2008", "year": 2008, "c": "comparators", "url": "https://doi.org/10.3905/JPM.2008.35.1.40", "note": "J. Portfolio Mgmt 35(1):40-51. Maximum diversification."},
+ {"id": "brittenjones1999", "label": "Britten-Jones 1999", "year": 1999, "c": "regreg", "url": "https://doi.org/10.1111/0022-1082.00120", "note": "J. Finance 54(2):655-671. Tangency weights are the coefficients of regressing a constant on excess returns."},
+ {"id": "jagannathanma2003", "label": "Jagannathan–Ma 2003", "year": 2003, "c": "regreg", "url": "https://scholar.google.com/scholar?q=Jagannathan+Ma+2003+Risk+Reduction+in+Large+Portfolios+Why+Imposing+the+Wrong+Constraints+Helps", "note": "J. Finance 58(4):1651-1683. The no-short constraint acts like shrinkage of the covariance."},
+ {"id": "brodie2009", "label": "Brodie et al 2009", "year": 2009, "c": "regreg", "url": "https://doi.org/10.1073/pnas.0904287106", "note": "PNAS 106(30):12267-12272. An l1 penalty on the regression gives sparse, stable Markowitz portfolios."},
+ {"id": "williams1977", "label": "Williams 1977", "year": 1977, "c": "perturbed", "url": "https://doi.org/10.1068/a090285", "note": "Environment and Planning A 9(3):285-344. The expected maximum utility as a measure of user benefit in travel demand models."},
+ {"id": "mcfadden1981", "label": "McFadden 1981", "year": 1981, "c": "perturbed", "url": "https://scholar.google.com/scholar?q=McFadden+1981+Econometric+models+of+probabilistic+choice", "note": "The social-surplus function of a random-utility model: choice probabilities are the gradient of the expected maximum utility."},
+ {"id": "berthet2020", "label": "Berthet et al 2020", "year": 2020, "c": "perturbed", "url": "https://arxiv.org/abs/2002.08676", "note": "NeurIPS 2020. Perturbed optimizers: a differentiable argmax obtained by adding noise to the inputs. Gumbel noise gives the entropy-regularized softmax."},
+ {"id": "longinsolnik2001", "label": "Longin–Solnik 2001", "year": 2001, "c": "empirical", "url": "https://doi.org/10.1111/0022-1082.00340", "note": "J. Finance 56(2):649-676. Rejects normality for the joint lower tail of international equity returns, but not for the upper tail."},
+ {"id": "angchen2002", "label": "Ang–Chen 2002", "year": 2002, "c": "empirical", "url": "https://doi.org/10.1016/S0304-405X(02)00068-5", "note": "J. Financial Econ. 63(3):443-494. Correlations between U.S. equity portfolios and the market are higher in downturns than a normal distribution implies."},
+ {"id": "embrechts2002", "label": "Embrechts et al 2002", "year": 2002, "c": "empirical", "url": "https://scholar.google.com/scholar?q=Embrechts+McNeil+Straumann+2002+Correlation+and+dependence+in+risk+management+properties+and+pitfalls", "note": "Sets out why correlation is an incomplete summary of dependence."},
+ {"id": "patton2004", "label": "Patton 2004", "year": 2004, "c": "empirical", "url": "https://doi.org/10.1093/jjfinec/nbh006", "note": "J. Financial Econometrics 2(1):130-168. Modelling asymmetric dependence gives economically significant gains in an asset-allocation problem."},
+ {"id": "mallela2026", "label": "Mallela–Leonelli 2026", "year": 2026, "c": "empirical", "url": "https://arxiv.org/abs/2606.16840", "note": "Hüsler-Reiss extremal graphs for equities: the lower-tail network is near-complete and the upper-tail network is thin."}
+];
+
+// type: lineage | identity | endpoint | contrast | gap
+const EDGES = [
+ {"s": "c2021", "t": "c2026", "type": "lineage", "label": "independent performances → factor, group and tree dependence"},
+ {"s": "c2026", "t": "paper", "type": "identity", "label": "the inverse that makes the reading practical"},
+ {"s": "paper", "t": "polish", "type": "identity", "label": "the paper's application"},
+ {"s": "c2026", "t": "polish", "type": "identity", "label": "calibration uses this inverse"},
+ {"s": "sharpe1974", "t": "bl1992", "type": "lineage", "label": "reverse step → Black–Litterman prior"},
+ {"s": "bl1992", "t": "idzorek2005", "type": "lineage"},
+ {"s": "bl1992", "t": "qiangorman2001", "type": "lineage", "label": "views on covariance"},
+ {"s": "ahuja2001", "t": "bertsimas2012", "type": "lineage", "label": "inverse-optimization theory"},
+ {"s": "bl1992", "t": "bertsimas2012", "type": "lineage", "label": "Black–Litterman as inverse optimization"},
+ {"s": "bertsimas2012", "t": "yuwangdong2023", "type": "lineage"},
+ {"s": "bl1992", "t": "polish", "type": "identity", "label": "anchor to a benchmark: view on returns ↔ view on dependence"},
+ {"s": "qiangorman2001", "t": "polish", "type": "endpoint", "label": "a correlation view is the second-moment case"},
+ {"s": "bertsimas2012", "t": "polish", "type": "gap", "label": "inverts for returns and risk, not for dependence"},
+ {"s": "yuwangdong2023", "t": "polish", "type": "contrast", "label": "inverts the optimizer for a risk preference; polishing inverts a race for abilities"},
+ {"s": "bradleyterry1952", "t": "luce1959", "type": "lineage"},
+ {"s": "luce1959", "t": "plackett1975", "type": "lineage", "label": "choices → rankings"},
+ {"s": "luce1959", "t": "yellott1977", "type": "lineage", "label": "Luce = race with Gumbel noise"},
+ {"s": "luce1959", "t": "mcfadden1974", "type": "lineage", "label": "multinomial logit"},
+ {"s": "mcfadden1974", "t": "berry1994", "type": "lineage"},
+ {"s": "berry1994", "t": "blp1995", "type": "lineage", "label": "random coefficients"},
+ {"s": "blp1995", "t": "bgh2013", "type": "lineage", "label": "invertibility conditions"},
+ {"s": "luce1959", "t": "paper", "type": "contrast", "label": "capitalization weighting obeys Luce's axiom; a correlated race does not"},
+ {"s": "yellott1977", "t": "thurstone1927", "type": "identity", "label": "the logit is a race with Gumbel performances"},
+ {"s": "mcfadden1974", "t": "c2021", "type": "endpoint", "label": "log shares: the closed-form inverse for independent Gumbel noise"},
+ {"s": "blp1995", "t": "c2026", "type": "contrast", "label": "share inversion by contraction on simulated shares"},
+ {"s": "bgh2013", "t": "c2026", "type": "lineage", "label": "conditions for a unique share inverse"},
+ {"s": "thurstone1927", "t": "mosteller1951", "type": "lineage"},
+ {"s": "thurstone1927", "t": "clark1961", "type": "lineage"},
+ {"s": "thurstone1927", "t": "maydeu2005", "type": "lineage"},
+ {"s": "thurstone1927", "t": "c2021", "type": "lineage", "label": "the race"},
+ {"s": "harville1973", "t": "c2021", "type": "lineage", "label": "winning probabilities in multi-entry contests"},
+ {"s": "clark1961", "t": "c2026", "type": "contrast", "label": "moment-matching approximation of the maximum"},
+ {"s": "ghk", "t": "c2026", "type": "contrast", "label": "probit probabilities by simulation"},
+ {"s": "butler1982", "t": "c2026", "type": "lineage", "label": "condition on a factor and integrate by quadrature"},
+ {"s": "meucci2006", "t": "meucci2008", "type": "lineage"},
+ {"s": "meucci2008", "t": "polish", "type": "contrast", "label": "tail views by re-weighting scenarios, then re-optimizing"},
+ {"s": "bl1992", "t": "giacometti2007", "type": "lineage", "label": "non-normal priors"},
+ {"s": "bl1992", "t": "harvey2010", "type": "lineage"},
+ {"s": "giacometti2007", "t": "parknguyen2025", "type": "lineage"},
+ {"s": "meucci2006", "t": "sahamkhadam2022", "type": "lineage", "label": "copula views"},
+ {"s": "bl1992", "t": "sahamkhadam2022", "type": "lineage"},
+ {"s": "kraus1976", "t": "harveysiddique2000", "type": "lineage", "label": "unconditional → conditional coskewness"},
+ {"s": "kraus1976", "t": "simaan1993", "type": "lineage"},
+ {"s": "lai1991", "t": "briec2007", "type": "lineage"},
+ {"s": "martellini2010", "t": "boudt2020", "type": "lineage", "label": "comoment estimation → shrinkage"},
+ {"s": "harvey2010", "t": "parknguyen2025", "type": "lineage"},
+ {"s": "simaan1993", "t": "parknguyen2025", "type": "lineage", "label": "three-moment risk model"},
+ {"s": "briec2007", "t": "polish", "type": "contrast", "label": "skewness through comoment tensors and an optimizer"},
+ {"s": "parknguyen2025", "t": "polish", "type": "gap", "label": "skew-normal posterior; no joint lower tail"},
+ {"s": "sahamkhadam2022", "t": "polish", "type": "gap", "label": "copula scenarios, but the reverse step stays on returns"},
+ {"s": "taildepclust2018", "t": "lohre2020", "type": "lineage", "label": "tail-dependence linkage"},
+ {"s": "taildepclust2018", "t": "tailriskparity", "type": "lineage"},
+ {"s": "lopezdeprado2016", "t": "lohre2020", "type": "lineage"},
+ {"s": "lopezdeprado2016", "t": "raffinot2018", "type": "lineage"},
+ {"s": "rockafellar2000", "t": "polish", "type": "contrast", "label": "reaches the tail by a linear program"},
+ {"s": "raffinot2018", "t": "polish", "type": "contrast", "label": "reaches the tail by bisection on a tree"},
+ {"s": "lohre2020", "t": "polish", "type": "contrast", "label": "no covariance inversion, but no view and no inverse"},
+ {"s": "tailriskparity", "t": "polish", "type": "contrast", "label": "equalizes tail-risk contributions"},
+ {"s": "lopezdeprado2016", "t": "cotton2024schur", "type": "lineage", "label": "HRP → Schur family"},
+ {"s": "lopezdeprado2016", "t": "paper", "type": "contrast", "label": "de-duplicates by clustering; comparator in the Dow walk-forward"},
+ {"s": "cotton2024schur", "t": "paper", "type": "contrast", "label": "comparator in the Dow walk-forward"},
+ {"s": "maillard2010", "t": "paper", "type": "contrast", "label": "comparator in the Dow walk-forward"},
+ {"s": "choueifaty2008", "t": "paper", "type": "contrast", "label": "covariance-based comparator"},
+ {"s": "brittenjones1999", "t": "jagannathanma2003", "type": "lineage"},
+ {"s": "jagannathanma2003", "t": "brodie2009", "type": "lineage", "label": "constraints as shrinkage → penalties"},
+ {"s": "brodie2009", "t": "paper", "type": "contrast", "label": "l1 penalty ↔ a dependence-adjusted regularizer on the simplex"},
+ {"s": "williams1977", "t": "mcfadden1981", "type": "lineage"},
+ {"s": "mcfadden1981", "t": "berthet2020", "type": "lineage", "label": "social surplus → perturbed optimizers"},
+ {"s": "mcfadden1981", "t": "paper", "type": "identity", "label": "weights are the gradient of an expected maximum"},
+ {"s": "berthet2020", "t": "paper", "type": "endpoint", "label": "Gumbel noise gives softmax; correlated Gaussian noise gives the paper's regularizer"},
+ {"s": "embrechts2002", "t": "longinsolnik2001", "type": "lineage"},
+ {"s": "longinsolnik2001", "t": "polish", "type": "lineage", "label": "premise: the joint lower tail is not Gaussian"},
+ {"s": "angchen2002", "t": "polish", "type": "lineage", "label": "premise: correlations rise in downturns"},
+ {"s": "patton2004", "t": "polish", "type": "lineage", "label": "premise: asymmetric dependence matters for allocation"},
+ {"s": "mallela2026", "t": "polish", "type": "lineage", "label": "premise: crash together, rally apart"}
+];
+const STYLE = {
+  lineage:  {stroke:"#999", width:1.4, dash:null},
+  identity: {stroke:"#2471a3", width:2.8, dash:null},
+  endpoint: {stroke:"#1e8449", width:2.2, dash:null},
+  contrast: {stroke:"#7d3c98", width:1.8, dash:"2,4"},
+  gap:      {stroke:"#c0392b", width:2.2, dash:"7,5"},
+};
+
+const W = document.getElementById("graph").clientWidth, H = 980;
+const svg = d3.select("#graph").append("svg").attr("width","100%").attr("height",H).attr("viewBox",[0,0,W,H]);
+const g = svg.append("g");
+svg.call(d3.zoom().scaleExtent([0.4,3]).on("zoom", ev => g.attr("transform", ev.transform)));
+
+const links = EDGES.map(e => ({source:e.s, target:e.t, ...e}));
+const cx = W/2, cy = H/2, R_OUTER = 385;
+const sectors = {};
+Object.keys(CLUSTERS).forEach((k,i,arr)=>{ sectors[k] = (i/arr.length)*2*Math.PI - Math.PI/2; });
+const CORE = new Set(["paper","polish","c2026","c2021"]);
+const CENTER = "paper";
+const byC = {};
+NODES.forEach(d=>{ (byC[d.c] = byC[d.c] || []).push(d); });
+const outer = Object.keys(CLUSTERS).filter(k=>k!=="core");
+let acc = 0; const total = outer.reduce((a,k)=>a+byC[k].length+1.5,0);
+outer.forEach(k=>{ const m = byC[k].length, span = (m+1.5)/total*2*Math.PI;
+  byC[k].forEach((d,j)=>{ const a = -Math.PI/2 + acc + span*(j+0.75)/(m+0.5);
+    d.rr = R_OUTER + (m>3 ? ((j%2)?-75:10) : -25);
+    d.x = cx + d.rr*Math.cos(a); d.y = cy + d.rr*Math.sin(a); });
+  acc += span; });
+byC.core.forEach((d,i)=>{
+  if (d.id===CENTER){ d.fx=cx; d.fy=cy; d.rr=0; return; }
+  const a = -Math.PI/2 + (i-1)*2*Math.PI/3; d.rr = 95;
+  d.x = cx + 95*Math.cos(a); d.y = cy + 95*Math.sin(a); });
+
+const sim = d3.forceSimulation(NODES)
+  .force("link", d3.forceLink(links).id(d=>d.id).distance(120).strength(0.012))
+  .force("charge", d3.forceManyBody().strength(-260))
+  .force("radial", d3.forceRadial(d=>d.rr, cx, cy).strength(d=> CORE.has(d.id)?0.9:0.8))
+  .force("collide", d3.forceCollide().radius(d=>(d.r||9)+20));
+
+const tooltip = d3.select("#tooltip");
+const TYPE_NAMES = {lineage:"builds on", identity:"same object, two readings",
+  endpoint:"special case", contrast:"a different approach to the same problem", gap:"a step the cited work does not take"};
+
+const link = g.append("g").selectAll("line").data(links).join("line")
+  .attr("stroke",d=>STYLE[d.type].stroke).attr("stroke-width",d=>STYLE[d.type].width)
+  .attr("stroke-dasharray",d=>STYLE[d.type].dash).attr("opacity",0.75);
+const linkHover = g.append("g").selectAll("line").data(links).join("line")
+  .attr("stroke","transparent").attr("stroke-width",12)
+  .on("mousemove",(ev,d)=>{ tooltip.style("display","block")
+      .style("left",(ev.pageX+14)+"px").style("top",(ev.pageY+8)+"px")
+      .html(`<b>${d.source.label} → ${d.target.label}</b><br><i>${TYPE_NAMES[d.type]}</i>${d.label?"<br>"+d.label:""}`); })
+  .on("mouseout",()=>tooltip.style("display","none"));
+const edgeLabel = g.append("g").selectAll("text").data(links.filter(d=>false)).join("text")
+  .attr("class","edgelabel").attr("text-anchor","middle").attr("fill",d=>STYLE[d.type].stroke).text(d=>d.label);
+
+const node = g.append("g").selectAll("circle").data(NODES).join("circle")
+  .attr("r",d=>d.r||9).attr("fill",d=>CLUSTERS[d.c].color).attr("stroke","#fff").attr("stroke-width",1.5)
+  .style("cursor","pointer")
+  .on("click",(ev,d)=>{ if(d.url) window.open(d.url, d.url.startsWith("..")?"_self":"_blank"); })
+  .on("mousemove",(ev,d)=>{ tooltip.style("display","block")
+      .style("left",(ev.pageX+14)+"px").style("top",(ev.pageY+8)+"px")
+      .html(`<b>${d.label}</b>${d.year?" ("+d.year+")":""}<br>${d.note||""}`); })
+  .on("mouseout",()=>tooltip.style("display","none"))
+  .call(d3.drag()
+    .on("start",(ev,d)=>{ if(!ev.active) sim.alphaTarget(0.25).restart(); d.fx=d.x; d.fy=d.y; })
+    .on("drag",(ev,d)=>{ d.fx=ev.x; d.fy=ev.y; })
+    .on("end",(ev,d)=>{ if(!ev.active) sim.alphaTarget(0); if(d.id!==CENTER){ d.fx=null; d.fy=null; } }));
+
+const label = g.append("g").selectAll("text").data(NODES).join("text")
+  .attr("class","nodelabel").attr("text-anchor","middle").attr("dy",d=>-((d.r||9)+5))
+  .style("font-weight",d=>CORE.has(d.id)?"bold":"normal").text(d=>d.label);
+
+sim.on("tick",()=>{
+  link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  linkHover.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  edgeLabel.attr("x",d=>(d.source.x+d.target.x)/2).attr("y",d=>(d.source.y+d.target.y)/2 - 4);
+  node.attr("cx",d=>d.x=Math.max(20,Math.min(W-20,d.x))).attr("cy",d=>d.y=Math.max(20,Math.min(H-20,d.y)));
+  label.attr("x",d=>d.x).attr("y",d=>d.y);
+});
+
+d3.select("#cluster-legend").selectAll("span").data(Object.values(CLUSTERS)).join("span")
+  .html(d=>`<span class="dot" style="background:${d.color}"></span>${d.label}`);
+</script>
+</body>
+</html>

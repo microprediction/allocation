@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hierarchical risk parity — allocation</title>
+  <meta name="description" content="HierarchicalRiskParity: recursive-bisection risk parity ordered by Fiedler seriation instead of a dendrogram.">
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="brand" href="../../index.html">allocation</a>
+    <nav>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Methods <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a>
+          <a href="../../methods/schur-bridge/index.html">Schur bridge</a>
+          <a href="../../methods/schur-complementary/index.html">Schur-complementary</a>
+          <a href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a>
+          <a href="../../methods/risk-parity/index.html">Risk parity</a>
+          <a href="../../methods/minimum-variance/index.html">Minimum variance</a>
+          <a href="../../methods/maximum-diversification/index.html">Maximum diversification</a>
+          <a href="../../methods/mean-variance/index.html">Mean–variance</a>
+          <a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a>
+          <a class="dd-all" href="../../methods/index.html">All methods</a>
+        </div></div>
+      <div class="dd"><button type="button" aria-haspopup="true" onclick="var p=this.parentNode,o=p.classList.contains('open');document.querySelectorAll('.dd.open').forEach(function(e){e.classList.remove('open')});if(!o)p.classList.add('open')">Guides <span aria-hidden="true">&#9662;</span></button>
+        <div class="dd-m">
+          <a href="../../guides/streaming/index.html">Streaming and changing universes</a>
+          <a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a>
+          <a href="../../guides/comparing-methods/index.html">Comparing methods</a>
+        </div></div>
+      <a href="../../papers/index.html">Papers</a>
+      <a href="../../demos/index.html">Demos</a>
+      <a href="../../maps/portfolio-implied-contests.html">Map</a>
+      <a href="https://github.com/microprediction/allocation/blob/main/SKILL.md">Skill</a>
+      <a href="https://github.com/microprediction/allocation">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" aria-label="Documentation">
+    <p class="side-h">Methods</p>
+    <ul>
+      <li><a href="../../methods/index.html">Overview</a></li>
+      <li><a href="../../methods/thurstone-portfolio-polishing/index.html">Thurstone portfolio polishing</a></li>
+      <li><a href="../../methods/schur-bridge/index.html">Schur bridge</a></li>
+      <li><a href="../../methods/schur-complementary/index.html">Schur-complementary</a></li>
+      <li><a class="cur" aria-current="page" href="../../methods/hierarchical-risk-parity/index.html">Hierarchical risk parity</a></li>
+      <li><a href="../../methods/risk-parity/index.html">Risk parity</a></li>
+      <li><a href="../../methods/minimum-variance/index.html">Minimum variance</a></li>
+      <li><a href="../../methods/maximum-diversification/index.html">Maximum diversification</a></li>
+      <li><a href="../../methods/mean-variance/index.html">Mean–variance</a></li>
+      <li><a href="../../methods/equal-weight-and-inverse-variance/index.html">Equal weight and inverse variance</a></li>
+    </ul>
+    <p class="side-h">Guides</p>
+    <ul>
+      <li><a href="../../guides/streaming/index.html">Streaming and changing universes</a></li>
+      <li><a href="../../guides/constraints-and-costs/index.html">Constraints and trading costs</a></li>
+      <li><a href="../../guides/comparing-methods/index.html">Comparing methods</a></li>
+    </ul>
+  </aside>
+  <main>
+<p class="crumb"><a href="../index.html">Methods</a></p>
+  <h1>Hierarchical risk parity</h1>
+  <p class="subtitle">Recursive bisection over a spectral ordering of the assets.</p>
+<dl class="facts">
+    <div><dt>Batch</dt><dd><code>HierarchicalRiskParity</code></dd></div>
+    <div><dt>Streaming</dt><dd><code>StreamingHRP</code></dd></div>
+    <div><dt>Weights</dt><dd>Long-only, sum to one</dd></div>
+    <div><dt>Covariance inverse</dt><dd>None</dd></div>
+  </dl>
+  <p class="lead">Order the assets so that similar ones sit together. Split the order in two,
+    divide the budget between the halves in inverse proportion to their variances, and repeat
+    inside each half.</p>
+
+  <h2 id="what">What it does</h2>
+  <p>This is the method of L&oacute;pez de Prado (2016) with one change. The original takes the
+    asset order from a dendrogram, which can rearrange abruptly when the covariance moves a
+    little. This estimator orders the assets along the Fiedler vector of the correlation graph,
+    which rearranges only when two coordinates cross.</p>
+  <p>Because the order differs, the weights differ from those of a dendrogram-based
+    implementation on the same data.</p>
+  <p>It is the <code>gamma=0</code> case of
+    <a href="../schur-complementary/index.html">Schur-complementary</a> and the near end of the
+    <a href="../schur-bridge/index.html">Schur bridge</a>
+    <code>hrp_to_min_variance</code>.</p>
+
+  <h2 id="use">Use</h2>
+<pre><code>from allocation import HierarchicalRiskParity
+
+est = HierarchicalRiskParity().fit(returns)
+est.weights_
+est.order_          # the asset order used for bisection</code></pre>
+  <h2 id="params">Parameters</h2>
+<div class="table-wrap"><table class="params">
+      <thead><tr><th>Parameter</th><th>Default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>knn</code></td><td><code>None</code></td><td>Sparsify the similarity graph to this many nearest neighbours, for large universes.</td></tr>
+        <tr><td><code>prior, prior_weight</code></td><td><code>None</code>, <code>0.0</code></td><td>A prior similarity matrix, such as sectors, and its weight in the ordering.</td></tr>
+        <tr><td><code>covariance_estimator</code></td><td><code>None</code></td><td>Any online estimator with <code>partial_fit</code> and <code>covariance_</code>. <code>None</code> uses an exponentially weighted covariance.</td></tr>
+        <tr><td><code>halflife</code></td><td><code>60.0</code></td><td>Half-life of the default covariance, in observations.</td></tr>
+      </tbody></table></div>
+  <h2 id="more">Background</h2>
+  <ul>
+    <li>L&oacute;pez de Prado (2016), <a href="https://doi.org/10.3905/jpm.2016.42.4.059">Building Diversified Portfolios that Outperform Out of Sample</a></li>
+    <li><a href="../../demos/schur-gamma/index.html">Demo: one slider from hierarchical risk parity to minimum variance</a></li>
+  </ul>
+
+  </main>
+</div>
+
+<footer>
+  <a href="../../methods/index.html">Methods</a> ·
+  <a href="../../papers/index.html">Papers</a> ·
+  <a href="../../demos/index.html">Demos</a> ·
+  <a href="https://github.com/microprediction/allocation">GitHub</a> ·
+  <a href="https://pypi.org/project/allocation/">PyPI</a>
+  &nbsp;·&nbsp; MIT © Peter Cotton
+</footer>
+
+</body>
+</html>

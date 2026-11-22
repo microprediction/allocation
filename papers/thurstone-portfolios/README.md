@@ -1,42 +1,41 @@
-# Thurstone Portfolios: Long-Only Allocation by Inverting Winning Probabilities
+# Portfolio-Implied Contests, with an Application to Tail Risk
 
-- **Status**: draft
-- **Authors**: Peter Cotton
-- **Started**: 2026-06-04
+- **Author**: Peter Cotton
+- **Posted**: [SSRN 7737202](https://ssrn.com/abstract=7737202); submitted to arXiv
+- **PDF**: [paper.pdf](https://allocation.microprediction.org/papers/thurstone-portfolios/paper.pdf)
 
 ## Abstract
 
-A long-only asset-allocation scheme in which portfolio weights are the winning
-probabilities of a Thurstonian race among assets. Starting from a variance-only
-(diagonal) allocation, weights are inverted into latent abilities, the contest is
-re-run with correlation reintroduced, and each asset's probability of "winning"
-becomes its new weight. The construction is long-only and budget-feasible by
-design, avoids covariance inversion, and exposes a single correlation dial $\phi$
-in place of mean--variance shrinkage. Positioned as a non-Lucian alternative to
-CAPM / capitalization weighting.
+We use a recently developed contest inversion algorithm as a device for portfolio
+construction and augmentation, and in particular we demonstrate how an investor can
+inject views about tail dependence into an existing portfolio by this means. Each
+asset is a runner in a Thurstone race whose noisy performances may be correlated
+through factor or hierarchical structure, and its weight is the probability that it
+finishes first. A fast deterministic inverse recovers abilities from benchmark
+weights, and a simulation re-runs the race under new dependence. Neither inverts a
+covariance or solves an optimization. Given a factor model the cost is linear in the
+number of assets, and thousands of names fit in seconds. Near-duplicates split a
+position rather than double it. We prove benchmark reproduction, an implied convex
+objective and a turnover bound.
 
-## Status / TODO
+## Around the paper
 
-This is an early draft. Method, CAPM framing, and protocol are written; empirical
-results are placeholders.
-
-- [ ] Fill REIT study results (from `winningportstudy`).
-- [ ] Fill Russell / AI-benefit study results (from `winningetfstudy`).
-- [ ] Deterministic correlated-race (lattice) implementation in `thurstone`.
-- [ ] Figures: efficient-frontier comparison, $\phi$ sensitivity, drawdown curves.
-
-## Sources
-
-- Method/code: [`winningport`](https://github.com/microprediction/winningport)
-  (`abilityport` / `ability_port_factory`), the legacy "winning"-package
-  implementation of the ability tilt.
-- Studies: [`winningportstudy`](https://github.com/microprediction/winningportstudy)
-  (REITs), [`winningetfstudy`](https://github.com/microprediction/winningetfstudy)
-  (Russell indices, AI-benefit scores).
-- Narrative: `docs/book/chapters/{02-introduction,10-portfolios}` in this repo.
+- Method documentation: [Thurstone portfolio polishing](https://allocation.microprediction.org/methods/thurstone-portfolio-polishing/)
+- Interactive demo: [A portfolio is a race](https://allocation.microprediction.org/demos/portfolio-contest/)
+- Slides: [talk](https://allocation.microprediction.org/papers/thurstone-portfolios/talk.pdf),
+  [introductory presentation](https://allocation.microprediction.org/papers/thurstone-portfolios/intro-presentation.pdf)
+- Literature: [interactive map](https://allocation.microprediction.org/maps/portfolio-implied-contests.html),
+  [LITERATURE-MAP.md](LITERATURE-MAP.md)
+- The inverse: Cotton (2021), [SIAM J. Financial Math. 12(1)](https://doi.org/10.1137/19M1276261);
+  Cotton (2026), [arXiv:2609.01133](https://arxiv.org/abs/2609.01133)
+- Code: `allocation.ThurstonePortfolio`, with calibration and racing in
+  [`winning`](https://github.com/microprediction/winning)
 
 ## Files
 
-- `paper.tex` — manuscript (imports `../shared/preamble.tex`, cites `../refs.bib`)
-- `figures/` — figures used in this paper
-- Build: `../build.sh thurstone-portfolios` → `paper.pdf`
+- `paper.tex`, `sections/` — manuscript (cites `../refs.bib`)
+- `figures/` — figures used in the paper
+- `talk/` — Beamer source of the talk
+- `arxiv/` — arXiv submission files
+- `REVISIONS.md` — revision notes
+- `LITERATURE-MAP.md` — related work, as text
